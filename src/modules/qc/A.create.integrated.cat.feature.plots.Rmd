@@ -9,12 +9,16 @@ VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.D
 ```{r A_createIntegrated, eval=TRUE, echo=T, results=F}
 ###############################################################################
 ## Create sample list filtered on MT and norm_counts_RNA                     ##
+
+
+
 SampleList <- createNormSampleList(
     obj = Obio,
     reduce = Obio@parameterList$debugReduce, # Default is NULL
     vars.to.regress = Obio@parameterList$vars.to.regress,
     s.genes = NULL,
-    g2m.genes = NULL
+    g2m.genes = NULL,
+    annotateCellCyclePhase = F
 )
 
 print(paste0("Cell Recuction: ", Obio@parameterList$debugReduce))
@@ -46,6 +50,15 @@ if (length(pos) > 0){
 
 ###############################################################################
 ## Integrate Datasets                                                        ##
+
+## Determine k-filter parameter ##
+k.test <- min(as.vector(unlist(lapply(SampleList, ncol))))
+if (k.test < 200){
+    k.filter <- k.test-1
+} else {
+    k.filter <- 200
+}
+
 if (length(SampleList) > 1){
     if (Obio@parameterList$scIntegrationMethod == "SCT"){
         
@@ -71,7 +84,8 @@ if (length(SampleList) > 1){
             object.list = SampleList, 
             normalization.method = "SCT", 
             anchor.features = sample.features, 
-            verbose = FALSE
+            verbose = FALSE,
+            k.filter = k.filter
         )
         
         OsC <- Seurat::IntegrateData(
@@ -85,14 +99,15 @@ if (length(SampleList) > 1){
     
         sampleAnchors <- Seurat::FindIntegrationAnchors(
             object.list = SampleList, 
-            dims = 1:30
+            dims = 1:Obio@parameterList$singleCellSeuratNpcs4PCA,
+            k.filter = k.filter
         ) 
 
 
         OsC <- Seurat::IntegrateData(
             #features.to.integrate = geneIntersectVec,
             anchorset = sampleAnchors, 
-            dims = 1:30
+            dims = 1:Obio@parameterList$singleCellSeuratNpcs4PCA
         )
     }
     Obio@dataTableList$referenceList[["sampleAnchors"]] <- as.vector(sort(sampleAnchors@anchor.features))
@@ -100,7 +115,7 @@ if (length(SampleList) > 1){
     OsC <- SampleList[[1]]
 }
 
-Idents(OsC) <- factor(Idents(OsC), levels = names(Obio@sampleDetailList))
+Seurat::Idents(OsC) <- factor(Seurat::Idents(OsC), levels = names(Obio@sampleDetailList))
 OsC@meta.data$sampleID <- factor(OsC@meta.data$sampleID, levels = names(Obio@sampleDetailList))
 
 OsC@meta.data[["cellID"]] <- row.names(OsC@meta.data)
@@ -109,7 +124,7 @@ OsC@meta.data[["cellID"]] <- row.names(OsC@meta.data)
 
 ## Prepare for AUC ##
 ## UMAP ##
-DefaultAssay(OsC) <- "RNA"
+Seurat::DefaultAssay(OsC) <- "RNA"
 
 
 OsC <- Seurat::FindVariableFeatures(
@@ -119,7 +134,7 @@ OsC <- Seurat::FindVariableFeatures(
 )
 
 if (length(Obio@sampleDetailList) > 1){
-    DefaultAssay(OsC) <- "integrated"
+    Seurat::DefaultAssay(OsC) <- "integrated"
 } else {
     Obio@parameterList$singleCellClusterString <- gsub("integrated", "RNA", Obio@parameterList$singleCellClusterString)
 }

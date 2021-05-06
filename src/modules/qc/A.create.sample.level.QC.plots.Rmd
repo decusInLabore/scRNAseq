@@ -107,10 +107,12 @@ if (length(plotListSQCUMAP) > 3){
 
 cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = '\n'))
 
+
+tabVar <- ""
 ```
 
 
-```{r UMAP_data_CC, echo=TRUE, eval=TRUE, warning=FALSE, results=F}
+```{r UMAP_data_CC, echo=TRUE, eval=FALSE, warning=FALSE, results=F}
 ###############################################################################
 ## Do percent mt plots                                                       ##
 resList <- doUMAP_cellCyle(
@@ -133,24 +135,25 @@ figureCount <- resList$figureCount
 
 
 if (length(plotList) > 3){
-    tabVar <- ".tabset .tabset-fade .tabset-dropdown"
+    tabVar <- "### Plot Cell Cycle UMAP Per Sample .tabset .tabset-fade .tabset-dropdown"
 } else {
-    tabVar <- ".tabset .tabset-fade .tabset-pills"
+    tabVar <- "### Plot Cell Cycle UMAP Per Sample .tabset .tabset-fade .tabset-pills"
 }
 
 
 ```
 
 
-### Plot Cell Cycle UMAP Per Sample {`r tabVar`}
-```{r Plot_UMAP_CC, echo=TRUE, eval=TRUE, warning=FALSE, results="asis"} 
+{`r tabVar`}
+```{r Plot_UMAP_CC, echo=TRUE, eval=FALSE, warning=FALSE, results="asis"} 
 
 cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = '\n'))
 
+tabVar <- ""
 ```
 
 
-```{r cell_cyle_hist_data, echo=TRUE, eval=TRUE, warning=FALSE, results=F}
+```{r cell_cyle_hist_data, echo=TRUE, eval=FALSE, warning=FALSE, results=F}
 ###############################################################################
 ## Do percent mt plots                                                       ##
 resList <- doCellCycleBarchart(
@@ -170,16 +173,16 @@ figureCount <- resList$figureCount
 ###############################################################################
 
 if (length(plotList) > 3){
-    tabVar <- ".tabset .tabset-fade .tabset-dropdown"
+    tabVar <- "### Plot Per Sample Cell Cycle Estimate .tabset .tabset-fade .tabset-dropdown"
 } else {
-    tabVar <- ".tabset .tabset-fade .tabset-pills"
+    tabVar <- "### Plot Per Sample Cell Cycle Estimate .tabset .tabset-fade .tabset-pills"
 }
 
 
 ```
 
 
-### Plot Per Sample Cell Cycle Estimate {`r tabVar`}
+ {`r tabVar`}
 ```{r Plot_cellCycleBarchart, echo=TRUE, eval=TRUE, warning=FALSE, results="asis"} 
 
 cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = '\n'))

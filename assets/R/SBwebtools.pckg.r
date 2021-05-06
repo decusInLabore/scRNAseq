@@ -621,19 +621,17 @@ setGeneric(
 setGeneric(
     name="createAnalysisFolders",
     def=function(
-        obj, 
-        baseDir="/camp/stp/babs/working/boeings/Projects/", 
-        localBaseDir = "Y:/working/boeings/Projects/"
+        obj
         ){
         obj@parameterList$datadir <- paste0(
-            baseDir,
+           
             obj@parameterList$folder, 
             "basedata/"
         )
         
         ## Create basedata folder ##
         obj@parameterList$localDataDir <- paste0(
-            localBaseDir,
+           
             obj@parameterList$folder, 
             "basedata/"
         )
@@ -644,13 +642,11 @@ setGeneric(
         
         ## Create workdir ##
         obj@parameterList$workdir <- paste0(
-            baseDir,
             obj@parameterList$folder, 
             "workdir/"
         )
         
         obj@parameterList$localWorkDir <- paste0(
-            localBaseDir,
             obj@parameterList$folder, 
             "workdir/"
         )
@@ -661,13 +657,11 @@ setGeneric(
         
         ## Create fastq dir ##
         obj@parameterList$fastqDir <- paste0(
-            baseDir,
             obj@parameterList$folder, 
             "FASTQ_files/"
         )
         
         obj@parameterList$localFastqDir <- paste0(
-            localBaseDir,
             obj@parameterList$folder, 
             "FASTQ_files/"
         )
@@ -678,7 +672,6 @@ setGeneric(
         
         ## Create outputdir ##
         obj@parameterList$outputDir <- paste0(
-            localBaseDir,
             obj@parameterList$folder, 
             "outputs/"
         )

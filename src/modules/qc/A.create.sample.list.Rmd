@@ -10,12 +10,37 @@ VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.D
 ###############################################################################
 ## Create Sample List QC                                                     ## 
 
+## Assign cell cycle scores
+if (Obio@parameterList$geneIDcolumn != "mgi_symbol" & Obio@parameterList$geneIDcolumn != "hgnc_symbol") {
+            queryGS <- "hgnc_symbol" 
+        } else {
+            queryGS <- Obio@parameterList$geneIDcolumn
+        }
+
+s.genes <- retrieve.gene.category.from.db(
+                cat_id = "ag_lab_categories__41",
+                password = db.pwd,
+                gene.symbol = queryGS,
+                user = Obio@dbDetailList$db.user,
+                host = Obio@dbDetailList$host
+            )
+
+g2m.genes <- retrieve.gene.category.from.db(
+                cat_id = "ag_lab_categories__42",
+                password = db.pwd,
+                gene.symbol = queryGS,
+                user = Obio@dbDetailList$db.user,
+                host = Obio@dbDetailList$host
+            )
+
+
 SampleList <- createSampleListQC(
     obj = Obio,
     reduce = Obio@parameterList$debugReduce,    
     vars.to.regress = Obio@scDetailList$vars.to.regress,
-    s.genes = NULL,
-    g2m.genes = NULL
+    s.genes = s.genes,
+    g2m.genes = NULL,
+    annotateCellCyclePhase = FALSE
 )
 
 

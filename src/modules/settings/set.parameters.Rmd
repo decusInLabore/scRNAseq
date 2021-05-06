@@ -295,14 +295,16 @@ clusterSigEnrichmentList = list(
 ## Create defaults ##
 pos <- grep("debugReduce", names(dfObio))
 
+if (!exists("debugReduce")){
 if (length(pos) > 0){
-    if (dfObio$debugReduce == "" | toupper(dfObio$debugReduce) == "NULL") {
+    if (dfObio$debugReduce[1] == "" | toupper(dfObio$debugReduce[1]) == "NULL") {
          "debugReduce" <- NULL
     }  else {
         debugReduce <- as.numeric(dfObio$debugReduce[1])
     }
 } else {
     debugReduce <- NULL
+}
 }
 
 
@@ -376,9 +378,7 @@ Obio <- setMountingPoint(Obio)
 Obio <- setAnalysisPaths(Obio)
 Obio <- setCrickGenomeAndGeneNameTable(Obio)
 Obio <- createAnalysisFolders(
-    Obio,
-    baseDir="/camp/stp/babs/working/boeings/Projects/",
-    localBaseDir = paste0(hpc.mount, "Projects/")
+    Obio
 )
 Obio <- setDataBaseParameters(Obio)
 
