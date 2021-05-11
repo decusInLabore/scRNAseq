@@ -1,14 +1,14 @@
 "query"
-"DROP TABLE IF EXISTS PBMC10k_gene_expr_tb;
+"DROP TABLE IF EXISTS scPDAC_subC4_gene_expr_tb;
 "
-"CREATE TABLE IF NOT EXISTS PBMC10k_gene_expr_tb (gene VARCHAR(100) CHARACTER SET latin1 COLLATE latin1_swedish_ci, cellID VARCHAR(100) CHARACTER SET latin1 COLLATE latin1_swedish_ci, lg10Expr DECIMAL(6,3) NULL DEFAULT NULL, row_names INT(10) NOT NULL AUTO_INCREMENT,PRIMARY KEY (row_names)); "
-"LOAD DATA LOCAL INFILE '/camp/stp/babs/working/boeings/Projects/boeings/stefan.boeing/426_scRNAseq_PBMC_10k/workdir/temp.PBMC10k.csv' INTO TABLE PBMC10k_gene_expr_tb FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '
+"CREATE TABLE IF NOT EXISTS scPDAC_subC4_gene_expr_tb (gene VARCHAR(100) CHARACTER SET latin1 COLLATE latin1_swedish_ci, cellID VARCHAR(100) CHARACTER SET latin1 COLLATE latin1_swedish_ci, lg10Expr DECIMAL(6,3) NULL DEFAULT NULL, row_names INT(10) NOT NULL AUTO_INCREMENT,PRIMARY KEY (row_names)); "
+"LOAD DATA LOCAL INFILE '/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/437subC_fibroblast_GSE154778_primTumor_C4/workdir/temp.scPDAC_subC4.csv' INTO TABLE scPDAC_subC4_gene_expr_tb FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '
 ' IGNORE 1 LINES (gene, cellID, lg10Expr, row_names);"
-"ALTER TABLE PBMC10k_gene_expr_tb ADD UNIQUE(row_names);"
-"CREATE INDEX idx_gene ON PBMC10k_gene_expr_tb (gene);"
-"GRANT SELECT on immuno_ref_data.PBMC10k_PCA TO PBMC10k_scData@'shiny-bioinformatics.crick.ac.uk';"
-"GRANT SELECT on immuno_ref_data.PBMC10k_PCA TO PBMC10k_scData@'10.%';"
-"GRANT SELECT on immuno_ref_data.PBMC10k_gene_expr_tb TO PBMC10k_scData@'shiny-bioinformatics.crick.ac.uk';"
-"GRANT SELECT on immuno_ref_data.PBMC10k_gene_expr_tb TO PBMC10k_scData@'10.%';"
-"GRANT SELECT on immuno_ref_data.PBMC10k_geneID_tb TO PBMC10k_scData@'shiny-bioinformatics.crick.ac.uk';"
-"GRANT SELECT on immuno_ref_data.PBMC10k_geneID_tb TO PBMC10k_scData@'10.%';"
+"ALTER TABLE scPDAC_subC4_gene_expr_tb ADD UNIQUE(row_names);"
+"CREATE INDEX idx_gene ON scPDAC_subC4_gene_expr_tb (gene);"
+"GRANT SELECT on chl_data.scPDAC_subC4_PCA TO scPDAC_subC4_sc@'shiny-bioinformatics.crick.ac.uk';"
+"GRANT SELECT on chl_data.scPDAC_subC4_PCA TO scPDAC_subC4_sc@'10.%';"
+"GRANT SELECT on chl_data.scPDAC_subC4_gene_expr_tb TO scPDAC_subC4_sc@'shiny-bioinformatics.crick.ac.uk';"
+"GRANT SELECT on chl_data.scPDAC_subC4_gene_expr_tb TO scPDAC_subC4_sc@'10.%';"
+"GRANT SELECT on chl_data.scPDAC_subC4_geneID_tb TO scPDAC_subC4_sc@'shiny-bioinformatics.crick.ac.uk';"
+"GRANT SELECT on chl_data.scPDAC_subC4_geneID_tb TO scPDAC_subC4_sc@'10.%';"
