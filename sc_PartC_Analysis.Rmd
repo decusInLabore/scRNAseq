@@ -78,8 +78,8 @@ db.pwd <- as.vector(dbTable[1,1])
 
 
 
-source("assets/scTools.r")
-source("assets/SBwebtools.pckg.r")
+source("assets/R/scTools.r")
+source("assets/R/SBwebtools.pckg.r")
 
 
 if (length(.libPaths()) > 2){
@@ -100,9 +100,7 @@ Obio <- setMountingPoint(Obio)
 Obio <- setAnalysisPaths(Obio)
 Obio <- setCrickGenomeAndGeneNameTable(Obio)
 Obio <- createAnalysisFolders(
-    Obio,
-    baseDir="/camp/stp/babs/working/boeings/Projects/",
-    localBaseDir = paste0(hpc.mount, "Projects/")
+    Obio
 )
 Obio <- setDataBaseParameters(Obio)
 
