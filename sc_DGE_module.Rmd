@@ -281,7 +281,31 @@ DGEinputList <- list(
       "DGEselCol" = "seurat_clusters",
       "DGEsampleList" = list(
           "Fib_C2"   = c(2),
-          "Fib_C1_C2" = c(0,1)
+          "Fib_C0_C1" = c(0,1)
+      )
+  ),
+  "comp_2" = list(
+      "name"    = "DGE_Fib_C1_vs_Fib_C0_C2",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "Fib_C2"   = c(1),
+          "Fib_C0_C1" = c(0,2)
+      )
+  ),
+  "comp_3" = list(
+      "name"    = "DGE_Fib_C1_vs_Fib_C0",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "Fib_C2"   = c(1),
+          "Fib_C0_C1" = c(0)
+      )
+  ),
+  "comp_3" = list(
+      "name"    = "DGE_Fib_C1_vs_Fib_C2",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "Fib_C2"   = c(1),
+          "Fib_C0_C1" = c(2)
       )
   )
 )

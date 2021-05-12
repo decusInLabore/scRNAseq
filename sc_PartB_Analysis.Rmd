@@ -37,23 +37,60 @@ setwd(cwd)
 ## Load custom packages specific for this analysis ##
 source("assets/R/scTools.r")
 source("assets/R/SBwebtools.pckg.r")
+
+upload.results.to.database <- TRUE
+save.chunk.intermediates <- TRUE
+
+###############################################################################
+##                                                                           ##
+figureCount <- 1
+
+## Load R module load R/3.5.1-foss-2018b ##
+#setwd(Obio@parameterList$localWorkDir)
+
+
+
+
+##                                                                           ##
+###############################################################################
+
+###############################################################################
+## SB local libpaths                                                         ##
+## Set filename for temp pdf files ##
+
+if (length(.libPaths()) > 2){
+    .libPaths(.libPaths()[2:3])
+}
+## Done                                                                      ##
+###############################################################################
+
+
+
 ```
 
 
-<!-- Essential 1: (output required later): Set Parameters and directories and create Obio object Chapter/Module -->
-```{r child = 'src/modules/settings/partB.set.parameters.Rmd', eval=TRUE}
+<!-- Running Individual Modules in R -->
+<!-- For example rmarkdown::render("src/modules/settings/partB.set.parameters.Rmd", output_dir = "..") -->
+
+
+<!-- Essential 1: Set Analysis Parameters Chapter/Module (output required later) -->
+```{r child = 'src/modules/section_B/B.1.set.parameters.Rmd', eval=TRUE}
 ```
 
-<!-- Essential 2: (output required later): Create Integrated Seurat Object Chapter/Module -->
-```{r child = 'src/modules/partB_main_figures/partB.create.integrated.seurat.object.Rmd', eval=TRUE}
+<!-- Optional 2: Retrieve Reference Genes from Database or Gmt file -->
+```{r child = 'src/modules/section_B/B.2.retrieve.reference.gene.sets.Rmd', eval=TRUE}
 ```
 
-<!-- Optional 3: (creates output only): Create variation plots Chapter/Module -->
-```{r child = 'src/modules/partB_main_figures/partB.create.variation.plots.Rmd', eval=TRUE}
+<!-- Essential 3: (output required later): Create Integrated Seurat Object Chapter/Module -->
+```{r child = 'src/modules/section_B/B.3.create.integrated.seurat.object.Rmd', eval=TRUE}
 ```
 
-<!-- Essential 4: (output required later): Create variation plots Chapter/Module -->
-```{r child = 'src/modules/partB_main_figures/partB.create.pca.plots.Rmd', eval=TRUE}
+<!-- Optional 4: (creates output only): Create variation plots Chapter/Module -->
+```{r child = 'src/modules/section_B/B.4.create.variation.plots.Rmd', eval=TRUE}
+```
+
+<!-- Essential 5: (output required later): Create variation plots Chapter/Module -->
+```{r child = 'src/modules/section_B/B.5.create.pca.plots.Rmd', eval=TRUE}
 ```
 
 <!-- Essential 5: (output required later): Create variation plots Chapter/Module -->
@@ -121,33 +158,6 @@ source("assets/R/SBwebtools.pckg.r")
 <!-- Optional 20: (output required later): Add extra tables Chapter/Module -->
 ```{r child = 'src/modules/partB_main_figures/partB.add.extra.tables.Rmd', eval=TRUE}
 ```
-
-
-
-### Old below ###
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
