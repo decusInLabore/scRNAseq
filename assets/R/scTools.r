@@ -1,5 +1,33 @@
 
 ###############################################################################
+## Add to Seurat metadata                                                    ##
+setGeneric(
+    name="addDf2seuratMetaData",
+    def=function(obj, dfAdd) {
+        print(paste0("Dims before addition: ", dim(obj@meta.data)))
+        
+        for (i in 1:ncol(dfAdd)){
+            addVec <- as.vector(dfAdd[,i])
+            names(addVec) <- row.names(dfAdd)
+            colName <- as.vector(names(dfAdd)[i])
+            obj <- Seurat::AddMetaData(
+                object = obj, 
+                metadata = addVec, 
+                colName
+            )
+        }
+        
+        print(paste0("Dims after addition: ", dim(obj@meta.data)))
+        print(paste0("Meta data column names: ", paste(names(obj@meta.data), collapse = ", ")))
+        return(obj)
+    }
+)
+
+## Done adding to Seurat metadata                                            ##
+###############################################################################
+
+
+###############################################################################
 ## Write table to Excel File                                                 ##
 createXLSXoutput <- function(
     dfTable = "dfTable",

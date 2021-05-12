@@ -66,32 +66,6 @@ setClass(
 
 
 
-###############################################################################
-## Add to Seurat metadata                                                    ##
-setGeneric(
-    name="addDf2seuratMetaData",
-    def=function(obj, dfAdd) {
-        print(paste0("Dims before addition: ", dim(obj@meta.data)))
-        
-        for (i in 1:ncol(dfAdd)){
-            addVec <- as.vector(dfAdd[,i])
-            names(addVec) <- row.names(dfAdd)
-            colName <- as.vector(names(dfAdd)[i])
-            obj <- AddMetaData(
-                object = obj, 
-                metadata = addVec, 
-                colName
-            )
-        }
-        
-        print(paste0("Dims after addition: ", dim(obj@meta.data)))
-        print(paste0("Meta data column names: ", paste(names(obj@meta.data), collapse = ", ")))
-        return(obj)
-    }
-)
-
-## Done adding to Seurat metadata                                            ##
-###############################################################################
 
 ###############################################################################
 ## Add to script vector                                                      ##
@@ -9812,6 +9786,13 @@ add.category.to.lab.reference.table.hs <- function(
     lab.name = "Swanton",
     replaceExistingCatName = TRUE
 ) {
+    
+    ############################################################################
+    ## Check if table exists and create it if not
+    
+    ## Done 
+    ############################################################################
+    
     ## Preparind gene.vector ##
     gene.vector <- na.omit(gene.vector)
     gene.vector <- gene.vector[gene.vector != ""]
@@ -9872,10 +9853,35 @@ add.category.to.lab.reference.table.hs <- function(
     #comments_2 = rep(comments_2, length(gene.vector))
     cat_item_size = length(gene.vector)
     
+    ############################################################################
+    ## Determine if cat exists                                                ##
+    query <- paste0(
+        "SELECT * FROM information_schema.tables WHERE table_schema = '", cat.ref.db, "' AND table_name = '", cat.ref.db.table,"' LIMIT 1;"
+    )
     
-    ## Determine if cat exists ##
+    dbDB <- DBI::dbConnect(
+        drv = RMySQL::MySQL(), 
+        user = user, 
+        password = db.pwd, 
+        host = host, 
+        dbname = cat.ref.db
+    )
+    
+    dfTest <- DBI::dbGetQuery(dbDB, query)
+    
+    
+    if (nrow(dfTest) == 0){
+        query <- paste0("CREATE TABLE ", cat.ref.db.table, " LIKE ag_lab_categories;")
+    }
+    
+    res <- DBI::dbGetQuery(dbDB, query)
+    DBI::dbDisconnect(dbDB)
+    
+    ## Done                                                                   ##
+    ############################################################################
+    
     library(RMySQL)
-    dbDB <- dbConnect(
+    dbDB <- DBI::dbConnect(
         drv = RMySQL::MySQL(), 
         user = user, 
         password = db.pwd, 
@@ -9889,10 +9895,9 @@ add.category.to.lab.reference.table.hs <- function(
         " WHERE cat_name = '",cat_name,"'"
     )
     
-    dfTest <- dbGetQuery(dbDB, query)
-    dbDisconnect(dbDB)
+    dfTest <- DBI::dbGetQuery(dbDB, query)
+    DBI::dbDisconnect(dbDB)
     updateCat <- FALSE
-    library(RMySQL)
     
     if (nrow(dfTest) == 1){
         cat_id <- dfTest[,"cat_id"]
@@ -9901,14 +9906,14 @@ add.category.to.lab.reference.table.hs <- function(
         
     } else {
         
-            dbDB = dbConnect(MySQL(), user = user, password = pwd, dbname= cat.ref.db ,host = host)
+            dbDB = DBI::dbConnect(RMySQL::MySQL(), user = user, password = pwd, dbname= cat.ref.db ,host = host)
             
             ## Set default ##
             next.id = 1
             max.value = 0
             
             max.value <- as.numeric(
-                dbGetQuery(dbDB, 
+                DBI::dbGetQuery(dbDB, 
                            paste(
                                "SELECT MAX(row_names) FROM ", 
                                cat.ref.db.table, sep=""
@@ -9916,7 +9921,7 @@ add.category.to.lab.reference.table.hs <- function(
                 )
             )
             if (!is.na(max.value)){
-                df.ref = dbGetQuery(dbDB, paste("SELECT DISTINCT cat_id FROM ", cat.ref.db.table, sep=""))
+                df.ref = DBI::dbGetQuery(dbDB, paste("SELECT DISTINCT cat_id FROM ", cat.ref.db.table, sep=""))
                 ids = unique(df.ref$cat_id)
                 ids = as.numeric(sapply(ids, function(x) unlist(strsplit(x, paste(cat.ref.db.table, "__", sep="")))[2]))
                 next.id = max(ids)+1
@@ -9924,16 +9929,16 @@ add.category.to.lab.reference.table.hs <- function(
                 max.value = 0
             }
             #df.ref = dbGetQuery(dbDB, "SELECT DISTINCT * FROM js_lab_categories WHERE cat_id = 'not_existing'")
-            dbDisconnect(dbDB)
+            DBI::dbDisconnect(dbDB)
             
             
             cat_id = paste(cat.ref.db.table, "__", next.id, sep="")
             
         }
     
-    dbDB = dbConnect(MySQL(), user = user, password = pwd, dbname= cat.ref.db ,host = host)
-    df.ref = dbGetQuery(dbDB, "SELECT DISTINCT * FROM js_lab_categories WHERE cat_id = 'not_existing'")
-    dbDisconnect(dbDB)
+    dbDB = DBI::dbConnect(MySQL(), user = user, password = pwd, dbname= cat.ref.db ,host = host)
+    df.ref = DBI::dbGetQuery(dbDB, "SELECT DISTINCT * FROM js_lab_categories WHERE cat_id = 'not_existing'")
+    DBI::dbDisconnect(dbDB)
     
     ## Get current reference category format from db ##
     
@@ -9980,17 +9985,17 @@ add.category.to.lab.reference.table.hs <- function(
     
     
     #Upload to database
-    library(RMySQL)
-    dbDB = dbConnect(MySQL(), user = user, password = pwd, dbname= cat.ref.db, host = host)
+    
+    dbDB = DBI::dbConnect(RMySQL::MySQL(), user = user, password = pwd, dbname= cat.ref.db, host = host)
     if (new.lab.category.table){
-        dbGetQuery(dbDB, paste("DROP TABLE IF EXISTS ", cat.ref.db.table, sep=""))
+        DBI::dbGetQuery(dbDB, paste("DROP TABLE IF EXISTS ", cat.ref.db.table, sep=""))
     }
     
     uploaded = FALSE
     while (!uploaded){
         tryCatch({
             killDbConnections()
-            dbDB = dbConnect(MySQL(), user = user, password = pwd, dbname= cat.ref.db,host = host)
+            dbDB = DBI::dbConnect(MySQL(), user = user, password = pwd, dbname= cat.ref.db,host = host)
             if (updateCat){
                 query <- paste0(
                     "UPDATE ", cat.ref.db.table,
@@ -10005,7 +10010,7 @@ add.category.to.lab.reference.table.hs <- function(
                     "', cat_item_size='",df.cat.new[,"cat_item_size"],
                     "' WHERE cat_id = '", df.cat.new[,"cat_id"], "'"
                 )
-                dbGetQuery(dbDB, query)
+                DBI::dbGetQuery(dbDB, query)
                 
             } else {
                 query <- paste0(
@@ -10018,7 +10023,7 @@ add.category.to.lab.reference.table.hs <- function(
                 )
                 
                 
-                dbGetQuery(dbDB, query)
+                DBI::dbGetQuery(dbDB, query)
                 
                 # dbWriteTable(
                 #     dbDB, 
@@ -10039,12 +10044,12 @@ add.category.to.lab.reference.table.hs <- function(
     #dbWriteTable(dbDB, dataTable, df.new, row.names= FALSE, overwrite=FALSE, append=TRUE)
     
     if (new.lab.category.table){
-        dbGetQuery(dbDB, paste("ALTER TABLE `",cat.ref.db.table,"` ADD UNIQUE(`row_names`)", sep=""))
-        dbGetQuery(dbDB, paste("ALTER TABLE `",cat.ref.db.table,"` ADD PRIMARY KEY(`row_names`)", sep=""))
+        DBI::dbGetQuery(dbDB, paste("ALTER TABLE `",cat.ref.db.table,"` ADD UNIQUE(`row_names`)", sep=""))
+        DBI::dbGetQuery(dbDB, paste("ALTER TABLE `",cat.ref.db.table,"` ADD PRIMARY KEY(`row_names`)", sep=""))
         
         
         
-        dbGetQuery(dbDB, paste("ALTER TABLE ",cat.ref.db.table,"
+        DBI::dbGetQuery(dbDB, paste("ALTER TABLE ",cat.ref.db.table,"
                                CHANGE `hgnc_symbol` `hgnc_symbol` LONGTEXT CHARACTER SET latin1 COLLATE latin1_swedish_ci ,
                                CHANGE `mgi_symbol` `mgi_symbol` LONGTEXT CHARACTER SET latin1 COLLATE latin1_swedish_ci ,
                                CHANGE `cat_name` `cat_name` VARCHAR(255) CHARACTER SET latin1 COLLATE latin1_swedish_ci ,
@@ -10058,16 +10063,16 @@ add.category.to.lab.reference.table.hs <- function(
                                sep="")
         )
     }
-    dbDisconnect(dbDB)
+    DBI::dbDisconnect(dbDB)
     
     # Add description
     if (add.internal.cat.description){
         ## Escape ##
         #cat.description.text <- gsub("\\'", "\\'", cat.description.text)
-        dbDB = dbConnect(MySQL(), user = user, password = pwd, dbname= cat.description.db,host = host)
+        dbDB = DBI::dbConnect(RMySQL::MySQL(), user = user, password = pwd, dbname= cat.description.db,host = host)
         insert.query <- paste0("INSERT INTO `",cat.description.db,"`.`",cat.description.db.table,"` (`cat_id`, `cat_name`, `cat_description`, `created_by`, `lab`, `creation_date`) VALUES ('",cat_id[1],"', '",cat_name[1],"', '",cat.description.text,"', '",data_source[1],"', '",lab.name,"', CURDATE())");
-        dbGetQuery(dbDB, insert.query)
-        dbDisconnect(dbDB)
+        DBI::dbGetQuery(dbDB, insert.query)
+        DBI::dbDisconnect(dbDB)
     }
     string = paste0(cat_id, " with cat_name ",cat_name, " added.")
     print(string)
