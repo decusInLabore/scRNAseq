@@ -9936,7 +9936,7 @@ add.category.to.lab.reference.table.hs <- function(
             
         }
     
-    dbDB = DBI::dbConnect(MySQL(), user = user, password = pwd, dbname= cat.ref.db ,host = host)
+    dbDB = DBI::dbConnect(RMySQL::MySQL(), user = user, password = pwd, dbname= cat.ref.db ,host = host)
     df.ref = DBI::dbGetQuery(dbDB, "SELECT DISTINCT * FROM js_lab_categories WHERE cat_id = 'not_existing'")
     DBI::dbDisconnect(dbDB)
     
