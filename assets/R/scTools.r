@@ -1,5 +1,33 @@
 
 ###############################################################################
+## Add to Seurat metadata                                                    ##
+setGeneric(
+    name="addDf2seuratMetaData",
+    def=function(obj, dfAdd) {
+        print(paste0("Dims before addition: ", dim(obj@meta.data)))
+        
+        for (i in 1:ncol(dfAdd)){
+            addVec <- as.vector(dfAdd[,i])
+            names(addVec) <- row.names(dfAdd)
+            colName <- as.vector(names(dfAdd)[i])
+            obj <- Seurat::AddMetaData(
+                object = obj, 
+                metadata = addVec, 
+                colName
+            )
+        }
+        
+        print(paste0("Dims after addition: ", dim(obj@meta.data)))
+        print(paste0("Meta data column names: ", paste(names(obj@meta.data), collapse = ", ")))
+        return(obj)
+    }
+)
+
+## Done adding to Seurat metadata                                            ##
+###############################################################################
+
+
+###############################################################################
 ## Write table to Excel File                                                 ##
 createXLSXoutput <- function(
     dfTable = "dfTable",
@@ -1071,7 +1099,8 @@ setGeneric(
         reduce = NULL,
         vars.to.regress = NULL,
         g2m.genes = NULL,
-        s.genes = NULL
+        s.genes = NULL,
+        annotateCellCyclePhase = TRUE
         #vars to regress cell cycle options #c("S_Score", "G2M_Score) or
         #"CC_Difference"
         #figureCount = 1,
@@ -1158,7 +1187,7 @@ setGeneric(
 
             }
 
-            SampleList[[sampleID]] = CreateSeuratObject(
+            SampleList[[sampleID]] = Seurat::CreateSeuratObject(
                 counts = fullMat,
                 project = sampleID,
                 min.cells = 0,
@@ -1196,12 +1225,9 @@ setGeneric(
                 stop("Mitochondrial gene identifier not specified for this species in function createNormSampleList().")
             }
 
-            SampleList[[i]][["percent_mt"]] <- PercentageFeatureSet(object =SampleList[[i]], pattern = mtSel)
+            SampleList[[i]][["percent_mt"]] <- Seurat::PercentageFeatureSet(object =SampleList[[i]], pattern = mtSel)
 
 
-            SampleList[[i]][["percent_mt"]] <- PercentageFeatureSet(
-                object =SampleList[[i]], pattern = mtSel
-            )
             ## Remove contaminating cells ##
             SampleList[[i]] <- subset(
                 x = SampleList[[i]],
@@ -1216,20 +1242,20 @@ setGeneric(
             }
 
             if (obj@parameterList$scIntegrationMethod == "SCT"){
-                SampleList[[i]] <- SCTransform(SampleList[[i]], verbose = FALSE)
-                SampleList[[i]] <- NormalizeData(
+                SampleList[[i]] <- Seurat::SCTransform(SampleList[[i]], verbose = FALSE)
+                SampleList[[i]] <- Seurat::NormalizeData(
                     SampleList[[i]],
                     verbose = FALSE,
                     assay = "RNA"
                 )
             } else {
-                SampleList[[i]] <- NormalizeData(
+                SampleList[[i]] <- Seurat::NormalizeData(
                     SampleList[[i]],
                     verbose = FALSE
                 )
             }
             
-            SampleList[[i]] <- FindVariableFeatures(
+            SampleList[[i]] <- Seurat::FindVariableFeatures(
                 SampleList[[i]],
                 selection.method = "vst",
                 nfeatures = NtopGenes,
@@ -1239,7 +1265,7 @@ setGeneric(
             unionVarGenes <- unique(
                 c(
                     unionVarGenes,
-                    VariableFeatures(SampleList[[i]])
+                    Seurat::VariableFeatures(SampleList[[i]])
                 )
             )
             
@@ -1251,51 +1277,34 @@ setGeneric(
             )
             
             ## Assign cell cycle scores ##
+            if (annotateCellCyclePhase){
             
-            if (obj@parameterList$geneIDcolumn != "mgi_symbol" & obj@parameterList$geneIDcolumn != "hgnc_symbol") {
-                queryGS <- "hgnc_symbol" 
-            } else {
-                queryGS <- obj@parameterList$geneIDcolumn
+                if (is.null(s.genes)){
+                    stop("S.genes required")
+                }
+                
+                if (is.null(g2m.genes)){
+                    stop("G2M Genes required")
+                }
+                
+                #Idents(SampleList[[sampleID]]) <- "sampleID"
+                SampleList[[sampleID]] <- Seurat::CellCycleScoring(
+                    SampleList[[sampleID]], 
+                    s.features = s.genes, 
+                    g2m.features = g2m.genes, 
+                    set.ident = TRUE
+                )    
+                ## Done adding cell cycle scores ##
+                
+                ## Remove dots from column names ##
+                names(SampleList[[sampleID]]@meta.data) <- gsub("\\.", "_",names(SampleList[[sampleID]]@meta.data))
+                
+                ## Add G1 to G2M-S differences
+                SampleList[[sampleID]]$CC_Difference <- SampleList[[sampleID]]$S_Score - SampleList[[sampleID]]$G2M_Score
             }
-            
-            if (is.null(s.genes)){
-                s.genes <- retrieve.gene.category.from.db(
-                    cat_id = "ag_lab_categories__41",
-                    password = db.pwd,
-                    gene.symbol = queryGS,
-                    user = obj@dbDetailList$db.user,
-                    host = obj@dbDetailList$host
-                )
-            }
-            
-            if (is.null(g2m.genes)){
-                g2m.genes <- retrieve.gene.category.from.db(
-                    cat_id = "ag_lab_categories__42",
-                    password = db.pwd,
-                    gene.symbol = queryGS,
-                    user = obj@dbDetailList$db.user,
-                    host = obj@dbDetailList$host
-                )
-            }
-            
-            #Idents(SampleList[[sampleID]]) <- "sampleID"
-            SampleList[[sampleID]] <- CellCycleScoring(
-                SampleList[[sampleID]], 
-                s.features = s.genes, 
-                g2m.features = g2m.genes, 
-                set.ident = TRUE
-            )    
-            ## Done adding cell cycle scores ##
-            
-            ## Remove dots from column names ##
-            names(SampleList[[sampleID]]@meta.data) <- gsub("\\.", "_",names(SampleList[[sampleID]]@meta.data))
-            
-            ## Add G1 to G2M-S differences
-            SampleList[[sampleID]]$CC_Difference <- SampleList[[sampleID]]$S_Score - SampleList[[sampleID]]$G2M_Score
-            
             
             ## Regress out irrelevant items, if specified ##
-            SampleList[[i]] <- ScaleData(
+            SampleList[[i]] <- Seurat::ScaleData(
                 SampleList[[i]], 
                 verbose = FALSE,
                 vars.to.regress = vars.to.regress,
@@ -1318,13 +1327,14 @@ setGeneric(
         reduce = NULL,
         vars.to.regress = NULL,
         s.genes = NULL,
-        g2m.genes = NULL
+        g2m.genes = NULL,
+        annotateCellCyclePhase = TRUE
         #figureCount = 1,
         #VersionPdfExt = ".pdf",
         #tocSubLevel = 4
     ) {
     ## Create Sample List ##
-    library(Seurat)
+    #library(Seurat)
     SampleList <- list()
 
     for (i in 1:length(obj@sampleDetailList)){
@@ -1397,7 +1407,7 @@ setGeneric(
 
         }
 
-        SampleList[[sampleID]] = CreateSeuratObject(
+        SampleList[[sampleID]] = Seurat::CreateSeuratObject(
             counts = fullMat,
             project = sampleID,
             min.cells = 0,
@@ -1436,93 +1446,89 @@ setGeneric(
             mtSel <- "^MitoGene-"
         }
 
-        SampleList[[i]][["percent_mt"]] <- PercentageFeatureSet(object =SampleList[[i]], pattern = mtSel)
+        SampleList[[i]][["percent_mt"]] <- Seurat::PercentageFeatureSet(object =SampleList[[i]], pattern = mtSel)
         names(SampleList[[i]]@meta.data) <- gsub("percent.mt","percent_mt",names(SampleList[[i]]@meta.data))
 
         ## Normalise ##
-        SampleList[[i]] <- SCTransform(SampleList[[i]], verbose = FALSE)
-        SampleList[[i]] <- NormalizeData(
+        # SampleList[[i]] <- Seurat::SCTransform(SampleList[[i]], verbose = FALSE)
+        SampleList[[i]] <- Seurat::NormalizeData(
             SampleList[[i]],
             verbose = FALSE,
             assay = "RNA"
         )
         
         ## Find variable features ##
-        SampleList[[i]] <- FindVariableFeatures(
+        SampleList[[i]] <- Seurat::FindVariableFeatures(
             object = SampleList[[i]],
             selection.method = 'vst',
             nfeatures =  obj@parameterList$NtopGenes
         )
 
         
-        ## Assign cell cycle scores
-        if (obj@parameterList$geneIDcolumn != "mgi_symbol" & obj@parameterList$geneIDcolumn != "hgnc_symbol") {
-            queryGS <- "hgnc_symbol" 
-        } else {
-            queryGS <- obj@parameterList$geneIDcolumn
-        }
         
-        if (is.null(s.genes)){
-            s.genes <- retrieve.gene.category.from.db(
-                cat_id = "ag_lab_categories__41",
-                password = db.pwd,
-                gene.symbol = queryGS,
-                user = obj@dbDetailList$db.user,
-                host = obj@dbDetailList$host
-            )
-        }
         
-        if (is.null(g2m.genes)){
-            g2m.genes <- retrieve.gene.category.from.db(
-                cat_id = "ag_lab_categories__42",
-                password = db.pwd,
-                gene.symbol = queryGS,
-                user = obj@dbDetailList$db.user,
-                host = obj@dbDetailList$host
-            )
+        if (annotateCellCyclePhase) {
+            if (is.null(s.genes)){
+                exit("Please provide S-phase gene list")
+            }
+            
+            if (is.null(g2m.genes)){
+                exit("Please provide G2M-phase gene list")
+            }
+            SampleList[[sampleID]] <- Seurat::CellCycleScoring(
+                SampleList[[sampleID]], 
+                s.features = s.genes, 
+                g2m.features = g2m.genes, 
+                set.ident = TRUE
+            )  
+            
+            names(SampleList[[sampleID]]@meta.data) <- gsub("\\.", "_",names(SampleList[[sampleID]]@meta.data))
+            
+            ## Add G1 to G2M-S differences
+            SampleList[[sampleID]]$CC_Difference <- SampleList[[sampleID]]$S_Score - SampleList[[sampleID]]$G2M_Score
+            
+            
         }
         
         
         #Idents(SampleList[[sampleID]]) <- "orig.ident"
-        SampleList[[sampleID]] <- CellCycleScoring(
-            SampleList[[sampleID]], 
-            s.features = s.genes, 
-            g2m.features = g2m.genes, 
-            set.ident = TRUE
-        )    
+          
         
         #print(sampleID)
         #print(names(SampleList[[sampleID]]@meta.data))
         
         ## Remove dots from column names ##
-        names(SampleList[[sampleID]]@meta.data) <- gsub("\\.", "_",names(SampleList[[sampleID]]@meta.data))
-        
-        ## Add G1 to G2M-S differences
-        SampleList[[sampleID]]$CC_Difference <- SampleList[[sampleID]]$S_Score - SampleList[[sampleID]]$G2M_Score
         
         
         ## 20201221 - added features = row.names(SampleList[[i]]) and vars to regress
-        SampleList[[i]] <- ScaleData(
+        SampleList[[i]] <- Seurat::ScaleData(
             SampleList[[i]], 
             verbose = FALSE,
             vars.to.regress = vars.to.regress #,
             #features = row.names(SampleList[[i]])
         )
+        
+        nPCs <- obj@sampleDetailList[[i]]$singleCellSeuratNpcs4PCA
+        if (ncol(SampleList[[i]]) < 250){
+            nPCs <- 10
+        } else if (ncol(SampleList[[i]]) < 10){
+            nPCs <- 2
+        }
 
-        SampleList[[i]] <- RunPCA(
+        SampleList[[i]] <- Seurat::RunPCA(
             SampleList[[i]],
-            npcs = obj@sampleDetailList[[i]]$singleCellSeuratNpcs4PCA, 
+            npcs = nPCs, 
             verbose = FALSE
         )
         ## Do tSNE ##
-        SampleList[[i]] <- RunTSNE(SampleList[[i]], reduction = "pca", dims = 1:20)
+        SampleList[[i]] <- Seurat::RunTSNE(SampleList[[i]], reduction = "pca", dims = 1:nPCs, perplexity=nPCs)
 
         ## Do UMAP ##
-        SampleList[[i]] <- RunUMAP(SampleList[[i]], reduction = "pca", dims = 1:20)
+        SampleList[[i]] <- Seurat::RunUMAP(SampleList[[i]], reduction = "pca", dims = 1:nPCs)
 
         ## Do clustering ##
-        SampleList[[i]] <- FindNeighbors(SampleList[[i]], reduction = "pca", dims = 1:20)
-        SampleList[[i]] <- FindClusters(SampleList[[i]], resolution = obj@sampleDetailList[[i]]$singleCellClusterParameter)
+        SampleList[[i]] <- Seurat::FindNeighbors(SampleList[[i]], reduction = "pca", dims = 1:nPCs)
+        SampleList[[i]] <- Seurat::FindClusters(SampleList[[i]], resolution = obj@sampleDetailList[[i]]$singleCellClusterParameter)
 
         ## Annotated included/excluded cells ##
         SampleList[[i]]@meta.data[["selected"]] <- "+"

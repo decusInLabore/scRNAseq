@@ -78,7 +78,7 @@ db.pwd <- as.vector(dbTable[1,1])
 
 figureCount <- 1
 
-source("assets/SBwebtools.pckg.r")
+source("assets/R/SBwebtools.pckg.r")
 
 if (length(.libPaths()) > 2){
     .libPaths(.libPaths()[2:3])
@@ -95,15 +95,13 @@ checkFile = paste0(
 )
 
 
-Obio <- setMountingPoint(Obio)
-Obio <- setAnalysisPaths(Obio)
-Obio <- setCrickGenomeAndGeneNameTable(Obio)
-Obio <- createAnalysisFolders(
-    Obio,
-    baseDir="/camp/stp/babs/working/boeings/Projects/",
-    localBaseDir = paste0(hpc.mount, "Projects/")
-)
-Obio <- setDataBaseParameters(Obio)
+#Obio <- setMountingPoint(Obio)
+#Obio <- setAnalysisPaths(Obio)
+#Obio <- setCrickGenomeAndGeneNameTable(Obio)
+#Obio <- createAnalysisFolders(
+#    Obio
+#)
+#Obio <- setDataBaseParameters(Obio)
 
 ## Upload metadata table > p315_PCA
 # Obio@parameterList$host <- "10.152.22.193"
@@ -279,27 +277,43 @@ setGeneric(
 DGEtagVec <- as.vector(NULL, mode = "character")
 DGEinputList <- list(
   "comp_1" = list(
-      "name"    = "DGE_B_cells_vs_Mono_CD14",
-      "DGEselCol" = "seurat_clusters",
+      "name"    = "DGE_M1M2M3_vs_T1ET1ET4",
+      "DGEselCol" = "subClusterName",
       "DGEsampleList" = list(
-          "B_cells"   = c(5,7),
-          "Mono_CD14" = c(0,11)
+          "M1M2M3"   = c("M1", "M2", "M3"),
+          "T1ET1ET4" = c("T1", "ET1", "ET4")
       )
   ),
   "comp_2" = list(
-      "name"    = "DGE_B_cells_1_vs_B_cells_2",
-      "DGEselCol" = "seurat_clusters",
+      "name"    = "DGE_M1M2M3_vs_T1",
+      "DGEselCol" = "subClusterName",
       "DGEsampleList" = list(
-          "B_cells_1"   = c(5),
-          "B_cells_2" = c(7)
+          "M1M2M3"   = c("M1", "M2", "M3"),
+          "T1" = c("T1")
       )
   ),
   "comp_3" = list(
-      "name"    = "DGE_Mono_CD14_vs_Mono_FCGR3",
-      "DGEselCol" = "seurat_clusters",
+      "name"    = "DGE_ET1_vs_ET4",
+      "DGEselCol" = "subClusterName",
       "DGEsampleList" = list(
-          "Mono_CD14"   = c(0,11),
-          "Mono_FCGR3" = c(6)
+          "ET1"   = c("ET1"),
+          "ET4" = c("ET4")
+      )
+  ),
+  "comp_4" = list(
+      "name"    = "DGE_T1_vs_ET1ET4",
+      "DGEselCol" = "subClusterName",
+      "DGEsampleList" = list(
+          "T1"   = c("T1"),
+          "ET1ET4" = c("ET1", "ET4")
+      )
+  ),
+  "comp_5" = list(
+      "name"    = "DGE_M1_vs_M2",
+      "DGEselCol" = "subClusterName",
+      "DGEsampleList" = list(
+          "M1"   = c("M1"),
+          "M2" = c("M2")
       )
   )
 )
@@ -330,7 +344,7 @@ for (i in 1:length(DGEinputList)){
         contrastTag = paste0("contrast_",i,"_"),
         DGEsampleList = DGEinputList[[i]][["DGEsampleList"]]
     )
-    
+
     OsC <- resList$OsC
     
     ###########################################################################
@@ -674,7 +688,7 @@ for (i in 1:length(DGEtagVec)){
     
     selVec <- c(
         "gene",
-        names(dfAllPlots)[grep(DGEtagVec[i], names(dfAllPlots))]
+        names(dfAllPlots)[grep(paste0(DGEtagVec[i],"$"), names(dfAllPlots))]
     )
     
     dfPlot <- dfAllPlots[,selVec]
@@ -814,9 +828,10 @@ for (i in 1:length(DGEtagVec)){
     tag <- paste0("Volcano_Plot_", DGEtagVec[i])  
     label <- gsub("_", " ", DGEtagVec[i])
     
+    
     selVec <- c(
         "gene",
-        names(dfAllPlots)[grep(DGEtagVec[i], names(dfAllPlots))]
+        names(dfAllPlots)[grep(paste0(DGEtagVec[i],"$"), names(dfAllPlots))]
     )
     
     dfPlot <- dfAllPlots[,selVec]
@@ -972,9 +987,10 @@ for (i in 1:length(DGEtagVec)){
     tagGLpos <- paste0(DGEtagVec[i], "_pos") 
     tagGLneg <- paste0(DGEtagVec[i], "_neg") 
     
+    
     selVec <- c(
         "gene",
-        names(dfAllPlots)[grep(DGEtagVec[i], names(dfAllPlots))]
+        names(dfAllPlots)[grep(paste0(DGEtagVec[i],"$"), names(dfAllPlots))]
     )
     
     dfPlot <- dfAllPlots[,selVec]
@@ -1481,7 +1497,10 @@ cmd.vec <- upload.datatable.to.database(
     df.data = Obio@databaseTable, #[Obio@databaseTable$count_cut_off > 1, ],
     db.col.parameter.list = list(
         "VARCHAR(255) CHARACTER SET latin1 COLLATE latin1_swedish_ci" = c("Gene_name","gene_description"),
-        "VARCHAR(50) CHARACTER SET latin1 COLLATE latin1_swedish_ci" = c("ENSDARG", "dr_symbol","clone_based_gene_ID","Gene_description","Gene_type","ENSG", "ENSMUSG", "hgnc_symbol", "mgi_symbol", "uniprot", "entrezgene","display_ptm", "^sequence_window", "p_site_env","for_GSEA_gene_chip","associated_gene_name", "gene_type"),
+        
+        "VARCHAR(100) CHARACTER SET utf8 COLLATE utf8_general_ci" = c("cellType","cellIdent","sample_","cellID","orig_ident","old_ident","clustIdent","hmIdent","sampleID","clusterName","^ClusterName","clusterColor","ClusterTestRes","sampleName","sampleColor","CellFromTumor","Patient","Region","Article_Cell_Type","Gender","Glia_vs_Neuron","sub_clusters_ExNeurons","subCluster","NitChol_vs_Serotonergic","Nitrergic_vs_Cholinergic","Sample_Group","CC_Difference","meta_","cluster_sample","^DGE_","DZ_vs_LZ_FDC","ENSDARG","dr_symbol","clone_based_gene_ID","Gene_description","Gene_type","ENSG","ENSMUSG","hgnc_symbol","mgi_symbol","uniprot","entrezgene","display_ptm","^sequence_window","p_site_env","for_GSEA_gene_chip","associated_gene_name","gene_type"),
+        
+        
         "VARCHAR(1) CHARACTER SET latin1 COLLATE latin1_swedish_ci" = c("ppos", "amino_acid", "charge","known_site"),
         "BIGINT(8) NULL DEFAULT NULL" = c("row_names"),
         "INT(8) NULL DEFAULT NULL" = c("DEseq2Normalized","CoVarOrder","row_id", "cluster_order","cluster_id", "count_cut_off", "^position$", "raw_counts"),

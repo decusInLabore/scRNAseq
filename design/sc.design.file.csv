@@ -1,73 +1,73 @@
-﻿Global Parameters,,,,
-singleCellClusterParameter,0.3,,,
-NtopGenes,2000,,,
-scNintegrationFeatures,3000,,,
-primReduction,umap,,,
-vars.to.regress,NULL,,,
-singleCellSeuratNpcs4PCA,30,,,
-folder,boeings/stefan.boeing/426_scRNAseq_PBMC_10k/,,,
-lab.categories.table,immuno_ref_categories,,,
-project_id,PBMC10k,,,
-labname,TenXGenomics,,,
-sra.id.vector,,,,
-gse.id.vector,,,,
-asf.id,,,,
-experiment.type,sc_rna_seq,,,
-species,homo_sapiens,,,
-release,release-89,,,
-timecourse.units,,,,
-count.table.headline,lg10 Expr for all Samples,,,
-count.table.sidelabel,lg10 Expr,,,
-heamap.headline.text,Heatmap: Row-averaged Expr,,,
-,,,,
-ParameterList,,,,
-debugReduce,,,,
-sra.id.vector,,,,
-gse.id.vector,,,,
-addDmaps,FALSE,,,
-catRefFile,/camp/stp/babs/working/boeings/Projects/boeings/stefan.boeing/426_scRNAseq_PBMC_10k/basedata/pbmc10xSignatures.txt,,,
-scIntegrationMethod,SCT,,,"# ""SCT"" or ""standard"""
-,,,,
-Sample Parameters,,,,
-sampleName,PBMC10X,,,
-limsID,PBMC10X,,,
-type,TenX,,"# type must be in c(""TenX"", ""matrixFiles"", ""loomFiles"", ""hdf5Files"")",
-gene.column,2,,# default 2,
-path,/camp/stp/babs/working/boeings/Projects/boeings/stefan.boeing/426_scRNAseq_PBMC_10k/FASTQ_files/PBMC10X/outs/filtered_feature_bc_matrix,,,
-singleCellSeuratMtCutoff,15,,,
-SeuratNrnaMaxFeatures,10000,,,
-SeuratNrnaMinFeatures,1000,,,
-,,,,
-Database Parameters,,,,
-primDataDB,immuno_ref_data,,,
-ref.cat.db,reference_categories_db_new,,,
-db.user,boeingS,,,
-host,10.27.241.82,,,
-,,,,
-Documentation Parameter,,,,
-title,PBMCs from a Healthy Donor: Whole Transcriptome Analysis,,,
-subtitle,Single Cell Gene Expression Dataset by Cell Ranger 4.0.0,,,
-abstract,Human peripheral blood mononuclear cells (PBMCs) of a healthy female donor aged 25 were obtained by 10x Genomics from AllCells. Whole transcriptome libraries were generated with Chromium Next GEM Single Cell 3' Reagent Kits v3.1 (Dual Index) User Guide (CG000315) and sequenced on an Illumina NovaSeq 6000.,,,
-,,,,
-ReferenceTableSelection,,,,
-referenceTableListDB,Hallmark Signatures,mysigdb_h_hallmarks,,
-referenceTableListDB,Pathways,mysigdb_c2_1329_canonical_pathways,,
-referenceTableListDB,GO-BP,mysigdb_c5_BP,,
-referenceTableListDB,GO-MF,mysigdb_c5_MF,,
-referenceTableListDB,TF Motifs,TRANSFAC_and_JASPAR_PWMs,,
-referenceTableListDB,Protein Complexes,networkcategories,,
-referenceTableListDB,GO-BP,GO_Biological_Process_2017,,
-referenceTableListDB,Immunologic Signatures,mysigdb_c7_immunologic_signatures,,
-referenceTableListDB,LINCS Down,LINCS_L1000_Chem_Pert_down,,
-referenceTableListDB,LINCS Up,LINCS_L1000_Chem_Pert_up,,
-referenceTableListDB,Cell Type Signatures,mysigdb_sc_sig,,
-referenceTableListDB,Cell Type Signatures,cibersort_L22,,
-,,,,
-Cell Signature Selection,,,,
-cellSignatureDBtable,Cell Type Signatures,mysigdb_sc_sig,,
-cellSignatureDBtable,Cell Type Signatures,cibersort_L22,,
-cellSignatureDBtable,GO-MF,mysigdb_c5_MF,,
-cellSignatureDBtable,Pathways,mysigdb_c2_1329_canonical_pathways,,
-cellSignatureDBtable,Hallmarks,mysigdb_h_hallmarks,,
-,,,,
-DGEParameters,,,,
+Global Parameters				
+singleCellClusterParameter	0.3			
+NtopGenes	2000			
+scNintegrationFeatures	3000			
+primReduction	umap			
+vars.to.regress	NULL			
+singleCellSeuratNpcs4PCA	30			
+folder	camp/stp/babs/working/boeings/stefan.boeing/426_scRNAseq_PBMC_10k/			
+lab.categories.table	immuno_ref_categories			
+project_id	PBMC10k			
+labname	TenXGenomics			
+sra.id.vector				
+gse.id.vector				
+asf.id				
+experiment.type	sc_rna_seq			
+species	homo_sapiens			
+release	release-89			
+timecourse.units				
+count.table.headline	lg10 Expr for all Samples			
+count.table.sidelabel	lg10 Expr			
+heamap.headline.text	Heatmap: Row-averaged Expr			
+				
+ParameterList				
+debugReduce				
+sra.id.vector				
+gse.id.vector				
+addDmaps	FALSE			
+catRefFile	/camp/stp/babs/working/boeings/Projects/boeings/stefan.boeing/426_scRNAseq_PBMC_10k/basedata/pbmc10xSignatures.txt			
+scIntegrationMethod	SCT			"# ""SCT"" or ""standard"""
+				
+Sample Parameters				
+sampleName	PBMC10X			
+limsID	PBMC10X			
+type	TenX		"# type must be in c(""TenX"", ""matrixFiles"", ""loomFiles"", ""hdf5Files"")"	
+gene.column	2		# default 2	
+path	/camp/stp/babs/working/boeings/Projects/boeings/stefan.boeing/426_scRNAseq_PBMC_10k/FASTQ_files/PBMC10X/outs/filtered_feature_bc_matrix			
+singleCellSeuratMtCutoff	15			
+SeuratNrnaMaxFeatures	10000			
+SeuratNrnaMinFeatures	1000			
+				
+Database Parameters				
+primDataDB	immuno_ref_data			
+ref.cat.db	reference_categories_db_new			
+db.user	boeingS			
+host	10.27.241.82			
+				
+Documentation Parameter				
+title	PBMCs from a Healthy Donor: Whole Transcriptome Analysis			
+subtitle	Single Cell Gene Expression Dataset by Cell Ranger 4.0.0			
+abstract	Human peripheral blood mononuclear cells (PBMCs) of a healthy female donor aged 25 were obtained by 10x Genomics from AllCells. Whole transcriptome libraries were generated with Chromium Next GEM Single Cell 3' Reagent Kits v3.1 (Dual Index) User Guide (CG000315) and sequenced on an Illumina NovaSeq 6000.			
+				
+ReferenceTableSelection				
+referenceTableListDB	Hallmark Signatures	mysigdb_h_hallmarks		
+referenceTableListDB	Pathways	mysigdb_c2_1329_canonical_pathways		
+referenceTableListDB	GO-BP	mysigdb_c5_BP		
+referenceTableListDB	GO-MF	mysigdb_c5_MF		
+referenceTableListDB	TF Motifs	TRANSFAC_and_JASPAR_PWMs		
+referenceTableListDB	Protein Complexes	networkcategories		
+referenceTableListDB	GO-BP	GO_Biological_Process_2017		
+referenceTableListDB	Immunologic Signatures	mysigdb_c7_immunologic_signatures		
+referenceTableListDB	LINCS Down	LINCS_L1000_Chem_Pert_down		
+referenceTableListDB	LINCS Up	LINCS_L1000_Chem_Pert_up		
+referenceTableListDB	Cell Type Signatures	mysigdb_sc_sig		
+referenceTableListDB	Cell Type Signatures	cibersort_L22		
+				
+Cell Signature Selection				
+cellSignatureDBtable	Cell Type Signatures	mysigdb_sc_sig		
+cellSignatureDBtable	Cell Type Signatures	cibersort_L22		
+cellSignatureDBtable	GO-MF	mysigdb_c5_MF		
+cellSignatureDBtable	Pathways	mysigdb_c2_1329_canonical_pathways		
+cellSignatureDBtable	Hallmarks	mysigdb_h_hallmarks		
+				
+DGEParameters				

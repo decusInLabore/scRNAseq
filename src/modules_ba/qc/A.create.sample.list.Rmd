@@ -38,7 +38,7 @@ SampleList <- createSampleListQC(
     obj = Obio,
     reduce = Obio@parameterList$debugReduce,    
     vars.to.regress = Obio@scDetailList$vars.to.regress,
-    s.genes = NULL,
+    s.genes = s.genes,
     g2m.genes = NULL,
     annotateCellCyclePhase = FALSE
 )
