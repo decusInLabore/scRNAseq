@@ -92,8 +92,8 @@ db.pwd <- as.vector(dbTable[1,1])
 #     )
 # )
 
-source("assets/scTools.r")
-source("assets/SBwebtools.pckg.r")
+source("assets/R/scTools.r")
+source("assets/R/SBwebtools.pckg.r")
 
 
 if (length(.libPaths()) > 2){
@@ -110,15 +110,32 @@ if (file.exists(ObioFN)){
 }
 
 ## Reset paths to local environment
+
+
 Obio <- setMountingPoint(Obio)
 Obio <- setAnalysisPaths(Obio)
 Obio <- setCrickGenomeAndGeneNameTable(Obio)
 Obio <- createAnalysisFolders(
-    Obio,
-    baseDir="/camp/stp/babs/working/boeings/Projects/",
-    localBaseDir = paste0(hpc.mount, "Projects/")
+    Obio
 )
 Obio <- setDataBaseParameters(Obio)
+
+Obio@parameterList$species <- "mus_musculus"
+###############################################################################
+## Add annotation file                                                       ##
+Obio@parameterList$species <- "mus_musculus"
+Obio <- addGeneAnnotation(Obio)
+
+dfMM_Anno <- Obio@dfGeneAnnotation
+dfMM_Anno <- unique(dfMM_Anno[,c("mgi_symbol", "hgnc_symbol")])
+dfMM_Anno <- dfMM_Anno[dfMM_Anno$hgnc_symbol != "",]
+
+Obio@parameterList$species <- "homo_sapiens"
+Obio <- addGeneAnnotation(Obio)
+
+## Done adding annotation file                                               ##
+###############################################################################
+
 ```
 
 
@@ -130,86 +147,76 @@ Obio <- setDataBaseParameters(Obio)
 ## Goal: create a table, that can be added via the 'gene' column to the main 
 ## database table
 
-dfAddCounts <- import.db.table.from.db(
-    dbtable = "vpl369A_rna_seq_table",
-    dbname = "vpl_data",
-    user = Obio@dbDetailList$db.user,
-    password = db.pwd,
-    host = Obio@dbDetailList$host
+FN <- "/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/437_fibroblast_GSE154778/auxiliarydata/WT_v_Inhba_Inbbb_null_combined.20210429.txt"
+
+dfAddCounts <- read.delim(
+    FN, 
+    header = T, 
+    sep = "\t",
+    stringsAsFactors = F
 )
-# # 
-selVec <- c(
-    Obio@parameterList$geneIDcolumn,
-    names(dfAddCounts)[grep("contrast_1_logFC", names(dfAddCounts))],
-    names(dfAddCounts)[grep("contrast_1_lg10p", names(dfAddCounts))],
-    names(dfAddCounts)[grep("contrast_1_padj", names(dfAddCounts))],
-    names(dfAddCounts)[grep("contrast_2_logFC", names(dfAddCounts))],
-    names(dfAddCounts)[grep("contrast_2_lg10p", names(dfAddCounts))],
-    names(dfAddCounts)[grep("contrast_2_padj", names(dfAddCounts))],
-    names(dfAddCounts)[grep("contrast_3_logFC", names(dfAddCounts))],
-    names(dfAddCounts)[grep("contrast_3_lg10p", names(dfAddCounts))],
-    names(dfAddCounts)[grep("contrast_3_padj", names(dfAddCounts))]
+
+minC <- min(dfAddCounts$padj[dfAddCounts$padj != 0])
+
+dfAddCounts$padj[dfAddCounts$padj == 0] <- minC
+
+
+padj  <- names(dfAddCounts)[grep("padj", names(dfAddCounts))]
+            lg10p <- gsub("padj", "lg10p", padj)
+
+            for (z in 1:length(padj)){
+                preprocess <- as.numeric(dfAddCounts[,padj[z]])
+
+                if (length(grep("padj", padj[z])) > 0){
+                    preprocess <- as.numeric(dfAddCounts[,padj[z]])
+                    minNum <- min(preprocess[preprocess != 0])
+                    preprocess[preprocess == 0] <- minNum
+                } else {
+                    preprocess <- as.numeric(dfAddCounts[,padj[z]])
+                }
+
+                temp <- -1*log10(preprocess)
+                #temp[temp >= 50] = 50
+                dfAddCounts[,lg10p[z]] <- temp
+            }
+
+names(dfAddCounts) <- gsub("gene_id", "ENSG", names(dfAddCounts))
+names(dfAddCounts) <- gsub("log2FoldChange", "contrast_A_logFC_bulkRNA_Seq_SS_Inhba_Inhba_KO_vs_WT", names(dfAddCounts))
+names(dfAddCounts) <- gsub("padj", "contrast_A_padj_bulkRNA_Seq_SS_Inhba_Inhba_KO_vs_WT", names(dfAddCounts))
+names(dfAddCounts) <- gsub("lg10p", "contrast_A_lg10p_bulkRNA_Seq_SS_Inhba_Inhba_KO_vs_WT", names(dfAddCounts))
+
+## Add hgnc_symbol annotation
+
+
+dfMM_Anno <- dfMM_Anno[dfMM_Anno$mgi_symbol %in% dfAddCounts$symbol, ]
+
+
+
+dfAddCounts <- merge(
+    dfAddCounts,
+    dfMM_Anno, 
+    by.x = "symbol",
+    by.y = "mgi_symbol", 
+    all =T
 )
-# # 
-dfAddCounts <- unique(dfAddCounts[,selVec])
-dfAddCounts <- dfAddCounts[dfAddCounts$mgi_symbol != "",]
+
+dfAddCounts[is.na(dfAddCounts)] <- 0
+
+dfAddCounts$symbol <- NULL
+dfAddCounts$ENSG <- NULL
+
+
+
 
 #dfNormCounts <- spread(data = dfNormCounts, key=condition, value=measurement)
 #names(dfNormCounts) <- paste0("norm_counts_", names(dfNormCounts))
 #names(dfNormCounts) <- gsub("norm_counts_gene", "gene", names(dfNormCounts))
 
-names(dfAddCounts) <- gsub("contrast_1_logFC_", "contrast_A_logFC_bulkRNASeq_vpl369A_", names(dfAddCounts) )
-names(dfAddCounts) <- gsub("contrast_1_padj_", "contrast_A_padj_bulkRNASeq_vpl369A_", names(dfAddCounts) )
-names(dfAddCounts) <- gsub("contrast_1_lg10p_", "contrast_A_lg10p_bulkRNASeq_vpl369A_", names(dfAddCounts) )
-
-names(dfAddCounts) <- gsub("contrast_2_logFC_", "contrast_A_logFC_bulkRNASeq_vpl369A_", names(dfAddCounts) )
-names(dfAddCounts) <- gsub("contrast_2_padj_", "contrast_A_padj_bulkRNASeq_vpl369A_", names(dfAddCounts) )
-names(dfAddCounts) <- gsub("contrast_2_lg10p_", "contrast_A_lg10p_bulkRNASeq_vpl369A_", names(dfAddCounts) )
-
-names(dfAddCounts) <- gsub("contrast_3_logFC_", "contrast_A_logFC_bulkRNASeq_vpl369A_", names(dfAddCounts) )
-names(dfAddCounts) <- gsub("contrast_3_padj_", "contrast_A_padj_bulkRNASeq_vpl369A_", names(dfAddCounts) )
-names(dfAddCounts) <- gsub("contrast_3_lg10p_", "contrast_A_lg10p_bulkRNASeq_vpl369A_", names(dfAddCounts) )
 
 
 dfRefDatasets <- dfAddCounts
 
-####################3
-## Add vpl367
-dfAddCounts <- import.db.table.from.db(
-    dbtable = "vpl367_rna_seq_table",
-    dbname = "vpl_data",
-    user = Obio@dbDetailList$db.user,
-    password = db.pwd,
-    host = Obio@dbDetailList$host
-)
-# # 
-selVec <- c(
-    Obio@parameterList$geneIDcolumn,
-    names(dfAddCounts)[grep("contrast_1_logFC", names(dfAddCounts))],
-    names(dfAddCounts)[grep("contrast_1_lg10p", names(dfAddCounts))],
-    names(dfAddCounts)[grep("contrast_1_padj", names(dfAddCounts))]
-)
-# # 
-dfAddCounts <- unique(dfAddCounts[,selVec])
-dfAddCounts <- dfAddCounts[Obio@parameterList$geneIDcolumn != "",]
 
-#dfNormCounts <- spread(data = dfNormCounts, key=condition, value=measurement)
-#names(dfNormCounts) <- paste0("norm_counts_", names(dfNormCounts))
-#names(dfNormCounts) <- gsub("norm_counts_gene", "gene", names(dfNormCounts))
-
-names(dfAddCounts) <- gsub("contrast_1_logFC_", "contrast_A_logFC_bulkRNASeq_vpl367_", names(dfAddCounts) )
-names(dfAddCounts) <- gsub("contrast_1_padj_", "contrast_A_padj_bulkRNASeq_vpl367_", names(dfAddCounts) )
-names(dfAddCounts) <- gsub("contrast_1_lg10p_", "contrast_A_lg10p_bulkRNASeq_vpl367_", names(dfAddCounts) )
-
-dfRefDatasets <- merge(
-    dfRefDatasets, 
-    dfAddCounts, 
-    by.x = Obio@parameterList$geneIDcolumn, 
-    by.y = Obio@parameterList$geneIDcolumn,
-    all =TRUE
-)
-
-dfRefDatasets[is.na(dfRefDatasets)] <- 0
 ## Done
 ######################
 

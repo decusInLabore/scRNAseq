@@ -118,26 +118,7 @@ List of 4
  $ warning: logi FALSE
  $ results: chr "asis"
 
-
-Attaching package: 'Seurat'
-
-The following object is masked from 'package:SummarizedExperiment':
-
-    Assays
-
-Warning: The 'show_progress' argument is deprecated as of v0.3. Use 'verbosity' instead. (in sctransform::vst)
-Calculating cell attributes from input UMI matrix: log_umi
-Variance stabilizing transformation of count matrix of size 18889 by 10185
-Model formula is y ~ log_umi
-Get Negative Binomial regression parameters per gene
-Using 2000 genes, 10185 cells
-There are 1 estimated thetas smaller than 1e-07 - will be set to 1e-07
-Found 87 outliers - those will be ignored in fitting/regularization step
-
-Second step: Get residuals using fitted parameters for 18889 genes
-Computing corrected count matrix for 18889 genes
-Calculating gene attributes
-Wall clock passed: Time difference of 4.809521 mins
+Loading required package: DBI
 Calculating gene variances
 0%   10   20   30   40   50   60   70   80   90   100%
 [----|----|----|----|----|----|----|----|----|----|
@@ -146,29 +127,236 @@ Calculating feature variances of standardized and clipped values
 0%   10   20   30   40   50   60   70   80   90   100%
 [----|----|----|----|----|----|----|----|----|----|
 **************************************************|
-Loading required package: DBI
-Warning: The following features are not present in the object: MLF1IP, not searching for symbol synonyms
-Warning: The following features are not present in the object: FAM64A, HN1, not searching for symbol synonyms
 Warning: The default method for RunUMAP has changed from calling Python UMAP via reticulate to the R-native UWOT using the cosine metric
 To use Python UMAP via reticulate, set umap.method to 'umap-learn' and metric to 'correlation'
 This message will be shown once per session
-15:02:01 UMAP embedding parameters a = 0.9922 b = 1.112
-15:02:01 Read 10185 rows and found 20 numeric columns
-15:02:01 Using Annoy for neighbor search, n_neighbors = 30
-15:02:01 Building Annoy index with metric = cosine, n_trees = 50
+20:59:37 UMAP embedding parameters a = 0.9922 b = 1.112
+20:59:37 Read 50 rows and found 10 numeric columns
+20:59:37 Using Annoy for neighbor search, n_neighbors = 30
+20:59:37 Building Annoy index with metric = cosine, n_trees = 50
 0%   10   20   30   40   50   60   70   80   90   100%
 [----|----|----|----|----|----|----|----|----|----|
 **************************************************|
-15:02:04 Writing NN index file to temp file /tmp/slurm_25072569/RtmpubRsc8/file1091a6931b8
-15:02:04 Searching Annoy index using 1 thread, search_k = 3000
-15:02:08 Annoy recall = 100%
-15:02:09 Commencing smooth kNN distance calibration using 1 thread
-15:02:11 Initializing from normalized Laplacian + noise
-15:02:11 Commencing optimization for 200 epochs, with 429476 positive edges
+20:59:38 Writing NN index file to temp file /tmp/slurm_25076982/RtmpImOPLj/file2dcf48f323
+20:59:38 Searching Annoy index using 1 thread, search_k = 3000
+20:59:38 Annoy recall = 100%
+20:59:38 Commencing smooth kNN distance calibration using 1 thread
+20:59:40 Initializing from normalized Laplacian + noise
+20:59:40 Commencing optimization for 500 epochs, with 1534 positive edges
 0%   10   20   30   40   50   60   70   80   90   100%
 [----|----|----|----|----|----|----|----|----|----|
 **************************************************|
-15:02:28 Optimization finished
+20:59:41 Optimization finished
+Computing nearest neighbor graph
+Computing SNN
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Calculating gene variances
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Calculating feature variances of standardized and clipped values
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+20:59:42 UMAP embedding parameters a = 0.9922 b = 1.112
+20:59:42 Read 114 rows and found 10 numeric columns
+20:59:42 Using Annoy for neighbor search, n_neighbors = 30
+20:59:42 Building Annoy index with metric = cosine, n_trees = 50
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+20:59:42 Writing NN index file to temp file /tmp/slurm_25076982/RtmpImOPLj/file2dcf3d1a16db
+20:59:42 Searching Annoy index using 1 thread, search_k = 3000
+20:59:43 Annoy recall = 100%
+20:59:43 Commencing smooth kNN distance calibration using 1 thread
+20:59:45 Initializing from normalized Laplacian + noise
+20:59:45 Commencing optimization for 500 epochs, with 4348 positive edges
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+20:59:46 Optimization finished
+Computing nearest neighbor graph
+Computing SNN
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Calculating gene variances
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Calculating feature variances of standardized and clipped values
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+20:59:47 UMAP embedding parameters a = 0.9922 b = 1.112
+20:59:47 Read 45 rows and found 10 numeric columns
+20:59:47 Using Annoy for neighbor search, n_neighbors = 30
+20:59:47 Building Annoy index with metric = cosine, n_trees = 50
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+20:59:47 Writing NN index file to temp file /tmp/slurm_25076982/RtmpImOPLj/file2dcf7e637b16
+20:59:47 Searching Annoy index using 1 thread, search_k = 3000
+20:59:47 Annoy recall = 100%
+20:59:47 Commencing smooth kNN distance calibration using 1 thread
+20:59:49 Initializing from normalized Laplacian + noise
+20:59:49 Commencing optimization for 500 epochs, with 1304 positive edges
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+20:59:50 Optimization finished
+Computing nearest neighbor graph
+Computing SNN
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Calculating gene variances
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Calculating feature variances of standardized and clipped values
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+20:59:55 UMAP embedding parameters a = 0.9922 b = 1.112
+20:59:55 Read 260 rows and found 30 numeric columns
+20:59:55 Using Annoy for neighbor search, n_neighbors = 30
+20:59:55 Building Annoy index with metric = cosine, n_trees = 50
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+20:59:55 Writing NN index file to temp file /tmp/slurm_25076982/RtmpImOPLj/file2dcf3b6d44aa
+20:59:55 Searching Annoy index using 1 thread, search_k = 3000
+20:59:55 Annoy recall = 100%
+20:59:56 Commencing smooth kNN distance calibration using 1 thread
+20:59:57 Initializing from normalized Laplacian + noise
+20:59:57 Commencing optimization for 500 epochs, with 10600 positive edges
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+20:59:59 Optimization finished
+Computing nearest neighbor graph
+Computing SNN
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Calculating gene variances
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Calculating feature variances of standardized and clipped values
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+21:00:01 UMAP embedding parameters a = 0.9922 b = 1.112
+21:00:01 Read 147 rows and found 10 numeric columns
+21:00:01 Using Annoy for neighbor search, n_neighbors = 30
+21:00:01 Building Annoy index with metric = cosine, n_trees = 50
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+21:00:01 Writing NN index file to temp file /tmp/slurm_25076982/RtmpImOPLj/file2dcf5e5c1bb3
+21:00:01 Searching Annoy index using 1 thread, search_k = 3000
+21:00:01 Annoy recall = 100%
+21:00:02 Commencing smooth kNN distance calibration using 1 thread
+21:00:03 Initializing from normalized Laplacian + noise
+21:00:03 Commencing optimization for 500 epochs, with 5600 positive edges
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+21:00:04 Optimization finished
+Computing nearest neighbor graph
+Computing SNN
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Calculating gene variances
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Calculating feature variances of standardized and clipped values
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+21:00:07 UMAP embedding parameters a = 0.9922 b = 1.112
+21:00:07 Read 171 rows and found 10 numeric columns
+21:00:07 Using Annoy for neighbor search, n_neighbors = 30
+21:00:07 Building Annoy index with metric = cosine, n_trees = 50
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+21:00:07 Writing NN index file to temp file /tmp/slurm_25076982/RtmpImOPLj/file2dcfe776404
+21:00:07 Searching Annoy index using 1 thread, search_k = 3000
+21:00:07 Annoy recall = 100%
+21:00:08 Commencing smooth kNN distance calibration using 1 thread
+21:00:09 Initializing from normalized Laplacian + noise
+21:00:09 Commencing optimization for 500 epochs, with 6674 positive edges
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+21:00:10 Optimization finished
+Computing nearest neighbor graph
+Computing SNN
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Calculating gene variances
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Calculating feature variances of standardized and clipped values
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+21:00:13 UMAP embedding parameters a = 0.9922 b = 1.112
+21:00:13 Read 217 rows and found 10 numeric columns
+21:00:13 Using Annoy for neighbor search, n_neighbors = 30
+21:00:13 Building Annoy index with metric = cosine, n_trees = 50
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+21:00:13 Writing NN index file to temp file /tmp/slurm_25076982/RtmpImOPLj/file2dcf63d10e78
+21:00:13 Searching Annoy index using 1 thread, search_k = 3000
+21:00:13 Annoy recall = 100%
+21:00:14 Commencing smooth kNN distance calibration using 1 thread
+21:00:15 Initializing from normalized Laplacian + noise
+21:00:15 Commencing optimization for 500 epochs, with 8308 positive edges
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+21:00:17 Optimization finished
+Computing nearest neighbor graph
+Computing SNN
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Calculating gene variances
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Calculating feature variances of standardized and clipped values
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+21:00:19 UMAP embedding parameters a = 0.9922 b = 1.112
+21:00:19 Read 130 rows and found 10 numeric columns
+21:00:19 Using Annoy for neighbor search, n_neighbors = 30
+21:00:19 Building Annoy index with metric = cosine, n_trees = 50
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+21:00:19 Writing NN index file to temp file /tmp/slurm_25076982/RtmpImOPLj/file2dcf49ecc99e
+21:00:19 Searching Annoy index using 1 thread, search_k = 3000
+21:00:19 Annoy recall = 100%
+21:00:20 Commencing smooth kNN distance calibration using 1 thread
+21:00:21 Initializing from normalized Laplacian + noise
+21:00:21 Commencing optimization for 500 epochs, with 4432 positive edges
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+21:00:22 Optimization finished
 Computing nearest neighbor graph
 Computing SNN
 0%   10   20   30   40   50   60   70   80   90   100%
@@ -228,20 +416,316 @@ List of 3
  $ echo   : symbol T
  $ results: symbol F
 
-Warning: The 'show_progress' argument is deprecated as of v0.3. Use 'verbosity' instead. (in sctransform::vst)
-Calculating cell attributes from input UMI matrix: log_umi
-Variance stabilizing transformation of count matrix of size 18766 by 9200
-Model formula is y ~ log_umi
-Get Negative Binomial regression parameters per gene
-Using 2000 genes, 9200 cells
-Found 74 outliers - those will be ignored in fitting/regularization step
-
-Second step: Get residuals using fitted parameters for 18766 genes
-Computing corrected count matrix for 18766 genes
-Calculating gene attributes
-Wall clock passed: Time difference of 4.21929 mins
-Warning: The following features are not present in the object: MLF1IP, not searching for symbol synonyms
-Warning: The following features are not present in the object: FAM64A, HN1, not searching for symbol synonyms
+Computing 2000 integration features
+Scaling features for provided objects
+Finding all pairwise anchors
+Running CCA
+Warning in irlba(A = mat3, nv = num.cc) :
+  You're computing too large a percentage of total singular values, use a standard svd instead.
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 250 anchors
+Filtering anchors
+	Retained 163 anchors
+Extracting within-dataset neighbors
+Running CCA
+Warning in irlba(A = mat3, nv = num.cc) :
+  You're computing too large a percentage of total singular values, use a standard svd instead.
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 205 anchors
+Filtering anchors
+	Retained 203 anchors
+Extracting within-dataset neighbors
+Running CCA
+Warning in irlba(A = mat3, nv = num.cc) :
+  You're computing too large a percentage of total singular values, use a standard svd instead.
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 220 anchors
+Filtering anchors
+	Retained 220 anchors
+Extracting within-dataset neighbors
+Running CCA
+Warning in irlba(A = mat3, nv = num.cc) :
+  You're computing too large a percentage of total singular values, use a standard svd instead.
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 250 anchors
+Filtering anchors
+	Retained 100 anchors
+Extracting within-dataset neighbors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 563 anchors
+Filtering anchors
+	Retained 212 anchors
+Extracting within-dataset neighbors
+Running CCA
+Warning in irlba(A = mat3, nv = num.cc) :
+  You're computing too large a percentage of total singular values, use a standard svd instead.
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 220 anchors
+Filtering anchors
+	Retained 101 anchors
+Extracting within-dataset neighbors
+Running CCA
+Warning in irlba(A = mat3, nv = num.cc) :
+  You're computing too large a percentage of total singular values, use a standard svd instead.
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 250 anchors
+Filtering anchors
+	Retained 137 anchors
+Extracting within-dataset neighbors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 524 anchors
+Filtering anchors
+	Retained 274 anchors
+Extracting within-dataset neighbors
+Running CCA
+Warning in irlba(A = mat3, nv = num.cc) :
+  You're computing too large a percentage of total singular values, use a standard svd instead.
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 220 anchors
+Filtering anchors
+	Retained 125 anchors
+Extracting within-dataset neighbors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 704 anchors
+Filtering anchors
+	Retained 344 anchors
+Extracting within-dataset neighbors
+Running CCA
+Warning in irlba(A = mat3, nv = num.cc) :
+  You're computing too large a percentage of total singular values, use a standard svd instead.
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 250 anchors
+Filtering anchors
+	Retained 139 anchors
+Extracting within-dataset neighbors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 539 anchors
+Filtering anchors
+	Retained 259 anchors
+Extracting within-dataset neighbors
+Running CCA
+Warning in irlba(A = mat3, nv = num.cc) :
+  You're computing too large a percentage of total singular values, use a standard svd instead.
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 220 anchors
+Filtering anchors
+	Retained 133 anchors
+Extracting within-dataset neighbors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 806 anchors
+Filtering anchors
+	Retained 398 anchors
+Extracting within-dataset neighbors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 643 anchors
+Filtering anchors
+	Retained 335 anchors
+Extracting within-dataset neighbors
+Running CCA
+Warning in irlba(A = mat3, nv = num.cc) :
+  You're computing too large a percentage of total singular values, use a standard svd instead.
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 250 anchors
+Filtering anchors
+	Retained 111 anchors
+Extracting within-dataset neighbors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 548 anchors
+Filtering anchors
+	Retained 221 anchors
+Extracting within-dataset neighbors
+Running CCA
+Warning in irlba(A = mat3, nv = num.cc) :
+  You're computing too large a percentage of total singular values, use a standard svd instead.
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 220 anchors
+Filtering anchors
+	Retained 104 anchors
+Extracting within-dataset neighbors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 923 anchors
+Filtering anchors
+	Retained 366 anchors
+Extracting within-dataset neighbors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 678 anchors
+Filtering anchors
+	Retained 261 anchors
+Extracting within-dataset neighbors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 749 anchors
+Filtering anchors
+	Retained 303 anchors
+Extracting within-dataset neighbors
+Running CCA
+Warning in irlba(A = mat3, nv = num.cc) :
+  You're computing too large a percentage of total singular values, use a standard svd instead.
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 250 anchors
+Filtering anchors
+	Retained 148 anchors
+Extracting within-dataset neighbors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 492 anchors
+Filtering anchors
+	Retained 281 anchors
+Extracting within-dataset neighbors
+Running CCA
+Warning in irlba(A = mat3, nv = num.cc) :
+  You're computing too large a percentage of total singular values, use a standard svd instead.
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 220 anchors
+Filtering anchors
+	Retained 141 anchors
+Extracting within-dataset neighbors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 637 anchors
+Filtering anchors
+	Retained 354 anchors
+Extracting within-dataset neighbors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 561 anchors
+Filtering anchors
+	Retained 318 anchors
+Extracting within-dataset neighbors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 582 anchors
+Filtering anchors
+	Retained 332 anchors
+Extracting within-dataset neighbors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 624 anchors
+Filtering anchors
+	Retained 362 anchors
+Extracting within-dataset neighbors
+Merging dataset 3 into 2
+Extracting anchors for merged samples
+Finding integration vectors
+Finding integration vector weights
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Integrating data
+Merging dataset 1 into 2 3
+Extracting anchors for merged samples
+Finding integration vectors
+Finding integration vector weights
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Integrating data
+Merging dataset 8 into 7
+Extracting anchors for merged samples
+Finding integration vectors
+Finding integration vector weights
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Integrating data
+Merging dataset 5 into 2 3 1
+Extracting anchors for merged samples
+Finding integration vectors
+Finding integration vector weights
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Integrating data
+Merging dataset 6 into 4
+Extracting anchors for merged samples
+Finding integration vectors
+Finding integration vector weights
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Integrating data
+Merging dataset 2 3 1 5 into 4 6
+Extracting anchors for merged samples
+Finding integration vectors
+Finding integration vector weights
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Integrating data
+Merging dataset 7 8 into 4 6 2 3 1 5
+Extracting anchors for merged samples
+Finding integration vectors
+Finding integration vector weights
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Integrating data
+Warning: Adding a command log without an assay associated with it
 Calculating gene variances
 0%   10   20   30   40   50   60   70   80   90   100%
 [----|----|----|----|----|----|----|----|----|----|
@@ -250,23 +734,23 @@ Calculating feature variances of standardized and clipped values
 0%   10   20   30   40   50   60   70   80   90   100%
 [----|----|----|----|----|----|----|----|----|----|
 **************************************************|
-15:07:47 UMAP embedding parameters a = 0.9922 b = 1.112
-15:07:47 Read 9200 rows and found 20 numeric columns
-15:07:47 Using Annoy for neighbor search, n_neighbors = 30
-15:07:47 Building Annoy index with metric = cosine, n_trees = 50
+21:01:46 UMAP embedding parameters a = 0.9922 b = 1.112
+21:01:46 Read 1133 rows and found 20 numeric columns
+21:01:46 Using Annoy for neighbor search, n_neighbors = 30
+21:01:46 Building Annoy index with metric = cosine, n_trees = 50
 0%   10   20   30   40   50   60   70   80   90   100%
 [----|----|----|----|----|----|----|----|----|----|
 **************************************************|
-15:07:49 Writing NN index file to temp file /tmp/slurm_25072569/RtmpubRsc8/file1091323ca63c
-15:07:49 Searching Annoy index using 1 thread, search_k = 3000
-15:07:53 Annoy recall = 100%
-15:07:54 Commencing smooth kNN distance calibration using 1 thread
-15:07:56 Initializing from normalized Laplacian + noise
-15:07:56 Commencing optimization for 500 epochs, with 396282 positive edges
+21:01:47 Writing NN index file to temp file /tmp/slurm_25076982/RtmpImOPLj/file2dcf46ba8428
+21:01:47 Searching Annoy index using 1 thread, search_k = 3000
+21:01:47 Annoy recall = 100%
+21:01:48 Commencing smooth kNN distance calibration using 1 thread
+21:01:49 Initializing from normalized Laplacian + noise
+21:01:49 Commencing optimization for 500 epochs, with 50826 positive edges
 0%   10   20   30   40   50   60   70   80   90   100%
 [----|----|----|----|----|----|----|----|----|----|
 **************************************************|
-15:08:33 Optimization finished
+21:01:54 Optimization finished
 Computing nearest neighbor graph
 Computing SNN
 0%   10   20   30   40   50   60   70   80   90   100%
@@ -333,7 +817,7 @@ Project Database could not be reached or has no entry in Obio@parameterList$lims
 
 output file: sc_PartA_QC.knit.md
 
-/camp/apps/eb/dev/software/Anaconda2/2019.10/bin/pandoc +RTS -K512m -RTS sc_PartA_QC.utf8.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output /camp/stp/babs/working/boeings/Projects/boeings/stefan.boeing/426_scRNAseq_PBMC_10k/workdir/html_local/sc_PartA_QC.html --lua-filter /camp/apps/misc/stp/babs/manual/software/r/r-site-library/bioc-3.9/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /camp/apps/misc/stp/babs/manual/software/r/r-site-library/bioc-3.9/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --standalone --section-divs --table-of-contents --toc-depth 5 --variable toc_float=1 --variable toc_selectors=h1,h2,h3,h4,h5 --variable toc_collapsed=1 --variable toc_smooth_scroll=1 --variable toc_print=1 --template /camp/apps/misc/stp/babs/manual/software/r/r-site-library/bioc-3.9/rmarkdown/rmd/h/default.html --no-highlight --variable highlightjs=1 --css src/assets/style/style.css --variable theme=paper --include-in-header /tmp/slurm_25072569/RtmpubRsc8/rmarkdown-str10914673a5a5.html --mathjax --variable 'mathjax-url:https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --variable code_folding=hide --variable code_menu=1 
+/camp/apps/eb/dev/software/Anaconda2/2019.10/bin/pandoc +RTS -K512m -RTS sc_PartA_QC.utf8.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output /camp/stp/babs/working/boeings/Projects/hillc/danielle.park/437subC_fibroblast_GSE154778_primTumor_C4/workdir/html_local/sc_PartA_QC.html --lua-filter /camp/apps/misc/stp/babs/manual/software/r/r-site-library/bioc-3.9/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /camp/apps/misc/stp/babs/manual/software/r/r-site-library/bioc-3.9/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --standalone --section-divs --table-of-contents --toc-depth 5 --variable toc_float=1 --variable toc_selectors=h1,h2,h3,h4,h5 --variable toc_collapsed=1 --variable toc_smooth_scroll=1 --variable toc_print=1 --template /camp/apps/misc/stp/babs/manual/software/r/r-site-library/bioc-3.9/rmarkdown/rmd/h/default.html --no-highlight --variable highlightjs=1 --css src/assets/style/style.css --variable theme=paper --include-in-header /tmp/slurm_25076982/RtmpImOPLj/rmarkdown-str2dcf72a91db7.html --mathjax --variable 'mathjax-url:https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --variable code_folding=hide --variable code_menu=1 
 
-Output created: /camp/stp/babs/working/boeings/Projects/boeings/stefan.boeing/426_scRNAseq_PBMC_10k/workdir/html_local/sc_PartA_QC.html
-There were 50 or more warnings (use warnings() to see the first 50)
+Output created: /camp/stp/babs/working/boeings/Projects/hillc/danielle.park/437subC_fibroblast_GSE154778_primTumor_C4/workdir/html_local/sc_PartA_QC.html
+There were 28 warnings (use warnings() to see them)
