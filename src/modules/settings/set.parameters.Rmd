@@ -28,7 +28,7 @@ names(dfObio) <- as.vector(t(dfObio[1,]))
 dfObio <- dfObio[-1,]
 
 for (i in 1:ncol(dfObio)){
-    pos <- grep("#", dfObio[,i])
+    pos <- grep("#", dfObio[,i], useBytes = TRUE)
     if (length(pos) > 0){
         dfObio[pos, i] <- ""
     }
@@ -340,7 +340,7 @@ Obio = new(
         "labname" = projectDetailList$labname,
         "db.user" =  dbDetailList$db.user,
         "host" = dbDetailList$host,
-        "timecourse.units" = "",
+        "timecourse.units" = "hrs",
         "count.table.headline" = "lg10 Expr for all Samples",
         "count.table.sidelabel" = "lg10 Expr",
         "heamap.headline.text" = "Heatmap: Row-averaged Expr",

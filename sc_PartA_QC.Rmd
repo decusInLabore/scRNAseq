@@ -77,7 +77,7 @@ runDoubletFinder <- FALSE
 ```
 
 <!-- Optional 2: Create 10X QC Table Chapter/Module -->
-```{r child = 'src/modules/qc/create.10X.QC.table.Rmd', eval=FALSE}
+```{r child = 'src/modules/qc/create.10X.QC.table.Rmd', eval=TRUE}
 ```
 
 <!-- Essential 2: (output required later): Create Seurat Sample List Chapter/Module -->
@@ -93,7 +93,7 @@ runDoubletFinder <- FALSE
 ```
 
 <!-- Optional 5: Create category feature plots -->
-```{r child = 'src/modules/qc/A.create.integrated.cat.feature.plots.Rmd', eval=TRUE}
+```{r child = 'src/modules/qc/A.create.integrated.cat.feature.plots.Rmd', eval=FALSE}
 ```
 
 

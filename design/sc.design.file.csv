@@ -1,149 +1,74 @@
-<<<<<<< HEAD
-Global Parameters				
-singleCellClusterParameter	0.3			
-NtopGenes	2000			
-scNintegrationFeatures	3000			
-primReduction	umap			
-vars.to.regress	NULL			
-singleCellSeuratNpcs4PCA	30			
-folder	camp/stp/babs/working/boeings/stefan.boeing/426_scRNAseq_PBMC_10k/			
-lab.categories.table	immuno_ref_categories			
-project_id	PBMC10k			
-labname	TenXGenomics			
-sra.id.vector				
-gse.id.vector				
-asf.id				
-experiment.type	sc_rna_seq			
-species	homo_sapiens			
-release	release-89			
-timecourse.units				
-count.table.headline	lg10 Expr for all Samples			
-count.table.sidelabel	lg10 Expr			
-heamap.headline.text	Heatmap: Row-averaged Expr			
-				
-ParameterList				
-debugReduce				
-sra.id.vector				
-gse.id.vector				
-addDmaps	FALSE			
-catRefFile	/camp/stp/babs/working/boeings/Projects/boeings/stefan.boeing/426_scRNAseq_PBMC_10k/basedata/pbmc10xSignatures.txt			
-scIntegrationMethod	SCT			"# ""SCT"" or ""standard"""
-				
-Sample Parameters				
-sampleName	PBMC10X			
-limsID	PBMC10X			
-type	TenX		"# type must be in c(""TenX"", ""matrixFiles"", ""loomFiles"", ""hdf5Files"")"	
-gene.column	2		# default 2	
-path	/camp/stp/babs/working/boeings/Projects/boeings/stefan.boeing/426_scRNAseq_PBMC_10k/FASTQ_files/PBMC10X/outs/filtered_feature_bc_matrix			
-singleCellSeuratMtCutoff	15			
-SeuratNrnaMaxFeatures	10000			
-SeuratNrnaMinFeatures	1000			
-				
-Database Parameters				
-primDataDB	immuno_ref_data			
-ref.cat.db	reference_categories_db_new			
-db.user	boeingS			
-host	10.27.241.82			
-				
-Documentation Parameter				
-title	PBMCs from a Healthy Donor: Whole Transcriptome Analysis			
-subtitle	Single Cell Gene Expression Dataset by Cell Ranger 4.0.0			
-abstract	Human peripheral blood mononuclear cells (PBMCs) of a healthy female donor aged 25 were obtained by 10x Genomics from AllCells. Whole transcriptome libraries were generated with Chromium Next GEM Single Cell 3' Reagent Kits v3.1 (Dual Index) User Guide (CG000315) and sequenced on an Illumina NovaSeq 6000.			
-				
-ReferenceTableSelection				
-referenceTableListDB	Hallmark Signatures	mysigdb_h_hallmarks		
-referenceTableListDB	Pathways	mysigdb_c2_1329_canonical_pathways		
-referenceTableListDB	GO-BP	mysigdb_c5_BP		
-referenceTableListDB	GO-MF	mysigdb_c5_MF		
-referenceTableListDB	TF Motifs	TRANSFAC_and_JASPAR_PWMs		
-referenceTableListDB	Protein Complexes	networkcategories		
-referenceTableListDB	GO-BP	GO_Biological_Process_2017		
-referenceTableListDB	Immunologic Signatures	mysigdb_c7_immunologic_signatures		
-referenceTableListDB	LINCS Down	LINCS_L1000_Chem_Pert_down		
-referenceTableListDB	LINCS Up	LINCS_L1000_Chem_Pert_up		
-referenceTableListDB	Cell Type Signatures	mysigdb_sc_sig		
-referenceTableListDB	Cell Type Signatures	cibersort_L22		
-				
-Cell Signature Selection				
-cellSignatureDBtable	Cell Type Signatures	mysigdb_sc_sig		
-cellSignatureDBtable	Cell Type Signatures	cibersort_L22		
-cellSignatureDBtable	GO-MF	mysigdb_c5_MF		
-cellSignatureDBtable	Pathways	mysigdb_c2_1329_canonical_pathways		
-cellSignatureDBtable	Hallmarks	mysigdb_h_hallmarks		
-				
-DGEParameters				
-=======
-Global Parameters,,,,,,,,,,,
-singleCellClusterParameter,0.3,,,,,,,,,,
-NtopGenes,2000,,,,,,,,,,
-scNintegrationFeatures,3000,,,,,,,,,,
-primReduction,umap,,,,,,,,,,
-vars.to.regress,NULL,,,,,,,,,,
-singleCellSeuratNpcs4PCA,30,,,,,,,,,,
-folder,/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/437subC_fibroblast_GSE154778_primTumor_C4/,,,,,,,,,,
-lab.categories.table,ch_lab_categories,,,,,,,,,,
-project_id,scPDAC_subC4,,,,,,,,,,
-labname,Hill,,,,,,,,,,
-sra.id.vector,,,,,,,,,,,
-gse.id.vector,,,,,,,,,,,
-asf.id,,,,,,,,,,,
-experiment.type,sc_rna_seq,,,,,,,,,,
-species,homo_sapiens,,,,,,,,,,
-release,release-89,,,,,,,,,,
-timecourse.units,,,,,,,,,,,
-count.table.headline,lg10 Expr for all Samples,,,,,,,,,,
-count.table.sidelabel,lg10 Expr,,,,,,,,,,
-heamap.headline.text,Heatmap: Row-averaged Expr,,,,,,,,,,
-,,,,,,,,,,,
-ParameterList,,,,,,,,,,,
-debugReduce,,,,,,,,,,,
-sra.id.vector,,,,,,,,,,,
-gse.id.vector,,,,,,,,,,,
-addDmaps,FALSE,,,,,,,,,,
-catRefFile,/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/437subC_fibroblast_GSE154778_primTumor_C4/basedata/scPDACSignatures.txt,,,,,,,,,,
-scIntegrationMethod,RNA,,,"# ""SCT"" or ""RNA""",,,,,,,
-,,,,,,,,,,,
-Sample Parameters,,,,,,,,,,,
-sampleName,P01Fib,P03Fib,P05Fib,P06Fib,P07Fib,P08Fib,P09Fib,P10Fib,,,
-limsID,P01Fib,P03Fib,P05Fib,P06Fib,P07Fib,P08Fib,P09Fib,P10Fib,,,
-type,matrixFiles,matrixFiles,matrixFiles,matrixFiles,matrixFiles,matrixFiles,matrixFiles,matrixFiles,,,"# type must be in c(""TenX"", ""matrixFiles"", ""loomFiles"", ""hdf5Files"")"
-gene.column,2,2,2,2,2,2,2,2,,,# default 2
-path,/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/437subC_fibroblast_GSE154778_primTumor_C4/basedata/input_P01_C4.txt,/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/437subC_fibroblast_GSE154778_primTumor_C4/basedata/input_P03_C4.txt,/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/437subC_fibroblast_GSE154778_primTumor_C4/basedata/input_P05_C4.txt,/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/437subC_fibroblast_GSE154778_primTumor_C4/basedata/input_P06_C4.txt,/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/437subC_fibroblast_GSE154778_primTumor_C4/basedata/input_P07_C4.txt,/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/437subC_fibroblast_GSE154778_primTumor_C4/basedata/input_P08_C4.txt,/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/437subC_fibroblast_GSE154778_primTumor_C4/basedata/input_P09_C4.txt,/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/437subC_fibroblast_GSE154778_primTumor_C4/basedata/input_P10_C4.txt,,,
-singleCellSeuratMtCutoff,15,15,15,15,15,15,15,15,,,
-SeuratNrnaMaxFeatures,10000,10000,10000,10000,10000,10000,10000,10000,,,
-SeuratNrnaMinFeatures,1000,1000,1000,1000,1000,1000,1000,1000,,,
-,,,,,,,,,,,
-Database Parameters,,,,,,,,,,,
-primDataDB,chl_data,,,,,,,,,,
-ref.cat.db,reference_categories_db_new,,,,,,,,,,
-db.user,boeingS,,,,,,,,,,
-host,10.27.241.82,,,,,,,,,,
-,,,,,,,,,,,
-Documentation Parameter,,,,,,,,,,,
-title,Single-cell transcriptomics analysis of pancreatic primary tumor and metastatic biopsy tissues - ,,,,,,,,,,
-subtitle,Subclustering of Fibroblast Cluster C4,,,,,,,,,,
-abstract,The single-cell RNA profiles of dissociated 10 pancreatic primary tumors and 6 metastatic biopsies were obtained using the 10x Genomics Chromium platform Overall design Tissues were dissciated using a tumor dissociation kit Miltenyi Biotec on a gentleMACSTM Dissociator Single cell RNA-sequencing was carried out using using the Chromium Single Cell Gene Expression Solution system v2 by 10x Genomics and an Illumina HiSeq4000 sequencer,,,,,,,,,,
-,,,,,,,,,,,
-ReferenceTableSelection,,,,,,,,,,,
-referenceTableListDB,Hallmark Signatures,mysigdb_h_hallmarks,,,,,,,,,
-referenceTableListDB,Pathways,mysigdb_c2_1329_canonical_pathways,,,,,,,,,
-referenceTableListDB,GO-BP,mysigdb_c5_BP,,,,,,,,,
-referenceTableListDB,GO-MF,mysigdb_c5_MF,,,,,,,,,
-referenceTableListDB,TF Motifs,TRANSFAC_and_JASPAR_PWMs,,,,,,,,,
-referenceTableListDB,Protein Complexes,networkcategories,,,,,,,,,
-referenceTableListDB,GO-BP,GO_Biological_Process_2017,,,,,,,,,
-referenceTableListDB,Immunologic Signatures,mysigdb_c7_immunologic_signatures,,,,,,,,,
-referenceTableListDB,LINCS Down,LINCS_L1000_Chem_Pert_down,,,,,,,,,
-referenceTableListDB,LINCS Up,LINCS_L1000_Chem_Pert_up,,,,,,,,,
-referenceTableListDB,Cell Type Signatures,mysigdb_sc_sig,,,,,,,,,
-referenceTableListDB,Cell Type Signatures,cibersort_L22,,,,,,,,,
-,,,,,,,,,,,
-Cell Signature Selection,,,,,,,,,,,
-cellSignatureDBtable,Cell Type Signatures,mysigdb_sc_sig,,,,,,,,,
-cellSignatureDBtable,Cell Type Signatures,cibersort_L22,,,,,,,,,
-cellSignatureDBtable,GO-MF,mysigdb_c5_MF,,,,,,,,,
-cellSignatureDBtable,Pathways,mysigdb_c2_1329_canonical_pathways,,,,,,,,,
-cellSignatureDBtable,Hallmarks,mysigdb_h_hallmarks,,,,,,,,,
-,,,,,,,,,,,
-DGEParameters,,,,,,,,,,,
->>>>>>> 7c296894aecc7dfeb53755627106c00c5d3e09d9
+Global Parameters,,,,,,,,
+singleCellClusterParameter,0.3,,,,,,,
+NtopGenes,2000,,,,,,,
+scNintegrationFeatures,3000,,,,,,,
+primReduction,umap,,,,,,,
+vars.to.regress,NULL,,,,,,,
+singleCellSeuratNpcs4PCA,30,,,,,,,
+folder,/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/439_scRNAseq_KPC_PDAC_GSE129455/,,,,,,,
+lab.categories.table,ch_lab_categories,,,,,,,
+project_id,GSE129455,,,,,,,
+labname,Tuveson,,,,,,,
+sra.id.vector,,,,,,,,
+gse.id.vector,GSE129455,,,,,,,
+asf.id,,,,,,,,
+experiment.type,sc_rna_seq,,,,,,,
+species,mus_musculus,,,,,,,
+release,release-89,,,,,,,
+timecourse.units,,,,,,,,
+count.table.headline,lg10 Expr for all Samples,,,,,,,
+count.table.sidelabel,lg10 Expr,,,,,,,
+heamap.headline.text,Heatmap: Row-averaged Expr,,,,,,,
+,,,,,,,,
+ParameterList,,,,,,,,
+debugReduce,,,,,,,,
+sra.id.vector,,,,,,,,
+gse.id.vector,,,,,,,,
+addDmaps,FALSE,,,,,,,
+catRefFile,/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/437subC_fibroblast_GSE154778_primTumor_C4/basedata/scPDACSignatures.txt,,,,,,,
+scIntegrationMethod,SCT,,,"# ""SCT"" or ""RNA""",,,,
+,,,,,,,,
+Sample Parameters,,,,,,,,
+meta_Type,KPCviable,KPCviable,KPCviable,KPCviable,KPC_Fibroblast,KPC_Fibroblast,KPC_Fibroblast,KPC_Fibroblast
+sampleName,KPC1viable,KPC2viable,KPC3viable,KPC4viable,KPC1fib,KPC2fib,KPC3fib,KPC4fib
+limsID,KPC1viable,KPC2viable,KPC3viable,KPC4viable,KPC1fib,KPC2fib,KPC3fib,KPC4fib
+type,matrixFiles,matrixFiles,matrixFiles,matrixFiles,matrixFiles,matrixFiles,matrixFiles,matrixFiles
+gene.column,2,2,2,2,2,2,2,2
+path,/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/439_scRNAseq_KPC_PDAC_GSE129455/basedata/KPC1viable.txt,/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/439_scRNAseq_KPC_PDAC_GSE129455/basedata/KPC2viable.txt,/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/439_scRNAseq_KPC_PDAC_GSE129455/basedata/KPC3viable.txt,/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/439_scRNAseq_KPC_PDAC_GSE129455/basedata/KPC4viable.txt,/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/439_scRNAseq_KPC_PDAC_GSE129455/basedata/KPC1fib.txt,/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/439_scRNAseq_KPC_PDAC_GSE129455/basedata/KPC2fib.txt,/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/439_scRNAseq_KPC_PDAC_GSE129455/basedata/KPC3fib.txt,/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/439_scRNAseq_KPC_PDAC_GSE129455/basedata/KPC4fib.txt
+singleCellSeuratMtCutoff,20,20,20,20,20,20,20,20
+SeuratNrnaMaxFeatures,10000,10000,10000,10000,10000,10000,10000,10000
+SeuratNrnaMinFeatures,500,500,500,500,500,500,500,500
+,,,,,,,,
+Database Parameters,,,,,,,,
+primDataDB,chl_data,,,,,,,
+ref.cat.db,reference_categories_db_new,,,,,,,
+db.user,boeingS,,,,,,,
+host,10.27.241.82,,,,,,,
+,,,,,,,,
+Documentation Parameter,,,,,,,,
+title,Cross-species single-cell analysis of pancreatic ductal adenocarcinoma reveals cancer-associated fibroblasts expressing MHC class II,,,,,,,
+subtitle,Elyada E  Bolisetty M  Laise P  Flynn WF et al. Cross-Species Single-Cell Analysis of Pancreatic Ductal Adenocarcinoma Reveals Antigen-Presenting Cancer-Associated Fibroblasts. Cancer Discov 2019 Aug;9(8):1102-1123. PMID:Ê31197017,,,,,,,
+abstract,This study used 10X Genomics  single-cell RNA-sequencing to examine the cell types present in the KrasLSL-G12D; Trp53LSL-R172H; Pdx1-Cre (KPC) mouse model for pancreatic ductal adenocarcinoma. The study analyzed tumors from 4 different mice. For each tumor  we performed flow sorting to isolate all viable cells  and to isolate a fibroblast-enriched population of cells for single-cell RNA-seq to determine the transcriptomes of individual cells in KPC pancreatic ductal adenocarcinoma tumors.,,,,,,,
+,,,,,,,,
+ReferenceTableSelection,,,,,,,,
+referenceTableListDB,Hallmark Signatures,mysigdb_h_hallmarks,,,,,,
+referenceTableListDB,Pathways,mysigdb_c2_1329_canonical_pathways,,,,,,
+referenceTableListDB,GO-BP,mysigdb_c5_BP,,,,,,
+referenceTableListDB,GO-MF,mysigdb_c5_MF,,,,,,
+referenceTableListDB,TF Motifs,TRANSFAC_and_JASPAR_PWMs,,,,,,
+referenceTableListDB,Protein Complexes,networkcategories,,,,,,
+referenceTableListDB,GO-BP,GO_Biological_Process_2017,,,,,,
+referenceTableListDB,Immunologic Signatures,mysigdb_c7_immunologic_signatures,,,,,,
+referenceTableListDB,LINCS Down,LINCS_L1000_Chem_Pert_down,,,,,,
+referenceTableListDB,LINCS Up,LINCS_L1000_Chem_Pert_up,,,,,,
+referenceTableListDB,Cell Type Signatures,mysigdb_sc_sig,,,,,,
+referenceTableListDB,Cell Type Signatures,cibersort_L22,,,,,,
+,,,,,,,,
+Cell Signature Selection,,,,,,,,
+cellSignatureDBtable,Cell Type Signatures,mysigdb_sc_sig,,,,,,
+cellSignatureDBtable,Cell Type Signatures,cibersort_L22,,,,,,
+cellSignatureDBtable,GO-MF,mysigdb_c5_MF,,,,,,
+cellSignatureDBtable,Pathways,mysigdb_c2_1329_canonical_pathways,,,,,,
+cellSignatureDBtable,Hallmarks,mysigdb_h_hallmarks,,,,,,
+,,,,,,,,
+DGEParameters,,,,,,,,
