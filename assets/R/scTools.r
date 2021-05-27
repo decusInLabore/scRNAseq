@@ -1057,7 +1057,7 @@ setGeneric(
 
             NewChnk <- paste0(
                 paste(rep("#", tocSubLevel), collapse=""), " ", tag,
-                "\n```{r SL_UMAP_",
+                "\n```{r SL2_UMAP_",
                 tag,", results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",
                 figLegend,"'}\n",
                 "\n",
@@ -1932,22 +1932,24 @@ setGeneric(
         figureCount = 1,
         VersionPdfExt = ".pdf",
         tocSubLevel = 4,
+        s.genes = NULL,
+        g2m.genes = NULL,
         cellCycleRefFile = 'paste0(hpc.mount, "Projects/reference_data/cell_cycle_vignette_files/nestorawa_forcellcycle_expressionMatrix.txt")'
         
     ) {
         ###############################################################################
         ## Make plots                                                                ##
         #library(Seurat)
-        
-        exp.mat <- read.table(file = cellCycleRefFile, header = TRUE, 
-                              as.is = TRUE, row.names = 1)
-        
-        
-        # A list of cell cycle markers, from Tirosh et al, 2015, is loaded with Seurat.  We can
-        # segregate this list into markers of G2/M phase and markers of S phase
-        s.genes <- cc.genes$s.genes
-        g2m.genes <- cc.genes$g2m.genes
-        
+        if (is.null(s.genes) | is.null(g2m.genes)){
+                exp.mat <- read.table(file = cellCycleRefFile, header = TRUE, 
+                                      as.is = TRUE, row.names = 1)
+                
+                
+                # A list of cell cycle markers, from Tirosh et al, 2015, is loaded with Seurat.  We can
+                # segregate this list into markers of G2/M phase and markers of S phase
+                s.genes <- cc.genes$s.genes
+                g2m.genes <- cc.genes$g2m.genes
+        }
         print(paste0("Used as S-phase marker genes: ", sort(unique(paste(s.genes, collapse = ", ")))))
         print(paste0("Used as G2M-phase marker genes: ", sort(unique(paste(g2m.genes, collapse = ", ")))))
         
@@ -2114,12 +2116,15 @@ setGeneric(
         VersionPdfExt = ".pdf",
         tocSubLevel = 4,
         dotsize = 0.5,
+        s.genes = NULL,
+        g2m.genes = NULL,
         cellCycleRefFile = paste0(hpc.mount, "Projects/reference_data/cell_cycle_vignette_files/nestorawa_forcellcycle_expressionMatrix.txt")
     ) {
         ###############################################################################
         ## Make plots                                                                ##
         library(Seurat)
         
+        if (is.null(s.genes) | is.null(g2m.genes)){
         exp.mat <- read.table(file = cellCycleRefFile, header = TRUE, 
                               as.is = TRUE, row.names = 1)
         
@@ -2128,6 +2133,7 @@ setGeneric(
         # segregate this list into markers of G2/M phase and markers of S phase
         s.genes <- cc.genes$s.genes
         g2m.genes <- cc.genes$g2m.genes
+        }
         
         print(paste0("Used as S-phase marker genes: ", sort(unique(paste(s.genes, collapse = ", ")))))
         print(paste0("Used as G2M-phase marker genes: ", sort(unique(paste(g2m.genes, collapse = ", ")))))

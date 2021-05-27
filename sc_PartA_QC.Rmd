@@ -85,7 +85,11 @@ runDoubletFinder <- FALSE
 ```
 
 <!-- Optional 3: Create QC Plots Chapter/Module -->
-```{r child = 'src/modules/qc/A.create.sample.level.QC.plots.Rmd', eval=FALSE}
+```{r child = 'src/modules/qc/A.create.sample.level.QC.plots.Rmd', eval=TRUE}
+```
+
+<!-- Optional 4: Create QC Cell Cycle Plots Chapter/Module -->
+```{r child = 'src/modules/qc/A.create.sample.level.cell.cycle.QC.plots.Rmd', eval=FALSE}
 ```
 
 <!-- Optional 4: Perform three cell cycle regressions: none, G2M/S and full Chapter/Module -->

@@ -277,35 +277,11 @@ setGeneric(
 DGEtagVec <- as.vector(NULL, mode = "character")
 DGEinputList <- list(
   "comp_1" = list(
-      "name"    = "DGE_PeriLZ_vs_CentralLZ",
-      "DGEselCol" = "seurat_clusters",
+      "name"    = "DGE_FibAll_vs_ViableAll",
+      "DGEselCol" = "meta_Type",
       "DGEsampleList" = list(
-          "PeriLZ"   = c(0),
-          "CentralLZ" = c(1)
-      )
-  ),
-  "comp_2" = list(
-      "name"    = "DGE_PeriLZ_vs_DZ",
-      "DGEselCol" = "seurat_clusters",
-      "DGEsampleList" = list(
-          "PeriLZ"   = c(0),
-          "DZ" = c(2)
-      )
-  ),
-  "comp_3" = list(
-      "name"    = "DGE_CentralLZ_vs_DZ",
-      "DGEselCol" = "seurat_clusters",
-      "DGEsampleList" = list(
-          "CentralLZ"   = c(1),
-          "DZ" = c(2)
-      )
-  ),
-  "comp_4" = list(
-      "name"    = "DGE_LZ_vs_DZ",
-      "DGEselCol" = "seurat_clusters",
-      "DGEsampleList" = list(
-          "LZ"   = c(0,1),
-          "DZ" = c(2)
+          "FibAll"   = c("KPC_Fibroblast"),
+          "ViableAll" = c("KPCviable")
       )
   )
 )
