@@ -78,7 +78,7 @@ db.pwd <- as.vector(dbTable[1,1])
 
 figureCount <- 1
 
-source("assets/R/SBwebtools.pckg.r")
+source("assets/SBwebtools.pckg.r")
 
 if (length(.libPaths()) > 2){
     .libPaths(.libPaths()[2:3])
@@ -99,7 +99,9 @@ Obio <- setMountingPoint(Obio)
 Obio <- setAnalysisPaths(Obio)
 Obio <- setCrickGenomeAndGeneNameTable(Obio)
 Obio <- createAnalysisFolders(
-    Obio
+    Obio,
+    baseDir="/camp/stp/babs/working/boeings/Projects/",
+    localBaseDir = paste0(hpc.mount, "Projects/")
 )
 Obio <- setDataBaseParameters(Obio)
 
@@ -256,9 +258,6 @@ setGeneric(
     
     comp_1 <- unique(comp_1[,selVec])
     
-    ## Shorten to maxlength of 64
-    names(comp_1) <- substr(names(comp_1), 1, 64)
-    
     pos <- grep(paste0("DGE_", DGEselCol), names(Obio@dataTableList))
     
     returnList <- list(
@@ -275,22 +274,254 @@ setGeneric(
 
 
 DGEtagVec <- as.vector(NULL, mode = "character")
+
+
 DGEinputList <- list(
   "comp_1" = list(
-      "name"    = "DGE_FibAll_vs_ViableAll",
-      "DGEselCol" = "meta_Type",
+      "name"    = "DGE_Neuron_vs_Glia",
+      "DGEselCol" = "seurat_clusters",
       "DGEsampleList" = list(
-          "FibAll"   = c("KPC_Fibroblast"),
-          "ViableAll" = c("KPCviable")
+          "Neuron1"   = c(0,1,3,4,5,6,7,10),
+          "Glia1" = c(2)
       )
-  )
+  ),
+  "comp_2" = list(
+      "name"    = "DGE_NeuronsChAT_vs_NeuronsOther",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "NeuronsChAT2" = c(0,3,6,7),
+          "NeuronsOther2"   = c(1,4,5,10)
+      )
+  ),
+  "comp_3" = list(
+      "name"    = "DGE_Neurons_Nos_vs_Neurons_Other",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "NeuronsNos3"   = c(1,5,10),
+          "NeuronsOther3" = c(0,3,4,6,7)
+      )
+  ),
+  "comp_4" = list(
+      "name"    = "DGE_Neurons_5HT_vs_Neurons_Other",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "Neurons5HT4"   = c(4),
+          "NeuronsOther4" = c(0,1,3,5,6,7,10)
+      )
+  ),
+  "comp_5" = list(
+      "name"    = "DGE_Neurons_Chat1_vs_Neurons_ChAT_Other",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "NeuronsChat15"   = c(0),
+          "NeuronsChatOther5" = c(3,6,7)
+      )
+  ),
+  "comp_6" = list(
+      "name"    = "DGE_NeuronChat2_vs_Neuron_ChAT_Other",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "NeuronChat26"   = c(3),
+          "NeuronChatOther6" = c(0,6,7)
+      )
+  ),
+  "comp_7" = list(
+      "name"    = "DGE_NeuronChat3_vs_Neuron_ChAT_Other",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "NeuronChat37"   = c(6),
+          "NeuronChatOther7" = c(0,3,7)
+      )
+  ),
+  "comp_8" = list(
+      "name"    = "DGE_NeuronNos1_vs_Neuron_Nos_Other",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "NeuronNos18"   = c(1),
+          "NeuronNosOther8" = c(5,10)
+      )
+  ),
+  "comp_9" = list(
+      "name"    = "DGE_NeuronNos2_vs_Neuron_Nos_Other",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "NeuronNos29"   = c(5),
+          "NeuronNosOther9" = c(1,10)
+      )
+  ),
+  "comp_10" = list(
+      "name"    = "DGE_NeuronNos3_vs_Neuron_Nos_Other",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "NeuronNos310"   = c(10),
+          "NeuronNosOther10" = c(1,5)
+      )
+  ),
+  "comp_11" = list(
+      "name"    = "DGE_NeuronsNOSChat_vs_ChatOther",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "NeuronsNOSChat11"   = c(7),
+          "NeuronChatOther11" = c(0,3,6)
+      )
+  ),
+  "comp_12" = list(
+      "name"    = "DGE_NeuronsNOSChat_vs_NeuronsNosOthers",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "NeuronsNOSChat12"   = c(7),
+          "NeuronsNosOther12" = c(1,5,10)
+      )
+  ),
+  "comp_13" = list(
+      "name"    = "DGE_Neurons5HT_vs_NeuronsNos",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "Neurons5HT13"   = c(4),
+          "NeuronsNos13" = c(1,5,10)
+      )
+  ),
+  "comp_14" = list(
+      "name"    = "DGE_Neurons5HT_vs_NeuronsChat",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "Neurons5HT14"   = c(4),
+          "NeuronsChat14" = c(0,3,6,7)
+      )
+  ),
+  "comp_15" = list(
+      "name"    = "DGE_Chat1_vs_OtherUMAPChAT",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "Chat115"   = c(0),
+         "OtherUMAPChAT15" = c(3,6)
+      )
+  ),
+  "comp_16" = list(
+      "name"    = "DGE_Chat2_vs_OtherUMAPChAT",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "Chat216"   = c(3),
+          "OtherUMAPChAT16" = c(0,6)
+      )
+  ),
+  "comp_17" = list(
+      "name"    = "DGE_Chat3_vs_OtherUMAPChAT",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "Chat317"   = c(6),
+          "OtherUMAPChAT17" = c(0,3)
+      )
+  ),
+  "comp_18" = list(
+      "name"    = "DGE_NOS1_vs_OtherUMAPNOS",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "NOS118"   = c(1),
+          "OtherUMAPNOS18" = c(5,7,10)
+      )
+  ),
+  "comp_19" = list(
+      "name"    = "DGE_NOS2_vs_OtherUMAPNOS",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "NOS219"   = c(5),
+          "OtherUMAPNOS19" = c(1,7,10)
+      )
+  ),
+  "comp_20" = list(
+      "name"    = "DGE_NOS3_vs_OtherUMAPNOS",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "NOS320"   = c(10),
+          "OtherUMAPNOS20" = c(1,5,7)
+      )
+  ),
+  "comp_21" = list(
+      "name"    = "DGE_C5HT_vs_UMAPNOS",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "C5HT21"   = c(4),
+          "UMAPNOS21" = c(1,5,7,10)
+      )
+  ),
+  "comp_22" = list(
+      "name"    = "DGE_C5HT_vs_UMAPChAT",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "C5HT22"   = c(4),
+          "UMAPChAT22" = c(0,3,6)
+      )
+ ),
+  "comp_23" = list(
+      "name"    = "DGE_Other1_vs_UMAPChAT",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "Other123"   = c(8),
+          "UMAPChAT23" = c(0,3,6)
+      )
+ ),
+  "comp_24" = list(
+      "name"    = "DGE_Other1_vs_ChAT",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "Other124"   = c(8),
+          "ChAT24" = c(0,3,6,7)
+      )
+  ),
+  "comp_25" = list(
+      "name"    = "DGE_Other1_vs_ NeuronsNOS",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "Other25"   = c(8),
+           "NeuronsNos25"   = c(1,5,10)
+      )
+ ),
+  "comp_26" = list(
+      "name"    = "DGE_Other1_vs_ UMAPNOS",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "Other26"   = c(8),
+           "UMAPNOS26"   = c(1,5,7,10)
+      )
+ ),
+  "comp_27" = list(
+      "name"    = "DGE_Other1_vs_Neurons5HT",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "Other127"   = c(8),
+          "Neurons5HT27"   = c(4)
+      )
+ ),
+  "comp_28" = list(
+      "name"    = "DGE_Other1_vs_Glia",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "Other128"   = c(8),
+          "Glia28" = c(2)
+      )
+ ),
+  "comp_29" = list(
+      "name"    = "DGE_Other1_vs_Neuron",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "Other129"   = c(8),
+          "Neuron29"   = c(0,1,3,4,5,6,7,10)
+      )
+ ),
+  "comp_30" = list(
+      "name"    = "DGE_Other1_vs_Chat3",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "Other130"   = c(8),
+          "Chat330"   = c(6)
+      )
+  ) 
 )
 
 
 
-for (i in 1:length(DGEinputList)){
-    DGEinputList[[i]]$name <- substr(DGEinputList[[i]]$name, 1, 64)
-}
+
 
 
 
@@ -435,12 +666,9 @@ for (i in 1:length(DGEinputList)){
     #colVec <- dfPair$sampleColor
     #names(colVec) <- dfPair$sampleName
     levels <- as.vector(dfCol$name)
-    levelsRest <- levels[grep("^Rest$", levels)]
+    levelsRest <- levels[grep("Rest", levels)]
     levels <- levels[levels != "Rest"]
     levels <- c(levels, levelsRest)
-    if (sum(duplicated(levels)) > 0){
-        levels <- unique(levels)
-    }
     
     dfPlot$Cluster <- factor(dfPlot$Cluster, levels = levels)
 
@@ -548,6 +776,8 @@ cat(paste(knit(text = chnkVec, quiet = T), collapse = '\n'))
 
 ###############################################################################
 ## Assemble DGE summary table                                                ##
+dfTemp <- Obio@dataTableList[["DGE_table"]] 
+
 library(openxlsx)
 wb <- createWorkbook()
 
@@ -656,7 +886,7 @@ for (i in 1:length(DGEtagVec)){
     
     selVec <- c(
         "gene",
-        names(dfAllPlots)[grep(DGEtagVec[i], names(dfAllPlots))]
+        names(dfAllPlots)[grep(paste0(DGEtagVec[i], "$"), names(dfAllPlots))]
     )
     
     dfPlot <- dfAllPlots[,selVec]
@@ -820,14 +1050,6 @@ for (i in 1:length(DGEtagVec)){
     dfPlot[["X"]] <- dfPlot[,grep("_logFC", names(dfPlot))]
     dfPlot[["Y"]] <- dfPlot[,grep("_lg10p_", names(dfPlot))]
     
-    if (max(dfPlot$Y) > 250){
-        yInc <- 50
-    } else if (max(dfPlot$Y) > 50){
-        yInc <- 10
-    } else {
-        yInc <- 5
-    }
-    
     dotsize  = 1.25
     if (nrow(dfPlot) > 10000){
       dotsize  = 1
@@ -861,7 +1083,7 @@ for (i in 1:length(DGEtagVec)){
       ) + ggtitle(paste0("Volcano Plot for DGE Comparison ", gsub("_", " ", label))
       ) + ylim(logFClims, -1 * logFClims
       ) + scale_color_manual("DGE Status" ,values = colVec
-      ) + scale_y_continuous(breaks=c(seq(0,400, yInc))
+      ) + scale_y_continuous(breaks=c(seq(0,400,50))
       ) + scale_x_continuous(breaks=c(seq(-400,400,2))
       )
 
@@ -1363,9 +1585,9 @@ save(OsC,
 #dfTemp[["ref_gene"]] <- ""
 #dfTemp[dfTemp$gene %in% refGenes, "ref_gene"] <- "+"
 
-dfTemp <- Obio@dataTableList[["DGE_table"]]
-
 library(openxlsx)
+
+dfTemp <- Obio@dataTableList[["DGE_table"]] 
 
 if (!dir.exists( paste0(
    Obio@parameterList$html_local,

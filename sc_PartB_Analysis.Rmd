@@ -89,9 +89,21 @@ if (length(.libPaths()) > 2){
 ```{r child = 'src/modules/section_B/B.4.create.variation.plots.Rmd', eval=TRUE}
 ```
 
-<!-- Essential 5: (output required later): Create variation plots Chapter/Module -->
-```{r child = 'src/modules/section_B/B.5.create.pca.plots.Rmd', eval=TRUE}
+<!-- Essential 5: (output required later): 
+  Creation of PCA plots 
+  Differential gene expression 
+  
+  Chapter/Module -->
+```{r child = 'src/modules/section_B/B.5.cluster.DGE.Rmd', eval=TRUE}
 ```
+
+<!-- Essential 6: (output required later): 
+DGE Marker gene upload
+  
+Chapter/Module -->
+```{r child = 'src/modules/section_B/B.6.create.pca.plots.Rmd', eval=TRUE}
+```
+
 
 <!-- Essential 5: (output required later): Create variation plots Chapter/Module -->
 ```{r child = 'src/modules/partB_main_figures/partB.calculate.average.expression.Rmd', eval=TRUE}

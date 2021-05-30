@@ -116,7 +116,9 @@ Obio <- setMountingPoint(Obio)
 Obio <- setAnalysisPaths(Obio)
 Obio <- setCrickGenomeAndGeneNameTable(Obio)
 Obio <- createAnalysisFolders(
-    Obio
+    Obio,
+    baseDir="/camp/stp/babs/working/boeings/Projects/",
+    localBaseDir = paste0(hpc.mount, "Projects/")
 )
 Obio <- setDataBaseParameters(Obio)
 
@@ -130,7 +132,7 @@ dfMM_Anno <- Obio@dfGeneAnnotation
 dfMM_Anno <- unique(dfMM_Anno[,c("mgi_symbol", "hgnc_symbol")])
 dfMM_Anno <- dfMM_Anno[dfMM_Anno$hgnc_symbol != "",]
 
-Obio@parameterList$species <- "homo_sapiens"
+#Obio@parameterList$species <- "homo_sapiens"
 Obio <- addGeneAnnotation(Obio)
 
 ## Done adding annotation file                                               ##
@@ -180,7 +182,7 @@ padj  <- names(dfAddCounts)[grep("padj", names(dfAddCounts))]
                 dfAddCounts[,lg10p[z]] <- temp
             }
 
-names(dfAddCounts) <- gsub("gene_id", "ENSG", names(dfAddCounts))
+names(dfAddCounts) <- gsub("gene_id", "ENSMUSG", names(dfAddCounts))
 names(dfAddCounts) <- gsub("log2FoldChange", "contrast_A_logFC_bulkRNA_Seq_SS_Inhba_Inhba_KO_vs_WT", names(dfAddCounts))
 names(dfAddCounts) <- gsub("padj", "contrast_A_padj_bulkRNA_Seq_SS_Inhba_Inhba_KO_vs_WT", names(dfAddCounts))
 names(dfAddCounts) <- gsub("lg10p", "contrast_A_lg10p_bulkRNA_Seq_SS_Inhba_Inhba_KO_vs_WT", names(dfAddCounts))
@@ -188,23 +190,48 @@ names(dfAddCounts) <- gsub("lg10p", "contrast_A_lg10p_bulkRNA_Seq_SS_Inhba_Inhba
 ## Add hgnc_symbol annotation
 
 
-dfMM_Anno <- dfMM_Anno[dfMM_Anno$mgi_symbol %in% dfAddCounts$symbol, ]
-
-
-
-dfAddCounts <- merge(
-    dfAddCounts,
-    dfMM_Anno, 
-    by.x = "symbol",
-    by.y = "mgi_symbol", 
-    all =T
-)
+# dfMM_Anno <- dfMM_Anno[dfMM_Anno$mgi_symbol %in% dfAddCounts$symbol, ]
+# 
+# 
+# 
+# dfAddCounts <- merge(
+#     dfAddCounts,
+#     dfMM_Anno, 
+#     by.x = "symbol",
+#     by.y = "mgi_symbol", 
+#     all =T
+# )
 
 dfAddCounts[is.na(dfAddCounts)] <- 0
+
+names(dfAddCounts) <- gsub("symbol", "mgi_symbol", names(dfAddCounts) )
+dfAddCounts <- dfAddCounts[dfAddCounts$mgi_symbol != "",]
 
 dfAddCounts$symbol <- NULL
 dfAddCounts$ENSG <- NULL
 
+## Add Inhba correlation ##
+FN <- "../html_local/report_tables/Inhba.correlation.table.txt"
+dfAdd <- read.delim(
+    FN, 
+    header = T, 
+    sep = "\t",
+    stringsAsFactors = F
+)
+
+selVec <- c("gene", "corCoef") 
+dfAdd <- unique(dfAdd[,selVec])
+dfAddCounts <- merge(
+    dfAddCounts, 
+    dfAdd, 
+    by.x = "mgi_symbol",
+    by.y = "gene",
+    all = TRUE
+)
+
+dfAddCounts[is.na(dfAddCounts)] <- 0
+
+names(dfAddCounts) <- gsub("corCoef", "contrast_C_Inhba_Correlation_Coef", names(dfAddCounts))
 
 
 
