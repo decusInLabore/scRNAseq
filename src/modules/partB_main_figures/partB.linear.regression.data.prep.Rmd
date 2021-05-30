@@ -302,58 +302,59 @@ if (Obio@parameterList$geneIDcolumn != "hgnc_symbol" & Obio@parameterList$geneID
 
 
 
-
-for (i in 1:length(LRmarkerGeneList)){
-    cat.name <- paste0(
-        names(LRmarkerGeneList)[i],
-        "_Cluster_Markers_LR"
-    )
-    cat_type <- "DGE_Cluster_Markers"
-    cat.description.text <- paste0(
-        cat.name, 
-        " from linear regression."
-    )
+if (upload.results.to.database){
+    for (i in 1:length(LRmarkerGeneList)){
+        cat.name <- paste0(
+            names(LRmarkerGeneList)[i],
+            "_Cluster_Markers_LR"
+        )
+        cat_type <- "DGE_Cluster_Markers"
+        cat.description.text <- paste0(
+            cat.name, 
+            " from linear regression."
+        )
+        
+        
+        geneVec <- LRmarkerGeneList[[i]]
+        
+        catID <- add.category.to.lab.reference.table.hs(
+            host = Obio@dbDetailList$host,
+            pwd = db.pwd,
+            user = Obio@dbDetailList$db.user,
+            cat.ref.db = Obio@dbDetailList$ref.cat.db,
+            cat.ref.db.table = Obio@parameterList$lab.categories.table,
+            gene.vector = gene.vec,
+            gene.id = refGeneIDcolumn, #options hgnc_symbol, mgi_symbol
+            mm.hs.conversion.file =  paste0(cwd, "/assets/annotation/homologene.data.txt"),
+            cat_name = cat.name,
+            cat_type = cat_type,
+            data_source = paste0(Obio@parameterList$labname, " Lab"),
+            comments_1 = "",
+            comments_2 = "",
+            new.lab.category.table = FALSE,
+            cat.description.db  = "internal_categories",
+            cat.description.db.table = "category_description",
+            cat.description.text = cat.description.text,
+            lab.name = Obio@parameterList$labname,
+            replaceExistingCatName = TRUE
+        )
     
     
-    geneVec <- LRmarkerGeneList[[i]]
+        updatedCatIDs <- c(
+            updatedCatIDs,
+            catID
+        )
     
-    catID <- add.category.to.lab.reference.table.hs(
-        host = Obio@dbDetailList$host,
-        pwd = db.pwd,
-        user = Obio@dbDetailList$db.user,
-        cat.ref.db = Obio@dbDetailList$ref.cat.db,
-        cat.ref.db.table = Obio@parameterList$lab.categories.table,
-        gene.vector = gene.vec,
-        gene.id = refGeneIDcolumn, #options hgnc_symbol, mgi_symbol
-        mm.hs.conversion.file =  paste0(cwd, "/assets/annotation/homologene.data.txt"),
-        cat_name = cat.name,
-        cat_type = cat_type,
-        data_source = paste0(Obio@parameterList$labname, " Lab"),
-        comments_1 = "",
-        comments_2 = "",
-        new.lab.category.table = FALSE,
-        cat.description.db  = "internal_categories",
-        cat.description.db.table = "category_description",
-        cat.description.text = cat.description.text,
-        lab.name = Obio@parameterList$labname,
-        replaceExistingCatName = TRUE
-    )
-
-
-    updatedCatIDs <- c(
-        updatedCatIDs,
-        catID
-    )
-
-    updatedCatNames <- c(
-        updatedCatNames,
-        cat.name
-    )
-    
-    clusterName <- c(
-        clusterName,
-        names(DGEmarkerGeneList)[i]
-    )
+        updatedCatNames <- c(
+            updatedCatNames,
+            cat.name
+        )
+        
+        clusterName <- c(
+            clusterName,
+            names(DGEmarkerGeneList)[i]
+        )
+    }
 }
 
 dfLRlegend <- data.frame(
