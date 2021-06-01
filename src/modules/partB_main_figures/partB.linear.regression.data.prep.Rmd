@@ -57,7 +57,7 @@ for (i in 1:length(clusterVec)){
   
   residuals <- round(clusterFit$residuals, 3)
   dfTempResiduals <- data.frame(dfDataTable$gene, residuals, stringsAsFactors = F)
-  names(dfTempResiduals) <- c("gene", paste0(clusterVec[i], "_Residuals"))
+  names(dfTempResiduals) <- c("gene", paste0(clusterVec[i]))
   
   if (i ==1){
     dfClusterResiduals <- dfTempResiduals
@@ -81,11 +81,11 @@ Obio@dataTableList[["dfClusterResiduals"]] <- dfClusterResiduals
 ## Select a suitable cut-off for marker genes                                ##
 library(tidyverse)
 dfLongResiduals <- data.frame(
-    dfClusterResiduals %>% pivot_longer(!gene, names_to = "cluster", values_to = "residuals")
+    dfClusterResiduals %>% tidyr::pivot_longer(!gene, names_to = "cluster", values_to = "residuals")
 )
 
 
-dfRegMins <- data.frame(dfLongResiduals %>% group_by(cluster) %>%   top_n(10, residuals) %>% summarize(min10 = min(residuals)))
+dfRegMins <- data.frame(dfLongResiduals %>% dplyr::group_by(cluster) %>%   top_n(10, residuals) %>% dplyr::summarize(min10 = min(residuals)))
 
 ## Select as cut-off: median of all so at least half the cluster have 10 marker genes
 LRcutOff <- median(dfRegMins$min10)
@@ -122,12 +122,13 @@ residualClusterMarkers <- list()
 clusterVec <- names(dfClusterResiduals)
 clusterVec <- clusterVec[clusterVec != "gene"]
 
+
 for (i in 1:length(clusterVec)){
     clusterGenes <- as.vector(sort(unique(dfClusterResiduals[dfClusterResiduals[, clusterVec[i]] > LRcutOff,"gene"])))
    
     
     if (length(clusterGenes) > 1){
-        residualClusterMarkers[[paste0(clusterVec[[i]], "_Linear_Regression_Markers_", LRcutOff)]] <- c(
+        residualClusterMarkers[[paste0(clusterVec[[i]])]] <- c(
             paste0(clusterVec[[i]], "_Linear_Regression_Markers_", gsub("\\.", "_", LRcutOff) , " Experiment ", Obio@parameterList$project_id),
             clusterGenes
         )
@@ -139,12 +140,13 @@ for (i in 1:length(clusterVec)){
 ## Upload/update category by category                                ##
 updatedCatIDs <- as.vector(NULL, mode = "character")
 updatedCatNames <- as.vector(NULL, mode = "character")
+LRmarkerGeneList <- list()
         
 for (i in 1:length(names(residualClusterMarkers))){
     cat.name <- names(residualClusterMarkers)[i]
-    cat_type <- paste0("temp_cluster_marker_", Obio@parameterList$project_id)
+    # cat_type <- paste0("temp_cluster_marker_", Obio@parameterList$project_id)
             
-    cat.description.text <- as.vector(residualClusterMarkers[[i]][1]) 
+    # cat.description.text <- as.vector(residualClusterMarkers[[i]][1]) 
             
     gene.vec <- as.vector(
        residualClusterMarkers[[i]]
@@ -155,44 +157,214 @@ for (i in 1:length(names(residualClusterMarkers))){
             
     ## Determine if cat exists ##
             
-            
-    catID <- add.category.to.lab.reference.table.hs(
-        host = Obio@dbDetailList$host,
-        pwd = db.pwd,
-        user = Obio@dbDetailList$db.user,
-        cat.ref.db = Obio@dbDetailList$ref.cat.db,
-        cat.ref.db.table = Obio@parameterList$lab.categories.table,
-        gene.vector = gene.vec,
-        gene.id = refGeneIDcolumn, #options hgnc_symbol, mgi_symbol
-        mm.hs.conversion.file =  paste0(cwd, "/assets/annotation/homologene.data.txt"),
-        cat_name = cat.name,
-        cat_type = cat_type,
-        data_source = paste0(Obio@parameterList$labname, " Lab"),
-        comments_1 = "",
-        comments_2 = "",
-        new.lab.category.table = FALSE,
-        cat.description.db  = "internal_categories",
-        cat.description.db.table = "category_description",
-        cat.description.text = cat.description.text,
-        lab.name = Obio@parameterList$labname,
-        replaceExistingCatName = TRUE
-    ) 
-        
-            
-    updatedCatIDs <- c(
-        updatedCatIDs, 
-        catID
-    )    
+    LRmarkerGeneList[[cat.name]] <- gene.vec
     
-    updatedCatNames <- c(
-        updatedCatNames,
-        cat.name
-    )
+    
 } ## End dfDat loop
 
-dfCatNameLR <- data.frame(catID = updatedCatIDs, cat_name= updatedCatNames, stringsAsFactors = F)
+Obio@dataTableList[["LRmarkerGeneList"]] <- LRmarkerGeneList
 
-Obio@dataTableList[["residualClusterMarkers"]] <- residualClusterMarkers
+        
+## Done uploading general markers                                            ##
+###############################################################################
+
+
+
+# dfCatNameLR <- data.frame(catID = updatedCatIDs, cat_name= updatedCatNames, stringsAsFactors = F)
+
+# Obio@dataTableList[["residualClusterMarkers"]] <- residualClusterMarkers
+# Obio@dataTableList[["LRmarkerGeneList"]] 
+# Obio@dataTableList[["DGEmarkerGeneList"]] 
+
+###############################################################################
+## upload LR and dge markers to db                                           ##
+## First the DGE markers ##
+DGEmarkerGeneList <- Obio@dataTableList$DGEmarkerGeneList
+updatedCatIDs <- as.vector(NULL, mode="character")
+updatedCatNames <- as.vector(NULL, mode="character")
+clusterName <- as.vector(NULL, mode="character")
+
+if (Obio@parameterList$geneIDcolumn != "hgnc_symbol" & Obio@parameterList$geneIDcolumn != "mgi_symbol"){
+    refGeneIDcolumn <- "hgnc_symbol"
+    dfAnno <- Obio@dfGeneAnnotation
+    dfAnno <- unique(dfAnno[,c("hgnc_symbol",Obio@parameterList$geneIDcolumn )])
+    
+    dfAnno <- dfAnno[dfAnno$hgnc_symbol != "", ]
+    
+    for (i in 1:length(DGEmarkerGeneList)){
+        oGeneVec <- DGEmarkerGeneList[[i]]
+        tGeneVec <- as.vector(
+            dfAnno[dfAnno[,Obio@parameterList$geneIDcolumn] %in% oGeneVec, "hgnc_symbol"]
+        )
+        
+        DGEmarkerGeneList[[i]] <- tGeneVec
+        
+        
+    }
+    
+    
+} else {
+    refGeneIDcolumn <- Obio@parameterList$geneIDcolumn
+}
+
+
+
+if (upload.results.to.database){
+    for (i in 1:length(DGEmarkerGeneList)){
+        cat.name <- paste0(
+            names(DGEmarkerGeneList)[i],
+            "_Cluster_Markers_DGE"
+        )
+        cat_type <- "DGE_Cluster_Markers"
+        cat.description.text <- paste0(
+            cat.name, 
+            " from Seurat FindAllMarkers."
+        )
+        
+        
+        geneVec <- DGEmarkerGeneList[[i]]
+        
+        catID <- add.category.to.lab.reference.table.hs(
+            host = Obio@dbDetailList$host,
+            pwd = db.pwd,
+            user = Obio@dbDetailList$db.user,
+            cat.ref.db = Obio@dbDetailList$ref.cat.db,
+            cat.ref.db.table = Obio@parameterList$lab.categories.table,
+            gene.vector = geneVec,
+            gene.id = refGeneIDcolumn, #options hgnc_symbol, mgi_symbol
+            mm.hs.conversion.file =  paste0(cwd, "/assets/annotation/homologene.data.txt"),
+            cat_name = cat.name,
+            cat_type = cat_type,
+            data_source = paste0(Obio@parameterList$labname, " Lab"),
+            comments_1 = "",
+            comments_2 = "",
+            new.lab.category.table = FALSE,
+            cat.description.db  = "internal_categories",
+            cat.description.db.table = "category_description",
+            cat.description.text = cat.description.text,
+            lab.name = Obio@parameterList$labname,
+            replaceExistingCatName = TRUE
+        )
+    
+    
+        updatedCatIDs <- c(
+            updatedCatIDs,
+            catID
+        )
+    
+        updatedCatNames <- c(
+            updatedCatNames,
+            cat.name
+        )
+        
+        clusterName <- c(
+            clusterName,
+            names(DGEmarkerGeneList)[i]
+        )
+    }
+}
+
+dfDGElegend <- data.frame(
+    clusterName,
+    updatedCatIDs,
+    updatedCatNames
+)
+
+
+## Second Linear regression Markers  ##
+LRmarkerGeneList <- Obio@dataTableList$LRmarkerGeneList
+updatedCatIDs <- as.vector(NULL, mode="character")
+updatedCatNames <- as.vector(NULL, mode="character")
+clusterName <- as.vector(NULL, mode="character")
+
+if (Obio@parameterList$geneIDcolumn != "hgnc_symbol" & Obio@parameterList$geneIDcolumn != "mgi_symbol"){
+    refGeneIDcolumn <- "hgnc_symbol"
+    dfAnno <- Obio@dfGeneAnnotation
+    dfAnno <- unique(dfAnno[,c("hgnc_symbol",Obio@parameterList$geneIDcolumn )])
+    
+    dfAnno <- dfAnno[dfAnno$hgnc_symbol != "", ]
+    
+    for (i in 1:length(LRmarkerGeneList)){
+        oGeneVec <- LRmarkerGeneList[[i]]
+        tGeneVec <- as.vector(
+            dfAnno[dfAnno[,Obio@parameterList$geneIDcolumn] %in% oGeneVec, "hgnc_symbol"]
+        )
+        
+        LRmarkerGeneList[[i]] <- tGeneVec
+        
+        
+    }
+    
+    
+} else {
+    refGeneIDcolumn <- Obio@parameterList$geneIDcolumn
+}
+
+
+
+if (upload.results.to.database){
+    for (i in 1:length(LRmarkerGeneList)){
+        cat.name <- paste0(
+            names(LRmarkerGeneList)[i],
+            "_Cluster_Markers_LR"
+        )
+        cat_type <- "DGE_Cluster_Markers"
+        cat.description.text <- paste0(
+            cat.name, 
+            " from linear regression."
+        )
+        
+        
+        geneVec <- LRmarkerGeneList[[i]]
+        
+        catID <- add.category.to.lab.reference.table.hs(
+            host = Obio@dbDetailList$host,
+            pwd = db.pwd,
+            user = Obio@dbDetailList$db.user,
+            cat.ref.db = Obio@dbDetailList$ref.cat.db,
+            cat.ref.db.table = Obio@parameterList$lab.categories.table,
+            gene.vector = geneVec,
+            gene.id = refGeneIDcolumn, #options hgnc_symbol, mgi_symbol
+            mm.hs.conversion.file =  paste0(cwd, "/assets/annotation/homologene.data.txt"),
+            cat_name = cat.name,
+            cat_type = cat_type,
+            data_source = paste0(Obio@parameterList$labname, " Lab"),
+            comments_1 = "",
+            comments_2 = "",
+            new.lab.category.table = FALSE,
+            cat.description.db  = "internal_categories",
+            cat.description.db.table = "category_description",
+            cat.description.text = cat.description.text,
+            lab.name = Obio@parameterList$labname,
+            replaceExistingCatName = TRUE
+        )
+    
+    
+        updatedCatIDs <- c(
+            updatedCatIDs,
+            catID
+        )
+    
+        updatedCatNames <- c(
+            updatedCatNames,
+            cat.name
+        )
+        
+        clusterName <- c(
+            clusterName,
+            names(LRmarkerGeneList)[i]
+        )
+    }
+}
+
+dfLRlegend <- data.frame(
+    clusterName,
+    updatedCatIDs,
+    updatedCatNames
+)
+
+## done upload markers                                                       ##
+###############################################################################
 
 ###############################################################################
 ## Creaate Plot array                                                        ##
@@ -215,15 +387,20 @@ if (length(c2Vec) == length(clusterVec)){
 
 h <- sum(c("seurat_clusters","clusterName", "clusterColor") %in% names(OsC@meta.data))
 
+dfClustCol <- unique(OsC@meta.data[,c("clusterName", "clusterColor")])
+
+dfClustCol$clusterName <- factor(dfClustCol$clusterName, levels = clusterVec)
+
+dfClustCol <- dfClustCol[order(dfClustCol$clusterName),]
 
     ## Determine cluster colors ##
-    dfClustCol <- data.frame(cluster=clusterVec, clusterCol=clusterVec)
-    dfClustCol$clusterCol <- as.numeric(gsub("C_", "", dfClustCol$clusterCol))
-    #dfClustCol <- dfClustCol[order(dfClustCol$clusterCol, decreasing = F),]
-    
-    dfClustCol <- unique(OsC@meta.data[,c("clusterName", "clusterColor", "seurat_clusters")])
-    dfClustCol$clusterName <- factor(dfClustCol$clusterName , levels = clusterVec)
-    dfClustCol <- dfClustCol[order(dfClustCol$clusterName),]
+    # dfClustCol <- data.frame(cluster=clusterVec, clusterCol=clusterVec)
+    # # dfClustCol$clusterCol <- as.numeric(gsub("C_", "", dfClustCol$clusterCol), dfClustCol$clusterCol)
+    # #dfClustCol <- dfClustCol[order(dfClustCol$clusterCol, decreasing = F),]
+    # 
+    # dfClustCol <- unique(OsC@meta.data[,c("clusterName", "clusterColor", "seurat_clusters")])
+    # dfClustCol$clusterName <- factor(dfClustCol$clusterName , levels = clusterVec)
+    # dfClustCol <- dfClustCol[order(dfClustCol$clusterName),]
 
 
 # library(scales)
@@ -235,7 +412,7 @@ clusterCol <- as.vector(dfClustCol$clusterColor)
 
 for (i in 1:length(clusterVec)){
     ## Determine top10 markers ##
-    clustCol <- names(dfClusterResiduals)[grep(paste0(clusterVec[i],"_"), names(dfClusterResiduals))]
+    clustCol <- names(dfClusterResiduals)[grep(paste0(clusterVec[i]), names(dfClusterResiduals))]
     dfClusterResiduals <- dfClusterResiduals[order(dfClusterResiduals[,clustCol], decreasing = T), ]
     
     markerVec <- as.vector(dfClusterResiduals[1:10,"gene"])
@@ -301,21 +478,21 @@ for (i in 1:length(clusterVec)){
     ##                                                                       ##
     ###########################################################################
     
-    pos <- grep(paste0(clusterVec[i],"_"), dfCatNameLR$cat_name)
+    pos <- grep(paste0(clusterVec[i]), dfLRlegend$clusterName)
     
     LRcatID <- ""
     if (length(pos) == 1){
-      LRcatID <- as.vector(dfCatNameLR[pos, "catID"])
+      LRcatID <- as.vector(dfLRlegend[pos, "updatedCatIDs"])
     }
     
     
     clusterVec <- as.vector(dfClustCol$clusterName)
     clusterCol <- as.vector(dfClustCol$clusterCol)
-    pos <- grep(paste0(gsub("C_", "Cluster_",clusterVec[i]),"$"), dfFAMplotIDs$cat_name)
+    # pos <- grep(paste0(gsub("C_", "Cluster_",clusterVec[i]),"$"), dfFAMplotIDs$cat_name)
     
     DGEcatID <- ""
     if (length(pos) == 1){
-      DGEcatID <- as.vector(dfFAMplotIDs[pos, "cat_id"])
+      DGEcatID <- as.vector(dfDGElegend[pos, "updatedCatIDs"])
     }
     
     if (length(Obio@sampleDetailList) == 1){
@@ -340,7 +517,7 @@ if (LRcatID != ""){
 if (DGEcatID != ""){
     linkDGE <- paste0('<a href="https://',urlString,'/',Obio@parameterList$project_id,'/scatterplot?x_axis=add_counts_Avg_log10_Expr_all&y_axis=',prefix,'counts_Avg_log10_Expr_',clusterVec[i], '&cat_id=', DGEcatID,'" target="_blank">here</a>')
     
-    heatmaplinkDGE <- paste0('In order to identify cluster specific marker genes a <a href="https://biologic.crick.ac.uk/',Obio@parameterList$project_id,'/category-view/', DGEcatID,'" target="_blank">cluster-maker gene heatmap for the differential-gene expression derrived marker gene set</a> might be interesting.')
+    heatmaplinkDGE <- paste0('In order to identify cluster specific marker genes a <a href="https://biologic.crick.ac.uk/',Obio@parameterList$project_id,'/category-view/', DGEcatID,'" target="_blank">cluster-maker gene heatmap for the differential-gene expression derrived marker gene set</a> might be interesting. ')
     
 } else {
     linkDGE <- ""

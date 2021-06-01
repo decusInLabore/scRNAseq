@@ -253,6 +253,61 @@ if (file.exists(FN)){
 ## Done create cellRanger QC plots                                           ##
 ###############################################################################
 
+###############################################################################
+## Add meta data                                                             ##
+
+FN <- "design/sc.design.file.csv"
+
+if (file.exists(FN)){
+    if (file.exists(FN)){
+        dfObio <- read.csv(FN, header = F, stringsAsFactors = F)
+    }
+
+    dfObio[is.na(dfObio)] <- ""
+    
+    dfObio <- dfObio[dfObio[,1] != "", ]
+    
+    dfObio <- data.frame(t(dfObio), stringsAsFactors = F)
+    
+    names(dfObio) <- as.vector(t(dfObio[1,]))
+    dfObio <- dfObio[-1,]
+    pos <- unique(
+        c(
+            grep("meta_", names(dfObio)),
+            grep("META_", toupper(names(dfObio)))
+        )
+    )
+    
+    if (length(pos) > 0){
+        selVec <- c(
+            "sampleName",
+            names(dfObio)[pos]
+        )
+      
+        dfTemp <- dfObio[,selVec]
+        
+        dfMeta <- OsC@meta.data
+        dfMeta[["cellID"]] <- row.names(dfMeta)
+        dfMeta <- dfMeta[,c("cellID", "sampleID")]
+        
+        dfTemp <- merge(
+            dfTemp, 
+            dfMeta, 
+            by.x = "sampleName",
+            by.y = "sampleID"
+        )
+        
+        row.names(dfTemp) <- dfTemp$cellID
+        dfTemp$cellID <- NULL
+        dfTemp$sampleName <- NULL
+        
+        OsC <- addDf2seuratMetaData(
+            obj = OsC, 
+            dfAdd = dfTemp
+        )
+    }
+}
+
 
 ```
 

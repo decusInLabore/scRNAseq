@@ -258,17 +258,30 @@ for (i in 1:length(geneSets)){
     pdf(FN)
         print(plotList[[tag]])
     dev.off()
+    
+    
+    if (exists("shinyURL") & !is.null(shinyURL)){
+        geneRef <- paste0("Cat_", HMname)
+            link <- paste0(
+              'An interactive version of this figure with additional viewing options can be found <a href="',shinyURL,'?_inputs_&gene=%22',geneRef,'%22" target="_blank">here</a>. '
+            )
+            
+    } else {
+        link <- ""
+    }
+    
     ## Create R markdown chunk ##
     figLegend <- paste0(
         '**Figure ', 
         figureCount, 
         'A:** Category Scatter showing gene category ', 
         HMname, '. ', legendNote, 
-        '. Download a pdf of this figure <a href="',FNrel,'" target="_blank">here</a>. '
+        '. Download a pdf of this figure <a href="',FNrel,'" target="_blank">here</a>. ',
+        link
     )
             
             
-   
+    
             
     NewChnk <- paste0(
         "#### Category Feature Plot ",HMname,

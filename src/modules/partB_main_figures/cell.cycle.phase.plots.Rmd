@@ -107,11 +107,21 @@ if (length(unique(dfPlot$Cluster)) > 15){
                 print(plotList[[tag]])
             dev.off()
             
+            if (exists("shinyURL") & !is.null(shinyURL)){
+            link <- paste0(
+              'An interactive version of this figure with additional viewing options can be found <a href="',shinyURL,'?_inputs_&y_axis=%22UMAP_2%22&x_axis=%22UMAP_1%22&colorBy=%22Phase%22&splitByColumn=%22all%22" target="_blank">here</a>. '
+            )
+            
+            } else {
+              link <- ""
+            }
+            
             figLegend <- paste0(
                 '**Figure ', 
                 figureCount, 
                 ':** ',
-                ' UMAP showing all cells from all samples together with the estimated cell-cycle phase color-coded. Download a pdf of this figure <a href="',FNrel,'" target="_blank">here</a>.'
+                ' UMAP showing all cells from all samples together with the estimated cell-cycle phase color-coded. Download a pdf of this figure <a href="',FNrel,'" target="_blank">here</a>. ',
+                link
             )
             
             figureCount <- figureCount + 1
@@ -210,11 +220,21 @@ if (length(unique(dfPlot$Cluster)) > 15){
                 print(plotList[[tag]])
             dev.off()
             
+            if (exists("shinyURL") & !is.null(shinyURL)){
+            link <- paste0(
+              'An interactive version of this figure with additional viewing options can be found <a href="',shinyURL,'?_inputs_&y_axis=%22tSNE_2%22&x_axis=%22tSNE_1%22&colorBy=%22Phase%22&splitByColumn=%22all%22" target="_blank">here</a>. '
+            )
+            
+            } else {
+              link <- ""
+            }
+            
             figLegend <- paste0(
                 '**Figure ', 
                 figureCount, 
                 ':** ',
-                ' tSNE showing all cells from all samples together. The esimated cell-cycle phase is color coded. Download a pdf of this figure <a href="',FNrel,'" target="_blank">here</a>.'
+                ' tSNE showing all cells from all samples together. The esimated cell-cycle phase is color coded. Download a pdf of this figure <a href="',FNrel,'" target="_blank">here</a>. ',
+                link
             )
             
             figureCount <- figureCount + 1
@@ -314,11 +334,21 @@ for (i in 1:length(sampleVec)){
                 print(plotList[[tag]])
             dev.off()
             
+            if (exists("shinyURL") & !is.null(shinyURL)){
+            link <- paste0(
+              'An interactive version of this figure with additional viewing options can be found <a href="',shinyURL,'?_inputs_&y_axis=%22UMAP_2%22&x_axis=%22UMAP_1%22&colorBy=%22Phase%22&splitByColumn=%22sampleName%22" target="_blank">here</a>. '
+            )
+            
+            } else {
+              link <- ""
+            }
+            
             figLegend <- paste0(
                 '**Figure ', 
                 figureCount, 
                 ':** ',
-                ' Sample-level UMAPs. Estimated cell-cylce phase color-coded. Download a pdf of this figure <a href="',FNrel,'" target="_blank">here</a>.'
+                ' Sample-level UMAPs. Estimated cell-cylce phase color-coded. Download a pdf of this figure <a href="',FNrel,'" target="_blank">here</a>. ',
+                link
             )
             
             figureCount <- figureCount + 1

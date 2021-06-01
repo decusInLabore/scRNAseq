@@ -102,14 +102,23 @@ if (length(unique(dfPlot$Cluster)) > 15){
                 print(plotList[[tag]])
             dev.off()
             
-            link <- paste0('<a href="https://',urlString,'/',Obio@parameterList$project_id,'/pca?x_axis=UMAP_1&y_axis=UMAP_2" target="_blank">here</a>')  
+            # link <- paste0('<a href="https://',urlString,'/',Obio@parameterList$project_id,'/pca?x_axis=UMAP_1&y_axis=UMAP_2" target="_blank">here</a>')  
+            
+            if (exists("shinyURL") & !is.null(shinyURL)){
+                link <- paste0(
+                  'An interactive version of this figure with additional viewing options can be found <a href="',shinyURL,'?_inputs_&y_axis=%22UMAP_2%22&x_axis=%22UMAP_1%22&colorBy=%22clusterName%22&splitByColumn=%22all%22" target="_blank">here</a>. '
+                )
+                
+            } else {
+                link <- ""
+            }
             
             figLegend <- paste0(
                 '**Figure ', 
                 figureCount, 
                 ':** ',
                 ' UMAP showing all cells from all samples together. Download a pdf of this figure <a href="',FNrel,'" target="_blank">here</a>.',
-                'An interactive version of this figure can be found ', link, '. '
+                'An interactive version of this figure can be found ', link
             )
             
             figureCount <- figureCount + 1
@@ -223,6 +232,15 @@ if (length(unique(dfPlot$Cluster)) > 15){
             dev.off()
             
             link <- paste0('<a href="https://',urlString,'/',Obio@parameterList$project_id,'/pca?x_axis=tSNE_1&y_axis=tSNE_2" target="_blank">here</a>')  
+            
+            if (exists("shinyURL") & !is.null(shinyURL)){
+                link <- paste0(
+                  'An interactive version of this figure with additional viewing options can be found <a href="',shinyURL,'?_inputs_&y_axis=%22tSNE_2%22&x_axis=%22tSNE_1%22&colorBy=%22clusterName%22&splitByColumn=%22all%22" target="_blank">here</a>. '
+                )
+                
+            } else {
+                link <- ""
+            }
             
             figLegend <- paste0(
                 '**Figure ', 
@@ -339,11 +357,21 @@ for (i in 1:length(sampleVec)){
                 print(plotList[[tag]])
             dev.off()
             
+            if (exists("shinyURL") & !is.null(shinyURL)){
+                link <- paste0(
+                  'An interactive version of this figure with additional viewing options can be found <a href="',shinyURL,'?_inputs_&y_axis=%22tSNE_2%22&x_axis=%22tSNE_1%22&colorBy=%22clusterName%22&splitByColumn=%22sampleName%22" target="_blank">here</a>. '
+                )
+                
+            } else {
+                link <- ""
+            }
+            
             figLegend <- paste0(
                 '**Figure ', 
                 figureCount, 
                 ':** ',
-                ' Sample-level UMAPs. Download a pdf of this figure <a href="',FNrel,'" target="_blank">here</a>.'
+                ' Sample-level UMAPs. Download a pdf of this figure <a href="',FNrel,'" target="_blank">here</a>. ',
+                link
             )
             
             figureCount <- figureCount + 1

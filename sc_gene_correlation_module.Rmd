@@ -1,0 +1,311 @@
+---
+
+output: 
+    html_document:
+        highlight: default
+        theme: paper
+        code_folding: hide
+        df_print: tibble
+        toc: true
+        toc_depth: 3
+        toc_float: true
+        css: /camp/stp/babs/working/boeings/Stefan/protocol_files/github/boeings/templates/style/style.css
+
+---
+    
+    
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+    tidy = TRUE,
+    tidy.opts = list(width.cutoff = 120),
+    message = FALSE,
+    warning = FALSE
+)
+```
+
+
+```{r hpc_notes, include=FALSE}
+
+## Get interactive session ##
+#  srun --time=08:00:00 --mem=40G -p int --pty bash
+
+# module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/3.6.0-foss-2016b-BABS;R;
+
+# sbatch --time=12:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/3.6.0-foss-2016b-BABS;Rscript runA.r" --job-name="rA"  --mem=100G -o rA.slurm >> commands.txt
+
+# sbatch --time=24:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/3.6.0-foss-2016b-BABS;Rscript runDGE.r" --job-name="rDGE" -p hmem --mem=300G -o rDGE.slurm >> commands.txt
+
+# --mem-per-cpu=14G -p hmem --pty bash
+
+```
+
+```{r populate_meta_data_database, eval=TRUE, echo=F, results=F}
+#Create the environment and load a suitable version of R, e.g. so:
+
+
+library(Seurat)
+library(ggplot2)
+library(tidyverse)
+library(knitr)
+
+VersionPdfExt <- paste0(".V", gsub("-", "", Sys.Date()), ".pdf")
+
+if (dir.exists("/Volumes/babs/working/boeings/")){
+    hpc.mount <- "/Volumes/babs/working/boeings/"
+} else if (dir.exists("Y:/working/boeings/")){
+    hpc.mount <- "Y:/working/boeings/"
+} else if (dir.exists("/camp/stp/babs/working/boeings/")){
+    hpc.mount <- "/camp/stp/babs/working/boeings/"
+} else {
+    hpc.mount <- ""
+}
+
+
+FN <- paste0(hpc.mount, "Projects/reference_data/documentation/BC.parameters.txt")
+dbTable <- read.delim(
+    FN, 
+    sep = "\t",
+    stringsAsFactors = F
+)
+
+db.pwd <- as.vector(dbTable[1,1])
+
+figureCount <- 1
+
+source("assets/R/SBwebtools.pckg.r")
+
+if (length(.libPaths()) > 2){
+    .libPaths(.libPaths()[2:3])
+}
+## Create biologic Object for visualization ##
+
+ObioFN <- paste0("../", list.files("..")[grep(".bioLOGIC.Robj", list.files(".."))])
+
+load(ObioFN)
+
+checkFile = paste0(
+         Obio@parameterList$project_id,
+         ".bioLOGIC.Robj"
+)
+
+
+Obio <- setMountingPoint(Obio)
+Obio <- setAnalysisPaths(Obio)
+Obio <- setCrickGenomeAndGeneNameTable(Obio)
+Obio <- createAnalysisFolders(
+    Obio
+)
+Obio <- setDataBaseParameters(Obio)
+
+## Upload metadata table > p315_PCA
+# Obio@parameterList$host <- "10.152.22.193"
+# Obio@parameterList$db.user <- "boeingS"
+# db.pwd <- "5+3f4nB040420"
+
+## Create url string
+if (Obio@parameterList$host == "10.27.241.234"){
+    urlString <- "biologic.thecrick.org"
+} else {
+    urlString <- "biologic.crick.ac.uk"
+}
+
+legendDotSize <- 5
+
+## Set file paths ##
+baseFN <- paste0(
+   Obio@parameterList$project_id, 
+   ".gene.correlation.table.xlsx"
+)
+
+
+outPutFN <- paste0(
+     Obio@parameterList$reportTableDir,
+     baseFN
+)
+  
+ 
+FNrel <- paste0("report_tables/", baseFN)
+ 
+
+## Create table link string ##
+tableLink <- paste0('<a href="https://',urlString,'/mdata/',Obio@parameterList$project_id, '/html/', FNrel,' target="_blank">here</a>')  
+
+tableString <- paste0('An Excel table with the DGE results can be downloaded  <a href="https://',urlString,'/mdata/',Obio@parameterList$project_id, '/html/', FNrel,' target="_blank">here</a>.')
+
+
+load(paste0(
+    Obio@parameterList$localWorkDir,
+    Obio@parameterList$project_id,
+    ".Seurat.Robj"
+)
+)
+
+
+
+## Subsete dataset ##
+
+
+oList <- SplitObject(OsC, split.by = "meta_Type")
+
+OsC_Fib <- oList[["KPC_Fibroblast"]]
+
+Idents(OsC_Fib) <- "clusterName"
+Oavg <- AverageExpression(
+  OsC_Fib,
+  assays = "RNA",
+  features = NULL,
+  return.seurat = TRUE,
+  add.ident = NULL,
+  slot = "data",
+  verbose = TRUE
+)
+
+dfTPM <- data.frame(Oavg[["RNA"]]@counts)
+
+###############################################################################
+            ## do correlation analysis                                                   ##
+    
+            pValueCor = rep(1, nrow(dfTPM))
+            corCoef = rep(0, nrow(dfTPM))
+            cor.method = "pearson"
+    
+            geneSel <- "Inhba"
+            pattern <- as.numeric(dfTPM[geneSel, ])
+    
+            #Find best correlation with kinase expression
+            print("Starting to calculate correlations...")
+            for (i in 1:nrow(dfTPM)){
+                samplePattern <- as.numeric(t(dfTPM[i,]))
+    
+                if (sum(samplePattern) != 0){
+                    cor.test.result = cor.test(samplePattern, pattern, method=cor.method)
+                    pValueCor[i] = cor.test.result$p.value
+                    corCoef[i] = cor.test.result$estimate
+                }
+                if (i%%1000 == 0){
+                    print(i)
+                }
+            }
+            print("...done.")
+    
+            dfTPM[["pValueCor"]] <- pValueCor
+            dfTPM[["corCoef"]] <- corCoef
+    
+            dfTPM <- dfTPM[order(dfTPM$corCoef, decreasing = TRUE),]
+            dfTempRes <- dfTPM
+            dfTempRes[["gene"]] <- row.names(dfTempRes)
+            dfTempRes <- dfTempRes[,c("corCoef", "gene")]
+            names(dfTempRes) <- gsub("corCoef", paste0("corCoef_", as.vector(dfAnnoCor[k, Obio@parameterList$geneIDcolumn])), names(dfTempRes))
+    
+            if (k==1){
+                dfTRes <- dfTempRes
+            } else {
+                dfTRes <- merge(
+                    dfTRes,
+                    dfTempRes,
+                    by.x = Obio@parameterList$primaryAlignmentGeneID,
+                    by.y = Obio@parameterList$primaryAlignmentGeneID,
+                    all =TRUE
+                )
+                dfTRes[is.na(dfTRes)] <- 0
+            }
+    
+    
+            ## Done correlation analysis                                                 ##
+            ###############################################################################
+
+## Do correlation ##
+
+
+
+```
+
+
+
+
+```{r create_report_params, eval=T, results="asis"}
+documentationParams <- list(
+
+    "title" = "Pseudobulk Differential Gene Expression Analysis",
+    "subtitle" =  "",
+    "abstract" = ""
+
+)
+
+Obio@parameterList$lims.id <- "SC19235"
+
+## Try to retrieve project data from db ##
+library(RMySQL)
+db.pwd2 <- "_asf_"
+db.user2 <- "asf"
+host2 <- "ms1.thecrick.org"
+projectParams <- documentationParams
+
+tryCatch({
+    dbDB = dbConnect(drv = RMySQL::MySQL(), user = db.user2, password = db.pwd2, host = host2, dbname = "asf");
+dfProposal =  dbGetQuery(dbDB, paste0("SELECT * FROM asf_proposals WHERE project_name ='",Obio@parameterList$lims.id,"'"));
+dbDisconnect(dbDB)
+  }, error = function(x) {
+    message("Project Database could not be reached or has no entry in Obio@parameterList$lims.id for this analysis.")
+   
+})
+
+if (exists("dfProposal")){
+  if (nrow(dfProposal) == 1){
+      if (!is.na(dfProposal[1,"ProjectAlias"]) & dfProposal[1,"ProjectAlias"] != ""){
+          projectParams[["title"]] = paste0(dfProposal[1,"ProjectAlias"], " - ", dfProposal[1,"project_name"])
+      }
+      
+      if (!is.na(dfProposal[1,"project_user"]) & dfProposal[1,"project_user"] != ""){
+          projectParams[["subtitle"]] = paste0(dfProposal[1,"user_lab"], " Lab - ", dfProposal[1,"project_user"])
+          projectParams[["subtitle"]] <- gsub("^ Lab - ", "", projectParams[["subtitle"]])
+          
+      }
+      
+      if (!is.na(dfProposal[1,"proposal_text"]) & dfProposal[1,"proposal_text"] != ""){
+          projectParams[["abstract"]] = dfProposal[1,"proposal_text"]
+         
+          
+      }
+  }
+}
+   
+## Escape all special characters
+projectParams <- lapply(
+  projectParams, function(x) 
+  #gsub("([.|()\\^{}+$*?]|\\[|\\])", "\\\\\1", x)
+  gsub("([.|()/\\^{}+$*?]|\\[|\\])", " ", x)
+) 
+
+projectParams <- lapply(
+  projectParams, function(x) 
+  #gsub("([.|()\\^{}+$*?]|\\[|\\])", "\\\\\1", x)
+  gsub("\\\n", " ", x)
+) 
+
+
+#projectParams$title <- "Title"
+# projectParams$abstract <- "This is the QC section."
+#projectParams$subtitle <- "Abstract"
+
+```
+
+
+
+## Documentation
+```{r documentation, eval=TRUE, echo=T, results=T}
+sessionInfo()
+```
+
+---
+title: "`r projectParams$title`"
+subtitle:  Pseudobulk Differential Gene Expression Analyses on Single-cell Results
+author:
+    - Bioinformatics: Stefan Boeing^[The Francis Crick Institute, stefan.boeing@crick.ac.uk]
+date: 'Compiled: `r format(Sys.Date(), "%B %d, %Y")`'
+
+abstract: |
+    In this section pseudo-bulk differential gene expression analyses for this project are presented. The method used here was developed recently by the Huber lab and is desribed in detail [here](https://www.biorxiv.org/content/10.1101/2020.08.13.249623v2).
+
+---

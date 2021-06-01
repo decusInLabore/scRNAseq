@@ -19,10 +19,10 @@ cat(paste0(
 
 
 plotGenes <- c(
-    Obio@dataTableList$referenceList$integrated_top30var[1:10]
+    Obio@dataTableList$referenceList$integrated_top30var[1:5]
 )
 
-plotParts <- ceiling(length(plotGenes)/2)
+plotParts <- length(plotGenes)
 
 chnkVec <- as.vector(NULL, mode = "character")
 plotListF <- list()
@@ -30,7 +30,7 @@ plotListF <- list()
 for (i in 1:plotParts){
     tag1 <- paste0("Featureplot_",i)
     
-    featureGenes <- c(plotGenes[((2*i)-1)], plotGenes[((2*i))])
+    featureGenes <- plotGenes[i]
     
     plotListF[[tag1]] <- FeaturePlot(
         OsC,
@@ -49,22 +49,31 @@ for (i in 1:plotParts){
         print(plotListF[[tag1]])
     dev.off()
     
-    linkFeatureView <- paste0('<a href="https://',urlString,'/mdata/',Obio@parameterList$project_id,'/html/FeatureView.html" target="_blank">FeatureView</a>')
+    if (exists("shinyURL") & !is.null(shinyURL)){
+        
+            linkFeatureView <- paste0(
+              'An interactive version of this figure with additional viewing options can be found <a href="',shinyURL,'?_inputs_&gene=%22',featureGenes,'%22" target="_blank">here</a>. '
+            )
+            
+    } else {
+        linkFeatureView <- ""
+    }
+    
+    
+    
     
     
 
     figLegend <-  paste0(
         "**Figure ", 
         figureCount, 
-        ":** Gene expression plot for genes ", 
-        plotGenes[((2*i)-1)], 
-        " and ", 
-        plotGenes[((2*i))],".",
-        " Results for any other gene may be plotted in ",linkFeatureView,"."
+        ":** Gene expression plot for ", 
+        featureGenes,
+        linkFeatureView
     )
       
     NewChnk <- paste0(
-        "#### Featureplot ", plotGenes[((2*i)-1)], " and ",plotGenes[((2*i))],
+        "#### Featureplot ", plotGenes[i],
         "\n```{r FeaturePlot_", i,
         ", results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",
         figLegend,"'}\n",
