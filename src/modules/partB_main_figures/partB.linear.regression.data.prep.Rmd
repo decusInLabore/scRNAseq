@@ -230,7 +230,7 @@ if (upload.results.to.database){
             user = Obio@dbDetailList$db.user,
             cat.ref.db = Obio@dbDetailList$ref.cat.db,
             cat.ref.db.table = Obio@parameterList$lab.categories.table,
-            gene.vector = gene.vec,
+            gene.vector = geneVec,
             gene.id = refGeneIDcolumn, #options hgnc_symbol, mgi_symbol
             mm.hs.conversion.file =  paste0(cwd, "/assets/annotation/homologene.data.txt"),
             cat_name = cat.name,
@@ -323,7 +323,7 @@ if (upload.results.to.database){
             user = Obio@dbDetailList$db.user,
             cat.ref.db = Obio@dbDetailList$ref.cat.db,
             cat.ref.db.table = Obio@parameterList$lab.categories.table,
-            gene.vector = gene.vec,
+            gene.vector = geneVec,
             gene.id = refGeneIDcolumn, #options hgnc_symbol, mgi_symbol
             mm.hs.conversion.file =  paste0(cwd, "/assets/annotation/homologene.data.txt"),
             cat_name = cat.name,
@@ -352,7 +352,7 @@ if (upload.results.to.database){
         
         clusterName <- c(
             clusterName,
-            names(DGEmarkerGeneList)[i]
+            names(LRmarkerGeneList)[i]
         )
     }
 }

@@ -40,6 +40,7 @@ source("assets/R/SBwebtools.pckg.r")
 
 upload.results.to.database <- TRUE
 save.chunk.intermediates <- TRUE
+shinyURL <- "https://shiny-bioinformatics.crick.ac.uk/shiny/boeings/GSE129455_app/"
 
 ###############################################################################
 ##                                                                           ##

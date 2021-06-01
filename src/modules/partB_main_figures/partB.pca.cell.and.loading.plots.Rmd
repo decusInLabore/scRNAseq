@@ -126,7 +126,17 @@ for (i in 1:length(xVec)){
         print(plotListCell[[tag]])
     dev.off()
     
-    link <- paste0('<a href="https://',urlString,'/',Obio@parameterList$project_id,'/pca?x_axis=',gsub('_', '', xVec[i]),'&y_axis=',gsub('_', '', yVec[i]),'" target = "_blank">here</a>')
+    # link <- paste0('<a href="https://',urlString,'/',Obio@parameterList$project_id,'/pca?x_axis=',gsub('_', '', xVec[i]),'&y_axis=',gsub('_', '', yVec[i]),'" target = "_blank">here</a>')
+    
+    if (exists("shinyURL") & !is.null(shinyURL)){
+        
+            link <- paste0(
+              'An interactive version of this figure with additional viewing options can be found <a href="',shinyURL,'?_inputs_&y_axis=%22',yVec[i],'%22&colorBy=%22clusterName%22&splitByColumn=%22all%22&x_axis=%22',xVec[i],'%22" target="_blank">here</a>. '
+            )
+            
+    } else {
+        link <- ""
+    }
     
     figCap <- paste0(
         '**Figure, ' ,figureCount,'A:** Cell-level PCA plot for dimensions ', xVec[i], ' and ', yVec[i],'. ', 
