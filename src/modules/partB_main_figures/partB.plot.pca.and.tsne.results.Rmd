@@ -49,8 +49,8 @@ minX <- 1.1*min(dfPlot$UMAP_1, na.rm = T)
 maxY <- 1.1*max(dfPlot$UMAP_2, na.rm = T)
 minY <- 1.1*min(dfPlot$UMAP_2, na.rm = T)            
 
-library(scales)
-clusterCols = hue_pal()(length(clusterVec))
+#library(scales)
+clusterCols = scales::hue_pal()(length(clusterVec))
 
 # dotsize  = 1
 # if (nrow(dfPlot) > 10000){

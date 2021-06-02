@@ -1,14 +1,14 @@
 "query"
-"DROP TABLE IF EXISTS GSE129455_gene_expr_tb;
+"DROP TABLE IF EXISTS PBMC10k_gene_expr_tb;
 "
-"CREATE TABLE IF NOT EXISTS GSE129455_gene_expr_tb (gene VARCHAR(100) CHARACTER SET latin1 COLLATE latin1_swedish_ci, cellID VARCHAR(100) CHARACTER SET latin1 COLLATE latin1_swedish_ci, lg10Expr DECIMAL(6,3) NULL DEFAULT NULL, row_names INT(10) NOT NULL AUTO_INCREMENT,PRIMARY KEY (row_names)); "
-"LOAD DATA LOCAL INFILE '/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/439_scRNAseq_KPC_PDAC_GSE129455/workdir/temp.GSE129455.csv' INTO TABLE GSE129455_gene_expr_tb FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '
+"CREATE TABLE IF NOT EXISTS PBMC10k_gene_expr_tb (gene VARCHAR(100) CHARACTER SET latin1 COLLATE latin1_swedish_ci, cellID VARCHAR(100) CHARACTER SET latin1 COLLATE latin1_swedish_ci, lg10Expr DECIMAL(6,3) NULL DEFAULT NULL, row_names INT(10) NOT NULL AUTO_INCREMENT,PRIMARY KEY (row_names)); "
+"LOAD DATA LOCAL INFILE '/camp/stp/babs/working/boeings/Projects/boeings/stefan.boeing/426_scRNAseq_PBMC_10k/workdir/temp.PBMC10k.csv' INTO TABLE PBMC10k_gene_expr_tb FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '
 ' IGNORE 1 LINES (gene, cellID, lg10Expr, row_names);"
-"ALTER TABLE GSE129455_gene_expr_tb ADD UNIQUE(row_names);"
-"CREATE INDEX idx_gene ON GSE129455_gene_expr_tb (gene);"
-"GRANT SELECT on chl_data.GSE129455_PCA TO GSE129455_scDat@'shiny-bioinformatics.crick.ac.uk';"
-"GRANT SELECT on chl_data.GSE129455_PCA TO GSE129455_scDat@'10.%';"
-"GRANT SELECT on chl_data.GSE129455_gene_expr_tb TO GSE129455_scDat@'shiny-bioinformatics.crick.ac.uk';"
-"GRANT SELECT on chl_data.GSE129455_gene_expr_tb TO GSE129455_scDat@'10.%';"
-"GRANT SELECT on chl_data.GSE129455_geneID_tb TO GSE129455_scDat@'shiny-bioinformatics.crick.ac.uk';"
-"GRANT SELECT on chl_data.GSE129455_geneID_tb TO GSE129455_scDat@'10.%';"
+"ALTER TABLE PBMC10k_gene_expr_tb ADD UNIQUE(row_names);"
+"CREATE INDEX idx_gene ON PBMC10k_gene_expr_tb (gene);"
+"GRANT SELECT on immuno_ref_data.PBMC10k_PCA TO PBMC10k_scData@'shiny-bioinformatics.crick.ac.uk';"
+"GRANT SELECT on immuno_ref_data.PBMC10k_PCA TO PBMC10k_scData@'10.%';"
+"GRANT SELECT on immuno_ref_data.PBMC10k_gene_expr_tb TO PBMC10k_scData@'shiny-bioinformatics.crick.ac.uk';"
+"GRANT SELECT on immuno_ref_data.PBMC10k_gene_expr_tb TO PBMC10k_scData@'10.%';"
+"GRANT SELECT on immuno_ref_data.PBMC10k_geneID_tb TO PBMC10k_scData@'shiny-bioinformatics.crick.ac.uk';"
+"GRANT SELECT on immuno_ref_data.PBMC10k_geneID_tb TO PBMC10k_scData@'10.%';"

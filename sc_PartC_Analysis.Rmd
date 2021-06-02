@@ -585,6 +585,7 @@ if (Obio@dbDetailList$host == "10.27.241.234"){
 
 }
 
+
 shinyProjectPath <-paste0(
     shinyBasePath, 
     Obio@parameterList$project_id, "_app"
@@ -1214,7 +1215,7 @@ pos <- grep("dfClusterResiduals", names(Obio@dataTableList))
 if (length(pos) == 1){
 
 dfAdd <- Obio@dataTableList$dfClusterResiduals
-
+names(dfAdd)[names(dfAdd) != "gene"] <- paste0(names(dfAdd)[names(dfAdd) != "gene"], "_Residuals")
 
 names(dfAdd)[grep("Residuals", names(dfAdd))] <- paste0("add_counts_", names(dfAdd)[grep("Residuals", names(dfAdd))])
 
