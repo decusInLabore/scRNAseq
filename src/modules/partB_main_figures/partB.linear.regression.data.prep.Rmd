@@ -212,6 +212,7 @@ if (Obio@parameterList$geneIDcolumn != "hgnc_symbol" & Obio@parameterList$geneID
 if (upload.results.to.database){
     for (i in 1:length(DGEmarkerGeneList)){
         cat.name <- paste0(
+            Obio@parameterList$project_id, "_",
             names(DGEmarkerGeneList)[i],
             "_Cluster_Markers_DGE"
         )
@@ -305,6 +306,7 @@ if (Obio@parameterList$geneIDcolumn != "hgnc_symbol" & Obio@parameterList$geneID
 if (upload.results.to.database){
     for (i in 1:length(LRmarkerGeneList)){
         cat.name <- paste0(
+            Obio@parameterList$project_id, "_",
             names(LRmarkerGeneList)[i],
             "_Cluster_Markers_LR"
         )
