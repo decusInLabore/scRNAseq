@@ -78,7 +78,7 @@ db.pwd <- as.vector(dbTable[1,1])
 
 figureCount <- 1
 
-source("assets/SBwebtools.pckg.r")
+source("assets/R/SBwebtools.pckg.r")
 
 if (length(.libPaths()) > 2){
     .libPaths(.libPaths()[2:3])
@@ -99,9 +99,7 @@ Obio <- setMountingPoint(Obio)
 Obio <- setAnalysisPaths(Obio)
 Obio <- setCrickGenomeAndGeneNameTable(Obio)
 Obio <- createAnalysisFolders(
-    Obio,
-    baseDir="/camp/stp/babs/working/boeings/Projects/",
-    localBaseDir = paste0(hpc.mount, "Projects/")
+    Obio
 )
 Obio <- setDataBaseParameters(Obio)
 
@@ -118,6 +116,14 @@ if (Obio@parameterList$host == "10.27.241.234"){
 }
 
 legendDotSize <- 5
+
+
+shinyURL <- paste0(
+    "https://shiny-bioinformatics.crick.ac.uk/shiny/boeings/",
+    Obio@parameterList$project_id,
+    "_app/"
+)            
+    
 
 ## Set file paths ##
 baseFN <- paste0(
@@ -397,7 +403,7 @@ for (i in 1:length(DGEinputList)){
             
             
     ## Add cluster colors ##
-    dfPlot[["Cluster"]] <- dfPlot[,unlist(DGEinputList[[i]]["name"])]
+    dfPlot[["Cluster"]] <- dfPlot[,paste0("meta_", unlist(DGEinputList[[i]]["name"]))]
     dfPlot$Cluster[is.na(dfPlot$Cluster)] <- ""
     dfPlot[dfPlot$Cluster == "", "Cluster"] <- "Rest"
     
@@ -485,7 +491,16 @@ for (i in 1:length(DGEinputList)){
           print(plotList[[tag]])
       dev.off()
             
-      link <- paste0('<a href="https://',urlString,'/',Obio@parameterList$project_id,'/pca?x_axis=UMAP_1&y_axis=UMAP_2" target="_blank">here</a>')  
+      # link <- paste0('<a href="https://',urlString,'/',Obio@parameterList$project_id,'/pca?x_axis=UMAP_1&y_axis=UMAP_2" target="_blank">here</a>')  
+      
+      if (exists("shinyURL") & !is.null(shinyURL)){
+          link <- paste0(
+                  'An interactive version of this figure with additional viewing options can be found <a href="',shinyURL,'?_inputs_&y_axis=%22UMAP_2%22&x_axis=%22UMAP_1%22&colorBy=%22',paste0("meta_", tag),'%22&splitByColumn=%22all%22" target="_blank">here</a>. '
+          )
+                
+      } else {
+          link <- ""
+      }
             
       figLegend <- paste0(
       '**Figure ', 
@@ -544,7 +559,7 @@ cat(paste(knit(text = chnkVec, quiet = T), collapse = '\n'))
 
 ###############################################################################
 ## Assemble DGE summary table                                                ##
-dfTemp <- Obio@dataTableList[["DGE_table"]] 
+#dfTemp <- Obio@dataTableList[["DGE_table"]] 
 
 library(openxlsx)
 wb <- createWorkbook()
@@ -620,18 +635,18 @@ Obio@dataTableList[["DGE_table"]] <- NULL
 Obio@dataTableList[["DGE_table"]] <- dfTemp
 
 ## Save DGE table to file ##
-tempDir <- paste0(Obio@parameterList$localWorkDir,"temp")
-            if(!dir.exists(tempDir)){
-                dir.create(tempDir)
-            }
-
-FN <- paste0(Obio@parameterList$localWorkDir, "/temp/DGE.result.table.txt")
-write.table(
-    dfTemp,
-    FN,
-    row.names = F, 
-    sep = "\t"
-)
+# tempDir <- paste0(Obio@parameterList$localWorkDir,"temp")
+#             if(!dir.exists(tempDir)){
+#                 dir.create(tempDir)
+#             }
+# 
+# FN <- paste0(Obio@parameterList$localWorkDir, "/temp/DGE.result.table.txt")
+# write.table(
+#     dfTemp,
+#     FN,
+#     row.names = F, 
+#     sep = "\t"
+# )
 
 ## Done adding DGE table                                                     ##
 ###############################################################################
@@ -1324,6 +1339,11 @@ cat(paste(knit(text = chnkVec, quiet = T), collapse = '\n'))
 
 ```
 
+
+<!-- Essential N: Upload meta data table -->
+```{r child = 'src/modules/db_tools/upload.meta.data.table.to.DB.Rmd', eval=TRUE}
+
+```
 
 
 ```{r documentation_saving, echo=F, eval=TRUE, warning=FALSE, results=F} 
