@@ -1152,7 +1152,7 @@ setGeneric(
 
                 assign(
                     "fullMat", #names(obj@parameterList[[obj@parameterList$inputMode]])[i],
-                    Read10X_h5(filename = dataDir, use.names = TRUE, unique.features = TRUE)
+                    Seurat::Read10X_h5(filename = dataDir, use.names = TRUE, unique.features = TRUE)
                 )
 
             } else {
@@ -1169,7 +1169,7 @@ setGeneric(
 
                 assign(
                     "fullMat", #names(obj@parameterList[[obj@parameterList$inputMode]])[i],
-                    Read10X(data.dir = dataDir, gene.column = gene.column)
+                    Seurat::Read10X(data.dir = dataDir, gene.column = gene.column)
                 )
 
 
@@ -1342,9 +1342,9 @@ setGeneric(
 
         # type must be in c("TenX", "matrixFiles", "loomFiles", "hdf5Files")
         if ( obj@sampleDetailList[[sampleID]]$type == "loomFiles" ){
-            library(loomR)
+            #library(loomR)
             loomFN <- obj@sampleDetailList[[sampleID]]$path
-            lfile <- connect(filename = loomFN, mode = "r+")
+            lfile <- loomR::connect(filename = loomFN, mode = "r+")
 
             fullMat <- lfile$matrix[, ]
 
@@ -1374,7 +1374,7 @@ setGeneric(
 
             assign(
                 "fullMat", #names(obj@parameterList[[obj@parameterList$inputMode]])[i],
-                Read10X_h5(filename = dataDir, use.names = TRUE, unique.features = TRUE)
+                Seurat::Read10X_h5(filename = dataDir, use.names = TRUE, unique.features = TRUE)
             )
 
         } else {
@@ -1391,7 +1391,7 @@ setGeneric(
 
             assign(
                 "fullMat", #names(obj@parameterList[[obj@parameterList$inputMode]])[i],
-                Read10X(data.dir = dataDir, gene.column = gene.column)
+                Seurat::Read10X(data.dir = dataDir, gene.column = gene.column)
             )
 
         }
