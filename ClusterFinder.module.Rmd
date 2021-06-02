@@ -332,6 +332,16 @@ selVec <- c(
 )
 
 dfMeta <- dfMeta[,selVec]
+
+selVec2 <- c(
+    names(dfMeta)[grep("_res_", names(dfMeta))]
+)
+
+for (i in 1:length(selVec2)){
+    dfMeta[,selVec2[i]] <- paste0("C", dfMeta[,selVec2[i]] )
+}
+
+
 names(dfMeta) <- gsub(paste0(tagString, "_snn_res_"), "ClusterTestRes_",names(dfMeta))
 names(dfMeta) <- gsub(paste0(tagString, "_rnn_res_"), "ClusterTestRes_",names(dfMeta))
 

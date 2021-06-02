@@ -585,6 +585,7 @@ if (Obio@dbDetailList$host == "10.27.241.234"){
 
 }
 
+
 shinyProjectPath <-paste0(
     shinyBasePath, 
     Obio@parameterList$project_id, "_app"
