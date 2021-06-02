@@ -93,7 +93,7 @@ resList <- profileCluster(
     # Input gmt file with categories to test: dfGmt
     # Output: table with enrichments
     obj = Obio,
-    markerList = Obio@dataTableList[["residualClusterMarkers"]],
+    markerList = Obio@dataTableList[["LRmarkerGeneList"]],
     gmtList = gmtList,
     nTop = 15,
     pvalueCutoff= 0.5
