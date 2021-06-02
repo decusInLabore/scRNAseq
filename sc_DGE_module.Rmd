@@ -142,9 +142,12 @@ FNrel <- paste0("report_tables/", baseFN)
  
 
 ## Create table link string ##
+
 tableLink <- paste0('<a href="https://',urlString,'/mdata/',Obio@parameterList$project_id, '/html/', FNrel,' target="_blank">here</a>')  
 
-tableString <- paste0('An Excel table with the DGE results can be downloaded  <a href="https://',urlString,'/mdata/',Obio@parameterList$project_id, '/html/', FNrel,' target="_blank">here</a>.')
+tableString <- paste0('An Excel table with the DGE results can be downloaded ',
+                      tableLink
+)
 
 
 load(paste0(
@@ -507,7 +510,7 @@ for (i in 1:length(DGEinputList)){
       figureCount, 
                 ':** ',
                 ' UMAP showing all cells from all samples together. Download a pdf of this figure <a href="',FNrel,'" target="_blank">here</a>. ',
-                'An interactive version of this figure can be found ', link, '. '
+                'An interactive version of this figure can be found ', link
             )
             
       figureCount <- figureCount + 1
