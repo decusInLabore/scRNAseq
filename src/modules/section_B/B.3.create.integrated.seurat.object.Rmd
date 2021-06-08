@@ -120,7 +120,7 @@ Seurat::Idents(OsC) <- factor(Seurat::Idents(OsC), levels = names(Obio@sampleDet
 
 OsC@meta.data[["cellID"]] <- row.names(OsC@meta.data)
 
-
+DefaultAssay(OsC) <- "RNA"
 ###############################################################################
 ## Setting plotting parameters                                               ##
 dotsize  = 1
