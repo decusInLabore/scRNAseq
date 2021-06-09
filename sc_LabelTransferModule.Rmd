@@ -260,20 +260,20 @@ transfer.anchors <- Seurat::FindTransferAnchors(
 # Oref <- transfer.list[["Zeppelli"]]
 predictions <- Seurat::TransferData(
     anchorset = transfer.anchors, 
-    refdata = transfer.list[["Tepe"]]$meta_Zeppilli_subclusters, 
+    refdata = transfer.list[["Tepe"]]$meta_ClusterName_Tepe, 
     weight.reduction = "cca",
     dims = 1:Obio@parameterList$singleCellSeuratNpcs4PCA
 )
 transfer.query <- AddMetaData(transfer.query, metadata = predictions)
 
 dfAdd <- transfer.query@meta.data[,c("predicted.id", "cellID")]
-names(dfAdd) <- gsub("predicted.id", "meta_Zeppilli_subclusters", names(dfAdd))
+names(dfAdd) <- gsub("predicted.id", "meta_ClusterName_Tepe", names(dfAdd))
 
 ## Get other half ##
-dfAdd2 <- transfer.list[["Zeppelli"]]@meta.data[,c("meta_Zeppilli_subclusters", "cellID")]
+dfAdd2 <- transfer.list[["Tepe"]]@meta.data[,c("meta_ClusterName_Tepe", "cellID")]
 
 dfAddFinal <- rbind(dfAdd, dfAdd2)
-names(dfAddFinal) <- gsub("meta_Zeppilli_subclusters","meta_LT_Zeppilli_subclusters", names(dfAddFinal))
+names(dfAddFinal) <- gsub("meta_ClusterName_Tepe","meta_LT_ClusterName_Tepe", names(dfAddFinal))
 row.names(dfAddFinal) <- dfAddFinal$cellID
 dfAddFinal$cellID <- NULL
 
@@ -304,6 +304,12 @@ save(OsC,
 #database.table[is.na(database.table)] <- 0
 ## Done adding extra dataset                                                 ##
 ###############################################################################
+```
+
+
+```{r make_figures, eval=TRUE, echo=F, results=F}
+
+
 ```
 
 ```{r saveobject, eval=TRUE, echo=T, results=F}
