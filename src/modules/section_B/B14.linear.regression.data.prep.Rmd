@@ -492,6 +492,8 @@ for (i in 1:length(clusterVec)){
     clusterCol <- as.vector(dfClustCol$clusterCol)
     # pos <- grep(paste0(gsub("C_", "Cluster_",clusterVec[i]),"$"), dfFAMplotIDs$cat_name)
     
+    pos <- grep(paste0(clusterVec[i]), dfDGElegend$clusterName)
+    
     DGEcatID <- ""
     if (length(pos) == 1){
       DGEcatID <- as.vector(dfDGElegend[pos, "updatedCatIDs"])
