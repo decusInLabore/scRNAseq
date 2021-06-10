@@ -107,70 +107,70 @@ Chapter/Module -->
 ```
 
 
-<!-- Essential 5: (output required later): Create variation plots Chapter/Module -->
-```{r child = 'src/modules/partB_main_figures/partB.calculate.average.expression.Rmd', eval=TRUE}
+<!-- Essential 7: (output required later): Create variation plots Chapter/Module -->
+```{r child = 'src/modules/section_B/B7.calculate.average.expression.Rmd', eval=TRUE}
 ```
 
-<!-- Optional 6: (Output only): Create pca plots Chapter/Module -->
-```{r child = 'src/modules/partB_main_figures/partB.plot.pca.and.tsne.results.Rmd', eval=TRUE}
+<!-- Optional 8: (Output only): Create pca plots Chapter/Module -->
+```{r child = 'src/modules/section_B/B8.plot.pca.and.tsne.results.Rmd', eval=TRUE}
 ```
 
-<!-- Optional 7: (Output only): Create pca plots Chapter/Module -->
-```{r child = 'src/modules/partB_main_figures/partB.euclidian.distances.figure.Rmd', eval=TRUE}
+<!-- Optional 9: (Output only): Create pca plots Chapter/Module -->
+```{r child = 'src/modules/section_B/B9.euclidian.distances.figure.Rmd', eval=TRUE}
 ```
 
 
-<!-- Optional 8: (Output only): Doublet Estimate Chapter/Module -->
-```{r child = 'src/modules/partB_main_figures/partB.doublet.estimation.plots.Rmd', eval=TRUE}
+<!-- Optional 10: (Output only): Doublet Estimate Chapter/Module -->
+```{r child = 'src/modules/section_B/B10.doublet.estimation.plots.Rmd', eval=TRUE}
 ```
 
-<!-- Optional 9: (Output only): Doublet Estimate Chapter/Module -->
-```{r child = 'src/modules/partB_main_figures/cell.cycle.phase.plots.Rmd', eval=TRUE}
+<!-- Optional 11: (Output only): Doublet Estimate Chapter/Module -->
+```{r child = 'src/modules/section_B/B11.cell.cycle.phase.plots.Rmd', eval=TRUE}
 ```
 
-<!-- Optional 10: (Output only): Cell Distribution Barchart Chapter/Module -->
-```{r child = 'src/modules/partB_main_figures/partB.Ncell.barchart.plots.Rmd', eval=TRUE}
+<!-- Optional 12: (Output only): Cell Distribution Barchart Chapter/Module -->
+```{r child = 'src/modules/section_B/B12.Ncell.barchart.plots.Rmd', eval=TRUE}
 ```
 
-<!-- Optional 11: (Output only):Category Enrichments Chapter/Module -->
-```{r child = 'src/modules/partB_main_figures/partB.AUC.cat.enrichments.Rmd', eval=TRUE}
+<!-- Optional 13: (Output only):Category Enrichments Chapter/Module -->
+```{r child = 'src/modules/section_B/B13.AUC.cat.enrichments.Rmd', eval=TRUE}
 ```
 
-<!-- Essential 12: (output required later):Category Linear Regression Marker Gene Data Prep Chapter/Module -->
-```{r child = 'src/modules/partB_main_figures/partB.linear.regression.data.prep.Rmd', eval=TRUE}
+<!-- Essential 14: (output required later):Category Linear Regression Marker Gene Data Prep Chapter/Module -->
+```{r child = 'src/modules/section_B/B14.linear.regression.data.prep.Rmd', eval=TRUE}
 ```
 
-<!-- Essential 13: (output required later):Category Linear Regression Marker Gene Data Prep Chapter/Module -->
-```{r child = 'src/modules/partB_main_figures/partB.heatmaps.and.dotplots.Rmd', eval=TRUE}
-```
-
-<!-- Essential 14: (output required later):Category Make cluster table Data Prep Chapter/Module -->
-```{r child = 'src/modules/partB_main_figures/partB.make.cluster.table.Rmd', eval=TRUE}
-```
-
-<!-- Essential 15: (output required later):Category Make cluster table Data Prep Chapter/Module -->
-```{r child = 'src/modules/partB_main_figures/partB.cell.type.estimate.Rmd', eval=TRUE}
+<!-- Essential 15: (output required later):Category Linear Regression Marker Gene Data Prep Chapter/Module -->
+```{r child = 'src/modules/section_B/B15.heatmaps.and.dotplots.Rmd', eval=TRUE}
 ```
 
 <!-- Essential 16: (output required later):Category Make cluster table Data Prep Chapter/Module -->
-```{r child = 'src/modules/partB_main_figures/partB.gene.set.heatmaps.Rmd', eval=TRUE}
+```{r child = 'src/modules/section_B/B16.make.cluster.table.Rmd', eval=TRUE}
 ```
 
-
 <!-- Essential 17: (output required later):Category Make cluster table Data Prep Chapter/Module -->
-```{r child = 'src/modules/partB_main_figures/partB.example.feature.plots.Rmd', eval=TRUE}
+```{r child = 'src/modules/section_B/B17.cell.type.estimate.Rmd', eval=TRUE}
 ```
 
 <!-- Essential 18: (output required later):Category Make cluster table Data Prep Chapter/Module -->
-```{r child = 'src/modules/partB_main_figures/partB.pca.cell.and.loading.plots.Rmd', eval=TRUE}
+```{r child = 'src/modules/section_B/B18.gene.set.heatmaps.Rmd', eval=TRUE}
 ```
 
-<!-- Optional 19: (output required later):Category Make cluster table Data Prep Chapter/Module -->
-```{r child = 'src/modules/partB_main_figures/partB.pseudotime.Rmd', eval=TRUE}
+
+<!-- Essential 19: (output required later):Category Make cluster table Data Prep Chapter/Module -->
+```{r child = 'src/modules/section_B/B19.example.feature.plots.Rmd', eval=TRUE}
 ```
 
-<!-- Optional 20: (output required later): Add extra tables Chapter/Module -->
-```{r child = 'src/modules/partB_main_figures/partB.add.extra.tables.Rmd', eval=TRUE}
+<!-- Essential 20: (output required later):Category Make cluster table Data Prep Chapter/Module -->
+```{r child = 'src/modules/section_B/B20.pca.cell.and.loading.plots.Rmd', eval=TRUE}
+```
+
+<!-- Optional 21: (output required later):Category Make cluster table Data Prep Chapter/Module -->
+```{r child = 'src/modules/section_B/B21.pseudotime.Rmd', eval=TRUE}
+```
+
+<!-- Optional 22: (output required later): Add extra tables Chapter/Module -->
+```{r child = 'src/modules/section_B/B22.add.extra.tables.Rmd', eval=TRUE}
 ```
 
 
