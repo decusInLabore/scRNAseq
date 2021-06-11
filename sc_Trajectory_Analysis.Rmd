@@ -1,0 +1,1080 @@
+---
+
+output: 
+    html_document:
+        highlight: default
+        theme: paper
+        code_folding: hide
+        df_print: tibble
+        toc: true
+        toc_depth: 3
+        toc_float: true
+        css: /camp/stp/babs/working/boeings/Stefan/protocol_files/github/boeings/templates/style/style.css
+
+---
+    
+    
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+    tidy = TRUE,
+    tidy.opts = list(width.cutoff = 120),
+    message = FALSE,
+    warning = FALSE
+)
+```
+
+
+```{r hpc_notes, include=FALSE}
+
+## Get interactive session ##
+#  srun --time=08:00:00 --mem=40G -p int --pty bash
+
+# module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/3.6.0-foss-2016b-BABS;R;
+
+# sbatch --time=12:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/3.6.0-foss-2016b-BABS;Rscript runA.r" --job-name="rA"  --mem=100G -o rA.slurm >> commands.txt
+
+# sbatch --time=24:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/3.6.0-foss-2016b-BABS;Rscript runDGE.r" --job-name="rDGE" -p hmem --mem=300G -o rDGE.slurm >> commands.txt
+
+# --mem-per-cpu=14G -p hmem --pty bash
+
+```
+
+```{r populate_meta_data_database, eval=TRUE, echo=F, results=F}
+#Create the environment and load a suitable version of R, e.g. so:
+VersionPdfExt <- paste0(".V", gsub("-", "", Sys.Date()), ".pdf")
+
+if (dir.exists("/Volumes/babs/working/boeings/")){
+    hpc.mount <- "/Volumes/babs/working/boeings/"
+} else if (dir.exists("Y:/working/boeings/")){
+    hpc.mount <- "Y:/working/boeings/"
+} else if (dir.exists("/camp/stp/babs/working/boeings/")){
+    hpc.mount <- "/camp/stp/babs/working/boeings/"
+} else {
+    hpc.mount <- ""
+}
+
+
+FN <- paste0(hpc.mount, "Projects/reference_data/documentation/BC.parameters.txt")
+dbTable <- read.delim(
+    FN, 
+    sep = "\t",
+    stringsAsFactors = F
+)
+
+db.pwd <- as.vector(dbTable[1,1])
+
+figureCount <- 1
+
+source("assets/R/SBwebtools.pckg.r")
+source("assets/R/scTools.r")
+
+if (length(.libPaths()) > 2){
+    .libPaths(.libPaths()[2:3])
+}
+## Create biologic Object for visualization ##
+
+ObioFN <- paste0("../", list.files("..")[grep(".bioLOGIC.Robj", list.files(".."))])
+
+load(ObioFN)
+
+checkFile = paste0(
+         Obio@parameterList$project_id,
+         ".bioLOGIC.Robj"
+)
+
+
+Obio <- setMountingPoint(Obio)
+Obio <- setAnalysisPaths(Obio)
+Obio <- setCrickGenomeAndGeneNameTable(Obio)
+Obio <- createAnalysisFolders(
+    Obio
+)
+Obio <- setDataBaseParameters(Obio)
+
+## Upload metadata table > p315_PCA
+# Obio@parameterList$host <- "10.152.22.193"
+# Obio@parameterList$db.user <- "boeingS"
+# db.pwd <- "5+3f4nB040420"
+
+
+ObioFN <- paste0("../", list.files("..")[grep(".Seurat.Robj", list.files(".."))])
+
+load(ObioFN)
+
+## Create url string
+if (Obio@parameterList$host == "10.27.241.234"){
+    urlString <- "biologic.thecrick.org"
+} else {
+    urlString <- "biologic.crick.ac.uk"
+}
+
+legendDotSize <- 5
+
+
+shinyURL <- paste0(
+    "https://shiny-bioinformatics.crick.ac.uk/shiny/boeings/",
+    Obio@parameterList$project_id,
+    "_app/"
+)            
+    
+
+## Set file paths ##
+baseFN <- paste0(
+   Obio@parameterList$project_id, 
+   ".trajectory.table.xlsx"
+)
+
+
+outPutFN <- paste0(
+     Obio@parameterList$reportTableDir,
+     baseFN
+)
+  
+ 
+FNrel <- paste0("report_tables/", baseFN)
+ 
+
+## Create table link string ##
+
+tableLink <- paste0('<a href="https://',urlString,'/mdata/',Obio@parameterList$project_id, '/html/', FNrel,' target="_blank">here</a>')  
+
+tableString <- paste0('An Excel table with the DGE results can be downloaded ',
+                      tableLink
+)
+```
+
+```{r runSlingshot, echo=F, eval=T, warning=FALSE, results="asis"}
+
+# Slingshot documentation is available here:https://bioconductor.org/packages/devel/bioc/vignettes/slingshot/inst/doc/vignette.html
+
+library(Seurat)
+library(slingshot)
+
+## Filtering for uninformative genes (expressed in less than 1% of cells) ##
+dfPerc <- Obio@dataTableList$dfPercCellsExpr
+dim(dfPerc)
+dfPerc <-dfPerc[dfPerc$count_cut_off > 1,]
+dim(dfPerc)
+
+# Reduce object to the most variable genes 
+# @ OsC@assays$integrated@var.features
+
+OsC <- subset(
+    OsC, 
+    cells = NULL, 
+    features = unique(dfPerc$gene)
+)
+
+###############################################################################
+## Annotate lineages in seurat object and split                              ##
+
+lineageList <- list(
+    "subT1" = c(4,1,2),
+    "subT2" = c(4, 5, 10, 0, 6, 3),
+    "subT3" = c(4,11)
+)
+
+for (i in 1:length(lineageList)){
+    OsC@meta.data[[names(lineageList)[i]]] <- "Rest"
+    OsC@meta.data[OsC@meta.data$seurat_clusters %in% lineageList[[i]], names(lineageList)[i]] <- "Selected"
+}
+
+
+
+ 
+## Done                                                                      ##
+###############################################################################
+
+OsubT1 <- SplitObject(OsC, split.by = "subT1")
+OsubT1 <- OsubT1[["Selected"]]
+OsubT1_sce <- as.SingleCellExperiment(OsubT1)
+
+sceSubT1 <- slingshot(
+    OsubT1_sce, 
+    clusterLabels = 'seurat_clusters',
+    reducedDim = "PCA",
+    allow.breaks = FALSE
+)
+save(sceSubT1, file = paste0(Obio@parameterList$localWorkDir, "sceSubT1.rds"))
+
+OsubT2 <- SplitObject(OsC, split.by = "subT2")
+OsubT2 <- OsubT2[["Selected"]]
+OsubT2_sce <- as.SingleCellExperiment(OsubT2)
+sceSubT2 <- slingshot(
+    OsubT2_sce, 
+    clusterLabels = 'seurat_clusters',
+    reducedDim = "PCA",
+    allow.breaks = FALSE
+)
+save(sceSubT2, file = paste0(Obio@parameterList$localWorkDir, "sceSubT2.rds"))
+
+OsubT3 <- SplitObject(OsC, split.by = "subT3")
+OsubT3 <- OsubT3[["Selected"]]
+OsubT3_sce <- as.SingleCellExperiment(OsubT3)
+sceSubT3 <- slingshot(
+    OsubT3_sce, 
+    clusterLabels = 'seurat_clusters',
+    reducedDim = "PCA",
+    allow.breaks = FALSE
+)
+save(sceSubT3, file = paste0(Obio@parameterList$localWorkDir, "sceSubT3.rds"))
+##
+
+
+
+# save(sce, file = paste0(Obio@parameterList$localWorkDir, "sce.rds"))
+#load(file = paste0(Obio@parameterList$localWorkDir, "sceSubT3.rds"))
+
+###############
+## Frirst subT1
+cl <- factor(as.vector(sceSubT1$seurat_clusters))
+rd <- reducedDims(sceSubT1)$PCA
+
+
+lin1 <- getLineages(rd, cl, start.clus= '4', end.clus = '1')
+
+pdf("../subT1.pdf")
+plot(rd, col = brewer.pal(9,"Set1")[cl], asp = 1, pch = 16)
+lines(SlingshotDataSet(lin1), lwd = 3, col = 'black')
+dev.off()
+
+## plot smoothed curve ##
+# crv1 <- getCurves(lin1)
+# 
+# pdf("../ttest.pdf")
+# plot(rd, col = brewer.pal(9,"Set1")[cl], asp = 1, pch = 16)
+# lines(SlingshotDataSet(crv1), lwd = 3, col = 'black')
+# dev.off()
+
+## Extract Pseudotime ##
+dfRes <- data.frame(
+    ST1_Pseudotime_Cortex = sceSubT1$slingPseudotime_1,
+    cellID = sceSubT1$cellID
+)
+
+row.names(dfRes) <- dfRes$cellID
+
+dfIDs <- unique(OsC@meta.data[,c("cellID", "seurat_clusters")])
+
+dfRes <- merge(
+    dfRes, 
+    dfIDs, 
+    by.x = "cellID",
+    by.y = "cellID",
+    all =T
+)
+
+dfRes[is.na(dfRes)] <- 0
+names(dfRes) <- gsub("ST", "meta_ST", names(dfRes))
+dfRes$seurat_clusters <- NULL
+row.names(dfRes) <- dfRes$cellID
+dfRes$cellID <- NULL
+
+names(dfRes) <- gsub("meta_ST1_Pseudotime_Cortex", "DM_Pseudotime_Cortex",names(dfRes))
+
+OsC <- addDf2seuratMetaData(
+    OsC, 
+    dfRes
+)
+
+save(OsC,
+    file = paste0(
+         Obio@parameterList$localWorkDir,
+         Obio@parameterList$project_id,
+        ".Seurat.Robj"
+     )
+)
+
+# <!-- Essential N: Upload meta data table -->
+# ```{r child = 'src/modules/db_tools/upload.meta.data.table.to.DB.Rmd', eval=TRUE}
+# 
+# ```
+
+## Associaton test
+library(gam)
+
+# Only look at the 1,000 most variable genes when identifying temporally expressesd genes.
+# Identify the variable genes by ranking all genes by their variance.
+Y <- log2(counts(sceSubT1) + 1)
+#var1K <- names(sort(apply(Y, 1, var),decreasing = TRUE))[1:1000]
+#Y <- Y[var1K, ]  # only counts for variable genes
+Y <-  Y[OsC@assays$integrated@var.features,]
+
+# Fit GAM for each gene using pseudotime as independent variable.
+t <- sceSubT1$slingPseudotime_1
+gam.pval <- apply(Y, 1, function(z){
+  d <- data.frame(z=z, t=t)
+  tmp <- gam(z ~ lo(t), data=d)
+  p <- summary(tmp)[4][[1]][1,5]
+  p
+})
+
+# Identify genes with the most significant time-dependent model fit.
+topgenes <- names(sort(gam.pval, decreasing = FALSE))[1:100]
+
+topgenes <- unique(topgenes, c("FN1", "KRT17", "KRT14","LY754","TBATA", "FOXN1"))
+
+# Prepare and plot a heatmap of the top genes that vary their expression over pseudotime.
+require(clusterExperiment)
+
+
+
+## Get cells in pseudotime order ##
+dfOrder <- data.frame(sceSubT1@colData)
+dfOrder <- dfOrder[,c("cellID", "slingPseudotime_1", "clusterName")]
+dfOrder <- dfOrder[order(dfOrder$slingPseudotime_1, decreasing = F),]
+cellOrder <- dfOrder$cellID
+cellCluster <- dfOrder$clusterName
+
+dfDat <- OsubT1@assays$RNA@scale.data
+dfDat <- dfDat[topgenes,cellOrder]
+
+## Make heatmap
+
+## Average Pseudotime data into 100 bins ##
+mHmBase <- data.matrix(dfDat)
+            
+        if ( nrow(mHmBase) < 110){
+            showRowNames <- TRUE
+        } else {
+            showRowNames <- FALSE
+        }
+        
+        ## Create heatmap plot ##
+        library(ComplexHeatmap)
+        library(circlize)
+        f1 = colorRamp2(seq(-4, 4, length = 3), c("#3060cf", "#fffbbc","#c4463a"))    
+    
+
+        ## Create top annotation and colorbars ##
+        # from https://www.biostars.org/p/368265/
+        # from https://bioconductor.statistik.tu-dortmund.de/packages/3.1/bioc/vignettes/ComplexHeatmap/inst/doc/ComplexHeatmap.html
+        
+        
+        anno <- as.data.frame(colnames(mHmBase))
+        colnames(anno) <- "cellID"
+        anno$Group <- cellCluster
+        
+        ## Color sample groups in line with the designated sample group color ##
+        
+        #library(scales)
+        #hue_pal()(2)
+        dfSel <- OsubT1@meta.data
+        row.names(dfSel) <- dfSel$cellID
+        dfSel <- dfSel[cellOrder, ]
+        df <- unique(data.frame(OsubT1@meta.data[,c("clusterName", "clusterColor")]))
+        
+        GroupVec <- as.vector(unique(df$clusterColor))
+        names(GroupVec) <- as.vector(unique(df$clusterName))
+        
+        df2 <- unique(data.frame(OsubT1@meta.data[,c("cellID","clusterName", "clusterColor")]))
+        row.names(df2) <- df2$cellID
+        df2 <- df2[cellOrder, ]
+        df2 <- data.frame(df2[,c("clusterName")])
+        names(df2) <- "Group"
+        
+        
+        ha = HeatmapAnnotation(df = df2, col = list(Group = GroupVec))
+    
+        ht_opt(
+            legend_border = "black",
+            heatmap_border = TRUE,
+            annotation_border = TRUE
+        )
+        
+        h1 = Heatmap(
+            mHmBase,
+            column_title = gsub(
+                    "_", 
+                    " ", 
+                    paste0("Heatmap_", "SubT1_Cortex")
+            ),
+            name = "", 
+            #row_km = 5,
+            col = f1,
+           
+            show_column_names = F,
+            show_row_names = showRowNames,
+            border = TRUE,
+            cluster_columns = F,
+            
+            #Dendrogram configurations: columns
+            clustering_distance_columns="euclidean",
+            clustering_method_columns="complete",
+            column_dend_height=unit(10,"mm"),
+            
+            #Dendrogram configurations: rows
+            clustering_distance_rows="euclidean",
+            clustering_method_rows="complete",
+            row_dend_width=unit(10,"mm"),
+            top_annotation = ha,
+            show_heatmap_legend = TRUE,
+            #row_title = NULL,
+            #show_row_dend = FALSE,
+            row_names_gp = gpar(fontsize = 5)
+        ) 
+        
+    ht_opt(RESET = TRUE)
+        
+    link <- paste0("https://biologic.crick.ac.uk/",Obio@parameterList$project_id,"/category-view/",Obio@parameterList$HmDisplayCatsFromDb[[k]])
+    
+    ###########################################################################
+    ## Save plot to file                                                     ##
+    FNbase <- paste0("Heatmap.", names(Obio@parameterList$HmDisplayCatsFromDb)[k],VersionPdfExt)
+    FN <- paste0(Obio@parameterList$reportFigDir, FNbase)
+    FNrel <- paste0("report_figures/", FNbase)
+    
+    pdf(FN)
+        print(HMplotList[[names(Obio@parameterList$HmDisplayCatsFromDb)[k]]])
+    dev.off()
+    ##                                                                       ##
+    ###########################################################################
+    
+    figCap <- paste0(
+    "**Figure ",
+    figureCount,
+    ":** Heatmap showing the gene category ", gsub("_", " ", names(Obio@parameterList$HmDisplayCatsFromDb)[k]), ". ",
+        "Download a pdf of this figure [here](", FNrel, "). ",
+        "An interactive version of this heatmap with an option for further filtering can be found [here](", link, ")."
+    )
+    
+    figureCount <- figureCount + 1 
+    
+    NewChnk <- paste0(
+            "### HM_", names(Obio@parameterList$HmDisplayCatsFromDb)[k],
+            "\n```{r Heatmap_HM_",k,", results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",figCap,"'}\n",
+            "\n",
+            "\n print(HMplotList[['",names(Obio@parameterList$HmDisplayCatsFromDb)[k],"']])",
+            "\n cat(  '\n')",
+            "\n\n\n```\n"   
+    )
+    
+    chnkVec <- c(
+        chnkVec,
+        NewChnk
+    )
+
+
+## Done
+######################
+
+###############################################################################
+## Try T2    
+###############
+## Frirst subT1
+cl <- factor(as.vector(sceSubT2$seurat_clusters))
+rd <- reducedDims(sceSubT2)$PCA
+
+
+lin1 <- getLineages(rd, cl, start.clus= '4', end.clus = '3')
+res <- slingLineages(lin1 )
+
+
+pdf("../medulla.path.pdf")
+plot(rd, col = brewer.pal(9,"Set1")[cl], asp = 1, pch = 16)
+lines(SlingshotDataSet(lin1), lwd = 3, col = 'black')
+dev.off()
+
+curves <- getCurves(lineages)
+plot(dimred, col = RColorBrewer::brewer.pal(9,"Set1")[clustering], asp = 1, pch = 16)
+lines(curves, lwd = 3, col = 'black')
+
+## plot smoothed curve ##
+# crv1 <- getCurves(lin1)
+# 
+# pdf("../ttest.pdf")
+# plot(rd, col = brewer.pal(9,"Set1")[cl], asp = 1, pch = 16)
+# lines(SlingshotDataSet(crv1), lwd = 3, col = 'black')
+# dev.off()
+
+## Extract Pseudotime ##
+dfRes <- data.frame(
+    ST2_Pseudotime_Medulla = sceSubT2$slingPseudotime_1,
+    cellID = sceSubT2$cellID
+)
+
+dfRes <- na.omit(dfRes)
+
+row.names(dfRes) <- dfRes$cellID
+#dfRes$cellID <- NULL
+dfIDs <- unique(OsC@meta.data[,c("cellID", "seurat_clusters")])
+
+dfRes <- merge(
+    dfRes, 
+    dfIDs, 
+    by.x = "cellID",
+    by.y = "cellID",
+    all =T
+)
+
+dfRes[is.na(dfRes)] <- 0
+names(dfRes) <- gsub("ST", "meta_ST", names(dfRes))
+dfRes$seurat_clusters <- NULL
+row.names(dfRes) <- dfRes$cellID
+dfRes$cellID <- NULL
+
+names(dfRes) <- gsub("meta_ST2_Pseudotime_Medulla", "DM_Pseudotime_Medulla_subT2", names(dfRes))
+
+OsC <- addDf2seuratMetaData(
+    OsC, 
+    dfRes
+)
+
+save(OsC,
+    file = paste0(
+         Obio@parameterList$localWorkDir,
+         Obio@parameterList$project_id,
+        ".Seurat.Robj"
+     )
+)
+
+# <!-- Essential N: Upload meta data table -->
+# ```{r child = 'src/modules/db_tools/upload.meta.data.table.to.DB.Rmd', eval=TRUE}
+# 
+# ```
+
+## Associaton test
+library(gam)
+
+# Only look at the 1,000 most variable genes when identifying temporally expressesd genes.
+# Identify the variable genes by ranking all genes by their variance.
+Y <- log2(counts(sceSubT2) + 1)
+#var1K <- names(sort(apply(Y, 1, var),decreasing = TRUE))[1:1000]
+#Y <- Y[var1K, ]  # only counts for variable genes
+Y <-  Y[OsC@assays$integrated@var.features,]
+
+# Fit GAM for each gene using pseudotime as independent variable.
+t <- sceSubT2$slingPseudotime_1
+gam.pval <- apply(Y, 1, function(z){
+  d <- data.frame(z=z, t=t)
+  tmp <- gam(z ~ lo(t), data=d)
+  p <- summary(tmp)[4][[1]][1,5]
+  p
+})
+
+# Identify genes with the most significant time-dependent model fit.
+topgenes <- names(sort(gam.pval, decreasing = FALSE))[1:100]  
+
+topgenes <- unique(c(
+    topgenes,
+    c("CLDN3","ASCL1","MYOG","MYOD","TTN","FOXI1","ASCL3","KRT7","NEUROD1","SOX2","IRX2","ATOH1","FN1","KRT17","KRT14")
+))
+
+
+# Prepare and plot a heatmap of the top genes that vary their expression over pseudotime.
+#require(clusterExperiment)
+
+
+
+## Get cells in pseudotime order ##
+dfOrder <- data.frame(sceSubT2@colData)
+dfOrder <- dfOrder[!is.na(dfOrder$slingPseudotime_1) ,]
+dfOrder <- dfOrder[dfOrder$cellID %in% row.names(dfRes),]
+
+dfOrder <- dfOrder[,c("cellID", "slingPseudotime_1", "clusterName")]
+dfOrder <- dfOrder[order(dfOrder$slingPseudotime_1, decreasing = F),]
+cellOrder <- dfOrder$cellID
+cellCluster <- dfOrder$clusterName
+
+dfDat <- OsubT2@assays$RNA@scale.data
+dfDat <- dfDat[topgenes,cellOrder]
+
+## Make heatmap
+
+## Average Pseudotime data into 100 bins ##
+mHmBase <- data.matrix(dfDat)
+            
+        if ( nrow(mHmBase) < 110){
+            showRowNames <- TRUE
+        } else {
+            showRowNames <- FALSE
+        }
+        
+        ## Create heatmap plot ##
+        library(ComplexHeatmap)
+        library(circlize)
+        f1 = colorRamp2(seq(-4, 4, length = 3), c("#3060cf", "#fffbbc","#c4463a"))    
+    
+
+        ## Create top annotation and colorbars ##
+        # from https://www.biostars.org/p/368265/
+        # from https://bioconductor.statistik.tu-dortmund.de/packages/3.1/bioc/vignettes/ComplexHeatmap/inst/doc/ComplexHeatmap.html
+        
+        
+        anno <- as.data.frame(colnames(mHmBase))
+        colnames(anno) <- "cellID"
+        anno$Group <- cellCluster
+        
+        ## Color sample groups in line with the designated sample group color ##
+        
+        #library(scales)
+        #hue_pal()(2)
+        dfSel <- OsubT2@meta.data
+        dfSel <- dfSel[dfSel$cellID %in% as.vector(anno$cellID),]
+        dfSel <- dfSel[cellOrder,]
+        df <- unique(data.frame(dfSel[,c("clusterName", "clusterColor")]))
+        
+        GroupVec <- as.vector(unique(df$clusterColor))
+        names(GroupVec) <- as.vector(unique(df$clusterName))
+        
+        dfSel <- OsubT2@meta.data
+        dfSel <- dfSel[dfSel$cellID %in% as.vector(anno$cellID),]
+        dfSel <- dfSel[cellOrder,]
+        df2 <- unique(data.frame(dfSel[,c("cellID","clusterName", "clusterColor")]))
+        
+        
+        
+        df2 <- data.frame(df2[,c("clusterName")])
+        names(df2) <- "Group"
+        
+        
+        ha = HeatmapAnnotation(df = df2, col = list(Group = GroupVec))
+    
+        ht_opt(
+            legend_border = "black",
+            heatmap_border = TRUE,
+            annotation_border = TRUE
+        )
+        
+        h1 = Heatmap(
+            mHmBase,
+            column_title = gsub(
+                    "_", 
+                    " ", 
+                    paste0("Heatmap_", "SubT2_Medulla")
+            ),
+            name = "", 
+            #row_km = 5,
+            col = f1,
+            cluster_columns = F,
+            show_column_names = F,
+            show_row_names = showRowNames,
+            border = TRUE,
+            
+            #Dendrogram configurations: columns
+            clustering_distance_columns="euclidean",
+            clustering_method_columns="complete",
+            column_dend_height=unit(10,"mm"),
+            
+            #Dendrogram configurations: rows
+            clustering_distance_rows="euclidean",
+            clustering_method_rows="complete",
+            row_dend_width=unit(10,"mm"),
+            top_annotation = ha,
+            show_heatmap_legend = TRUE,
+            #row_title = NULL,
+            #show_row_dend = FALSE,
+            row_names_gp = gpar(fontsize = 5)
+        ) 
+        
+    ht_opt(RESET = TRUE)
+        
+    link <- paste0("https://biologic.crick.ac.uk/",Obio@parameterList$project_id,"/category-view/",Obio@parameterList$HmDisplayCatsFromDb[[k]])
+    
+    ###########################################################################
+    ## Save plot to file                                                     ##
+    FNbase <- paste0("Heatmap.", names(Obio@parameterList$HmDisplayCatsFromDb)[k],VersionPdfExt)
+    FN <- paste0(Obio@parameterList$reportFigDir, FNbase)
+    FNrel <- paste0("report_figures/", FNbase)
+    
+    pdf(FN)
+        print(HMplotList[[names(Obio@parameterList$HmDisplayCatsFromDb)[k]]])
+    dev.off()
+    ##                                                                       ##
+    ###########################################################################
+    
+    figCap <- paste0(
+    "**Figure ",
+    figureCount,
+    ":** Heatmap showing the gene category ", gsub("_", " ", names(Obio@parameterList$HmDisplayCatsFromDb)[k]), ". ",
+        "Download a pdf of this figure [here](", FNrel, "). ",
+        "An interactive version of this heatmap with an option for further filtering can be found [here](", link, ")."
+    )
+    
+    figureCount <- figureCount + 1 
+    
+    NewChnk <- paste0(
+            "### HM_", names(Obio@parameterList$HmDisplayCatsFromDb)[k],
+            "\n```{r Heatmap_HM_",k,", results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",figCap,"'}\n",
+            "\n",
+            "\n print(HMplotList[['",names(Obio@parameterList$HmDisplayCatsFromDb)[k],"']])",
+            "\n cat(  '\n')",
+            "\n\n\n```\n"   
+    )
+    
+    chnkVec <- c(
+        chnkVec,
+        NewChnk
+    )
+
+
+## Done
+######################
+    
+        
+## Done T2
+###############################################################################
+    
+    
+###############################################################################
+## Try T3    
+###############
+## Frirst subT1
+cl <- factor(as.vector(sceSubT3$seurat_clusters))
+rd <- reducedDims(sceSubT3)$PCA
+
+
+lin1 <- getLineages(rd, cl, start.clus= '4', end.clus = '11')
+res <- slingLineages(lin1 )
+
+
+pdf("../subT3.C4.11.path.pdf")
+plot(rd, col = brewer.pal(9,"Set1")[cl], asp = 1, pch = 16)
+lines(SlingshotDataSet(lin1), lwd = 3, col = 'black')
+dev.off()
+
+curves <- getCurves(lineages)
+plot(dimred, col = RColorBrewer::brewer.pal(9,"Set1")[clustering], asp = 1, pch = 16)
+lines(curves, lwd = 3, col = 'black')
+
+## plot smoothed curve ##
+# crv1 <- getCurves(lin1)
+# 
+# pdf("../ttest.pdf")
+# plot(rd, col = brewer.pal(9,"Set1")[cl], asp = 1, pch = 16)
+# lines(SlingshotDataSet(crv1), lwd = 3, col = 'black')
+# dev.off()
+
+## Extract Pseudotime ##
+dfRes <- data.frame(
+    ST3_Pseudotime_MedullaAIRE = sceSubT3$slingPseudotime_1,
+    cellID = sceSubT3$cellID
+)
+
+dfRes <- na.omit(dfRes)
+
+row.names(dfRes) <- dfRes$cellID
+#dfRes$cellID <- NULL
+dfIDs <- unique(OsC@meta.data[,c("cellID", "seurat_clusters")])
+
+dfRes <- merge(
+    dfRes, 
+    dfIDs, 
+    by.x = "cellID",
+    by.y = "cellID",
+    all =T
+)
+
+dfRes[is.na(dfRes)] <- 0
+names(dfRes) <- gsub("ST", "meta_ST", names(dfRes))
+dfRes$seurat_clusters <- NULL
+row.names(dfRes) <- dfRes$cellID
+dfRes$cellID <- NULL
+
+OsC <- addDf2seuratMetaData(
+    OsC, 
+    dfRes
+)
+
+save(OsC,
+    file = paste0(
+         Obio@parameterList$localWorkDir,
+         Obio@parameterList$project_id,
+        ".Seurat.Robj"
+     )
+)
+
+# <!-- Essential N: Upload meta data table -->
+# ```{r child = 'src/modules/db_tools/upload.meta.data.table.to.DB.Rmd', eval=TRUE}
+# 
+# ```
+
+## Associaton test
+library(gam)
+
+# Only look at the 1,000 most variable genes when identifying temporally expressesd genes.
+# Identify the variable genes by ranking all genes by their variance.
+Y <- log2(counts(sceSubT3) + 1)
+#var1K <- names(sort(apply(Y, 1, var),decreasing = TRUE))[1:1000]
+#Y <- Y[var1K, ]  # only counts for variable genes
+Y <-  Y[OsC@assays$integrated@var.features,]
+
+# Fit GAM for each gene using pseudotime as independent variable.
+t <- sceSubT3$slingPseudotime_1
+gam.pval <- apply(Y, 1, function(z){
+  d <- data.frame(z=z, t=t)
+  tmp <- gam(z ~ lo(t), data=d)
+  p <- summary(tmp)[4][[1]][1,5]
+  p
+})
+
+# Identify genes with the most significant time-dependent model fit.
+topgenes <- names(sort(gam.pval, decreasing = FALSE))[1:100]  
+
+topgenes <- unique(c(
+    topgenes,
+    c("KRT16","KRT6A","AIRE","IVL", "FN1","KRT17","KRT14")
+))
+
+# Prepare and plot a heatmap of the top genes that vary their expression over pseudotime.
+#require(clusterExperiment)
+
+
+
+## Get cells in pseudotime order ##
+dfOrder <- data.frame(sceSubT3@colData)
+dfOrder <- dfOrder[!is.na(dfOrder$slingPseudotime_1) ,]
+dfOrder <- dfOrder[dfOrder$cellID %in% row.names(dfRes),]
+
+dfOrder <- dfOrder[,c("cellID", "slingPseudotime_1", "clusterName")]
+dfOrder <- dfOrder[order(dfOrder$slingPseudotime_1, decreasing = F),]
+cellOrder <- dfOrder$cellID
+cellCluster <- dfOrder$clusterName
+
+dfDat <- OsubT3@assays$RNA@scale.data
+dfDat <- dfDat[topgenes,cellOrder]
+
+## Make heatmap
+
+## Average Pseudotime data into 100 bins ##
+mHmBase <- data.matrix(dfDat)
+            
+        if ( nrow(mHmBase) < 110){
+            showRowNames <- TRUE
+        } else {
+            showRowNames <- FALSE
+        }
+        
+        ## Create heatmap plot ##
+        library(ComplexHeatmap)
+        library(circlize)
+        f1 = colorRamp2(seq(-4, 4, length = 3), c("#3060cf", "#fffbbc","#c4463a"))    
+    
+
+        ## Create top annotation and colorbars ##
+        # from https://www.biostars.org/p/368265/
+        # from https://bioconductor.statistik.tu-dortmund.de/packages/3.1/bioc/vignettes/ComplexHeatmap/inst/doc/ComplexHeatmap.html
+        
+        
+        anno <- as.data.frame(colnames(mHmBase))
+        colnames(anno) <- "cellID"
+        anno$Group <- cellCluster
+        
+        ## Color sample groups in line with the designated sample group color ##
+        
+        #library(scales)
+        #hue_pal()(2)
+        dfSel <- OsubT3@meta.data
+        dfSel <- dfSel[dfSel$cellID %in% as.vector(anno$cellID),]
+        dfSel <- dfSel[cellOrder,]
+        
+        df <- unique(data.frame(dfSel[,c("clusterName", "clusterColor")]))
+        
+        GroupVec <- as.vector(unique(df$clusterColor))
+        names(GroupVec) <- as.vector(unique(df$clusterName))
+        
+        dfSel <- OsubT3@meta.data
+        dfSel <- dfSel[dfSel$cellID %in% as.vector(anno$cellID),]
+        dfSel <- dfSel[cellOrder,]
+        df2 <- unique(data.frame(dfSel[,c("cellID","clusterName", "clusterColor")]))
+        
+        
+        
+        df2 <- data.frame(df2[,c("clusterName")])
+        names(df2) <- "Group"
+        
+        
+        ha = HeatmapAnnotation(df = df2, col = list(Group = GroupVec))
+    
+        ht_opt(
+            legend_border = "black",
+            heatmap_border = TRUE,
+            annotation_border = TRUE
+        )
+        
+        h1 = Heatmap(
+            mHmBase,
+            column_title = gsub(
+                    "_", 
+                    " ", 
+                    paste0("Heatmap_", "SubT3_MedullaAire")
+            ),
+            name = "", 
+            #row_km = 5,
+            col = f1,
+            cluster_columns = F,
+            show_column_names = F,
+            show_row_names = showRowNames,
+            border = TRUE,
+            
+            #Dendrogram configurations: columns
+            clustering_distance_columns="euclidean",
+            clustering_method_columns="complete",
+            column_dend_height=unit(10,"mm"),
+            
+            #Dendrogram configurations: rows
+            clustering_distance_rows="euclidean",
+            clustering_method_rows="complete",
+            row_dend_width=unit(10,"mm"),
+            top_annotation = ha,
+            show_heatmap_legend = TRUE,
+            #row_title = NULL,
+            #show_row_dend = FALSE,
+            row_names_gp = gpar(fontsize = 5)
+        ) 
+        
+    ht_opt(RESET = TRUE)
+        
+    link <- paste0("https://biologic.crick.ac.uk/",Obio@parameterList$project_id,"/category-view/",Obio@parameterList$HmDisplayCatsFromDb[[k]])
+    
+    ###########################################################################
+    ## Save plot to file                                                     ##
+    FNbase <- paste0("Heatmap.", names(Obio@parameterList$HmDisplayCatsFromDb)[k],VersionPdfExt)
+    FN <- paste0(Obio@parameterList$reportFigDir, FNbase)
+    FNrel <- paste0("report_figures/", FNbase)
+    
+    pdf(FN)
+        print(HMplotList[[names(Obio@parameterList$HmDisplayCatsFromDb)[k]]])
+    dev.off()
+    ##                                                                       ##
+    ###########################################################################
+    
+    figCap <- paste0(
+    "**Figure ",
+    figureCount,
+    ":** Heatmap showing the gene category ", gsub("_", " ", names(Obio@parameterList$HmDisplayCatsFromDb)[k]), ". ",
+        "Download a pdf of this figure [here](", FNrel, "). ",
+        "An interactive version of this heatmap with an option for further filtering can be found [here](", link, ")."
+    )
+    
+    figureCount <- figureCount + 1 
+    
+    NewChnk <- paste0(
+            "### HM_", names(Obio@parameterList$HmDisplayCatsFromDb)[k],
+            "\n```{r Heatmap_HM_",k,", results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",figCap,"'}\n",
+            "\n",
+            "\n print(HMplotList[['",names(Obio@parameterList$HmDisplayCatsFromDb)[k],"']])",
+            "\n cat(  '\n')",
+            "\n\n\n```\n"   
+    )
+    
+    chnkVec <- c(
+        chnkVec,
+        NewChnk
+    )
+
+
+## Done
+######################
+    
+        
+## Done T3
+###############################################################################    
+
+```
+
+### Slingshot Trajectory Inference
+The slingshot documentation is available <a href="https://bioconductor.org/packages/devel/bioc/vignettes/slingshot/inst/doc/vignette.html", target = "_blank">here</a>
+
+```{r create_subTrajectoryList, echo=F, eval=T, warning=FALSE, results="asis"}
+```
+
+```{r create_subTrajectoryList, echo=F, eval=T, warning=FALSE, results="asis"}
+```
+
+
+
+
+
+
+   
+
+
+
+
+```{r create_report_params, eval=T, results="asis"}
+documentationParams <- list(
+
+    "title" = "Pseudobulk Differential Gene Expression Analysis",
+    "subtitle" =  "",
+    "abstract" = ""
+
+)
+
+Obio@parameterList$lims.id <- "SC19235"
+
+## Try to retrieve project data from db ##
+library(RMySQL)
+db.pwd2 <- "_asf_"
+db.user2 <- "asf"
+host2 <- "ms1.thecrick.org"
+projectParams <- documentationParams
+
+tryCatch({
+    dbDB = dbConnect(drv = RMySQL::MySQL(), user = db.user2, password = db.pwd2, host = host2, dbname = "asf");
+dfProposal =  dbGetQuery(dbDB, paste0("SELECT * FROM asf_proposals WHERE project_name ='",Obio@parameterList$lims.id,"'"));
+dbDisconnect(dbDB)
+  }, error = function(x) {
+    message("Project Database could not be reached or has no entry in Obio@parameterList$lims.id for this analysis.")
+   
+})
+
+if (exists("dfProposal")){
+  if (nrow(dfProposal) == 1){
+      if (!is.na(dfProposal[1,"ProjectAlias"]) & dfProposal[1,"ProjectAlias"] != ""){
+          projectParams[["title"]] = paste0(dfProposal[1,"ProjectAlias"], " - ", dfProposal[1,"project_name"])
+      }
+      
+      if (!is.na(dfProposal[1,"project_user"]) & dfProposal[1,"project_user"] != ""){
+          projectParams[["subtitle"]] = paste0(dfProposal[1,"user_lab"], " Lab - ", dfProposal[1,"project_user"])
+          projectParams[["subtitle"]] <- gsub("^ Lab - ", "", projectParams[["subtitle"]])
+          
+      }
+      
+      if (!is.na(dfProposal[1,"proposal_text"]) & dfProposal[1,"proposal_text"] != ""){
+          projectParams[["abstract"]] = dfProposal[1,"proposal_text"]
+         
+          
+      }
+  }
+}
+   
+## Escape all special characters
+projectParams <- lapply(
+  projectParams, function(x) 
+  #gsub("([.|()\\^{}+$*?]|\\[|\\])", "\\\\\1", x)
+  gsub("([.|()/\\^{}+$*?]|\\[|\\])", " ", x)
+) 
+
+projectParams <- lapply(
+  projectParams, function(x) 
+  #gsub("([.|()\\^{}+$*?]|\\[|\\])", "\\\\\1", x)
+  gsub("\\\n", " ", x)
+) 
+
+
+#projectParams$title <- "Title"
+# projectParams$abstract <- "This is the QC section."
+#projectParams$subtitle <- "Abstract"
+
+```
+
+
+
+## Documentation
+```{r documentation, eval=TRUE, echo=T, results=T}
+sessionInfo()
+```
+
+---
+title: "`r projectParams$title`"
+subtitle:  Pseudobulk Differential Gene Expression Analyses on Single-cell Results
+author:
+    - Bioinformatics: Stefan Boeing^[The Francis Crick Institute, stefan.boeing@crick.ac.uk]
+date: 'Compiled: `r format(Sys.Date(), "%B %d, %Y")`'
+
+abstract: |
+    In this section pseudo-bulk differential gene expression analyses for this project are presented. The method used here was developed recently by the Huber lab and is desribed in detail [here](https://www.biorxiv.org/content/10.1101/2020.08.13.249623v2).
+
+---
