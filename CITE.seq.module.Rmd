@@ -1,0 +1,660 @@
+---
+    output: 
+    html_document:
+    code_folding: hide
+df_print: tibble
+highlight: default
+theme: paper
+toc: true
+toc_depth: 5
+toc_float: true
+css: /camp/stp/babs/working/boeings/Stefan/protocol_files/github/boeings/templates/style/style.css
+
+always_allow_html: yes
+---
+    
+    
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+    tidy = F,
+    tidy.opts = list(width.cutoff = 120),
+    message = FALSE,
+    warning = FALSE
+)
+```
+
+
+
+## Data Preparation
+### Set Environment and load R
+```{bash init, eval=F, echo=F}
+## Get interactive session ##
+#  srun --time=08:00:00 --mem=40G -p int --pty bash
+
+# module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/3.6.0-foss-2016b-BABS;R;
+
+# sbatch --time=08:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/3.6.0-foss-2016b-BABS;Rscript runB.r" --job-name="rB" --mem=100G -o rB.slurm >> commands.txt
+
+# sbatch --time=18:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/3.6.0-foss-2016b-BABS;Rscript runB.r" --job-name="rB" -p hmem --mem=300G -o rB.slurm >> commands.txt
+
+```
+
+```{r dbpwd, eval=T, echo=F}
+#Create the environment and load a suitable version of R, e.g. so:
+#library(keyring)
+#library(future)
+#plan("multiprocess", workers = 10)
+
+#options(future.globals.maxSize = 5000 * 1024^2)
+# First number: GB 1000 = 1GB
+# Try 5GB of RAM = 5000
+# Ref https://satijalab.org/seurat/v3.0/future_vignette.html
+
+
+
+###############################################################################
+## Set database password                                                     ##
+# if (exists("db.pwd")){
+#     print("Database password is set.")
+# } else {
+#     ## Set database password ##
+#     library(rstudioapi)
+#     db.pwd <- rstudioapi::askForPassword("Please enter database password")
+# }
+
+##                                                                           ##
+###############################################################################
+```
+
+### Set Parameters
+```{r set_directories, eval=T}
+###############################################################################
+## Load packages                                                             ##
+
+library(tidyverse)
+library(dplyr)
+library(Seurat)
+library(ggplot2)
+library(tidyr)
+library(knitr)
+
+## Set documentation parameters ##
+
+VersionPdfExt <- paste0(".V", gsub("-", "", Sys.Date()), ".pdf")
+
+if (dir.exists("/Volumes/babs/working/boeings/")){
+    hpc.mount <- "/Volumes/babs/working/boeings/"
+} else if (dir.exists("Y:/working/boeings/")){
+    hpc.mount <- "Y:/working/boeings/"
+} else if (dir.exists("/camp/stp/babs/working/boeings/")){
+    hpc.mount <- "/camp/stp/babs/working/boeings/"
+} else {
+    hpc.mount <- ""
+}
+
+## Load custom packages specific for this analysis ##
+source("assets/scTools.r")
+source("assets/SBwebtools.pckg.r")
+
+## Set database parameters ##
+FN <- paste0(hpc.mount, "Projects/reference_data/documentation/BC.parameters.txt")
+dbTable <- read.delim(
+    FN, 
+    sep = "\t",
+    stringsAsFactors = F
+)
+
+db.pwd <- as.vector(dbTable[1,1])
+
+## Set filename for temp pdf files ##
+
+if (length(.libPaths()) > 2){
+    .libPaths(.libPaths()[2:3])
+}
+
+
+###############################################################################
+## Load Obio object from step A                                              ##
+ObioFN <- paste0(
+    "../", 
+    list.files("..")[grep(".bioLOGIC.Robj", list.files(".."))]
+)
+
+load(ObioFN)
+
+## Activate debug mode on subset of cells < 1
+# Obio@parameterList$debugReduce <- 0.25
+
+## Set project specific parameters ##
+Obio <- setMountingPoint(Obio)
+Obio <- setAnalysisPaths(Obio)
+Obio <- setCrickGenomeAndGeneNameTable(Obio)
+Obio <- createAnalysisFolders(
+    Obio,
+    baseDir="/camp/stp/babs/working/boeings/Projects/",
+    localBaseDir = paste0(hpc.mount, "Projects/")
+)
+Obio <- setDataBaseParameters(Obio)
+Obio <- addGeneAnnotation(Obio)
+
+## Create Sample List ##
+if (Obio@parameterList$hpcMount != "/camp/stp/babs/working/boeings/"){
+    for (i in 1:length(Obio@sampleDetailList)){
+        Obio@sampleDetailList[[i]]$path <- gsub("/camp/stp/babs/working/boeings/",Obio@parameterList$hpcMount, Obio@sampleDetailList[[i]]$path)
+        
+    }
+}
+
+
+
+
+
+
+## Create outputfolders ##
+if (!dir.exists(paste0(Obio@parameterList$localWorkDir,Obio@parameterList$project_id))){
+    dir.create(paste0(Obio@parameterList$localWorkDir,Obio@parameterList$project_id))
+}
+
+
+
+Obio@parameterList[["html_local"]] <- paste0(Obio@parameterList$localWorkDir, "html_local/")
+
+if (!dir.exists(Obio@parameterList[["html_local"]])){
+    dir.create(Obio@parameterList[["html_local"]])
+}
+
+Obio@parameterList[["reportFigDir"]] <- paste0(Obio@parameterList$html_local, "report_figures/")
+pdfTemp <- paste0(Obio@parameterList$reportFigDir, "temp.pdf")
+
+
+if (!dir.exists(Obio@parameterList$reportFigDir)){
+    dir.create(Obio@parameterList$reportFigDir)
+}
+
+figureCount <- 1
+
+## Load R module load R/3.5.1-foss-2018b ##
+#setwd(Obio@parameterList$localWorkDir)
+
+if (Obio@parameterList$host == "10.27.241.234"){
+    urlString <- "biologic.thecrick.org"
+} else {
+    urlString <- "biologic.crick.ac.uk"
+}
+
+
+## Debugging mode on subset of cells ##
+# Obio@parameterList$d
+
+
+```
+
+```{r CreateReferenceGeneList, echo=T, eval=TRUE, warning=FALSE, results=FALSE}
+###############################################################################
+## Set gene reference list                                                   ##
+
+
+Obio@dataTableList[["referenceList"]] <- list()
+
+if (is.null(Obio@parameterList$HmDisplayCatsFromDb)){
+    Obio@parameterList$HmDisplayCatsFromDb <- list(
+        "TFs" = "ag_lab_categories__10"
+    )
+}
+
+## Add transcription factors that happen to be cluster markers ##
+catList <- Obio@parameterList$HmDisplayCatsFromDb
+
+
+
+if (Obio@parameterList$geneIDcolumn != "mgi_symbol" 
+    & Obio@parameterList$geneIDcolumn != "hgnc_symbol") {
+    queryGS <- "hgnc_symbol" 
+} else {
+    queryGS <- Obio@parameterList$geneIDcolumn
+}
+
+
+for (i in 1:length(catList)){
+    tempVec <- retrieve.gene.category.from.db(
+        cat_id = catList[[i]],
+        password = db.pwd,
+        gene.symbol = queryGS,
+        user = Obio@parameterList$db.user,
+        host = Obio@parameterList$host
+    )
+    
+    Obio@dataTableList$referenceList[[names(catList)[i]]] <- tempVec
+}
+
+## Done                                                                      ##
+###############################################################################
+```
+
+
+###########
+## Create CONDA environment
+
+#https://towardsdatascience.com/a-guide-to-conda-environments-bc6180fc533
+
+#https://docs.anaconda.com/ae-notebooks/admin-guide/install/config/set-up-default-project-env/
+
+## Conda environment vim ~/.condarc
+# conda -V
+# Create conda environment
+
+conda create -n CiteSeq_0621 python=3
+
+# Activate environment
+source activate CiteSeq_0621
+
+# Show version
+CITE-seq-Count --version
+
+## install citeseq count 
+pip install CITE-seq-Count==1.4.3
+
+
+# Deactivate
+source deactivate
+
+
+## Run cite seq count
+CITE-seq-Count -R1 /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/MAR1603A2_R1.fastq.gz -R2 /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/MAR1603A2_R2.fastq.gz -t /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423_scRNAseq_CITE_Cxcl13_SC20209/basedata/CITE.tags.csv -cbf 1 -cbl 16 -umif 17 -umil 26 -cells 1000 -trim 10 -wl /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/whitelist.csv -o /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files
+
+## Concatenate FASTQ files
+
+## Folders for this project
+(CiteSeq_0621) [boeings@babs001 workdir]$ ls /camp/stp/babs/inputs/sequencing/data/tolarp/ana.martinez-riano/SC20209/primary_data/210
+210121_K00102_0551_AHKN53BBXY/ 
+    210127_K00102_0554_BHKMLGBBXY/ 
+    210309_K00102_0563_BHL5NGBBXY/ 
+    
+    ## Survey folders
+    ls /camp/stp/babs/inputs/sequencing/data/tolarp/ana.martinez-riano/SC20209/primary_data/210121_K00102_0551_AHKN53BBXY/fastq
+A2 only
+
+ls /camp/stp/babs/inputs/sequencing/data/tolarp/ana.martinez-riano/SC20209/primary_data/210127_K00102_0554_BHKMLGBBXY/fastq
+A2 only
+
+ls /camp/stp/babs/inputs/sequencing/data/tolarp/ana.martinez-riano/SC20209/primary_data/210309_K00102_0563_BHL5NGBBXY/fastq
+A4 A6 only
+
+
+
+Cite-Seq samples
+MAR1603A1	CXCL13-ICPE_24h-GEX
+MAR1603A2	CXCL13-ICPE_24h-CITE
+MAR1603A3	71_24h_Biotin-GEX
+MAR1603A4	71_24h_Biotin-CITE
+MAR1603A5	71_7d_Biotin-GEX
+MAR1603A6	71_7d_Biotin-CITE
+
+# R1
+# example
+/camp/stp/babs/inputs/sequencing/fastq/210121_K00102_0551_AHKN53BBXY/fastq/MAR1603A2_S35_L007_R1_001.fastq.gz
+
+## Sample A2 
+#R1
+cat /camp/stp/babs/inputs/sequencing/data/tolarp/ana.martinez-riano/SC20209/primary_data/210121_K00102_0551_AHKN53BBXY/fastq/MAR1603A2_*_R1_*.fastq.gz /camp/stp/babs/inputs/sequencing/data/tolarp/ana.martinez-riano/SC20209/primary_data/210127_K00102_0554_BHKMLGBBXY/fastq/MAR1603A2*_R1_*.fastq.gz  > /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423B_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/MAR1603A2_R1.fastq.gz
+#R2
+cat /camp/stp/babs/inputs/sequencing/data/tolarp/ana.martinez-riano/SC20209/primary_data/210121_K00102_0551_AHKN53BBXY/fastq/MAR1603A2_*_R2_*.fastq.gz /camp/stp/babs/inputs/sequencing/data/tolarp/ana.martinez-riano/SC20209/primary_data/210127_K00102_0554_BHKMLGBBXY/fastq/MAR1603A2*_R2_*.fastq.gz  > /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423B_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/MAR1603A2_R2.fastq.gz
+
+## Sample A4
+#R1
+cat /camp/stp/babs/inputs/sequencing/data/tolarp/ana.martinez-riano/SC20209/primary_data/210309_K00102_0563_BHL5NGBBXY/fastq/MAR1603A4*_R1_*.fastq.gz > /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423B_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/MAR1603A4_R1.fastq.gz
+#R2
+cat /camp/stp/babs/inputs/sequencing/data/tolarp/ana.martinez-riano/SC20209/primary_data/210309_K00102_0563_BHL5NGBBXY/fastq/MAR1603A4*_R2_*.fastq.gz > /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423B_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/MAR1603A4_R2.fastq.gz
+
+## Sample A6
+#R1
+cat /camp/stp/babs/inputs/sequencing/data/tolarp/ana.martinez-riano/SC20209/primary_data/210309_K00102_0563_BHL5NGBBXY/fastq/MAR1603A6*_R1_*.fastq.gz > /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423B_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/MAR1603A6_R1.fastq.gz
+#R2
+cat /camp/stp/babs/inputs/sequencing/data/tolarp/ana.martinez-riano/SC20209/primary_data/210309_K00102_0563_BHL5NGBBXY/fastq/MAR1603A6*_R2_*.fastq.gz > /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423B_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/MAR1603A6_R2.fastq.gz
+
+#######################
+## Checks ##
+TTCGATGCTGGAGCA, adt_Cd16_Cd32
+GTCCGACTAATAGCT, adt_PE
+
+zcat /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423B_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/MAR1603A6_R2.fastq.gz | head | grep TTCGATGCTGGAGCA
+
+zcat /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423B_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/MAR1603A6_R2.fastq.gz | head | grep GTCCGACTAATAGCT
+
+##
+##########################3
+
+
+##########################
+## Create whitelist 
+## Create whitelist ##
+
+dfMeta <- OsC@meta.data
+
+dfMeta[["wl_cellID"]]<- sapply(dfMeta$cellID, function(x) unlist(strsplit(x, "_"))[1])
+dfMeta[["sample_prefix"]]<- sapply(dfMeta$cellID, function(x) unlist(strsplit(x, "_"))[2])
+
+dfSample <- unique(dfMeta[,c("sampleName", "sample_prefix")])
+dfSample [["projectIDs"]] <- c("MAR1603A2", "MAR1603A4", "MAR1603A6")
+
+sampleIDs <- unique(dfMeta$sampleID)
+#"CXCL13ICPE24h" "Biotin24h"     "Biotin7d"   
+projectIDs <- c("MAR1603A2", "MAR1603A4", "MAR1603A6")
+
+for (i in 1:length(sampleIDs)){
+    dfTemp <- data.frame(dfMeta[dfMeta$sampleID == sampleIDs[i], "wl_cellID"])
+    FNout <- paste0("../../CITEseq_FASTQ_files/",projectIDs[i],".whitelist.csv")
+    write.table(dfTemp, FNout, sep=",",row.names = FALSE, col.names=FALSE)
+    #/camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/whitelist.csv
+    
+}
+
+
+
+
+
+
+
+
+##
+##########################
+
+###########################
+## Prepare tsv file 
+## Prepare tsv file ##
+TTCGATGCTGGAGCA, adt_Cd16_Cd32
+GTCCGACTAATAGCT, adt_PE
+
+more /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423_scRNAseq_CITE_Cxcl13_SC20209/basedata/CITE.tags.csv 
+
+# Example
+# ATGCGA,First_tag_name
+# GTCATG,Second_tag_name
+# GCTAGTCGTACGA,Third_tag_name
+# GCTAGGTGTCGTA,Forth_tag_name
+
+## Done
+##############################
+
+###############################
+## Run citeseq counts
+
+# umil 28 > Use R1 readlength
+
+#A2 Sample
+mkdir  /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423B_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/MAR1603A2
+CITE-seq-Count -R1 /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423B_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/MAR1603A2_R1.fastq.gz -R2 /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423B_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/MAR1603A2_R2.fastq.gz -t /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423_scRNAseq_CITE_Cxcl13_SC20209/basedata/CITE.tags.csv -cbf 1 -cbl 16 -umif 17 -umil 28 -cells 1000 -trim 10 -wl /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423B_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/MAR1603A2.whitelist.csv -o /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423B_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/MAR1603A2
+
+#A4 Sample
+mkdir  /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423B_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/MAR1603A4
+CITE-seq-Count -R1 /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423B_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/MAR1603A4_R1.fastq.gz -R2 /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423B_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/MAR1603A4_R2.fastq.gz -t /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423_scRNAseq_CITE_Cxcl13_SC20209/basedata/CITE.tags.csv -cbf 1 -cbl 16 -umif 17 -umil 28 -cells 1000 -trim 10 -wl /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423B_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/MAR1603A4.whitelist.csv -o /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423B_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/MAR1603A4
+
+#A6 Sample
+mkdir  /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423B_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/MAR1603A6
+CITE-seq-Count -R1 /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423B_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/MAR1603A6_R1.fastq.gz -R2 /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423B_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/MAR1603A6_R2.fastq.gz -t /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423_scRNAseq_CITE_Cxcl13_SC20209/basedata/CITE.tags.csv -cbf 1 -cbl 16 -umif 17 -umil 28 -cells 1000 -trim 10 -wl /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423B_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/MAR1603A4.whitelist.csv -o /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423B_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/MAR1603A6
+
+
+## Done
+##############################
+
+# cite_seq_count -R1 ***_R1_001.fastq.gz -R2 ***_R2_001.fastq.gz -t ***/tags.csv -cbf 1 -cbl 16 -umif 17 -umil 28 -hd 2 -o Result.tsv -wl Barcode_whitelist.txt -n 5000
+# 
+# ## Generate cite-seq Count command ##
+# cite_seq_count -R1 ls /camp/stp/babs/inputs/sequencing/fastq/210121_K00102_0551_AHKN53BBXY/fastq/MAR1603A2_*R1*.fastq.gz -R2 /camp/stp/babs/inputs/sequencing/fastq/210121_K00102_0551_AHKN53BBXY/fastq/MAR1603A2_*R2*.fastq.gz -t CITE.tags.csv -cbf 1 -cbl 16 -umif 17 -umil 26 -hd 2 -o Result.tsv -wl Barcode_whitelist.txt -n 5000
+# 
+# /camp/stp/babs/inputs/sequencing/fastq/210121_K00102_0551_AHKN53BBXY/fastq/SC20209
+# /camp/stp/babs/inputs/sequencing/fastq/210127_K00102_0554_BHKMLGBBXY/fastq/SC20209
+# 
+# ## Merge R1 fastq files ##
+# 
+# ## Merge R2 fastq files ##
+# 
+# ## Prepare tsv file ##
+# TTCGATGCTGGAGCA, adt_Cd16_Cd32
+# GTCCGACTAATAGCT, adt_PE
+# 
+# # Example
+# # ATGCGA,First_tag_name
+# # GTCATG,Second_tag_name
+# # GCTAGTCGTACGA,Third_tag_name
+# # GCTAGGTGTCGTA,Forth_tag_name
+# 
+# 
+# ## Run cite-seq count
+# CITE-seq-Count -R1 TAGS_R1.fastq.gz -R2 TAGS_R2.fastq.gz -t CITE.tags.csv -cbf X1 -cbl X2 -umif Y1 -umil Y2 -cells EXPECTED_CELLS -o OUTFOLDER
+# 
+# # CITE.tags.csv
+# /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423_scRNAseq_CITE_Cxcl13_SC20209/basedata/CITE.tags.csv 
+# 
+# # R1
+# # example
+# /camp/stp/babs/inputs/sequencing/fastq/210121_K00102_0551_AHKN53BBXY/fastq/MAR1603A2_S35_L007_R1_001.fastq.gz
+# 
+# cat /camp/stp/babs/inputs/sequencing/fastq/210121_K00102_0551_AHKN53BBXY/fastq/MAR1603A2_*_R1_*.fastq.gz /camp/stp/babs/inputs/sequencing/fastq/210127_K00102_0554_BHKMLGBBXY/fastq/MAR1603A2*_R1_*.fastq.gz > /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/MAR1603A2_R1.fastq.gz
+# 
+# 
+# # R2
+# # example
+# /camp/stp/babs/inputs/sequencing/fastq/210121_K00102_0551_AHKN53BBXY/fastq/MAR1603A2_S35_L007_R2_001.fastq.gz
+# 
+# cat /camp/stp/babs/inputs/sequencing/fastq/210121_K00102_0551_AHKN53BBXY/fastq/MAR1603A2_*_R2_*.fastq.gz /camp/stp/babs/inputs/sequencing/fastq/210127_K00102_0554_BHKMLGBBXY/fastq/MAR1603A2*_R2_*.fastq.gz > /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/MAR1603A2_R2.fastq.gz
+# 
+# 
+# /camp/stp/babs/inputs/sequencing/fastq/210121_K00102_0551_AHKN53BBXY/fastq/SC20209
+# /camp/stp/babs/inputs/sequencing/fastq/210127_K00102_0554_BHKMLGBBXY/fastq/SC20209
+# 
+# ## Create whitelist ##
+# df <- data.frame(OsC@meta.data[,"cellID"])
+# write.table(df, "../../CITEseq_FASTQ_files/whitelist.csv", sep=",",row.names = FALSE, col.names=FALSE)
+# /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/whitelist.csv
+# 
+# ## CITE Seq testrun ##
+# CITE-seq-Count -R1 /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/MAR1603A2_R1.fastq.gz -R2 /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/MAR1603A2_R2.fastq.gz -t /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423_scRNAseq_CITE_Cxcl13_SC20209/basedata/CITE.tags.csv -cbf 1 -cbl 16 -umif 17 -umil 26 -cells 1000 -trim 10 -wl /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/whitelist.csv -o /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files
+# 
+# ## Checks 
+# zcat /camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/MAR1603A2_R2.fastq.gz | head | grep TTCGATGCTGGAGCA
+# 
+
+##############3
+## Processing
+library(Seurat)
+
+load("../SC20209B.Seurat.Robj")
+
+
+dataDirVec <- paste0(
+    "/camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423B_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/",
+    projectIDs,
+    "/read_count"
+)
+
+dataDirVec <- paste0(
+    "/Volumes/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423B_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/",
+    projectIDs,
+    "/read_count"
+)
+
+# dataDirVec <- c(
+#     "/camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423B_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/MAR1603A2/read_count",
+#     "/camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423B_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/MAR1603A4/read_count",
+#     "/camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423B_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/MAR1603A2/read_count"
+# )
+
+# dataDirVec <- c(
+#     "/Volumes/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423B_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/MAR1603A2/read_count",
+#     "/Volumes/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423B_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/MAR1603A4/read_count",
+#     "/Volumes/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423B_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/MAR1603A2/read_count"
+# )
+
+#dataDir <- "/camp/stp/babs/working/boeings/Projects/tolarp/ana.martinez.riano/423_scRNAseq_CITE_Cxcl13_SC20209/CITEseq_FASTQ_files/read_count"
+
+
+fullMatList <- list()
+
+prefix
+
+for (i in 1:length(dataDirVec)){
+    fullMat <- Read10X(data.dir = dataDirVec[i], gene.column = 1)
+    colnames(fullMat) <- paste0(colnames(fullMat), "-", as.vector(dfSample$sample_prefix[i]))
+    
+    row.names(fullMat) <- gsub("-GTCCGACTAATAGCT", "", row.names(fullMat))
+    row.names(fullMat) <- gsub("-TTCGATGCTGGAGCA",  "", row.names(fullMat))
+    fullMatList[[i]] <- fullMat
+    names(fullMatList)[i] <- dfSample$projectIDs[i]
+    
+}
+
+joinMat <- cbind(fullMatList[[1]], fullMatList[[2]])
+joinMat <- cbind(joinMat, fullMatList[[3]])
+
+selVec <- OsC@meta.data$cellID
+selVec <- selVec[selVec %in% colnames(joinMat)]
+
+
+joinMat <- joinMat[,selVec]
+
+## Add missing cells $$
+selVec <- OsC@meta.data$cellID
+missingIDs <- selVec[(!selVec %in% colnames(joinMat))]
+
+missMat <- matrix(nrow=3, ncol=length(missingIDs), 0)
+row.names(missMat) <- row.names(joinMat)
+colnames(missMat) <- missingIDs
+
+joinMat <- cbind(joinMat, missMat)
+
+adt_assay <- CreateAssayObject(counts = joinMat )
+
+
+###############################################################################
+## Create read-count historgram for each antibody                            ##
+
+histList <- list()
+for (j in 1:length(fullMatList)){
+    dfHist <-data.frame(t(data.frame(fullMatList[[j]])))
+    names(dfHist) <- gsub("\\.", "_", names(dfHist))
+    names(dfHist) <- gsub("-", "_", names(dfHist))
+    
+    histMax <- ceiling(max(dfHist)/10)*10
+    tagVec <- paste0(names(dfHist))
+    
+    
+    for (i in 1:length(tagVec)){
+        tag <- tagVec[i]
+        histList[[paste0(tag, "_", projectIDs[j])]] <- ggplot(
+            dfHist, aes_string(x=tag)
+        ) + geom_histogram(bins = histMax
+                           
+        ) + theme_bw(
+        )  +  theme(
+            axis.text.y   = element_text(size=8),
+            axis.text.x   = element_text(size=8),
+            axis.title.y  = element_text(size=8),
+            axis.title.x  = element_text(size=8),
+            axis.line = element_line(colour = "black"),
+            panel.border = element_rect(colour = "black", fill=NA, size=1),
+            plot.title = element_text(hjust = 0.5, size = 12),
+            legend.title = element_blank()
+        ) + ggtitle(paste0("Read Counts for Antibody: ", gsub("_", " ", paste0(tag, "_", projectIDs[j])))
+        ) + xlab("Counts") + ylab("Frequency")
+        
+        FNbase <- paste0(tag, VersionPdfExt)
+        FN <- paste0(Obio@parameterList$reportFigDir, FNbase)
+        FNrel <- paste0("report_figures/", FNbase)
+        # 
+        # pdf(FN)
+        # print(histList[[tag]])
+        # dev.off()
+        
+        #link <- paste0('<a href="https://',urlString,'/',Obio@parameterList$project_id,'/pca?x_axis=UMAP_1&y_axis=UMAP_2" target="_blank">here</a>')  
+        
+        # figLegend <- paste0(
+        #     '**Figure ', 
+        #     figureCount, 
+        #     ':** ',
+        #     ' UMAP showing all cells from all samples together. Download a pdf of this figure <a href="',FNrel,'" target="_blank">here</a>.',
+        #     'An interactive version of this figure can be found ', link, '. '
+        # )
+        # 
+        # figureCount <- figureCount + 1
+        # 
+        # NewChnk <- paste0(
+        #     "#### ", tag,
+        #     "\n```{r Sample_UMAP_",
+        #     tag,", results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",
+        #     figLegend,"'}\n",
+        #     "\n",
+        #     "\n print(plotList[['",tag,"']])",
+        #     "\n cat(  '\n')",
+        #     "\n\n\n```\n"   
+        # )
+        # 
+        # chnkVec <- c(
+        #     chnkVec,
+        #     NewChnk
+        # )
+    }
+}
+## Done                                                                      ##
+###############################################################################
+
+load("../SC20209B.Seurat.Robj")
+
+for (i in 1:length(adtAssayList)){
+    OsC[[paste0("ADT_", projectIDs[i])]] <- adtAssayList[[i]]
+}
+
+OsC[["ADT"]] <- adt_assay
+
+DefaultAssay(OsC) <- "ADT"
+OsC <- NormalizeData(OsC, normalization.method = "CLR", margin = 2)
+
+## Create output to add to FeatureView ##
+library(tidyverse)
+dfExpr <- data.frame(OsC[["ADT"]]@data)
+dfExpr[["gene"]] <- row.names(dfExpr)
+dfExpr <- gather(
+    dfExpr, 
+    condition, 
+    expr, 1:(ncol(dfExpr)-1), 
+    factor_key=TRUE
+)
+dfExpr <- dfExpr[dfExpr$expr != 0,]
+dfExpr <- dfExpr[dfExpr$gene != "unmapped", ]
+dfExpr$gene <- gsub("-", "_", dfExpr$gene)
+
+Obio@dataTableList[["dfResADT"]] <- dfExpr
+
+
+###################################
+## Plot CiteSeq in UMAP space
+
+p2 <- ggplot(data = dfPlot, aes(x=UMAP_1, y=UMAP_2, color = expr)
+)+ geom_point( shape=16, size = dotsize
+) + scale_color_gradient("expr", low="grey", high="darkblue"
+                         #) + xlab(input$x_axis) + ylab(input$y_axis
+) + theme_bw(
+)  +  theme(
+    axis.text.y   = element_text(size=8),
+    axis.text.x   = element_text(size=8),
+    axis.title.y  = element_text(size=8),
+    axis.title.x  = element_text(size=8),
+    axis.line = element_line(colour = "black"),
+    panel.border = element_rect(colour = "black", fill=NA, size=1),
+    plot.title = element_text(hjust = 0.5, size = 12)
+)+ ggtitle(paste0("Tag: adt_Cd16_Cd32 - Biotin24h A4")
+) + coord_fixed(ratio = 1
+) 
+
+## Done
+#####################################
+
+save(Obio, 
+     file = paste0(
+         Obio@parameterList$localWorkDir,
+         Obio@parameterList$project_id,
+         ".bioLOGIC.Robj"
+     )
+)
+
+print("Obio Object saved.")
