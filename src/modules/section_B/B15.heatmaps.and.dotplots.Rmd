@@ -47,7 +47,23 @@ OsC_HM <- ScaleData(OsC_HM, verbose = FALSE, features=allGenes)
 
 
 Idents(OsC_HM) <- "clusterName"
-Idents(OsC_HM) <- factor(Idents(OsC_HM), levels = Obio@parameterList[["clusterNameOrder"]])
+
+selVec <- c(
+  grep("cluster_order", gsub("\\.", "_",names(OsC@meta.data))),
+  grep("clusterName", names(OsC@meta.data))
+)
+
+if (length(selVec) == 2) {
+    dfCO <- unique(OsC@meta.data[,selVec])    
+    
+    names(dfCO) <- gsub("\\.", "_", names(dfCO))
+dfCO <- dfCO[order(dfCO$cluster_order, decreasing=F),]
+
+Idents(OsC_HM) <- factor(Idents(OsC_HM), levels = as.vector(dfCO$clusterName))
+
+Obio@parameterList$clusterNameOrder <- as.vector(dfCO$clusterName)
+}
+
 ## Order Heatmap Genes by cluster similarity
 
 ## For the moment: resetting heatmap list to keep it short ##
