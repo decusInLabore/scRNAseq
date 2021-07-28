@@ -1100,7 +1100,8 @@ setGeneric(
         vars.to.regress = NULL,
         g2m.genes = NULL,
         s.genes = NULL,
-        annotateCellCyclePhase = TRUE
+        annotateCellCyclePhase = TRUE,
+        integrationReduction = "cca" #options = "rpca" # options: c("cca", "rpca", "rlsi")
         #vars to regress cell cycle options #c("S_Score", "G2M_Score) or
         #"CC_Difference"
         #figureCount = 1,
@@ -1312,6 +1313,16 @@ setGeneric(
             )
 
         }
+        
+        ## Do rpca integration. Link to vignette: https://satijalab.org/seurat/articles/integration_rpca.html
+        if (integrationReduction == "rpca"){
+            features <- Seurat::SelectIntegrationFeatures(object.list = SampleList)
+            SampleList <- lapply(X = SampleList, FUN = function(x) {
+                x <- Seurat::ScaleData(x, features = features, verbose = FALSE)
+                x <- Seurat::RunPCA(x, features = features, verbose = FALSE)
+            })
+        }
+        
         return(SampleList)
 })
 ##                                                                           ##
