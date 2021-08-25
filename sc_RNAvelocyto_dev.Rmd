@@ -1,0 +1,489 @@
+---
+title: "Velocyto Procedure"
+author: "Stefan Boeing \n stefan.boeing@yahoo.com"
+date: 'Compiled: `r format(Sys.Date(), "%B %d, %Y")`'
+
+output: 
+  html_document:
+    code_folding: hide
+    df_print: tibble
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    css:
+  
+always_allow_html: yes
+
+---
+  
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  tidy = TRUE,
+  tidy.opts = list(width.cutoff = 120),
+  message = FALSE,
+  warning = FALSE
+)
+```
+
+
+## Part B Database
+
+module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/3.6.0-foss-2016b-BABS;R;
+
+```{bash script, echo=TRUE, eval=FALSE, warning=FALSE}
+module purge
+
+
+```
+
+
+```{r populate_meta_data_database, eval=TRUE, echo=F, results=F}
+
+
+conda activate R-4.0.2-BABS
+library(velocyto.R)
+library(Seurat)
+
+FNs <-"/camp/stp/babs/working/boeings/Projects/bonfantip/roberta.ragazzini/446_scRNAseq_subClustering_pbl359B_12clusters/workdir/pbl359BsubCluster.Seurat.Robj"
+
+
+load(FNs)
+
+dfMeta <- OsC@meta.data
+dfMeta <- dfMeta[,c("cellID", "sampleID", "sampleName")]
+dfMeta[["extension"]] <- sapply(dfMeta$cellID, function(x) unlist(strsplit(x, "_"))[2])
+
+FNo <- "/camp/stp/babs/working/boeings/Projects/bonfantip/roberta.ragazzini/446_scRNAseq_subClustering_pbl359B_12clusters/workdir/pbl359BsubCluster.bioLOGIC.Robj"
+load(FNo)
+
+dfAnno <- Obio@dfGeneAnnotation
+dfAnno <- unique(dfAnno[,c("ENSG", "hgnc_symbol")])
+
+fileList <- list(
+  "Epip6sub" = "/camp/stp/babs/working/boeings/Projects/bonfantip/sara.campinoti/359B_PBL_SC_subset_P6_P7_P10_P14_scRNAseq_lung_thymus_SC19153/af_test_workdir/quants/CAM441A4/quant",
+  "Epip7sub" = "/camp/stp/babs/working/boeings/Projects/bonfantip/sara.campinoti/359B_PBL_SC_subset_P6_P7_P10_P14_scRNAseq_lung_thymus_SC19153/af_test_workdir/quants/CAM441A5/quant",
+  "Epip10sub" = "/camp/stp/babs/working/boeings/Projects/bonfantip/sara.campinoti/359B_PBL_SC_subset_P6_P7_P10_P14_scRNAseq_lung_thymus_SC19153/af_test_workdir/quants/CAM441A6/quant",
+  "Epip14sub" = "/camp/stp/babs/working/boeings/Projects/bonfantip/sara.campinoti/359B_PBL_SC_subset_P6_P7_P10_P14_scRNAseq_lung_thymus_SC19153/af_test_workdir/quants/CAM441A7/quant"
+)
+
+splicedList <- list()
+unsplicedList <- list()
+
+for (i in 1:length(fileList)){
+  
+    frydir <- fileList[[i]]
+  
+    suppressPackageStartupMessages({
+      library(rjson)
+      library(Matrix)
+      library(SingleCellExperiment)
+    })
+  
+    qfile <- file.path(frydir, "quant.json")
+    if (!file.exists(qfile)) {
+      qfile <- file.path(frydir, "meta_info.json")
+    }
+    
+    meta_info <- fromJSON(file = qfile)
+    ng <- meta_info$num_genes
+    usa_mode <- meta_info$usa_mode
+    
+    # read in count matrix
+    af_raw <- readMM(file = file.path(frydir, "alevin", "quants_mat.mtx"))
+    # if usa mode, each gene gets 3 rows, so the actual number of genes is ng/3
+    if (usa_mode) {
+      if (ng %% 3 != 0) {
+        stop("The number of quantified targets is not a multiple of 3")
+      }
+      ng <- as.integer(ng/3)
+    }
+    
+    # read in gene name file and cell barcode file
+    afg <- read.csv(file.path(frydir, "alevin", "quants_mat_cols.txt"), 
+                    strip.white = TRUE, header = FALSE, nrows = ng #, 
+                    #col.names = c("gene_ids"), 
+                    #row.names = 1
+    )[1:ng,1]
+    afc <- read.csv(file.path(frydir, "alevin", "quants_mat_rows.txt"), 
+                    strip.white = TRUE, header = FALSE #,
+                    #col.names = c("barcodes"), row.names = 1
+    )
+    
+    ## Add id extension based on integrated experiment ##
+    extension <- as.vector(dfMeta[dfMeta$sampleName == names(fileList)[i], "extension"])
+    
+    afc <- as.vector(paste0(afc[,1], "_", extension))
+    
+    
+    
+    rd <- list("S" = seq(1, ng), "U" =  seq(ng + 1, 2 * ng),
+               "A" =  seq(2 * ng + 1, 3 * ng))
+    
+    ## spliced counts matrix ##
+    which_counts <- c("S","A")
+    splicedMat <- af_raw[, rd[[which_counts[1]]], drop = FALSE]
+    for (wc in which_counts[-1]) {
+      splicedMat <- splicedMat + af_raw[, rd[[wc]], drop = FALSE]
+    }
+    
+    ############################
+    ## Rename afg
+    
+    h <- dfAnno$ENSG[dfAnno$ENSG %in% afg]
+    dfTempAnno <- dfAnno[dfAnno$ENSG %in% h, ]
+    
+    dfConversion <- data.frame(ENSG = afg, hgnc_symbol = afg)
+    row.names(dfConversion) <- dfConversion$ENSG 
+    
+    
+    dfConversion$hgnc_symbol <- as.character(dfConversion$hgnc_symbol)
+    dfConversion[dfTempAnno$ENSG, "hgnc_symbol"] <- dfTempAnno$hgnc_symbol
+    dfConversion <- dfConversion[afg, ]
+    
+    afgGN <- make.unique(dfConversion$hgnc_symbol)
+    # sum(duplicated(afgGN))
+    
+    
+    
+    ##
+    ############################
+    
+    ## unspliced matrix ##
+    which_counts <- c("U")
+    unsplicedMat <- af_raw[, rd[[which_counts[1]]], drop = FALSE]
+    for (wc in which_counts[-1]) {
+      unsplicedMat <- unsplicedMat + af_raw[, rd[[wc]], drop = FALSE]
+    }
+    
+    
+    # create SingleCellExperiment object
+    spliced <- t(splicedMat)
+    row.names(spliced) <- afgGN
+    colnames(spliced) <- as.vector(afc)
+    unspliced = t(unsplicedMat)
+    row.names(unspliced) <- afgGN
+    colnames(unspliced) <- as.vector(afc)
+    
+    
+    
+    #############################################################
+    ## Translate gene IDs into gene names and make unique
+    splicedList[[names(fileList)[i]]] <- spliced
+    
+    unsplicedList[[names(fileList)[i]]] <- unspliced
+    ##
+    #############################################################
+}
+
+###############################################################################
+## Create one spliced and one unspliced matrix                               ##
+
+geneOrder <- row.names(splicedList[[1]])
+
+unityMatSpliced <- list()
+unityMatUnSpliced <- list()
+  
+for (i in 1:length(splicedList)){
+    splicedList[[i]] <- splicedList[[i]][order(geneOrder), ]
+    unsplicedList[[i]] <- unsplicedList[[i]][order(geneOrder), ]
+    
+    if (i ==1){
+      unityMatSpliced <- splicedList[[i]]
+    } else {
+      unityMatSpliced <- cbind(unityMatSpliced, splicedList[[i]])
+    }
+    
+    if (i ==1){
+      unityMatUnSpliced <- unsplicedList[[i]]
+    } else {
+      unityMatUnSpliced <- cbind(unityMatUnSpliced, unsplicedList[[i]])
+    }
+}
+
+
+
+
+## Done                                                                      ##
+###############################################################################
+
+
+###############################################################################
+## Cells in experiment                                                       ##
+
+cellsInExperiment <- OsC@meta.data$cellID
+
+unityMatSpliced <- unityMatSpliced[,cellsInExperiment]
+#unityMatSpliced <- unityMatSpliced[rowSums(unityMatSpliced) > 0,]
+
+unityMatUnSpliced <- unityMatUnSpliced[,cellsInExperiment]
+#unityMatUnSpliced <- unityMatUnSpliced[row.names(unityMatSpliced),]
+
+## Create single-cell object ##
+# sce <- SingleCellExperiment(list(spliced = unityMatSpliced, unspliced = unityMatUnSpliced),
+#                             colData =DataFrame(cells=colnames(unityMatSpliced))   ,
+#                             rowData = DataFrame(gene=row.names(unityMatSpliced))
+# )
+# 
+# 
+# sce <- sce[sce$sizefactor > 0] 
+###############################################################################
+## Create one spliced and one unspliced matrix                               ##
+
+
+
+#ematRes <- data.frame(unityMatSpliced) #where combined.cm is the .rds output of dropEst
+
+
+Seurat::DefaultAssay(OsC) <- "RNA"
+topHalf <- ceiling(nrow(OsC@assays$RNA@counts)/2)
+
+OsC <- Seurat::FindVariableFeatures(
+    object = OsC,
+    selection.method = 'vst', 
+    nfeatures =2000
+)
+
+
+topSel <- head(
+    x = Seurat::VariableFeatures(object = OsC), 
+    2000
+)
+
+
+ematRes <- unityMatSpliced
+nmatRes <- unityMatUnSpliced
+
+ematRes <- ematRes[row.names(ematRes) %in% topSel,]
+nmatRes <- nmatRes[row.names(ematRes),]
+
+## Done                                                                      ##
+###############################################################################
+
+
+###############################################################################
+## Cells in experiment                                                       ##
+
+
+
+
+## Deal with duplicated gene names ##
+i = 1
+while (sum(duplicated(row.names(ematRes))) > 0){
+    row.names(ematRes)[duplicated(row.names(ematRes))] <-
+        paste0(row.names(ematRes)[duplicated(row.names(ematRes))], "_", i)
+    i= i+1
+}
+
+## Deal with duplicated gene names ##
+i = 1
+while (sum(duplicated(row.names(nmatRes))) > 0){
+    row.names(nmatRes)[duplicated(row.names(nmatRes))] <-
+        paste0(row.names(nmatRes)[duplicated(row.names(nmatRes))], "_", i)
+    i= i+1
+}
+
+write.table(ematRes, "ematRes.pbl446.top.2000.txt", sep = "\t")
+write.table(nmatRes, "nmatRes.pbl446.top2000.txt", sep = "\t")
+
+
+# take cluster labels
+#Inserting cluster labels
+cluster.label <- OsC@meta.data[,"clusterName"]  #r$clusters$PCA[[1]]
+
+
+
+cell.colors <- OsC@meta.data[,"clusterColor"]  #r$clusters$PCA[[1]]
+names(cell.colors) <- OsC@meta.data$cellID
+
+
+# take embedding
+
+#save.image("vct.image.RData")
+
+###############################################################################
+## Get coordinates for display                                               ##
+
+#emb <- r$embeddings$PCA$tSNE
+emb <- data.matrix(OsC@meta.data[,c("UMAP_1", "UMAP_2")])
+
+#cell.dist <- as.dist(1-armaCor(t(r$reductions$PCA)))
+# Estimate the cell-cell distances 
+mPCAembedings <- data.matrix(OsC@meta.data[,grep("^PC_", names(OsC@meta.data))])
+cell.dist <- as.dist(1-armaCor(t(mPCAembedings)))
+
+#emat <- filter.genes.by.cluster.expression(emat,cluster.label,min.max.cluster.average = 0.5)
+#nmat <- filter.genes.by.cluster.expression(nmat,cluster.label,min.max.cluster.average = 0.05)
+#length(intersect(rownames(emat),rownames(emat)))
+
+# the source below suggests to filter for mrna genes
+# https://jef.works/blog/2020/01/14/rna_velocity_analysis_tutorial_tips/
+
+## hints on the no arrow problem
+
+fit.quantile <- 0.2
+rvel.cd <- gene.relative.velocity.estimates(
+    ematRes,
+    nmatRes,
+    deltaT=1,
+    kCells=20,  # 10 worked in trial run
+    k=5,
+    cell.dist=cell.dist,
+    fit.quantile=fit.quantile,
+    n.cores = 24
+)
+
+# save.image("vct.446.image.RData")
+
+# p1 <- show.velocity.on.embedding.cor(
+#     emb,
+#     rvel.cd,
+#     n=300,
+#     scale='sqrt',
+#     cell.colors=ac(cell.colors,alpha=0.5),
+#     cex=0.8,
+#     arrow.scale=5,
+#     show.grid.flow=TRUE,
+#     min.grid.cell.mass=0.5,
+#     grid.n=40,
+#     arrow.lwd=1,
+#     do.par=F,
+#     cell.border.alpha = 0.1
+# )
+
+pdf("umap.vlct.pbl446.2000.most.var.vc.dev.pdf")
+par(mfrow=c(1,1))
+show.velocity.on.embedding.cor(
+    emb,
+    rvel.cd,
+    n=300,
+    scale='sqrt',
+    cell.colors=ac(cell.colors,alpha=1),
+    cex=0.8,
+    arrow.scale=5,
+    show.grid.flow=TRUE,
+    min.grid.cell.mass=0.5,
+    grid.n=40,
+    arrow.lwd=1,
+    do.par=F,
+    cell.border.alpha = 0.1
+)
+dev.off()
+
+gene <- "Ret"
+# p2 <- gene.relative.velocity.estimates(
+#     emat,nmat,deltaT=1,
+#     kCells = 20,
+#     kGenes=1,
+#     fit.quantile=fit.quantile,
+#     cell.emb=emb,
+#     cell.colors=cell.colors,
+#     cell.dist=cell.dist,
+#     show.gene=gene,
+#     old.fit=rvel.cd,do.par=T
+# )
+
+pdf("umap.vlct.by.gene.ret.vpl330.vc.dev.pdf")
+gene <- "Ret"
+gene.relative.velocity.estimates(
+    emat,nmat,deltaT=1,
+    kCells = 20,
+    kGenes=1,
+    fit.quantile=fit.quantile,
+    cell.emb=emb,
+    cell.colors=cell.colors,
+    cell.dist=cell.dist,
+    show.gene=gene,
+    old.fit=rvel.cd,do.par=T
+)
+dev.off()
+
+
+
+##                                                                           ##
+###############################################################################
+
+
+```
+
+## Create diffTable ##
+```{r create_diff_table, eval=TRUE, echo=F, results=F}
+library(tidyverse)
+
+workdir <- "/camp/stp/babs/working/boeings/Projects/pachnisv/song.chng/330_10xscRNAseq_DIV4_DIV11_DIV20_SC19069/workdir/"
+datadir <- "/camp/stp/babs/working/boeings/Projects/pachnisv/song.chng/330_10xscRNAseq_DIV4_DIV11_DIV20_SC19069/velocyto/"
+
+setwd(datadir)
+load("vct.image.RData")
+setwd(workdir)
+
+###############################################################################
+# Create tables                                                              ##
+
+
+
+## Done                                                                      ##
+###############################################################################
+
+
+
+## nmatres ##
+mUS <- nmatRes
+mUS <- mUS + 1 
+mUS <- apply(mUS, 2, log10)
+
+
+## ematres ##
+mS <- ematRes
+mS <- mS + 1 
+mS <- apply(mS, 2, log10)
+
+
+
+#nmatres minus ematres #
+mDiff_S_US <- mS - mUS
+
+dfExpr <- data.frame(mDiff_S_US)
+dfExpr[["gene"]] <- row.names(dfExpr)
+dfExpr <- gather(
+    dfExpr, 
+    condition, 
+    expr, 1:(ncol(dfExpr)-1), 
+    factor_key=TRUE
+)
+dfExpr <- dfExpr[dfExpr$expr != 0,]
+
+names(dfExpr) <- gsub("condition", "cellID", names(dfExpr))
+names(dfExpr) <- gsub("expr", "lg10Expr", names(dfExpr))
+dfExpr$lg10Expr <- round(dfExpr$lg10Expr, 3)
+dfExpr[["dtype"]] <- "dS_US"
+dfExpr <- data.frame(dfExpr, stringsAsFactors = F)
+dfExpr$cellID <- as.character(dfExpr$cellID)
+
+## Adjust cell names ##
+dfExpr[grep("DIV4", as.vector(dfExpr$cellID)), "cellID"] <- paste0(as.vector(dfExpr[grep("DIV4", dfExpr$cellID), "cellID"]), "_1")
+dfExpr$cellID <- gsub("DIV4_", "", dfExpr$cellID)
+
+dfExpr[grep("DIV10", as.vector(dfExpr$cellID)), "cellID"] <- paste0(as.vector(dfExpr[grep("DIV10", dfExpr$cellID), "cellID"]), "_2")
+dfExpr$cellID <- gsub("DIV10_", "", dfExpr$cellID)
+
+dfExpr[grep("DIV20", as.vector(dfExpr$cellID)), "cellID"] <- paste0(as.vector(dfExpr[grep("DIV20", dfExpr$cellID), "cellID"]), "_3")
+dfExpr$cellID <- gsub("DIV20_", "", dfExpr$cellID)
+
+## retrieve expression data ##
+dfExDat <- read.csv(
+    "/camp/stp/babs/working/boeings/Projects/pachnisv/song.chng/330_10xscRNAseq_DIV4_DIV11_DIV20_SC19069/workdir/temp.vpl330.csv"
+)
+
+dfExDat[["dtype"]] <- "lg10Expr"
+dfExDat <- dfExDat[, names(dfExpr)]
+
+dfExpr <- rbind(dfExpr, dfExDat)
+dfExpr[["row_names"]] <- 1:nrow(dfExpr)
+
+print("column order dfExpr")
+print(names(dfExpr))
+
+tempFN <- paste0("/camp/stp/babs/working/boeings/Projects/pachnisv/song.chng/330_10xscRNAseq_DIV4_DIV11_DIV20_SC19069/workdir/temp.full.vpl330.csv")
+write.csv(dfExpr, tempFN, row.names = F)
+```

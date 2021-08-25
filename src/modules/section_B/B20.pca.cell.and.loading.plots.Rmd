@@ -58,15 +58,27 @@ OsC <- addDf2seuratMetaData(
 
 
 Obio@dataTableList[["meta.data"]] <- OsC@meta.data
+dfDat <- Obio@dataTableList$meta.data
 
-xVec <- c("PC_1","PC_3","PC_5","PC_7","PC_9","PC_11","PC_13","PC_15","PC_17","PC_19")
-yVec <- c("PC_2","PC_4","PC_6","PC_8","PC_10","PC_12","PC_14","PC_16","PC_18","PC_20")
-pcVec <- c("PC_1","PC_2","PC_3","PC_4","PC_5","PC_6","PC_7","PC_8","PC_9","PC_10")
+PCvec <- names(dfDat)[grep("PC_", names(dfDat))] 
+oddEven <- gsub("PC_", "", PCvec )
+oddEven <- ifelse(as.numeric(oddEven) %% 2 == 0, "even", "odd")
+
+xVec <- PCvec[oddEven == "odd"]
+yVec <- PCvec[oddEven == "even"]
+
+minLength <- min(length(xVec), length(yVec))
+xVec <- xVec[1:minLength]
+yVec <- yVec[1:minLength]
+
+
+
+pcVec <- xVec
 chnkVec <- as.vector(NULL, mode = "character")
 plotListCell <- list()
 plotListGene <- list()
 
-dfDat <- Obio@dataTableList$meta.data
+
 xMax <- ceiling(max(dfDat[,"PC_1"]))
 xMin <- floor(min(dfDat[,"PC_1"]))
 aLimit <- max(abs(c(xMax, xMin)))

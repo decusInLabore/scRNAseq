@@ -78,6 +78,10 @@ db.pwd <- as.vector(dbTable[1,1])
 
 figureCount <- 1
 
+
+#install.packages("devtools")
+#devtools::install_github("decusInLabore/biologicSeqTools")
+
 source("assets/R/SBwebtools.pckg.r")
 
 if (length(.libPaths()) > 2){
@@ -287,13 +291,37 @@ DGEtagVec <- as.vector(NULL, mode = "character")
 
 DGEinputList <- list(
   "comp_1" = list(
-      "name"    = "DGE_C5_vs_C7",
+      "name"    = "DGE_C2_vs_C0_C4",
       "DGEselCol" = "seurat_clusters",
       "DGEsampleList" = list(
-          "C5"   = c(5),
-          "C7" = c(7)
+          "C2"   = c(2),
+          "C0_C4" = c(0,4)
       )
-  ) 
+  ),
+  "comp_2" = list(
+      "name"    = "DGE_C2_vs_C0",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "C2"   = c(2),
+          "C0" = c(0)
+      )
+  ),
+  "comp_3" = list(
+      "name"    = "DGE_C2_vs_C4",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "C2"   = c(2),
+          "C4" = c(4)
+      )
+  ),
+  "comp_4" = list(
+      "name"    = "DGE_C0_vs_C4",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "C0"   = c(0),
+          "C4" = c(4)
+      )
+  )
 )
 
 
@@ -814,7 +842,7 @@ for (i in 1:length(DGEtagVec)){
     
     selVec <- c(
         "gene",
-        names(dfAllPlots)[grep(DGEtagVec[i], names(dfAllPlots))]
+        names(dfAllPlots)[grep(paste0( DGEtagVec[i], "$"), names(dfAllPlots))]
     )
     
     dfPlot <- dfAllPlots[,selVec]
@@ -832,6 +860,7 @@ for (i in 1:length(DGEtagVec)){
     colVec <- c("red", "blue", "black")
     names(colVec) <- c("Up", "Down", "Unchanged")
   
+    colVec <- colVec[names(colVec) %in% unique( dfPlot$DGE_Status)]
     
     dfPlot[["X"]] <- dfPlot[,grep("_logFC", names(dfPlot))]
     dfPlot[["Y"]] <- dfPlot[,grep("_lg10p_", names(dfPlot))]
@@ -849,7 +878,7 @@ for (i in 1:length(DGEtagVec)){
     
     plotList[[tag]] <- ggplot(
         data=dfPlot[dfPlot$included == "+",], 
-        aes(X, Y, color=DGE_Status,)
+        aes(X, Y, color= DGE_Status,)
       ) + geom_vline(xintercept = c(logFCtwoSD, -1 * logFCtwoSD), col = "darkgrey", lty=2
       ) + geom_vline(xintercept = 0, col = "darkgrey"
       ) + geom_hline(yintercept = 0, col = "darkgrey"
@@ -964,7 +993,7 @@ for (i in 1:length(DGEtagVec)){
     
     selVec <- c(
         "gene",
-        names(dfAllPlots)[grep(DGEtagVec[i], names(dfAllPlots))]
+        names(dfAllPlots)[grep(paste0(DGEtagVec[i], "$"), names(dfAllPlots))]
     )
     
     dfPlot <- dfAllPlots[,selVec]
@@ -1074,7 +1103,7 @@ library(clusterProfiler)
     ## Select colors ##
     library(scales)
     enrCols <- hue_pal()(length(gmtList))
-    names(enrCols) <- names(gmtList)
+    names(enrCols) <- substr(names(gmtList),1,10)
 
 
 
@@ -1404,8 +1433,11 @@ outPutFN <- paste0(
 FNrel <- paste0("report_table/", baseFN)
     
 wb <- createWorkbook()
-    addWorksheet(wb, paste0(Obio@parameterList$project_id, "_subcluster_DGE"))
-    freezePane(wb, paste0(Obio@parameterList$project_id, "_subcluster_DGE") ,  firstActiveRow = 2)
+
+sheet <- substr(paste0(Obio@parameterList$project_id, "_subcluster_DGE"),1,30)
+
+    addWorksheet(wb, sheet)
+    freezePane(wb, sheet ,  firstActiveRow = 2)
     
     ## Filter is inactivated, as it does not appear to be compatible with the current version of Excel
     #addFilter(wb, 1, row = 1, cols = 1:ncol(dfOutput))
@@ -1482,7 +1514,7 @@ cmd.vec <- upload.datatable.to.database(
         "VARCHAR(1) CHARACTER SET latin1 COLLATE latin1_swedish_ci" = c("ppos", "amino_acid", "charge","known_site"),
         "BIGINT(8) NULL DEFAULT NULL" = c("row_names"),
         "INT(8) NULL DEFAULT NULL" = c("DEseq2Normalized","CoVarOrder","row_id", "cluster_order","cluster_id", "count_cut_off", "^position$", "raw_counts"),
-        "DECIMAL(6,3) NULL DEFAULT NULL" = c("Integrated_Samples_","_avg_diff_","Ind_var","add_counts_",  "lg2BaseMean","lg2baseMean","contrast_P_PCA_estimatePCA","^CoVar$","NES", "logFC", "lg2_avg","norm_counts", "intensity", "^int", "iBAQ","^localization_prob$", "stat", "lg10p","contrast_x_", "add_MA_cts_MA"),
+        "DECIMAL(6,3) NULL DEFAULT NULL" = c("Integrated_Samples_","_avg_diff_","Ind_var","add_counts_",  "lg2BaseMean","lg2baseMean","contrast_P_PCA_estimatePCA","^CoVar$","NES", "logFC", "lg2_avg","norm_counts", "contrast_C_corCoef_Inhba_Fib", "intensity", "^int", "iBAQ","^localization_prob$", "stat", "lg10p","contrast_x_", "add_MA_cts_MA"),
         "DECIMAL(6,5) NULL DEFAULT NULL" = c("r2_PCA","padj", "pvalue","^pep$", "p_value_PCA")
     ),
     new.table = TRUE,

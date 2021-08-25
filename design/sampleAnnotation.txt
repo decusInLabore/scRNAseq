@@ -1,2 +1,5 @@
 "sampleID"	"sampleName"	"sampleColor"
-"PBMC10X"	"PBMC10X"	"#F8766D"
+"Epip10sub"	"Epip10sub"	"#F8766D"
+"Epip14sub"	"Epip14sub"	"#7CAE00"
+"Epip6sub"	"Epip6sub"	"#00BFC4"
+"Epip7sub"	"Epip7sub"	"#C77CFF"

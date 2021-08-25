@@ -2,24 +2,23 @@
 ## Prepare subset for sub-clustering                                         ##
 library(Seurat)
 ## load Seurat object with basedata
-FN <- "/camp/stp/babs/working/boeings/Projects/lovellbadger/emily.frost/358B_RLL_EF_single_cell_p27kip1_in_ovarian_granulosa_cells_SC19235/workdir/rll358B.Seurat.Robj"
+FN <- "/camp/stp/babs/working/boeings/Projects/bonfantip/roberta.ragazzini/446_scRNAseq_subClustering_pbl359B_12clusters/workdir/pbl359BsubCluster.Seurat.Robj"
 load(FN)
 
 ## Data selection for subsetting:
-sampleID: primaryTumor
+## Objective removing the T-cell cluster C10
 
 
-
-OsC_sel1 <- subset(x = OsC, subset = seurat_clusters %in% c(1,2,7,9,15) )
+OsC_sel1 <- subset(x = OsC, subset = seurat_clusters %in% c(1:9,11:13) )
 
 sampleIDs <- unique(OsC_sel1$sampleID)
 
 for (i in 1:length(sampleIDs)){
     FNout <- paste0(
-      "/camp/stp/babs/working/boeings/Projects/lovellbadger/emily.frost/358B_RLL_EF_single_cell_p27kip1_in_ovarian_granulosa_cells_SC19235/basedata/",
+      "/camp/stp/babs/working/boeings/Projects/bonfantip/roberta.ragazzini/446_scRNAseq_subClustering_pbl359B_12clusters/basedata/",
       "input_",
       sampleIDs[i],
-      "_C127915.txt"
+      "_C1to9_11to13.txt"
     )
     
     OsC_temp <- subset(x= OsC_sel1, subset = sampleID == sampleIDs[i])
@@ -31,8 +30,8 @@ for (i in 1:length(sampleIDs)){
     }
 }
 
-OsC@meta.data[["meta_Subclustering_rll358B"]] <- "Rest"
-OsC@meta.data[OsC@meta.data$seurat_clusters %in% c(1,2,7,9,15), "meta_Subclustering_rll358B"] <- "Selected"
+OsC@meta.data[["Subclustering_pbl359Bsub"]] <- "Rest"
+OsC@meta.data[OsC@meta.data$seurat_clusters %in% c(1:9,11:13), "Subclustering_pbl359Bsub"] <- "Selected"
 
 save(
   OsC, 
