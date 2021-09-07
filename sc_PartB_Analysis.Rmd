@@ -29,14 +29,18 @@ library(ggplot2)
 library(tidyr)
 library(knitr)
 
-cwd <- getwd()
-setwd("..")
-tempWorkDir <- getwd()
-setwd(cwd)
+cwd <- paste0(here::here(),"/")
+tempWorkDir <- paste0(cwd, "../")
 
 ## Load custom packages specific for this analysis ##
-source("assets/R/scTools.r")
-source("assets/R/SBwebtools.pckg.r")
+#source("assets/R/scTools.r")
+#source("assets/R/SBwebtools.pckg.r")
+
+devtools::install_github("decusInLabore/biologicSeqTools")
+devtools::install_github("decusInLabore/biologicToolsSC")
+library(Seurat)
+library(biologicSeqTools)
+library(biologicToolsSC)
 
 upload.results.to.database <- TRUE
 save.chunk.intermediates <- TRUE
@@ -59,9 +63,9 @@ figureCount <- 1
 ## SB local libpaths                                                         ##
 ## Set filename for temp pdf files ##
 
-if (length(.libPaths()) > 2){
-    .libPaths(.libPaths()[2:3])
-}
+# if (length(.libPaths()) > 2){
+#     .libPaths(.libPaths()[2:3])
+# }
 ## Done                                                                      ##
 ###############################################################################
 
@@ -91,18 +95,8 @@ if (length(.libPaths()) > 2){
 ```{r child = 'src/modules/section_B/B.4.create.variation.plots.Rmd', eval=TRUE}
 ```
 
-<!-- Essential 5: (output required later): 
-  Creation of PCA plots 
-  Differential gene expression 
-  
-  Chapter/Module -->
-```{r child = 'src/modules/section_B/B.5.cluster.DGE.Rmd', eval=TRUE}
-```
-
 <!-- Essential 6: (output required later): 
-DGE Marker gene upload
-  
-Chapter/Module -->
+DGE Marker gene upload Chapter/Module -->
 ```{r child = 'src/modules/section_B/B.6.create.pca.plots.Rmd', eval=TRUE}
 ```
 
@@ -203,14 +197,20 @@ save(OsC,
 
 ## Try to retrieve project data from db ##
 library(RMySQL)
-db.pwd2 <- "_asf_"
-db.user2 <- "asf"
-host2 <- "ms1.thecrick.org"
+db.pwd2 <- "zU3ufd9L"
+db.user2 <- "reader"
+host2 <- "clvd1-db-u-p-17.thecrick.org"
 projectParams <- Obio@documentationParams
 
 tryCatch({
-    dbDB = dbConnect(drv = RMySQL::MySQL(), user = db.user2, password = db.pwd2, host = host2, dbname = "asf");
-dfProposal =  dbGetQuery(dbDB, paste0("SELECT * FROM asf_proposals WHERE project_name ='",Obio@parameterList$lims.id,"'"));
+    dbDB = DBI::dbConnect(
+        drv = RMySQL::MySQL(), 
+        user = db.user2, 
+        password = db.pwd2, 
+        host = host2, 
+        dbname = "clarity_shadow"
+    )
+dfProposal =  DBI::dbGetQuery(dbDB, paste0("SELECT * FROM clarify_asf_proposals WHERE project_name ='",Obio@parameterList$lims.id,"'"))
 dbDisconnect(dbDB)
   }, error = function(x) {
     message("Project Database could not be reached or has no entry in Obio@parameterList$lims.id for this analysis.")

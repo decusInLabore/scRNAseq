@@ -9,6 +9,26 @@ VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.D
 
 ### Create Sample List
 ```{r B3_partB_create_sample_list, echo=TRUE, eval=TRUE, warning=FALSE, results=F}
+
+## Harmony tutorial: http://htmlpreview.github.io/?https://github.com/immunogenomics/harmony/blob/master/docs/SeuratV3.html ##
+
+###############################################################################
+## Create Seurat object containing all matrices                              ##
+pbmc <- CreateSeuratObject(counts = cbind(stim.sparse, ctrl.sparse), project = "PBMC", min.cells = 5) %>%
+    Seurat::NormalizeData(verbose = FALSE) %>%
+    FindVariableFeatures(selection.method = "vst", nfeatures = 2000) %>% 
+    ScaleData(verbose = FALSE) %>% 
+    RunPCA(pc.genes = pbmc@var.genes, npcs = 20, verbose = FALSE)
+
+my_harmony_embeddings <- HarmonyMatrix(
+  my_pca_embeddings, meta_data, c("dataset", "donor", "batch_id"),
+  do_pca = FALSE
+)
+
+
+##                                                                           ##
+###############################################################################
+
 ###############################################################################
 ## Do percent mt plots                                                       ##
 

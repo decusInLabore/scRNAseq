@@ -21,12 +21,20 @@ for (i in 1:length(sampleNames)){
         baseFN <- Obio@sampleDetailList[[sampleNames[i]]]$path
         summaryFN <- gsub("filtered_feature_bc_matrix", "metrics_summary.csv", baseFN)
         if (file.exists(summaryFN)){
-            dfTemp <- read.csv(summaryFN)
+            dfTemp <- read.csv(summaryFN, stringsAsFactors = F)
             dfTemp[["sampleName"]] <- sampleNames[i]
+            
+            
+            
+            
+            
             if (!tableCreated){
                 tableCreated = TRUE
                 dfRes <- dfTemp
             } else {
+                displayCols <- names(dfRes)[names(dfRes) %in% names(dfTemp)]
+                dfTemp <- dfTemp[,displayCols]
+                dfRes <- dfRes[,displayCols]
                 dfRes <- rbind(
                     dfRes,
                     dfTemp
@@ -78,10 +86,12 @@ dfRes$Parameter <- gsub("[.]", " ", dfRes$Parameter)
 ###############################################################################
 ## Write table to Excel File                                                 ##
 
+sheetName <- substr(paste0(Obio@parameterList$project_id, "_QC_Parameter_Table"), 1, 31)
+
 createXLSXoutput(
     dfTable = dfRes,
     outPutFN = paste0(Obio@parameterList$reportTableDir ,Obio@parameterList$project_id, "_QC_Parameter_Table.xlsx"),
-    tableName = paste0(Obio@parameterList$project_id, "_QC_Parameter_Table")
+    tableName = sheetName
 )
 
 ## Done creating Excel output table                                          ##

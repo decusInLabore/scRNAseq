@@ -42,14 +42,47 @@ List of 4
  $ warning: logi FALSE
  $ results: chr "asis"
 
+Loading required package: biologicSeqTools
+
+Attaching package: 'biologicSeqTools'
+
+The following objects are masked _by_ '.GlobalEnv':
+
+    add2labCatSelectionDBtable, add2vec,
+    add.category.to.lab.reference.table.hs, addCoVar,
+    addDGEcomparisons2DesignFile, addGeneAnnotation,
+    addProject2ProjectTable, addTPMorFPKMtable,
+    completeDesignBasedOnSampleID, createAlignmentShellScript,
+    createAnalysisFolders, createAndFormatExcelOutputFiles,
+    createbulkRNASeqAnalysisBashScripts,
+    createConcatenateFASTQfilesShellScript, createDdsObject,
+    createDesignFileCrickASFsamples,
+    create.gmt.file.from.ref.data.table, create.gsea.rnk.files,
+    create.GSEA.table, createNewProject, createPCAloadingPlots,
+    createRMDscript, createSampleDendrogram, createSettingsFile,
+    createSeuratSettingsFile, createSRAdownloadScript,
+    createSRRdownloadScript, create.timecourse.cat.lines,
+    create.tpm.and.fpkm.tables, createTrimGaloreShellScript,
+    create.website.parameters, datatable.to.website.ptm, dbcat2gmt,
+    doDGEanalysis, doLinearFittings, doLRTanalysis, doPCA, DotPlotSB,
+    excel, hpcClusterSubmisison, import.db.table.from.db,
+    killDbConnections, list.db.table.col.names, list.db.tables.in.db,
+    listExistingProjects, make.hm, msigdb.gmt2refDB,
+    organizeFastqFiles, prepareRSEMcountMatrix, profileCluster,
+    readAndPrepareCountMatrix, retrieve.gene.category.from.db,
+    selectHeatmapGenes, setAnalysisPaths,
+    setCrickGenomeAndGeneNameTable, setDataBaseParameters,
+    setMountingPoint, upload.datatable.to.database,
+    upload.pca.table.to.db
+
   |                                                                              |......................................................................| 100%
   ordinary text without R code
 
 
-  |                                                                              |.......                                                               |  10%
+  |                                                                              |.......                                                               |   9%
   ordinary text without R code
 
-  |                                                                              |........                                                              |  12%
+  |                                                                              |........                                                              |  11%
 label: unnamed-chunk-2 (with options) 
 List of 2
  $ child: chr "src/modules/section_B/B.2.retrieve.reference.gene.sets.Rmd"
@@ -84,10 +117,10 @@ Loading required package: DBI
   ordinary text without R code
 
 
-  |                                                                              |..........                                                            |  14%
+  |                                                                              |.........                                                             |  13%
   ordinary text without R code
 
-  |                                                                              |...........                                                           |  16%
+  |                                                                              |...........                                                           |  15%
 label: unnamed-chunk-3 (with options) 
 List of 2
  $ child: chr "src/modules/section_B/B.3.create.integrated.seurat.object.Rmd"
@@ -124,227 +157,171 @@ Running CCA
 Merging objects
 Finding neighborhoods
 Finding anchors
-	Found 5496 anchors
+	Found 13347 anchors
 Filtering anchors
-	Retained 3969 anchors
+	Retained 4579 anchors
 Extracting within-dataset neighbors
 Running CCA
 Merging objects
 Finding neighborhoods
 Finding anchors
-	Found 7174 anchors
+	Found 13318 anchors
 Filtering anchors
-	Retained 5176 anchors
+	Retained 3693 anchors
 Extracting within-dataset neighbors
 Running CCA
 Merging objects
 Finding neighborhoods
 Finding anchors
-	Found 5775 anchors
+	Found 11130 anchors
 Filtering anchors
-	Retained 3311 anchors
+	Retained 7031 anchors
 Extracting within-dataset neighbors
 Running CCA
 Merging objects
 Finding neighborhoods
 Finding anchors
-	Found 6713 anchors
+	Found 13347 anchors
 Filtering anchors
-	Retained 4875 anchors
+	Retained 4579 anchors
 Extracting within-dataset neighbors
 Running CCA
 Merging objects
 Finding neighborhoods
 Finding anchors
-	Found 5201 anchors
+	Found 12361 anchors
 Filtering anchors
-	Retained 3234 anchors
+	Retained 9708 anchors
 Extracting within-dataset neighbors
 Running CCA
 Merging objects
 Finding neighborhoods
 Finding anchors
-	Found 7419 anchors
+	Found 11135 anchors
 Filtering anchors
-	Retained 5838 anchors
+	Retained 6452 anchors
 Extracting within-dataset neighbors
 Running CCA
 Merging objects
 Finding neighborhoods
 Finding anchors
-	Found 4288 anchors
+	Found 13318 anchors
 Filtering anchors
-	Retained 2326 anchors
+	Retained 3693 anchors
 Extracting within-dataset neighbors
 Running CCA
 Merging objects
 Finding neighborhoods
 Finding anchors
-	Found 4325 anchors
+	Found 11130 anchors
 Filtering anchors
-	Retained 1883 anchors
+	Retained 7031 anchors
 Extracting within-dataset neighbors
 Running CCA
 Merging objects
 Finding neighborhoods
 Finding anchors
-	Found 4704 anchors
+	Found 11826 anchors
 Filtering anchors
-	Retained 2076 anchors
+	Retained 9372 anchors
 Extracting within-dataset neighbors
 Running CCA
 Merging objects
 Finding neighborhoods
 Finding anchors
-	Found 4427 anchors
+	Found 11130 anchors
 Filtering anchors
-	Retained 2170 anchors
+	Retained 7031 anchors
 Extracting within-dataset neighbors
 Running CCA
 Merging objects
 Finding neighborhoods
 Finding anchors
-	Found 5993 anchors
+	Found 8005 anchors
 Filtering anchors
-	Retained 1947 anchors
+	Retained 4719 anchors
 Extracting within-dataset neighbors
 Running CCA
 Merging objects
 Finding neighborhoods
 Finding anchors
-	Found 5776 anchors
+	Found 7150 anchors
 Filtering anchors
-	Retained 2073 anchors
+	Retained 5147 anchors
 Extracting within-dataset neighbors
 Running CCA
 Merging objects
 Finding neighborhoods
 Finding anchors
-	Found 6331 anchors
+	Found 7285 anchors
 Filtering anchors
-	Retained 2340 anchors
+	Retained 4522 anchors
 Extracting within-dataset neighbors
 Running CCA
 Merging objects
 Finding neighborhoods
 Finding anchors
-	Found 5547 anchors
+	Found 7150 anchors
 Filtering anchors
-	Retained 2377 anchors
+	Retained 5147 anchors
 Extracting within-dataset neighbors
 Running CCA
 Merging objects
 Finding neighborhoods
 Finding anchors
-	Found 4467 anchors
+	Found 7285 anchors
 Filtering anchors
-	Retained 3437 anchors
+	Retained 4522 anchors
 Extracting within-dataset neighbors
 Running CCA
 Merging objects
 Finding neighborhoods
 Finding anchors
-	Found 1538 anchors
+	Found 11741 anchors
 Filtering anchors
-	Retained 1371 anchors
+	Retained 3719 anchors
 Extracting within-dataset neighbors
 Running CCA
 Merging objects
 Finding neighborhoods
 Finding anchors
-	Found 1630 anchors
+	Found 10223 anchors
 Filtering anchors
-	Retained 1399 anchors
+	Retained 5112 anchors
 Extracting within-dataset neighbors
 Running CCA
 Merging objects
 Finding neighborhoods
 Finding anchors
-	Found 1487 anchors
+	Found 10170 anchors
 Filtering anchors
-	Retained 1382 anchors
+	Retained 4969 anchors
 Extracting within-dataset neighbors
 Running CCA
 Merging objects
 Finding neighborhoods
 Finding anchors
-	Found 1493 anchors
+	Found 10223 anchors
 Filtering anchors
-	Retained 1355 anchors
+	Retained 5112 anchors
 Extracting within-dataset neighbors
 Running CCA
 Merging objects
 Finding neighborhoods
 Finding anchors
-	Found 1443 anchors
+	Found 10170 anchors
 Filtering anchors
-	Retained 1378 anchors
+	Retained 4969 anchors
 Extracting within-dataset neighbors
 Running CCA
 Merging objects
 Finding neighborhoods
 Finding anchors
-	Found 1643 anchors
+	Found 6800 anchors
 Filtering anchors
-	Retained 1609 anchors
+	Retained 2952 anchors
 Extracting within-dataset neighbors
-Running CCA
-Merging objects
-Finding neighborhoods
-Finding anchors
-	Found 7680 anchors
-Filtering anchors
-	Retained 1816 anchors
-Extracting within-dataset neighbors
-Running CCA
-Merging objects
-Finding neighborhoods
-Finding anchors
-	Found 7356 anchors
-Filtering anchors
-	Retained 1567 anchors
-Extracting within-dataset neighbors
-Running CCA
-Merging objects
-Finding neighborhoods
-Finding anchors
-	Found 8137 anchors
-Filtering anchors
-	Retained 1937 anchors
-Extracting within-dataset neighbors
-Running CCA
-Merging objects
-Finding neighborhoods
-Finding anchors
-	Found 6328 anchors
-Filtering anchors
-	Retained 2588 anchors
-Extracting within-dataset neighbors
-Running CCA
-Merging objects
-Finding neighborhoods
-Finding anchors
-	Found 4536 anchors
-Filtering anchors
-	Retained 2886 anchors
-Extracting within-dataset neighbors
-Running CCA
-Merging objects
-Finding neighborhoods
-Finding anchors
-	Found 7466 anchors
-Filtering anchors
-	Retained 5258 anchors
-Extracting within-dataset neighbors
-Running CCA
-Merging objects
-Finding neighborhoods
-Finding anchors
-	Found 1669 anchors
-Filtering anchors
-	Retained 1033 anchors
-Extracting within-dataset neighbors
-Merging dataset 7 into 6
+Merging dataset 5 into 3
 Extracting anchors for merged samples
 Finding integration vectors
 Finding integration vector weights
@@ -352,7 +329,7 @@ Finding integration vector weights
 [----|----|----|----|----|----|----|----|----|----|
 **************************************************|
 Integrating data
-Merging dataset 5 into 6 7
+Merging dataset 4 into 2
 Extracting anchors for merged samples
 Finding integration vectors
 Finding integration vector weights
@@ -360,7 +337,7 @@ Finding integration vector weights
 [----|----|----|----|----|----|----|----|----|----|
 **************************************************|
 Integrating data
-Merging dataset 4 into 3
+Merging dataset 6 into 2 4
 Extracting anchors for merged samples
 Finding integration vectors
 Finding integration vector weights
@@ -368,7 +345,7 @@ Finding integration vector weights
 [----|----|----|----|----|----|----|----|----|----|
 **************************************************|
 Integrating data
-Merging dataset 8 into 6 7 5
+Merging dataset 3 5 into 2 4 6
 Extracting anchors for merged samples
 Finding integration vectors
 Finding integration vector weights
@@ -376,7 +353,7 @@ Finding integration vector weights
 [----|----|----|----|----|----|----|----|----|----|
 **************************************************|
 Integrating data
-Merging dataset 2 into 1
+Merging dataset 7 into 2 4 6 3 5
 Extracting anchors for merged samples
 Finding integration vectors
 Finding integration vector weights
@@ -384,15 +361,7 @@ Finding integration vector weights
 [----|----|----|----|----|----|----|----|----|----|
 **************************************************|
 Integrating data
-Merging dataset 1 2 into 3 4
-Extracting anchors for merged samples
-Finding integration vectors
-Finding integration vector weights
-0%   10   20   30   40   50   60   70   80   90   100%
-[----|----|----|----|----|----|----|----|----|----|
-**************************************************|
-Integrating data
-Merging dataset 6 7 5 8 into 3 4 1 2
+Merging dataset 1 into 2 4 6 3 5 7
 Extracting anchors for merged samples
 Finding integration vectors
 Finding integration vector weights
@@ -401,16 +370,16 @@ Finding integration vector weights
 **************************************************|
 Integrating data
 Warning: Adding a command log without an assay associated with it
-Warning: The following features are not present in the object: Atad2, Blm, Brip1, Casp8ap2, Cdc45, Cdc6, Cdca7, Chaf1b, Clspn, Dscc1, Dtl, E2f8, Exo1, Fen1, Gins2, Gmnn, Hells, Mcm2, Mcm4, Mcm5, Mcm6, Msh2, Nasp, Pcna, Pola1, Pold3, Prim1, Rad51, Rad51ap1, Rfc2, Rpa2, Rrm1, Slbp, Tipin, Tyms, Ubr7, Uhrf1, Ung, Usp1, Wdr76, not searching for symbol synonyms
-Warning: The following features are not present in the object: Anln, Aurkb, Bub1, Cbx5, Cdc25c, Cdca2, Ckap2, Ckap2l, Ckap5, Ctcf, Dlgap5, Fam64a, G2e3, Gtse1, Hjurp, Hn1, Kif11, Kif20b, Kif2c, Lbr, Ncapd2, Ndc80, Nek2, Nuf2, Rangap1, Smc4, Tmpo, Ttk, Tubb4b, not searching for symbol synonyms
+Warning: The following features are not present in the object: MLF1IP, not searching for symbol synonyms
+Warning: The following features are not present in the object: FAM64A, HN1, not searching for symbol synonyms
   |                                                                              |......................................................................| 100%
   ordinary text without R code
 
 
-  |                                                                              |............                                                          |  18%
+  |                                                                              |............                                                          |  17%
   ordinary text without R code
 
-  |                                                                              |..............                                                        |  20%
+  |                                                                              |.............                                                         |  19%
 label: unnamed-chunk-4 (with options) 
 List of 2
  $ child: chr "src/modules/section_B/B.4.create.variation.plots.Rmd"
@@ -455,7 +424,7 @@ Performing log-normalization
 [----|----|----|----|----|----|----|----|----|----|
 **************************************************|
 Centering and scaling data matrix
-  |                                                                              |                                                                      |   0%  |                                                                              |====                                                                  |   6%  |                                                                              |=========                                                             |  12%  |                                                                              |=============                                                         |  19%  |                                                                              |==================                                                    |  25%  |                                                                              |======================                                                |  31%  |                                                                              |==========================                                            |  38%  |                                                                              |===============================                                       |  44%  |                                                                              |===================================                                   |  50%  |                                                                              |=======================================                               |  56%  |                                                                              |============================================                          |  62%  |                                                                              |================================================                      |  69%  |                                                                              |====================================================                  |  75%  |                                                                              |=========================================================             |  81%  |                                                                              |=============================================================         |  88%  |                                                                              |==================================================================    |  94%  |                                                                              |======================================================================| 100%
+  |                                                                              |                                                                      |   0%  |                                                                              |===                                                                   |   4%  |                                                                              |======                                                                |   8%  |                                                                              |========                                                              |  12%  |                                                                              |===========                                                           |  16%  |                                                                              |==============                                                        |  20%  |                                                                              |=================                                                     |  24%  |                                                                              |====================                                                  |  28%  |                                                                              |======================                                                |  32%  |                                                                              |=========================                                             |  36%  |                                                                              |============================                                          |  40%  |                                                                              |===============================                                       |  44%  |                                                                              |==================================                                    |  48%  |                                                                              |====================================                                  |  52%  |                                                                              |=======================================                               |  56%  |                                                                              |==========================================                            |  60%  |                                                                              |=============================================                         |  64%  |                                                                              |================================================                      |  68%  |                                                                              |==================================================                    |  72%  |                                                                              |=====================================================                 |  76%  |                                                                              |========================================================              |  80%  |                                                                              |===========================================================           |  84%  |                                                                              |==============================================================        |  88%  |                                                                              |================================================================      |  92%  |                                                                              |===================================================================   |  96%  |                                                                              |======================================================================| 100%
 Calculating gene variances
 0%   10   20   30   40   50   60   70   80   90   100%
 [----|----|----|----|----|----|----|----|----|----|
@@ -472,13 +441,13 @@ Calculating feature variances of standardized and clipped values
 0%   10   20   30   40   50   60   70   80   90   100%
 [----|----|----|----|----|----|----|----|----|----|
 **************************************************|
-Finished averaging RNA for cluster KPC1viable
+Finished averaging RNA for cluster Skin01sub
 Performing log-normalization
 0%   10   20   30   40   50   60   70   80   90   100%
 [----|----|----|----|----|----|----|----|----|----|
 **************************************************|
 Centering and scaling data matrix
-  |                                                                              |                                                                      |   0%  |                                                                              |=====                                                                 |   7%  |                                                                              |==========                                                            |  14%  |                                                                              |===============                                                       |  21%  |                                                                              |====================                                                  |  29%  |                                                                              |=========================                                             |  36%  |                                                                              |==============================                                        |  43%  |                                                                              |===================================                                   |  50%  |                                                                              |========================================                              |  57%  |                                                                              |=============================================                         |  64%  |                                                                              |==================================================                    |  71%  |                                                                              |=======================================================               |  79%  |                                                                              |============================================================          |  86%  |                                                                              |=================================================================     |  93%  |                                                                              |======================================================================| 100%
+  |                                                                              |                                                                      |   0%  |                                                                              |===                                                                   |   5%  |                                                                              |======                                                                |   9%  |                                                                              |==========                                                            |  14%  |                                                                              |=============                                                         |  18%  |                                                                              |================                                                      |  23%  |                                                                              |===================                                                   |  27%  |                                                                              |======================                                                |  32%  |                                                                              |=========================                                             |  36%  |                                                                              |=============================                                         |  41%  |                                                                              |================================                                      |  45%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================                                |  55%  |                                                                              |=========================================                             |  59%  |                                                                              |=============================================                         |  64%  |                                                                              |================================================                      |  68%  |                                                                              |===================================================                   |  73%  |                                                                              |======================================================                |  77%  |                                                                              |=========================================================             |  82%  |                                                                              |============================================================          |  86%  |                                                                              |================================================================      |  91%  |                                                                              |===================================================================   |  95%  |                                                                              |======================================================================| 100%
 Calculating gene variances
 0%   10   20   30   40   50   60   70   80   90   100%
 [----|----|----|----|----|----|----|----|----|----|
@@ -495,13 +464,13 @@ Calculating feature variances of standardized and clipped values
 0%   10   20   30   40   50   60   70   80   90   100%
 [----|----|----|----|----|----|----|----|----|----|
 **************************************************|
-Finished averaging RNA for cluster KPC2viable
+Finished averaging RNA for cluster ThyP89sub
 Performing log-normalization
 0%   10   20   30   40   50   60   70   80   90   100%
 [----|----|----|----|----|----|----|----|----|----|
 **************************************************|
 Centering and scaling data matrix
-  |                                                                              |                                                                      |   0%  |                                                                              |=====                                                                 |   7%  |                                                                              |==========                                                            |  14%  |                                                                              |===============                                                       |  21%  |                                                                              |====================                                                  |  29%  |                                                                              |=========================                                             |  36%  |                                                                              |==============================                                        |  43%  |                                                                              |===================================                                   |  50%  |                                                                              |========================================                              |  57%  |                                                                              |=============================================                         |  64%  |                                                                              |==================================================                    |  71%  |                                                                              |=======================================================               |  79%  |                                                                              |============================================================          |  86%  |                                                                              |=================================================================     |  93%  |                                                                              |======================================================================| 100%
+  |                                                                              |                                                                      |   0%  |                                                                              |===                                                                   |   5%  |                                                                              |======                                                                |   9%  |                                                                              |==========                                                            |  14%  |                                                                              |=============                                                         |  18%  |                                                                              |================                                                      |  23%  |                                                                              |===================                                                   |  27%  |                                                                              |======================                                                |  32%  |                                                                              |=========================                                             |  36%  |                                                                              |=============================                                         |  41%  |                                                                              |================================                                      |  45%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================                                |  55%  |                                                                              |=========================================                             |  59%  |                                                                              |=============================================                         |  64%  |                                                                              |================================================                      |  68%  |                                                                              |===================================================                   |  73%  |                                                                              |======================================================                |  77%  |                                                                              |=========================================================             |  82%  |                                                                              |============================================================          |  86%  |                                                                              |================================================================      |  91%  |                                                                              |===================================================================   |  95%  |                                                                              |======================================================================| 100%
 Calculating gene variances
 0%   10   20   30   40   50   60   70   80   90   100%
 [----|----|----|----|----|----|----|----|----|----|
@@ -518,13 +487,13 @@ Calculating feature variances of standardized and clipped values
 0%   10   20   30   40   50   60   70   80   90   100%
 [----|----|----|----|----|----|----|----|----|----|
 **************************************************|
-Finished averaging RNA for cluster KPC3viable
+Finished averaging RNA for cluster ThyP94sub
 Performing log-normalization
 0%   10   20   30   40   50   60   70   80   90   100%
 [----|----|----|----|----|----|----|----|----|----|
 **************************************************|
 Centering and scaling data matrix
-  |                                                                              |                                                                      |   0%  |                                                                              |=====                                                                 |   7%  |                                                                              |==========                                                            |  14%  |                                                                              |===============                                                       |  21%  |                                                                              |====================                                                  |  29%  |                                                                              |=========================                                             |  36%  |                                                                              |==============================                                        |  43%  |                                                                              |===================================                                   |  50%  |                                                                              |========================================                              |  57%  |                                                                              |=============================================                         |  64%  |                                                                              |==================================================                    |  71%  |                                                                              |=======================================================               |  79%  |                                                                              |============================================================          |  86%  |                                                                              |=================================================================     |  93%  |                                                                              |======================================================================| 100%
+  |                                                                              |                                                                      |   0%  |                                                                              |===                                                                   |   5%  |                                                                              |======                                                                |   9%  |                                                                              |==========                                                            |  14%  |                                                                              |=============                                                         |  18%  |                                                                              |================                                                      |  23%  |                                                                              |===================                                                   |  27%  |                                                                              |======================                                                |  32%  |                                                                              |=========================                                             |  36%  |                                                                              |=============================                                         |  41%  |                                                                              |================================                                      |  45%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================                                |  55%  |                                                                              |=========================================                             |  59%  |                                                                              |=============================================                         |  64%  |                                                                              |================================================                      |  68%  |                                                                              |===================================================                   |  73%  |                                                                              |======================================================                |  77%  |                                                                              |=========================================================             |  82%  |                                                                              |============================================================          |  86%  |                                                                              |================================================================      |  91%  |                                                                              |===================================================================   |  95%  |                                                                              |======================================================================| 100%
 Calculating gene variances
 0%   10   20   30   40   50   60   70   80   90   100%
 [----|----|----|----|----|----|----|----|----|----|
@@ -541,13 +510,13 @@ Calculating feature variances of standardized and clipped values
 0%   10   20   30   40   50   60   70   80   90   100%
 [----|----|----|----|----|----|----|----|----|----|
 **************************************************|
-Finished averaging RNA for cluster KPC4viable
+Finished averaging RNA for cluster MedullaThy89sub
 Performing log-normalization
 0%   10   20   30   40   50   60   70   80   90   100%
 [----|----|----|----|----|----|----|----|----|----|
 **************************************************|
 Centering and scaling data matrix
-  |                                                                              |                                                                      |   0%  |                                                                              |=====                                                                 |   7%  |                                                                              |==========                                                            |  14%  |                                                                              |===============                                                       |  21%  |                                                                              |====================                                                  |  29%  |                                                                              |=========================                                             |  36%  |                                                                              |==============================                                        |  43%  |                                                                              |===================================                                   |  50%  |                                                                              |========================================                              |  57%  |                                                                              |=============================================                         |  64%  |                                                                              |==================================================                    |  71%  |                                                                              |=======================================================               |  79%  |                                                                              |============================================================          |  86%  |                                                                              |=================================================================     |  93%  |                                                                              |======================================================================| 100%
+  |                                                                              |                                                                      |   0%  |                                                                              |===                                                                   |   5%  |                                                                              |======                                                                |   9%  |                                                                              |==========                                                            |  14%  |                                                                              |=============                                                         |  18%  |                                                                              |================                                                      |  23%  |                                                                              |===================                                                   |  27%  |                                                                              |======================                                                |  32%  |                                                                              |=========================                                             |  36%  |                                                                              |=============================                                         |  41%  |                                                                              |================================                                      |  45%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================                                |  55%  |                                                                              |=========================================                             |  59%  |                                                                              |=============================================                         |  64%  |                                                                              |================================================                      |  68%  |                                                                              |===================================================                   |  73%  |                                                                              |======================================================                |  77%  |                                                                              |=========================================================             |  82%  |                                                                              |============================================================          |  86%  |                                                                              |================================================================      |  91%  |                                                                              |===================================================================   |  95%  |                                                                              |======================================================================| 100%
 Calculating gene variances
 0%   10   20   30   40   50   60   70   80   90   100%
 [----|----|----|----|----|----|----|----|----|----|
@@ -564,13 +533,13 @@ Calculating feature variances of standardized and clipped values
 0%   10   20   30   40   50   60   70   80   90   100%
 [----|----|----|----|----|----|----|----|----|----|
 **************************************************|
-Finished averaging RNA for cluster KPC1fib
+Finished averaging RNA for cluster MedullaThy94sub
 Performing log-normalization
 0%   10   20   30   40   50   60   70   80   90   100%
 [----|----|----|----|----|----|----|----|----|----|
 **************************************************|
 Centering and scaling data matrix
-  |                                                                              |                                                                      |   0%  |                                                                              |=====                                                                 |   7%  |                                                                              |=========                                                             |  13%  |                                                                              |==============                                                        |  20%  |                                                                              |===================                                                   |  27%  |                                                                              |=======================                                               |  33%  |                                                                              |============================                                          |  40%  |                                                                              |=================================                                     |  47%  |                                                                              |=====================================                                 |  53%  |                                                                              |==========================================                            |  60%  |                                                                              |===============================================                       |  67%  |                                                                              |===================================================                   |  73%  |                                                                              |========================================================              |  80%  |                                                                              |=============================================================         |  87%  |                                                                              |=================================================================     |  93%  |                                                                              |======================================================================| 100%
+  |                                                                              |                                                                      |   0%  |                                                                              |===                                                                   |   5%  |                                                                              |======                                                                |   9%  |                                                                              |==========                                                            |  14%  |                                                                              |=============                                                         |  18%  |                                                                              |================                                                      |  23%  |                                                                              |===================                                                   |  27%  |                                                                              |======================                                                |  32%  |                                                                              |=========================                                             |  36%  |                                                                              |=============================                                         |  41%  |                                                                              |================================                                      |  45%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================                                |  55%  |                                                                              |=========================================                             |  59%  |                                                                              |=============================================                         |  64%  |                                                                              |================================================                      |  68%  |                                                                              |===================================================                   |  73%  |                                                                              |======================================================                |  77%  |                                                                              |=========================================================             |  82%  |                                                                              |============================================================          |  86%  |                                                                              |================================================================      |  91%  |                                                                              |===================================================================   |  95%  |                                                                              |======================================================================| 100%
 Calculating gene variances
 0%   10   20   30   40   50   60   70   80   90   100%
 [----|----|----|----|----|----|----|----|----|----|
@@ -587,13 +556,13 @@ Calculating feature variances of standardized and clipped values
 0%   10   20   30   40   50   60   70   80   90   100%
 [----|----|----|----|----|----|----|----|----|----|
 **************************************************|
-Finished averaging RNA for cluster KPC2fib
+Finished averaging RNA for cluster CortexThy89sub
 Performing log-normalization
 0%   10   20   30   40   50   60   70   80   90   100%
 [----|----|----|----|----|----|----|----|----|----|
 **************************************************|
 Centering and scaling data matrix
-  |                                                                              |                                                                      |   0%  |                                                                              |=====                                                                 |   7%  |                                                                              |=========                                                             |  13%  |                                                                              |==============                                                        |  20%  |                                                                              |===================                                                   |  27%  |                                                                              |=======================                                               |  33%  |                                                                              |============================                                          |  40%  |                                                                              |=================================                                     |  47%  |                                                                              |=====================================                                 |  53%  |                                                                              |==========================================                            |  60%  |                                                                              |===============================================                       |  67%  |                                                                              |===================================================                   |  73%  |                                                                              |========================================================              |  80%  |                                                                              |=============================================================         |  87%  |                                                                              |=================================================================     |  93%  |                                                                              |======================================================================| 100%
+  |                                                                              |                                                                      |   0%  |                                                                              |===                                                                   |   5%  |                                                                              |=======                                                               |  10%  |                                                                              |==========                                                            |  14%  |                                                                              |=============                                                         |  19%  |                                                                              |=================                                                     |  24%  |                                                                              |====================                                                  |  29%  |                                                                              |=======================                                               |  33%  |                                                                              |===========================                                           |  38%  |                                                                              |==============================                                        |  43%  |                                                                              |=================================                                     |  48%  |                                                                              |=====================================                                 |  52%  |                                                                              |========================================                              |  57%  |                                                                              |===========================================                           |  62%  |                                                                              |===============================================                       |  67%  |                                                                              |==================================================                    |  71%  |                                                                              |=====================================================                 |  76%  |                                                                              |=========================================================             |  81%  |                                                                              |============================================================          |  86%  |                                                                              |===============================================================       |  90%  |                                                                              |===================================================================   |  95%  |                                                                              |======================================================================| 100%
 Calculating gene variances
 0%   10   20   30   40   50   60   70   80   90   100%
 [----|----|----|----|----|----|----|----|----|----|
@@ -610,36 +579,13 @@ Calculating feature variances of standardized and clipped values
 0%   10   20   30   40   50   60   70   80   90   100%
 [----|----|----|----|----|----|----|----|----|----|
 **************************************************|
-Finished averaging RNA for cluster KPC3fib
+Finished averaging RNA for cluster CortexThy94sub
 Performing log-normalization
 0%   10   20   30   40   50   60   70   80   90   100%
 [----|----|----|----|----|----|----|----|----|----|
 **************************************************|
 Centering and scaling data matrix
-  |                                                                              |                                                                      |   0%  |                                                                              |=====                                                                 |   7%  |                                                                              |==========                                                            |  14%  |                                                                              |===============                                                       |  21%  |                                                                              |====================                                                  |  29%  |                                                                              |=========================                                             |  36%  |                                                                              |==============================                                        |  43%  |                                                                              |===================================                                   |  50%  |                                                                              |========================================                              |  57%  |                                                                              |=============================================                         |  64%  |                                                                              |==================================================                    |  71%  |                                                                              |=======================================================               |  79%  |                                                                              |============================================================          |  86%  |                                                                              |=================================================================     |  93%  |                                                                              |======================================================================| 100%
-Calculating gene variances
-0%   10   20   30   40   50   60   70   80   90   100%
-[----|----|----|----|----|----|----|----|----|----|
-**************************************************|
-Calculating feature variances of standardized and clipped values
-0%   10   20   30   40   50   60   70   80   90   100%
-[----|----|----|----|----|----|----|----|----|----|
-**************************************************|
-Calculating gene variances
-0%   10   20   30   40   50   60   70   80   90   100%
-[----|----|----|----|----|----|----|----|----|----|
-**************************************************|
-Calculating feature variances of standardized and clipped values
-0%   10   20   30   40   50   60   70   80   90   100%
-[----|----|----|----|----|----|----|----|----|----|
-**************************************************|
-Finished averaging RNA for cluster KPC4fib
-Performing log-normalization
-0%   10   20   30   40   50   60   70   80   90   100%
-[----|----|----|----|----|----|----|----|----|----|
-**************************************************|
-Centering and scaling data matrix
-  |                                                                              |                                                                      |   0%  |                                                                              |=====                                                                 |   7%  |                                                                              |=========                                                             |  13%  |                                                                              |==============                                                        |  20%  |                                                                              |===================                                                   |  27%  |                                                                              |=======================                                               |  33%  |                                                                              |============================                                          |  40%  |                                                                              |=================================                                     |  47%  |                                                                              |=====================================                                 |  53%  |                                                                              |==========================================                            |  60%  |                                                                              |===============================================                       |  67%  |                                                                              |===================================================                   |  73%  |                                                                              |========================================================              |  80%  |                                                                              |=============================================================         |  87%  |                                                                              |=================================================================     |  93%  |                                                                              |======================================================================| 100%
+  |                                                                              |                                                                      |   0%  |                                                                              |====                                                                  |   5%  |                                                                              |=======                                                               |  10%  |                                                                              |==========                                                            |  15%  |                                                                              |==============                                                        |  20%  |                                                                              |==================                                                    |  25%  |                                                                              |=====================                                                 |  30%  |                                                                              |========================                                              |  35%  |                                                                              |============================                                          |  40%  |                                                                              |================================                                      |  45%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================                                |  55%  |                                                                              |==========================================                            |  60%  |                                                                              |==============================================                        |  65%  |                                                                              |=================================================                     |  70%  |                                                                              |====================================================                  |  75%  |                                                                              |========================================================              |  80%  |                                                                              |============================================================          |  85%  |                                                                              |===============================================================       |  90%  |                                                                              |==================================================================    |  95%  |                                                                              |======================================================================| 100%
   |                                                                              |..................................................                    |  71%
    inline R code fragments
 
@@ -655,32 +601,32 @@ List of 4
   ordinary text without R code
 
 
-  |                                                                              |...............                                                       |  22%
+  |                                                                              |...............                                                       |  21%
   ordinary text without R code
 
-  |                                                                              |................                                                      |  24%
+  |                                                                              |................                                                      |  23%
 label: unnamed-chunk-5 (with options) 
 List of 2
- $ child: chr "src/modules/section_B/B.5.create.pca.plots.Rmd"
+ $ child: chr "src/modules/section_B/B.5.cluster.DGE.Rmd"
  $ eval : logi TRUE
 
 
 
-processing file: ./src/modules/section_B/B.5.create.pca.plots.Rmd
-  |                                                                              |                                                                      |   0%  |                                                                              |.........                                                             |  12%
+processing file: ./src/modules/section_B/B.5.cluster.DGE.Rmd
+  |                                                                              |                                                                      |   0%  |                                                                              |..................                                                    |  25%
   ordinary text without R code
 
-  |                                                                              |..................                                                    |  25%
+  |                                                                              |...................................                                   |  50%
 label: partB_pca_plots (with options) 
 List of 3
  $ echo   : logi TRUE
  $ eval   : logi TRUE
  $ warning: logi FALSE
 
-  |                                                                              |..........................                                            |  38%
+  |                                                                              |....................................................                  |  75%
   ordinary text without R code
 
-  |                                                                              |...................................                                   |  50%
+  |                                                                              |......................................................................| 100%
 label: partB_create_PCA_plots (with options) 
 List of 4
  $ echo   : logi TRUE
@@ -691,23 +637,23 @@ List of 4
 Warning: The default method for RunUMAP has changed from calling Python UMAP via reticulate to the R-native UWOT using the cosine metric
 To use Python UMAP via reticulate, set umap.method to 'umap-learn' and metric to 'correlation'
 This message will be shown once per session
-23:35:37 UMAP embedding parameters a = 0.9922 b = 1.112
-23:35:37 Read 19648 rows and found 30 numeric columns
-23:35:37 Using Annoy for neighbor search, n_neighbors = 30
-23:35:37 Building Annoy index with metric = cosine, n_trees = 50
+16:41:04 UMAP embedding parameters a = 0.9922 b = 1.112
+16:41:04 Read 23764 rows and found 30 numeric columns
+16:41:04 Using Annoy for neighbor search, n_neighbors = 30
+16:41:04 Building Annoy index with metric = cosine, n_trees = 50
 0%   10   20   30   40   50   60   70   80   90   100%
 [----|----|----|----|----|----|----|----|----|----|
 **************************************************|
-23:35:41 Writing NN index file to temp file /tmp/slurm_25480163/RtmpxQTLxA/file45211b5e08e0
-23:35:41 Searching Annoy index using 1 thread, search_k = 3000
-23:35:47 Annoy recall = 100%
-23:35:48 Commencing smooth kNN distance calibration using 1 thread
-23:35:51 Initializing from normalized Laplacian + noise
-23:35:52 Commencing optimization for 200 epochs, with 887862 positive edges
+16:41:09 Writing NN index file to temp file /tmp/RtmpgJKUOq/file84c94bbffd1d
+16:41:09 Searching Annoy index using 1 thread, search_k = 3000
+16:41:20 Annoy recall = 100%
+16:41:21 Commencing smooth kNN distance calibration using 1 thread
+16:41:24 Initializing from normalized Laplacian + noise
+16:41:26 Commencing optimization for 200 epochs, with 1048306 positive edges
 0%   10   20   30   40   50   60   70   80   90   100%
 [----|----|----|----|----|----|----|----|----|----|
 **************************************************|
-23:36:18 Optimization finished
+16:42:08 Optimization finished
 Computing nearest neighbor graph
 Computing SNN
 0%   10   20   30   40   50   60   70   80   90   100%
@@ -724,24 +670,51 @@ The following object is masked from 'package:readr':
 
     col_factor
 
-Calculating cluster C15
-Calculating cluster C3
 Calculating cluster C1
+Calculating cluster C5
+Calculating cluster C9
+Calculating cluster C3
+Calculating cluster C2
 Calculating cluster C0
+Calculating cluster C8
+Calculating cluster C6
+Calculating cluster C4
 Calculating cluster C10
 Calculating cluster C7
-Calculating cluster C5
-Calculating cluster C13
-Calculating cluster C6
-Calculating cluster C9
-Calculating cluster C2
-Calculating cluster C12
-Calculating cluster C8
-Calculating cluster C14
-Calculating cluster C4
-Calculating cluster C16
-Calculating cluster C17
-Calculating cluster C11
+
+  |                                                                              |.................                                                     |  25%
+  ordinary text without R code
+
+  |                                                                              |..................                                                    |  26%
+label: unnamed-chunk-6 (with options) 
+List of 2
+ $ child: chr "src/modules/section_B/B.6.create.pca.plots.Rmd"
+ $ eval : logi TRUE
+
+
+
+processing file: ./src/modules/section_B/B.6.create.pca.plots.Rmd
+  |                                                                              |                                                                      |   0%  |                                                                              |.........                                                             |  12%
+  ordinary text without R code
+
+  |                                                                              |..................                                                    |  25%
+label: partB_pcaB6_plots (with options) 
+List of 3
+ $ echo   : logi TRUE
+ $ eval   : logi TRUE
+ $ warning: logi FALSE
+
+  |                                                                              |..........................                                            |  38%
+  ordinary text without R code
+
+  |                                                                              |...................................                                   |  50%
+label: partB_upload_markers (with options) 
+List of 4
+ $ echo   : logi TRUE
+ $ eval   : logi TRUE
+ $ warning: logi FALSE
+ $ results: symbol F
+
   |                                                                              |............................................                          |  62%
   ordinary text without R code
 
@@ -779,14 +752,13 @@ The following object is masked from 'package:tidyr':
 
     expand
 
-Finished averaging RNA for cluster KPC1viable
-Finished averaging RNA for cluster KPC2viable
-Finished averaging RNA for cluster KPC3viable
-Finished averaging RNA for cluster KPC4viable
-Finished averaging RNA for cluster KPC1fib
-Finished averaging RNA for cluster KPC2fib
-Finished averaging RNA for cluster KPC3fib
-Finished averaging RNA for cluster KPC4fib
+Finished averaging RNA for cluster Skin01sub
+Finished averaging RNA for cluster ThyP89sub
+Finished averaging RNA for cluster ThyP94sub
+Finished averaging RNA for cluster MedullaThy89sub
+Finished averaging RNA for cluster MedullaThy94sub
+Finished averaging RNA for cluster CortexThy89sub
+Finished averaging RNA for cluster CortexThy94sub
   |                                                                              |.............................................................         |  88%
    inline R code fragments
 
@@ -799,18 +771,18 @@ List of 4
  $ results: chr "asis"
 
 
-  |                                                                              |..................                                                    |  25%
+  |                                                                              |....................                                                  |  28%
   ordinary text without R code
 
-  |                                                                              |...................                                                   |  27%
-label: unnamed-chunk-6 (with options) 
+  |                                                                              |.....................                                                 |  30%
+label: unnamed-chunk-7 (with options) 
 List of 2
- $ child: chr "src/modules/partB_main_figures/partB.calculate.average.expression.Rmd"
+ $ child: chr "src/modules/section_B/B7.calculate.average.expression.Rmd"
  $ eval : logi TRUE
 
 
 
-processing file: ./src/modules/partB_main_figures/partB.calculate.average.expression.Rmd
+processing file: ./src/modules/section_B/B7.calculate.average.expression.Rmd
   |                                                                              |                                                                      |   0%  |                                                                              |..................                                                    |  25%
   ordinary text without R code
 
@@ -839,374 +811,225 @@ Performing log-normalization
 [----|----|----|----|----|----|----|----|----|----|
 **************************************************|
 Centering and scaling data matrix
-  |                                                                              |                                                                      |   0%  |                                                                              |====                                                                  |   6%  |                                                                              |=========                                                             |  12%  |                                                                              |=============                                                         |  19%  |                                                                              |==================                                                    |  25%  |                                                                              |======================                                                |  31%  |                                                                              |==========================                                            |  38%  |                                                                              |===============================                                       |  44%  |                                                                              |===================================                                   |  50%  |                                                                              |=======================================                               |  56%  |                                                                              |============================================                          |  62%  |                                                                              |================================================                      |  69%  |                                                                              |====================================================                  |  75%  |                                                                              |=========================================================             |  81%  |                                                                              |=============================================================         |  88%  |                                                                              |==================================================================    |  94%  |                                                                              |======================================================================| 100%
-Finished averaging RNA for cluster C15_KPC1viable
-Finished averaging RNA for cluster C3_KPC1viable
-Finished averaging RNA for cluster C1_KPC1viable
-Finished averaging RNA for cluster C0_KPC1viable
-Finished averaging RNA for cluster C10_KPC1viable
-Finished averaging RNA for cluster C7_KPC1viable
-Finished averaging RNA for cluster C5_KPC1viable
-Finished averaging RNA for cluster C13_KPC1viable
-Finished averaging RNA for cluster C6_KPC1viable
-Finished averaging RNA for cluster C9_KPC1viable
-Finished averaging RNA for cluster C2_KPC1viable
-Finished averaging RNA for cluster C12_KPC1viable
-Finished averaging RNA for cluster C8_KPC1viable
-Finished averaging RNA for cluster C14_KPC1viable
-Finished averaging RNA for cluster C4_KPC1viable
-Finished averaging RNA for cluster C16_KPC1viable
-Finished averaging RNA for cluster C17_KPC1viable
-Finished averaging RNA for cluster C7_KPC2viable
-Finished averaging RNA for cluster C14_KPC2viable
-Finished averaging RNA for cluster C10_KPC2viable
-Finished averaging RNA for cluster C9_KPC2viable
-Finished averaging RNA for cluster C0_KPC2viable
-Finished averaging RNA for cluster C1_KPC2viable
-Finished averaging RNA for cluster C15_KPC2viable
-Finished averaging RNA for cluster C3_KPC2viable
-Finished averaging RNA for cluster C2_KPC2viable
-Finished averaging RNA for cluster C13_KPC2viable
-Finished averaging RNA for cluster C16_KPC2viable
-Finished averaging RNA for cluster C4_KPC2viable
-Finished averaging RNA for cluster C6_KPC2viable
-Finished averaging RNA for cluster C8_KPC2viable
-Finished averaging RNA for cluster C17_KPC2viable
-Finished averaging RNA for cluster C12_KPC2viable
-Finished averaging RNA for cluster C5_KPC2viable
-Finished averaging RNA for cluster C3_KPC3viable
-Finished averaging RNA for cluster C0_KPC3viable
-Finished averaging RNA for cluster C6_KPC3viable
-Finished averaging RNA for cluster C12_KPC3viable
-Finished averaging RNA for cluster C13_KPC3viable
-Finished averaging RNA for cluster C1_KPC3viable
-Finished averaging RNA for cluster C14_KPC3viable
-Finished averaging RNA for cluster C2_KPC3viable
-Finished averaging RNA for cluster C9_KPC3viable
-Finished averaging RNA for cluster C10_KPC3viable
-Finished averaging RNA for cluster C5_KPC3viable
-Finished averaging RNA for cluster C17_KPC3viable
-Finished averaging RNA for cluster C8_KPC3viable
-Finished averaging RNA for cluster C15_KPC3viable
-Finished averaging RNA for cluster C7_KPC3viable
-Finished averaging RNA for cluster C16_KPC3viable
-Finished averaging RNA for cluster C11_KPC3viable
-Finished averaging RNA for cluster C4_KPC3viable
-Finished averaging RNA for cluster C9_KPC4viable
-Finished averaging RNA for cluster C0_KPC4viable
-Finished averaging RNA for cluster C1_KPC4viable
-Finished averaging RNA for cluster C12_KPC4viable
-Finished averaging RNA for cluster C3_KPC4viable
-Finished averaging RNA for cluster C2_KPC4viable
-Finished averaging RNA for cluster C10_KPC4viable
-Finished averaging RNA for cluster C4_KPC4viable
-Finished averaging RNA for cluster C6_KPC4viable
-Finished averaging RNA for cluster C5_KPC4viable
-Finished averaging RNA for cluster C13_KPC4viable
-Finished averaging RNA for cluster C8_KPC4viable
-Finished averaging RNA for cluster C7_KPC4viable
-Finished averaging RNA for cluster C14_KPC4viable
-Finished averaging RNA for cluster C16_KPC4viable
-Finished averaging RNA for cluster C11_KPC4viable
-Finished averaging RNA for cluster C15_KPC4viable
-Finished averaging RNA for cluster C17_KPC4viable
-Finished averaging RNA for cluster C2_KPC1fib
-Finished averaging RNA for cluster C4_KPC1fib
-Finished averaging RNA for cluster C0_KPC1fib
-Finished averaging RNA for cluster C12_KPC1fib
-Finished averaging RNA for cluster C5_KPC1fib
-Finished averaging RNA for cluster C9_KPC1fib
-Finished averaging RNA for cluster C7_KPC1fib
-Finished averaging RNA for cluster C8_KPC1fib
-Finished averaging RNA for cluster C1_KPC1fib
-Finished averaging RNA for cluster C6_KPC1fib
-Finished averaging RNA for cluster C11_KPC1fib
-Finished averaging RNA for cluster C17_KPC1fib
-Finished averaging RNA for cluster C3_KPC1fib
-Finished averaging RNA for cluster C13_KPC1fib
-Finished averaging RNA for cluster C14_KPC1fib
-Finished averaging RNA for cluster C15_KPC1fib
-Finished averaging RNA for cluster C10_KPC1fib
-Finished averaging RNA for cluster C16_KPC1fib
-Finished averaging RNA for cluster C8_KPC2fib
-Finished averaging RNA for cluster C7_KPC2fib
-Finished averaging RNA for cluster C6_KPC2fib
-Finished averaging RNA for cluster C2_KPC2fib
-Finished averaging RNA for cluster C1_KPC2fib
-Finished averaging RNA for cluster C12_KPC2fib
-Finished averaging RNA for cluster C5_KPC2fib
-Finished averaging RNA for cluster C0_KPC2fib
-Finished averaging RNA for cluster C4_KPC2fib
-Finished averaging RNA for cluster C3_KPC2fib
-Finished averaging RNA for cluster C10_KPC2fib
-Finished averaging RNA for cluster C11_KPC2fib
-Finished averaging RNA for cluster C14_KPC2fib
-Finished averaging RNA for cluster C9_KPC2fib
-Finished averaging RNA for cluster C17_KPC2fib
-Finished averaging RNA for cluster C16_KPC2fib
-Finished averaging RNA for cluster C13_KPC2fib
-Finished averaging RNA for cluster C2_KPC3fib
-Finished averaging RNA for cluster C5_KPC3fib
-Finished averaging RNA for cluster C9_KPC3fib
-Finished averaging RNA for cluster C6_KPC3fib
-Finished averaging RNA for cluster C11_KPC3fib
-Finished averaging RNA for cluster C4_KPC3fib
-Finished averaging RNA for cluster C0_KPC3fib
-Finished averaging RNA for cluster C3_KPC3fib
-Finished averaging RNA for cluster C1_KPC3fib
-Finished averaging RNA for cluster C14_KPC3fib
-Finished averaging RNA for cluster C8_KPC3fib
-Finished averaging RNA for cluster C10_KPC3fib
-Finished averaging RNA for cluster C12_KPC3fib
-Finished averaging RNA for cluster C7_KPC3fib
-Finished averaging RNA for cluster C15_KPC3fib
-Finished averaging RNA for cluster C16_KPC3fib
-Finished averaging RNA for cluster C2_KPC4fib
-Finished averaging RNA for cluster C4_KPC4fib
-Finished averaging RNA for cluster C11_KPC4fib
-Finished averaging RNA for cluster C8_KPC4fib
-Finished averaging RNA for cluster C3_KPC4fib
-Finished averaging RNA for cluster C9_KPC4fib
-Finished averaging RNA for cluster C6_KPC4fib
-Finished averaging RNA for cluster C5_KPC4fib
-Finished averaging RNA for cluster C7_KPC4fib
-Finished averaging RNA for cluster C14_KPC4fib
-Finished averaging RNA for cluster C12_KPC4fib
-Finished averaging RNA for cluster C1_KPC4fib
-Finished averaging RNA for cluster C0_KPC4fib
-Finished averaging RNA for cluster C15_KPC4fib
-Finished averaging RNA for cluster C17_KPC4fib
-Finished averaging RNA for cluster C13_KPC4fib
-Finished averaging RNA for cluster C10_KPC4fib
-Finished averaging integrated for cluster C15_KPC1viable
-Finished averaging integrated for cluster C3_KPC1viable
-Finished averaging integrated for cluster C1_KPC1viable
-Finished averaging integrated for cluster C0_KPC1viable
-Finished averaging integrated for cluster C10_KPC1viable
-Finished averaging integrated for cluster C7_KPC1viable
-Finished averaging integrated for cluster C5_KPC1viable
-Finished averaging integrated for cluster C13_KPC1viable
-Finished averaging integrated for cluster C6_KPC1viable
-Finished averaging integrated for cluster C9_KPC1viable
-Finished averaging integrated for cluster C2_KPC1viable
-Finished averaging integrated for cluster C12_KPC1viable
-Finished averaging integrated for cluster C8_KPC1viable
-Finished averaging integrated for cluster C14_KPC1viable
-Finished averaging integrated for cluster C4_KPC1viable
-Finished averaging integrated for cluster C16_KPC1viable
-Finished averaging integrated for cluster C17_KPC1viable
-Finished averaging integrated for cluster C7_KPC2viable
-Finished averaging integrated for cluster C14_KPC2viable
-Finished averaging integrated for cluster C10_KPC2viable
-Finished averaging integrated for cluster C9_KPC2viable
-Finished averaging integrated for cluster C0_KPC2viable
-Finished averaging integrated for cluster C1_KPC2viable
-Finished averaging integrated for cluster C15_KPC2viable
-Finished averaging integrated for cluster C3_KPC2viable
-Finished averaging integrated for cluster C2_KPC2viable
-Finished averaging integrated for cluster C13_KPC2viable
-Finished averaging integrated for cluster C16_KPC2viable
-Finished averaging integrated for cluster C4_KPC2viable
-Finished averaging integrated for cluster C6_KPC2viable
-Finished averaging integrated for cluster C8_KPC2viable
-Finished averaging integrated for cluster C17_KPC2viable
-Finished averaging integrated for cluster C12_KPC2viable
-Finished averaging integrated for cluster C5_KPC2viable
-Finished averaging integrated for cluster C3_KPC3viable
-Finished averaging integrated for cluster C0_KPC3viable
-Finished averaging integrated for cluster C6_KPC3viable
-Finished averaging integrated for cluster C12_KPC3viable
-Finished averaging integrated for cluster C13_KPC3viable
-Finished averaging integrated for cluster C1_KPC3viable
-Finished averaging integrated for cluster C14_KPC3viable
-Finished averaging integrated for cluster C2_KPC3viable
-Finished averaging integrated for cluster C9_KPC3viable
-Finished averaging integrated for cluster C10_KPC3viable
-Finished averaging integrated for cluster C5_KPC3viable
-Finished averaging integrated for cluster C17_KPC3viable
-Finished averaging integrated for cluster C8_KPC3viable
-Finished averaging integrated for cluster C15_KPC3viable
-Finished averaging integrated for cluster C7_KPC3viable
-Finished averaging integrated for cluster C16_KPC3viable
-Finished averaging integrated for cluster C11_KPC3viable
-Finished averaging integrated for cluster C4_KPC3viable
-Finished averaging integrated for cluster C9_KPC4viable
-Finished averaging integrated for cluster C0_KPC4viable
-Finished averaging integrated for cluster C1_KPC4viable
-Finished averaging integrated for cluster C12_KPC4viable
-Finished averaging integrated for cluster C3_KPC4viable
-Finished averaging integrated for cluster C2_KPC4viable
-Finished averaging integrated for cluster C10_KPC4viable
-Finished averaging integrated for cluster C4_KPC4viable
-Finished averaging integrated for cluster C6_KPC4viable
-Finished averaging integrated for cluster C5_KPC4viable
-Finished averaging integrated for cluster C13_KPC4viable
-Finished averaging integrated for cluster C8_KPC4viable
-Finished averaging integrated for cluster C7_KPC4viable
-Finished averaging integrated for cluster C14_KPC4viable
-Finished averaging integrated for cluster C16_KPC4viable
-Finished averaging integrated for cluster C11_KPC4viable
-Finished averaging integrated for cluster C15_KPC4viable
-Finished averaging integrated for cluster C17_KPC4viable
-Finished averaging integrated for cluster C2_KPC1fib
-Finished averaging integrated for cluster C4_KPC1fib
-Finished averaging integrated for cluster C0_KPC1fib
-Finished averaging integrated for cluster C12_KPC1fib
-Finished averaging integrated for cluster C5_KPC1fib
-Finished averaging integrated for cluster C9_KPC1fib
-Finished averaging integrated for cluster C7_KPC1fib
-Finished averaging integrated for cluster C8_KPC1fib
-Finished averaging integrated for cluster C1_KPC1fib
-Finished averaging integrated for cluster C6_KPC1fib
-Finished averaging integrated for cluster C11_KPC1fib
-Finished averaging integrated for cluster C17_KPC1fib
-Finished averaging integrated for cluster C3_KPC1fib
-Finished averaging integrated for cluster C13_KPC1fib
-Finished averaging integrated for cluster C14_KPC1fib
-Finished averaging integrated for cluster C15_KPC1fib
-Finished averaging integrated for cluster C10_KPC1fib
-Finished averaging integrated for cluster C16_KPC1fib
-Finished averaging integrated for cluster C8_KPC2fib
-Finished averaging integrated for cluster C7_KPC2fib
-Finished averaging integrated for cluster C6_KPC2fib
-Finished averaging integrated for cluster C2_KPC2fib
-Finished averaging integrated for cluster C1_KPC2fib
-Finished averaging integrated for cluster C12_KPC2fib
-Finished averaging integrated for cluster C5_KPC2fib
-Finished averaging integrated for cluster C0_KPC2fib
-Finished averaging integrated for cluster C4_KPC2fib
-Finished averaging integrated for cluster C3_KPC2fib
-Finished averaging integrated for cluster C10_KPC2fib
-Finished averaging integrated for cluster C11_KPC2fib
-Finished averaging integrated for cluster C14_KPC2fib
-Finished averaging integrated for cluster C9_KPC2fib
-Finished averaging integrated for cluster C17_KPC2fib
-Finished averaging integrated for cluster C16_KPC2fib
-Finished averaging integrated for cluster C13_KPC2fib
-Finished averaging integrated for cluster C2_KPC3fib
-Finished averaging integrated for cluster C5_KPC3fib
-Finished averaging integrated for cluster C9_KPC3fib
-Finished averaging integrated for cluster C6_KPC3fib
-Finished averaging integrated for cluster C11_KPC3fib
-Finished averaging integrated for cluster C4_KPC3fib
-Finished averaging integrated for cluster C0_KPC3fib
-Finished averaging integrated for cluster C3_KPC3fib
-Finished averaging integrated for cluster C1_KPC3fib
-Finished averaging integrated for cluster C14_KPC3fib
-Finished averaging integrated for cluster C8_KPC3fib
-Finished averaging integrated for cluster C10_KPC3fib
-Finished averaging integrated for cluster C12_KPC3fib
-Finished averaging integrated for cluster C7_KPC3fib
-Finished averaging integrated for cluster C15_KPC3fib
-Finished averaging integrated for cluster C16_KPC3fib
-Finished averaging integrated for cluster C2_KPC4fib
-Finished averaging integrated for cluster C4_KPC4fib
-Finished averaging integrated for cluster C11_KPC4fib
-Finished averaging integrated for cluster C8_KPC4fib
-Finished averaging integrated for cluster C3_KPC4fib
-Finished averaging integrated for cluster C9_KPC4fib
-Finished averaging integrated for cluster C6_KPC4fib
-Finished averaging integrated for cluster C5_KPC4fib
-Finished averaging integrated for cluster C7_KPC4fib
-Finished averaging integrated for cluster C14_KPC4fib
-Finished averaging integrated for cluster C12_KPC4fib
-Finished averaging integrated for cluster C1_KPC4fib
-Finished averaging integrated for cluster C0_KPC4fib
-Finished averaging integrated for cluster C15_KPC4fib
-Finished averaging integrated for cluster C17_KPC4fib
-Finished averaging integrated for cluster C13_KPC4fib
-Finished averaging integrated for cluster C10_KPC4fib
+  |                                                                              |                                                                      |   0%  |                                                                              |===                                                                   |   4%  |                                                                              |======                                                                |   8%  |                                                                              |========                                                              |  12%  |                                                                              |===========                                                           |  16%  |                                                                              |==============                                                        |  20%  |                                                                              |=================                                                     |  24%  |                                                                              |====================                                                  |  28%  |                                                                              |======================                                                |  32%  |                                                                              |=========================                                             |  36%  |                                                                              |============================                                          |  40%  |                                                                              |===============================                                       |  44%  |                                                                              |==================================                                    |  48%  |                                                                              |====================================                                  |  52%  |                                                                              |=======================================                               |  56%  |                                                                              |==========================================                            |  60%  |                                                                              |=============================================                         |  64%  |                                                                              |================================================                      |  68%  |                                                                              |==================================================                    |  72%  |                                                                              |=====================================================                 |  76%  |                                                                              |========================================================              |  80%  |                                                                              |===========================================================           |  84%  |                                                                              |==============================================================        |  88%  |                                                                              |================================================================      |  92%  |                                                                              |===================================================================   |  96%  |                                                                              |======================================================================| 100%
+Finished averaging RNA for cluster C1_Skin01sub
+Finished averaging RNA for cluster C5_Skin01sub
+Finished averaging RNA for cluster C9_Skin01sub
+Finished averaging RNA for cluster C3_Skin01sub
+Finished averaging RNA for cluster C2_Skin01sub
+Finished averaging RNA for cluster C0_Skin01sub
+Finished averaging RNA for cluster C8_Skin01sub
+Finished averaging RNA for cluster C6_Skin01sub
+Finished averaging RNA for cluster C4_Skin01sub
+Finished averaging RNA for cluster C10_Skin01sub
+Finished averaging RNA for cluster C7_Skin01sub
+Finished averaging RNA for cluster C6_ThyP89sub
+Finished averaging RNA for cluster C5_ThyP89sub
+Finished averaging RNA for cluster C1_ThyP89sub
+Finished averaging RNA for cluster C4_ThyP89sub
+Finished averaging RNA for cluster C0_ThyP89sub
+Finished averaging RNA for cluster C7_ThyP89sub
+Finished averaging RNA for cluster C3_ThyP89sub
+Finished averaging RNA for cluster C2_ThyP89sub
+Finished averaging RNA for cluster C9_ThyP89sub
+Finished averaging RNA for cluster C8_ThyP89sub
+Finished averaging RNA for cluster C10_ThyP89sub
+Finished averaging RNA for cluster C0_ThyP94sub
+Finished averaging RNA for cluster C2_ThyP94sub
+Finished averaging RNA for cluster C6_ThyP94sub
+Finished averaging RNA for cluster C1_ThyP94sub
+Finished averaging RNA for cluster C5_ThyP94sub
+Finished averaging RNA for cluster C3_ThyP94sub
+Finished averaging RNA for cluster C4_ThyP94sub
+Finished averaging RNA for cluster C7_ThyP94sub
+Finished averaging RNA for cluster C9_ThyP94sub
+Finished averaging RNA for cluster C6_MedullaThy89sub
+Finished averaging RNA for cluster C5_MedullaThy89sub
+Finished averaging RNA for cluster C1_MedullaThy89sub
+Finished averaging RNA for cluster C4_MedullaThy89sub
+Finished averaging RNA for cluster C0_MedullaThy89sub
+Finished averaging RNA for cluster C7_MedullaThy89sub
+Finished averaging RNA for cluster C3_MedullaThy89sub
+Finished averaging RNA for cluster C2_MedullaThy89sub
+Finished averaging RNA for cluster C9_MedullaThy89sub
+Finished averaging RNA for cluster C8_MedullaThy89sub
+Finished averaging RNA for cluster C10_MedullaThy89sub
+Finished averaging RNA for cluster C0_MedullaThy94sub
+Finished averaging RNA for cluster C2_MedullaThy94sub
+Finished averaging RNA for cluster C6_MedullaThy94sub
+Finished averaging RNA for cluster C1_MedullaThy94sub
+Finished averaging RNA for cluster C5_MedullaThy94sub
+Finished averaging RNA for cluster C3_MedullaThy94sub
+Finished averaging RNA for cluster C4_MedullaThy94sub
+Finished averaging RNA for cluster C7_MedullaThy94sub
+Finished averaging RNA for cluster C9_MedullaThy94sub
+Finished averaging RNA for cluster C4_CortexThy89sub
+Finished averaging RNA for cluster C8_CortexThy89sub
+Finished averaging RNA for cluster C7_CortexThy89sub
+Finished averaging RNA for cluster C0_CortexThy89sub
+Finished averaging RNA for cluster C2_CortexThy89sub
+Finished averaging RNA for cluster C3_CortexThy89sub
+Finished averaging RNA for cluster C9_CortexThy89sub
+Finished averaging RNA for cluster C1_CortexThy89sub
+Finished averaging RNA for cluster C5_CortexThy89sub
+Finished averaging RNA for cluster C6_CortexThy89sub
+Finished averaging RNA for cluster C8_CortexThy94sub
+Finished averaging RNA for cluster C2_CortexThy94sub
+Finished averaging RNA for cluster C4_CortexThy94sub
+Finished averaging RNA for cluster C3_CortexThy94sub
+Finished averaging RNA for cluster C0_CortexThy94sub
+Finished averaging RNA for cluster C1_CortexThy94sub
+Finished averaging RNA for cluster C5_CortexThy94sub
+Finished averaging RNA for cluster C6_CortexThy94sub
+Finished averaging RNA for cluster C7_CortexThy94sub
+Finished averaging RNA for cluster C9_CortexThy94sub
+Finished averaging RNA for cluster C10_CortexThy94sub
+Finished averaging integrated for cluster C1_Skin01sub
+Finished averaging integrated for cluster C5_Skin01sub
+Finished averaging integrated for cluster C9_Skin01sub
+Finished averaging integrated for cluster C3_Skin01sub
+Finished averaging integrated for cluster C2_Skin01sub
+Finished averaging integrated for cluster C0_Skin01sub
+Finished averaging integrated for cluster C8_Skin01sub
+Finished averaging integrated for cluster C6_Skin01sub
+Finished averaging integrated for cluster C4_Skin01sub
+Finished averaging integrated for cluster C10_Skin01sub
+Finished averaging integrated for cluster C7_Skin01sub
+Finished averaging integrated for cluster C6_ThyP89sub
+Finished averaging integrated for cluster C5_ThyP89sub
+Finished averaging integrated for cluster C1_ThyP89sub
+Finished averaging integrated for cluster C4_ThyP89sub
+Finished averaging integrated for cluster C0_ThyP89sub
+Finished averaging integrated for cluster C7_ThyP89sub
+Finished averaging integrated for cluster C3_ThyP89sub
+Finished averaging integrated for cluster C2_ThyP89sub
+Finished averaging integrated for cluster C9_ThyP89sub
+Finished averaging integrated for cluster C8_ThyP89sub
+Finished averaging integrated for cluster C10_ThyP89sub
+Finished averaging integrated for cluster C0_ThyP94sub
+Finished averaging integrated for cluster C2_ThyP94sub
+Finished averaging integrated for cluster C6_ThyP94sub
+Finished averaging integrated for cluster C1_ThyP94sub
+Finished averaging integrated for cluster C5_ThyP94sub
+Finished averaging integrated for cluster C3_ThyP94sub
+Finished averaging integrated for cluster C4_ThyP94sub
+Finished averaging integrated for cluster C7_ThyP94sub
+Finished averaging integrated for cluster C9_ThyP94sub
+Finished averaging integrated for cluster C6_MedullaThy89sub
+Finished averaging integrated for cluster C5_MedullaThy89sub
+Finished averaging integrated for cluster C1_MedullaThy89sub
+Finished averaging integrated for cluster C4_MedullaThy89sub
+Finished averaging integrated for cluster C0_MedullaThy89sub
+Finished averaging integrated for cluster C7_MedullaThy89sub
+Finished averaging integrated for cluster C3_MedullaThy89sub
+Finished averaging integrated for cluster C2_MedullaThy89sub
+Finished averaging integrated for cluster C9_MedullaThy89sub
+Finished averaging integrated for cluster C8_MedullaThy89sub
+Finished averaging integrated for cluster C10_MedullaThy89sub
+Finished averaging integrated for cluster C0_MedullaThy94sub
+Finished averaging integrated for cluster C2_MedullaThy94sub
+Finished averaging integrated for cluster C6_MedullaThy94sub
+Finished averaging integrated for cluster C1_MedullaThy94sub
+Finished averaging integrated for cluster C5_MedullaThy94sub
+Finished averaging integrated for cluster C3_MedullaThy94sub
+Finished averaging integrated for cluster C4_MedullaThy94sub
+Finished averaging integrated for cluster C7_MedullaThy94sub
+Finished averaging integrated for cluster C9_MedullaThy94sub
+Finished averaging integrated for cluster C4_CortexThy89sub
+Finished averaging integrated for cluster C8_CortexThy89sub
+Finished averaging integrated for cluster C7_CortexThy89sub
+Finished averaging integrated for cluster C0_CortexThy89sub
+Finished averaging integrated for cluster C2_CortexThy89sub
+Finished averaging integrated for cluster C3_CortexThy89sub
+Finished averaging integrated for cluster C9_CortexThy89sub
+Finished averaging integrated for cluster C1_CortexThy89sub
+Finished averaging integrated for cluster C5_CortexThy89sub
+Finished averaging integrated for cluster C6_CortexThy89sub
+Finished averaging integrated for cluster C8_CortexThy94sub
+Finished averaging integrated for cluster C2_CortexThy94sub
+Finished averaging integrated for cluster C4_CortexThy94sub
+Finished averaging integrated for cluster C3_CortexThy94sub
+Finished averaging integrated for cluster C0_CortexThy94sub
+Finished averaging integrated for cluster C1_CortexThy94sub
+Finished averaging integrated for cluster C5_CortexThy94sub
+Finished averaging integrated for cluster C6_CortexThy94sub
+Finished averaging integrated for cluster C7_CortexThy94sub
+Finished averaging integrated for cluster C9_CortexThy94sub
+Finished averaging integrated for cluster C10_CortexThy94sub
 Performing log-normalization
 0%   10   20   30   40   50   60   70   80   90   100%
 [----|----|----|----|----|----|----|----|----|----|
 **************************************************|
 Centering and scaling data matrix
-  |                                                                              |                                                                      |   0%  |                                                                              |====                                                                  |   6%  |                                                                              |=========                                                             |  12%  |                                                                              |=============                                                         |  19%  |                                                                              |==================                                                    |  25%  |                                                                              |======================                                                |  31%  |                                                                              |==========================                                            |  38%  |                                                                              |===============================                                       |  44%  |                                                                              |===================================                                   |  50%  |                                                                              |=======================================                               |  56%  |                                                                              |============================================                          |  62%  |                                                                              |================================================                      |  69%  |                                                                              |====================================================                  |  75%  |                                                                              |=========================================================             |  81%  |                                                                              |=============================================================         |  88%  |                                                                              |==================================================================    |  94%  |                                                                              |======================================================================| 100%
-Finished averaging RNA for cluster C15
-Finished averaging RNA for cluster C3
+  |                                                                              |                                                                      |   0%  |                                                                              |===                                                                   |   4%  |                                                                              |======                                                                |   8%  |                                                                              |========                                                              |  12%  |                                                                              |===========                                                           |  16%  |                                                                              |==============                                                        |  20%  |                                                                              |=================                                                     |  24%  |                                                                              |====================                                                  |  28%  |                                                                              |======================                                                |  32%  |                                                                              |=========================                                             |  36%  |                                                                              |============================                                          |  40%  |                                                                              |===============================                                       |  44%  |                                                                              |==================================                                    |  48%  |                                                                              |====================================                                  |  52%  |                                                                              |=======================================                               |  56%  |                                                                              |==========================================                            |  60%  |                                                                              |=============================================                         |  64%  |                                                                              |================================================                      |  68%  |                                                                              |==================================================                    |  72%  |                                                                              |=====================================================                 |  76%  |                                                                              |========================================================              |  80%  |                                                                              |===========================================================           |  84%  |                                                                              |==============================================================        |  88%  |                                                                              |================================================================      |  92%  |                                                                              |===================================================================   |  96%  |                                                                              |======================================================================| 100%
 Finished averaging RNA for cluster C1
+Finished averaging RNA for cluster C5
+Finished averaging RNA for cluster C9
+Finished averaging RNA for cluster C3
+Finished averaging RNA for cluster C2
 Finished averaging RNA for cluster C0
+Finished averaging RNA for cluster C8
+Finished averaging RNA for cluster C6
+Finished averaging RNA for cluster C4
 Finished averaging RNA for cluster C10
 Finished averaging RNA for cluster C7
-Finished averaging RNA for cluster C5
-Finished averaging RNA for cluster C13
-Finished averaging RNA for cluster C6
-Finished averaging RNA for cluster C9
-Finished averaging RNA for cluster C2
-Finished averaging RNA for cluster C12
-Finished averaging RNA for cluster C8
-Finished averaging RNA for cluster C14
-Finished averaging RNA for cluster C4
-Finished averaging RNA for cluster C16
-Finished averaging RNA for cluster C17
-Finished averaging RNA for cluster C11
-Finished averaging integrated for cluster C15
-Finished averaging integrated for cluster C3
 Finished averaging integrated for cluster C1
+Finished averaging integrated for cluster C5
+Finished averaging integrated for cluster C9
+Finished averaging integrated for cluster C3
+Finished averaging integrated for cluster C2
 Finished averaging integrated for cluster C0
+Finished averaging integrated for cluster C8
+Finished averaging integrated for cluster C6
+Finished averaging integrated for cluster C4
 Finished averaging integrated for cluster C10
 Finished averaging integrated for cluster C7
-Finished averaging integrated for cluster C5
-Finished averaging integrated for cluster C13
-Finished averaging integrated for cluster C6
-Finished averaging integrated for cluster C9
-Finished averaging integrated for cluster C2
-Finished averaging integrated for cluster C12
-Finished averaging integrated for cluster C8
-Finished averaging integrated for cluster C14
-Finished averaging integrated for cluster C4
-Finished averaging integrated for cluster C16
-Finished averaging integrated for cluster C17
-Finished averaging integrated for cluster C11
 Performing log-normalization
 0%   10   20   30   40   50   60   70   80   90   100%
 [----|----|----|----|----|----|----|----|----|----|
 **************************************************|
 Centering and scaling data matrix
-  |                                                                              |                                                                      |   0%  |                                                                              |====                                                                  |   6%  |                                                                              |=========                                                             |  12%  |                                                                              |=============                                                         |  19%  |                                                                              |==================                                                    |  25%  |                                                                              |======================                                                |  31%  |                                                                              |==========================                                            |  38%  |                                                                              |===============================                                       |  44%  |                                                                              |===================================                                   |  50%  |                                                                              |=======================================                               |  56%  |                                                                              |============================================                          |  62%  |                                                                              |================================================                      |  69%  |                                                                              |====================================================                  |  75%  |                                                                              |=========================================================             |  81%  |                                                                              |=============================================================         |  88%  |                                                                              |==================================================================    |  94%  |                                                                              |======================================================================| 100%
-Finished averaging RNA for cluster KPC1viable
-Finished averaging RNA for cluster KPC2viable
-Finished averaging RNA for cluster KPC3viable
-Finished averaging RNA for cluster KPC4viable
-Finished averaging RNA for cluster KPC1fib
-Finished averaging RNA for cluster KPC2fib
-Finished averaging RNA for cluster KPC3fib
-Finished averaging RNA for cluster KPC4fib
-Finished averaging integrated for cluster KPC1viable
-Finished averaging integrated for cluster KPC2viable
-Finished averaging integrated for cluster KPC3viable
-Finished averaging integrated for cluster KPC4viable
-Finished averaging integrated for cluster KPC1fib
-Finished averaging integrated for cluster KPC2fib
-Finished averaging integrated for cluster KPC3fib
-Finished averaging integrated for cluster KPC4fib
+  |                                                                              |                                                                      |   0%  |                                                                              |===                                                                   |   4%  |                                                                              |======                                                                |   8%  |                                                                              |========                                                              |  12%  |                                                                              |===========                                                           |  16%  |                                                                              |==============                                                        |  20%  |                                                                              |=================                                                     |  24%  |                                                                              |====================                                                  |  28%  |                                                                              |======================                                                |  32%  |                                                                              |=========================                                             |  36%  |                                                                              |============================                                          |  40%  |                                                                              |===============================                                       |  44%  |                                                                              |==================================                                    |  48%  |                                                                              |====================================                                  |  52%  |                                                                              |=======================================                               |  56%  |                                                                              |==========================================                            |  60%  |                                                                              |=============================================                         |  64%  |                                                                              |================================================                      |  68%  |                                                                              |==================================================                    |  72%  |                                                                              |=====================================================                 |  76%  |                                                                              |========================================================              |  80%  |                                                                              |===========================================================           |  84%  |                                                                              |==============================================================        |  88%  |                                                                              |================================================================      |  92%  |                                                                              |===================================================================   |  96%  |                                                                              |======================================================================| 100%
+Finished averaging RNA for cluster Skin01sub
+Finished averaging RNA for cluster ThyP89sub
+Finished averaging RNA for cluster ThyP94sub
+Finished averaging RNA for cluster MedullaThy89sub
+Finished averaging RNA for cluster MedullaThy94sub
+Finished averaging RNA for cluster CortexThy89sub
+Finished averaging RNA for cluster CortexThy94sub
+Finished averaging integrated for cluster Skin01sub
+Finished averaging integrated for cluster ThyP89sub
+Finished averaging integrated for cluster ThyP94sub
+Finished averaging integrated for cluster MedullaThy89sub
+Finished averaging integrated for cluster MedullaThy94sub
+Finished averaging integrated for cluster CortexThy89sub
+Finished averaging integrated for cluster CortexThy94sub
 Performing log-normalization
 0%   10   20   30   40   50   60   70   80   90   100%
 [----|----|----|----|----|----|----|----|----|----|
 **************************************************|
 Centering and scaling data matrix
-  |                                                                              |                                                                      |   0%  |                                                                              |====                                                                  |   6%  |                                                                              |=========                                                             |  12%  |                                                                              |=============                                                         |  19%  |                                                                              |==================                                                    |  25%  |                                                                              |======================                                                |  31%  |                                                                              |==========================                                            |  38%  |                                                                              |===============================                                       |  44%  |                                                                              |===================================                                   |  50%  |                                                                              |=======================================                               |  56%  |                                                                              |============================================                          |  62%  |                                                                              |================================================                      |  69%  |                                                                              |====================================================                  |  75%  |                                                                              |=========================================================             |  81%  |                                                                              |=============================================================         |  88%  |                                                                              |==================================================================    |  94%  |                                                                              |======================================================================| 100%
-Finished averaging RNA for cluster KPC1viable
-Finished averaging RNA for cluster KPC2viable
-Finished averaging RNA for cluster KPC3viable
-Finished averaging RNA for cluster KPC4viable
-Finished averaging RNA for cluster KPC1fib
-Finished averaging RNA for cluster KPC2fib
-Finished averaging RNA for cluster KPC3fib
-Finished averaging RNA for cluster KPC4fib
+  |                                                                              |                                                                      |   0%  |                                                                              |===                                                                   |   4%  |                                                                              |======                                                                |   8%  |                                                                              |========                                                              |  12%  |                                                                              |===========                                                           |  16%  |                                                                              |==============                                                        |  20%  |                                                                              |=================                                                     |  24%  |                                                                              |====================                                                  |  28%  |                                                                              |======================                                                |  32%  |                                                                              |=========================                                             |  36%  |                                                                              |============================                                          |  40%  |                                                                              |===============================                                       |  44%  |                                                                              |==================================                                    |  48%  |                                                                              |====================================                                  |  52%  |                                                                              |=======================================                               |  56%  |                                                                              |==========================================                            |  60%  |                                                                              |=============================================                         |  64%  |                                                                              |================================================                      |  68%  |                                                                              |==================================================                    |  72%  |                                                                              |=====================================================                 |  76%  |                                                                              |========================================================              |  80%  |                                                                              |===========================================================           |  84%  |                                                                              |==============================================================        |  88%  |                                                                              |================================================================      |  92%  |                                                                              |===================================================================   |  96%  |                                                                              |======================================================================| 100%
+Finished averaging RNA for cluster Skin01sub
+Finished averaging RNA for cluster ThyP89sub
+Finished averaging RNA for cluster ThyP94sub
+Finished averaging RNA for cluster MedullaThy89sub
+Finished averaging RNA for cluster MedullaThy94sub
+Finished averaging RNA for cluster CortexThy89sub
+Finished averaging RNA for cluster CortexThy94sub
 
-  |                                                                              |.....................                                                 |  29%
+  |                                                                              |......................                                                |  32%
   ordinary text without R code
 
-  |                                                                              |......................                                                |  31%
-label: unnamed-chunk-7 (with options) 
+  |                                                                              |........................                                              |  34%
+label: unnamed-chunk-8 (with options) 
 List of 2
- $ child: chr "src/modules/partB_main_figures/partB.plot.pca.and.tsne.results.Rmd"
+ $ child: chr "src/modules/section_B/B8.plot.pca.and.tsne.results.Rmd"
  $ eval : logi TRUE
 
 
 
-processing file: ./src/modules/partB_main_figures/partB.plot.pca.and.tsne.results.Rmd
+processing file: ./src/modules/section_B/B8.plot.pca.and.tsne.results.Rmd
   |                                                                              |                                                                      |   0%  |                                                                              |............                                                          |  17%
   ordinary text without R code
 
@@ -1228,32 +1051,24 @@ List of 4
  $ warning: logi FALSE
  $ results: logi FALSE
 
-Finished averaging RNA for cluster KPC1viable
-Finished averaging RNA for cluster KPC2viable
-Finished averaging RNA for cluster KPC3viable
-Finished averaging RNA for cluster KPC4viable
-Finished averaging RNA for cluster KPC1fib
-Finished averaging RNA for cluster KPC2fib
-Finished averaging RNA for cluster KPC3fib
-Finished averaging RNA for cluster KPC4fib
-Finished averaging RNA for cluster C15
-Finished averaging RNA for cluster C3
+Finished averaging RNA for cluster Skin01sub
+Finished averaging RNA for cluster ThyP89sub
+Finished averaging RNA for cluster ThyP94sub
+Finished averaging RNA for cluster MedullaThy89sub
+Finished averaging RNA for cluster MedullaThy94sub
+Finished averaging RNA for cluster CortexThy89sub
+Finished averaging RNA for cluster CortexThy94sub
 Finished averaging RNA for cluster C1
+Finished averaging RNA for cluster C5
+Finished averaging RNA for cluster C9
+Finished averaging RNA for cluster C3
+Finished averaging RNA for cluster C2
 Finished averaging RNA for cluster C0
+Finished averaging RNA for cluster C8
+Finished averaging RNA for cluster C6
+Finished averaging RNA for cluster C4
 Finished averaging RNA for cluster C10
 Finished averaging RNA for cluster C7
-Finished averaging RNA for cluster C5
-Finished averaging RNA for cluster C13
-Finished averaging RNA for cluster C6
-Finished averaging RNA for cluster C9
-Finished averaging RNA for cluster C2
-Finished averaging RNA for cluster C12
-Finished averaging RNA for cluster C8
-Finished averaging RNA for cluster C14
-Finished averaging RNA for cluster C4
-Finished averaging RNA for cluster C16
-Finished averaging RNA for cluster C17
-Finished averaging RNA for cluster C11
   |                                                                              |..........................................................            |  83%
    inline R code fragments
 
@@ -1266,18 +1081,18 @@ List of 4
  $ results: chr "asis"
 
 
-  |                                                                              |.......................                                               |  33%
+  |                                                                              |.........................                                             |  36%
   ordinary text without R code
 
-  |                                                                              |.........................                                             |  35%
-label: unnamed-chunk-8 (with options) 
+  |                                                                              |..........................                                            |  38%
+label: unnamed-chunk-9 (with options) 
 List of 2
- $ child: chr "src/modules/partB_main_figures/partB.euclidian.distances.figure.Rmd"
+ $ child: chr "src/modules/section_B/B9.euclidian.distances.figure.Rmd"
  $ eval : logi TRUE
 
 
 
-processing file: ./src/modules/partB_main_figures/partB.euclidian.distances.figure.Rmd
+processing file: ./src/modules/section_B/B9.euclidian.distances.figure.Rmd
   |                                                                              |                                                                      |   0%  |                                                                              |..............                                                        |  20%
   ordinary text without R code
 
@@ -1304,18 +1119,18 @@ Estimating 'maxdist' for feature matrix 1
   ordinary text without R code
 
 
-  |                                                                              |..........................                                            |  37%
+  |                                                                              |............................                                          |  40%
   ordinary text without R code
 
-  |                                                                              |...........................                                           |  39%
-label: unnamed-chunk-9 (with options) 
+  |                                                                              |.............................                                         |  42%
+label: unnamed-chunk-10 (with options) 
 List of 2
- $ child: chr "src/modules/partB_main_figures/partB.doublet.estimation.plots.Rmd"
+ $ child: chr "src/modules/section_B/B10.doublet.estimation.plots.Rmd"
  $ eval : logi TRUE
 
 
 
-processing file: ./src/modules/partB_main_figures/partB.doublet.estimation.plots.Rmd
+processing file: ./src/modules/section_B/B10.doublet.estimation.plots.Rmd
   |                                                                              |                                                                      |   0%  |                                                                              |............                                                          |  17%
   ordinary text without R code
 
@@ -1350,18 +1165,18 @@ List of 4
  $ results: chr "asis"
 
 
-  |                                                                              |.............................                                         |  41%
+  |                                                                              |..............................                                        |  43%
   ordinary text without R code
 
-  |                                                                              |..............................                                        |  43%
-label: unnamed-chunk-10 (with options) 
+  |                                                                              |................................                                      |  45%
+label: unnamed-chunk-11 (with options) 
 List of 2
- $ child: chr "src/modules/partB_main_figures/cell.cycle.phase.plots.Rmd"
+ $ child: chr "src/modules/section_B/B11.cell.cycle.phase.plots.Rmd"
  $ eval : logi TRUE
 
 
 
-processing file: ./src/modules/partB_main_figures/cell.cycle.phase.plots.Rmd
+processing file: ./src/modules/section_B/B11.cell.cycle.phase.plots.Rmd
   |                                                                              |                                                                      |   0%  |                                                                              |............                                                          |  17%
   ordinary text without R code
 
@@ -1383,34 +1198,26 @@ List of 4
  $ warning: logi FALSE
  $ results: logi FALSE
 
-Warning: The following features are not present in the object: MCM5, PCNA, TYMS, FEN1, MCM2, MCM4, RRM1, UNG, GINS2, MCM6, CDCA7, DTL, PRIM1, UHRF1, MLF1IP, HELLS, RFC2, RPA2, NASP, RAD51AP1, GMNN, WDR76, SLBP, CCNE2, UBR7, POLD3, MSH2, ATAD2, RAD51, RRM2, CDC45, CDC6, EXO1, TIPIN, DSCC1, BLM, CASP8AP2, USP1, CLSPN, POLA1, CHAF1B, BRIP1, E2F8, not searching for symbol synonyms
-Warning: The following features are not present in the object: HMGB2, CDK1, NUSAP1, UBE2C, BIRC5, TPX2, TOP2A, NDC80, CKS2, NUF2, CKS1B, MKI67, TMPO, CENPF, TACC3, FAM64A, SMC4, CCNB2, CKAP2L, CKAP2, AURKB, BUB1, KIF11, ANP32E, TUBB4B, GTSE1, KIF20B, HJURP, CDCA3, HN1, CDC20, TTK, CDC25C, KIF2C, RANGAP1, NCAPD2, DLGAP5, CDCA2, CDCA8, ECT2, KIF23, HMMR, AURKA, PSRC1, ANLN, LBR, CKAP5, CENPE, CTCF, NEK2, G2E3, GAS2L3, CBX5, CENPA, not searching for symbol synonyms
-Finished averaging RNA for cluster KPC1viable
-Finished averaging RNA for cluster KPC2viable
-Finished averaging RNA for cluster KPC3viable
-Finished averaging RNA for cluster KPC4viable
-Finished averaging RNA for cluster KPC1fib
-Finished averaging RNA for cluster KPC2fib
-Finished averaging RNA for cluster KPC3fib
-Finished averaging RNA for cluster KPC4fib
-Finished averaging RNA for cluster C15
-Finished averaging RNA for cluster C3
+Warning: The following features are not present in the object: MLF1IP, not searching for symbol synonyms
+Warning: The following features are not present in the object: FAM64A, HN1, not searching for symbol synonyms
+Finished averaging RNA for cluster Skin01sub
+Finished averaging RNA for cluster ThyP89sub
+Finished averaging RNA for cluster ThyP94sub
+Finished averaging RNA for cluster MedullaThy89sub
+Finished averaging RNA for cluster MedullaThy94sub
+Finished averaging RNA for cluster CortexThy89sub
+Finished averaging RNA for cluster CortexThy94sub
 Finished averaging RNA for cluster C1
+Finished averaging RNA for cluster C5
+Finished averaging RNA for cluster C9
+Finished averaging RNA for cluster C3
+Finished averaging RNA for cluster C2
 Finished averaging RNA for cluster C0
+Finished averaging RNA for cluster C8
+Finished averaging RNA for cluster C6
+Finished averaging RNA for cluster C4
 Finished averaging RNA for cluster C10
 Finished averaging RNA for cluster C7
-Finished averaging RNA for cluster C5
-Finished averaging RNA for cluster C13
-Finished averaging RNA for cluster C6
-Finished averaging RNA for cluster C9
-Finished averaging RNA for cluster C2
-Finished averaging RNA for cluster C12
-Finished averaging RNA for cluster C8
-Finished averaging RNA for cluster C14
-Finished averaging RNA for cluster C4
-Finished averaging RNA for cluster C16
-Finished averaging RNA for cluster C17
-Finished averaging RNA for cluster C11
   |                                                                              |..........................................................            |  83%
    inline R code fragments
 
@@ -1423,18 +1230,18 @@ List of 4
  $ results: chr "asis"
 
 
-  |                                                                              |................................                                      |  45%
+  |                                                                              |.................................                                     |  47%
   ordinary text without R code
 
-  |                                                                              |.................................                                     |  47%
-label: unnamed-chunk-11 (with options) 
+  |                                                                              |..................................                                    |  49%
+label: unnamed-chunk-12 (with options) 
 List of 2
- $ child: chr "src/modules/partB_main_figures/partB.Ncell.barchart.plots.Rmd"
+ $ child: chr "src/modules/section_B/B12.Ncell.barchart.plots.Rmd"
  $ eval : logi TRUE
 
 
 
-processing file: ./src/modules/partB_main_figures/partB.Ncell.barchart.plots.Rmd
+processing file: ./src/modules/section_B/B12.Ncell.barchart.plots.Rmd
   |                                                                              |                                                                      |   0%  |                                                                              |............                                                          |  17%
   ordinary text without R code
 
@@ -1468,18 +1275,18 @@ List of 4
  $ results: chr "asis"
 
 
-  |                                                                              |..................................                                    |  49%
+  |                                                                              |....................................                                  |  51%
   ordinary text without R code
 
-  |                                                                              |....................................                                  |  51%
-label: unnamed-chunk-12 (with options) 
+  |                                                                              |.....................................                                 |  53%
+label: unnamed-chunk-13 (with options) 
 List of 2
- $ child: chr "src/modules/partB_main_figures/partB.AUC.cat.enrichments.Rmd"
+ $ child: chr "src/modules/section_B/B13.AUC.cat.enrichments.Rmd"
  $ eval : logi TRUE
 
 
 
-processing file: ./src/modules/partB_main_figures/partB.AUC.cat.enrichments.Rmd
+processing file: ./src/modules/section_B/B13.AUC.cat.enrichments.Rmd
   |                                                                              |                                                                      |   0%  |                                                                              |............                                                          |  17%
   ordinary text without R code
 
@@ -1515,18 +1322,18 @@ List of 4
  $ results: chr "asis"
 
 
-  |                                                                              |.....................................                                 |  53%
+  |                                                                              |......................................                                |  55%
   ordinary text without R code
 
-  |                                                                              |......................................                                |  55%
-label: unnamed-chunk-13 (with options) 
+  |                                                                              |........................................                              |  57%
+label: unnamed-chunk-14 (with options) 
 List of 2
- $ child: chr "src/modules/partB_main_figures/partB.linear.regression.data.prep.Rmd"
+ $ child: chr "src/modules/section_B/B14.linear.regression.data.prep.Rmd"
  $ eval : logi TRUE
 
 
 
-processing file: ./src/modules/partB_main_figures/partB.linear.regression.data.prep.Rmd
+processing file: ./src/modules/section_B/B14.linear.regression.data.prep.Rmd
   |                                                                              |                                                                      |   0%  |                                                                              |............                                                          |  17%
   ordinary text without R code
 
@@ -1560,18 +1367,18 @@ List of 4
  $ results: chr "asis"
 
 
-  |                                                                              |........................................                              |  57%
+  |                                                                              |.........................................                             |  58%
   ordinary text without R code
 
-  |                                                                              |.........................................                             |  59%
-label: unnamed-chunk-14 (with options) 
+  |                                                                              |..........................................                            |  60%
+label: unnamed-chunk-15 (with options) 
 List of 2
- $ child: chr "src/modules/partB_main_figures/partB.heatmaps.and.dotplots.Rmd"
+ $ child: chr "src/modules/section_B/B15.heatmaps.and.dotplots.Rmd"
  $ eval : logi TRUE
 
 
 
-processing file: ./src/modules/partB_main_figures/partB.heatmaps.and.dotplots.Rmd
+processing file: ./src/modules/section_B/B15.heatmaps.and.dotplots.Rmd
   |                                                                              |                                                                      |   0%  |                                                                              |............                                                          |  17%
   ordinary text without R code
 
@@ -1617,6 +1424,32 @@ Scale for 'fill' is already present. Adding another scale for 'fill', which
 will replace the existing scale.
 Scale for 'fill' is already present. Adding another scale for 'fill', which
 will replace the existing scale.
+Scale for 'fill' is already present. Adding another scale for 'fill', which
+will replace the existing scale.
+Scale for 'fill' is already present. Adding another scale for 'fill', which
+will replace the existing scale.
+Scale for 'fill' is already present. Adding another scale for 'fill', which
+will replace the existing scale.
+Scale for 'fill' is already present. Adding another scale for 'fill', which
+will replace the existing scale.
+Scale for 'fill' is already present. Adding another scale for 'fill', which
+will replace the existing scale.
+Scale for 'fill' is already present. Adding another scale for 'fill', which
+will replace the existing scale.
+Scale for 'fill' is already present. Adding another scale for 'fill', which
+will replace the existing scale.
+Scale for 'fill' is already present. Adding another scale for 'fill', which
+will replace the existing scale.
+Scale for 'fill' is already present. Adding another scale for 'fill', which
+will replace the existing scale.
+Scale for 'fill' is already present. Adding another scale for 'fill', which
+will replace the existing scale.
+Scale for 'fill' is already present. Adding another scale for 'fill', which
+will replace the existing scale.
+Scale for 'fill' is already present. Adding another scale for 'fill', which
+will replace the existing scale.
+Scale for 'fill' is already present. Adding another scale for 'fill', which
+will replace the existing scale.
   |                                                                              |..........................................................            |  83%
    inline R code fragments
 
@@ -1629,18 +1462,18 @@ List of 4
  $ results: chr "asis"
 
 
-  |                                                                              |...........................................                           |  61%
+  |                                                                              |............................................                          |  62%
   ordinary text without R code
 
-  |                                                                              |............................................                          |  63%
-label: unnamed-chunk-15 (with options) 
+  |                                                                              |.............................................                         |  64%
+label: unnamed-chunk-16 (with options) 
 List of 2
- $ child: chr "src/modules/partB_main_figures/partB.make.cluster.table.Rmd"
+ $ child: chr "src/modules/section_B/B16.make.cluster.table.Rmd"
  $ eval : logi TRUE
 
 
 
-processing file: ./src/modules/partB_main_figures/partB.make.cluster.table.Rmd
+processing file: ./src/modules/section_B/B16.make.cluster.table.Rmd
   |                                                                              |                                                                      |   0%  |                                                                              |............                                                          |  17%
   ordinary text without R code
 
@@ -1681,18 +1514,18 @@ List of 4
  $ results: chr "asis"
 
 
-  |                                                                              |.............................................                         |  65%
+  |                                                                              |..............................................                        |  66%
   ordinary text without R code
 
-  |                                                                              |...............................................                       |  67%
-label: unnamed-chunk-16 (with options) 
+  |                                                                              |................................................                      |  68%
+label: unnamed-chunk-17 (with options) 
 List of 2
- $ child: chr "src/modules/partB_main_figures/partB.cell.type.estimate.Rmd"
+ $ child: chr "src/modules/section_B/B17.cell.type.estimate.Rmd"
  $ eval : logi TRUE
 
 
 
-processing file: ./src/modules/partB_main_figures/partB.cell.type.estimate.Rmd
+processing file: ./src/modules/section_B/B17.cell.type.estimate.Rmd
   |                                                                              |                                                                      |   0%  |                                                                              |............                                                          |  17%
   ordinary text without R code
 
@@ -1757,34 +1590,37 @@ The following object is masked from 'package:stringr':
     boundary
 
 --> No gene can be mapped....
---> Expected input gene ID: Fcgr2b,Fzd2,Ccl22,Bank1,Cd38,Ly86
+--> Expected input gene ID: AQP9,TNS2,NOTCH4,FMO3,TRAC,MT1F
 --> return NULL...
 --> No gene can be mapped....
---> Expected input gene ID: Rab27b,Il18r1,Fcer1a,H2-Aa,Slamf8,Ggt5
+--> Expected input gene ID: NTRK1,LTB,FAIM3,SLC15A3,CD27,PLA1A
 --> return NULL...
 --> No gene can be mapped....
---> Expected input gene ID: Tcl1,Dapk2,P2rx1,Ccl19,Cxcl13,Emr1
+--> Expected input gene ID: CD22,RASSF4,CCL19,RAB27B,SLC12A8,ADAM28
 --> return NULL...
 --> No gene can be mapped....
---> Expected input gene ID: Clec10a,Slc15a3,Ms4a2,Emr1,Paqr5,Ccl2
+--> Expected input gene ID: MMP12,CHI3L1,FAM174B,KIAA0226L,DAPK2,CCL19
 --> return NULL...
 --> No gene can be mapped....
---> Expected input gene ID: Il1b,Ccr7,Myb,Tnfrsf4,Mak,Ido1
+--> Expected input gene ID: CPA3,AIF1,DENND5B,GPC4,CCL18,CD209
 --> return NULL...
 --> No gene can be mapped....
---> Expected input gene ID: Dcstamp,Sell,Irf8,Blk,Ebi3,Gpr18
+--> Expected input gene ID: TNFRSF1B,AGT,CACYBP,CLU,F8,GZMA
 --> return NULL...
 --> No gene can be mapped....
---> Expected input gene ID: Cd86,Sept8,Cd69,Frk,Trem2,Cxcl2
+--> Expected input gene ID: CD180,DENND5B,KIAA0226L,TREM2,CCL8,NIPSNAP3B
 --> return NULL...
 --> No gene can be mapped....
---> Expected input gene ID: Cd22,Ccl2,H2-Ob,Il2ra,Ccl22,Igsf6
+--> Expected input gene ID: CTSC,CASP8,PDIA2,GPLD1,TTR,CARF
 --> return NULL...
 --> No gene can be mapped....
---> Expected input gene ID: Il18r1,Rgs13,Cyp27b1,Ggt5,Cd4,Gm2023
+--> Expected input gene ID: SEPT8,ST3GAL6,FCGR2B,CD244,CD22,EMR2
 --> return NULL...
 --> No gene can be mapped....
---> Expected input gene ID: Cd40,Faim3,Hoxa1,Smpd3,Ncf2,Mmp9
+--> Expected input gene ID: RSAD2,GPR65,IL5,NCF2,SLC12A8,CSF2
+--> return NULL...
+--> No gene can be mapped....
+--> Expected input gene ID: PSG2,FAM198B,TRPM6,P2RX1,CCL20,CHI3L1
 --> return NULL...
   |                                                                              |..........................................................            |  83%
    inline R code fragments
@@ -1798,18 +1634,18 @@ List of 4
  $ results: chr "asis"
 
 
-  |                                                                              |................................................                      |  69%
+  |                                                                              |.................................................                     |  70%
   ordinary text without R code
 
-  |                                                                              |.................................................                     |  71%
-label: unnamed-chunk-17 (with options) 
+  |                                                                              |..................................................                    |  72%
+label: unnamed-chunk-18 (with options) 
 List of 2
- $ child: chr "src/modules/partB_main_figures/partB.gene.set.heatmaps.Rmd"
+ $ child: chr "src/modules/section_B/B18.gene.set.heatmaps.Rmd"
  $ eval : logi TRUE
 
 
 
-processing file: ./src/modules/partB_main_figures/partB.gene.set.heatmaps.Rmd
+processing file: ./src/modules/section_B/B18.gene.set.heatmaps.Rmd
   |                                                                              |                                                                      |   0%  |                                                                              |............                                                          |  17%
   ordinary text without R code
 
@@ -1843,18 +1679,18 @@ List of 4
  $ results: chr "asis"
 
 
-  |                                                                              |...................................................                   |  73%
+  |                                                                              |....................................................                  |  74%
   ordinary text without R code
 
-  |                                                                              |....................................................                  |  75%
-label: unnamed-chunk-18 (with options) 
+  |                                                                              |.....................................................                 |  75%
+label: unnamed-chunk-19 (with options) 
 List of 2
- $ child: chr "src/modules/partB_main_figures/partB.example.feature.plots.Rmd"
+ $ child: chr "src/modules/section_B/B19.example.feature.plots.Rmd"
  $ eval : logi TRUE
 
 
 
-processing file: ./src/modules/partB_main_figures/partB.example.feature.plots.Rmd
+processing file: ./src/modules/section_B/B19.example.feature.plots.Rmd
   |                                                                              |                                                                      |   0%  |                                                                              |............                                                          |  17%
   ordinary text without R code
 
@@ -1888,18 +1724,18 @@ List of 4
  $ results: chr "asis"
 
 
-  |                                                                              |......................................................                |  76%
+  |                                                                              |......................................................                |  77%
   ordinary text without R code
 
-  |                                                                              |.......................................................               |  78%
-label: unnamed-chunk-19 (with options) 
+  |                                                                              |.......................................................               |  79%
+label: unnamed-chunk-20 (with options) 
 List of 2
- $ child: chr "src/modules/partB_main_figures/partB.pca.cell.and.loading.plots.Rmd"
+ $ child: chr "src/modules/section_B/B20.pca.cell.and.loading.plots.Rmd"
  $ eval : logi TRUE
 
 
 
-processing file: ./src/modules/partB_main_figures/partB.pca.cell.and.loading.plots.Rmd
+processing file: ./src/modules/section_B/B20.pca.cell.and.loading.plots.Rmd
   |                                                                              |                                                                      |   0%  |                                                                              |....                                                                  |   6%
   ordinary text without R code
 
@@ -1998,19 +1834,40 @@ List of 4
  $ results: symbol F
 
 --> No gene can be mapped....
---> Expected input gene ID: Gm13309,Ccl2,Ccl4,Fcer1a,Cd69,Hdc
+--> Expected input gene ID: CHI3L1,CCL5,NCF2,SELL,MMP12,KIAA0226L
 --> return NULL...
 --> No gene can be mapped....
---> Expected input gene ID: Dach1,Tlr7,Faim3,Hesx1,H2-Ob,Hpgds
+--> Expected input gene ID: CLC,SLC12A8,CD33,CRISP3,FFAR2,FAM198B
 --> return NULL...
 --> No gene can be mapped....
---> Expected input gene ID: Fcer1a,H2-Aa,Hoxa1,Emr1,Ptprcap,Smpdl3b
+--> Expected input gene ID: TREM2,CCL5,IGSF6,GGT5,IFI44L,HDC
 --> return NULL...
 --> No gene can be mapped....
---> Expected input gene ID: Lamp3,Rgs13,Ms4a1,P2rx5,Aif1,Alox5
+--> Expected input gene ID: FLVCR2,PLEKHG3,HHEX,IL1B,KYNU,BACH2
 --> return NULL...
 --> No gene can be mapped....
---> Expected input gene ID: Fcgr2b,Frmd4a,Socs1,Cxcr5,Dapk2,P2ry10
+--> Expected input gene ID: LILRA3,PDE6C,TNFRSF17,PRG2,NOX3,TRPM6
+--> return NULL...
+--> No gene can be mapped....
+--> Expected input gene ID: P2RX1,STAP1,ACHE,CD38,CLIC2,BPI
+--> return NULL...
+--> No gene can be mapped....
+--> Expected input gene ID: CD19,CD1C,PPFIBP1,SELL,TMEM255A,KIAA0754
+--> return NULL...
+--> No gene can be mapped....
+--> Expected input gene ID: FRK,PLEKHG3,RGS1,FAM174B,RRP12,ADRB2
+--> return NULL...
+--> No gene can be mapped....
+--> Expected input gene ID: KIAA0754,AQP9,C3AR1,GPC4,BEND5,CCL19
+--> return NULL...
+--> No gene can be mapped....
+--> Expected input gene ID: STAP1,FES,TREM2,EGR2,FZD2,HPGDS
+--> return NULL...
+--> No gene can be mapped....
+--> Expected input gene ID: ZNF286A,CD72,LTB,MYB,FAIM3,SLC2A6
+--> return NULL...
+--> No gene can be mapped....
+--> Expected input gene ID: EPN2,IL18RAP,IGLL3P,BACH2,PTPRCAP,TREM2
 --> return NULL...
   |                                                                              |..................................................................    |  94%
    inline R code fragments
@@ -2024,18 +1881,18 @@ List of 4
  $ results: chr "asis"
 
 
-  |                                                                              |........................................................              |  80%
+  |                                                                              |.........................................................             |  81%
   ordinary text without R code
 
-  |                                                                              |..........................................................            |  82%
-label: unnamed-chunk-20 (with options) 
+  |                                                                              |..........................................................            |  83%
+label: unnamed-chunk-21 (with options) 
 List of 2
- $ child: chr "src/modules/partB_main_figures/partB.pseudotime.Rmd"
+ $ child: chr "src/modules/section_B/B21.pseudotime.Rmd"
  $ eval : logi TRUE
 
 
 
-processing file: ./src/modules/partB_main_figures/partB.pseudotime.Rmd
+processing file: ./src/modules/section_B/B21.pseudotime.Rmd
   |                                                                              |                                                                      |   0%  |                                                                              |............                                                          |  17%
   ordinary text without R code
 
@@ -2069,18 +1926,18 @@ List of 4
  $ results: chr "asis"
 
 
-  |                                                                              |...........................................................           |  84%
+  |                                                                              |...........................................................           |  85%
   ordinary text without R code
 
-  |                                                                              |............................................................          |  86%
-label: unnamed-chunk-21 (with options) 
+  |                                                                              |.............................................................         |  87%
+label: unnamed-chunk-22 (with options) 
 List of 2
- $ child: chr "src/modules/partB_main_figures/partB.add.extra.tables.Rmd"
+ $ child: chr "src/modules/section_B/B22.add.extra.tables.Rmd"
  $ eval : logi TRUE
 
 
 
-processing file: ./src/modules/partB_main_figures/partB.add.extra.tables.Rmd
+processing file: ./src/modules/section_B/B22.add.extra.tables.Rmd
   |                                                                              |                                                                      |   0%  |                                                                              |..................                                                    |  25%
   ordinary text without R code
 
@@ -2103,10 +1960,10 @@ List of 4
  $ results: symbol F
 
 
-  |                                                                              |..............................................................        |  88%
+  |                                                                              |..............................................................        |  89%
   ordinary text without R code
 
-  |                                                                              |...............................................................       |  90%
+  |                                                                              |...............................................................       |  91%
 label: saveobject (with options) 
 List of 3
  $ eval   : logi TRUE
@@ -2139,7 +1996,7 @@ List of 3
 
 output file: sc_PartB_Analysis.knit.md
 
-/camp/apps/eb/dev/software/Anaconda2/2019.10/bin/pandoc +RTS -K512m -RTS sc_PartB_Analysis.utf8.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output /camp/stp/babs/working/boeings/Projects/hillc/danielle.park/439_scRNAseq_KPC_PDAC_GSE129455/workdir/html_local/sc_PartB_Analysis.html --lua-filter /camp/apps/misc/stp/babs/manual/software/r/r-site-library/bioc-3.9/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /camp/apps/misc/stp/babs/manual/software/r/r-site-library/bioc-3.9/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --standalone --section-divs --table-of-contents --toc-depth 5 --variable toc_float=1 --variable toc_selectors=h1,h2,h3,h4,h5 --variable toc_collapsed=1 --variable toc_smooth_scroll=1 --variable toc_print=1 --template /camp/apps/misc/stp/babs/manual/software/r/r-site-library/bioc-3.9/rmarkdown/rmd/h/default.html --no-highlight --variable highlightjs=1 --css src/assets/style/style.css --variable theme=paper --include-in-header /tmp/slurm_25480163/RtmpxQTLxA/rmarkdown-str45212af031f7.html --mathjax --variable 'mathjax-url:https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --variable code_folding=hide --variable code_menu=1 
+/camp/apps/eb/dev/software/Anaconda2/2019.10/bin/pandoc +RTS -K512m -RTS sc_PartB_Analysis.utf8.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output /camp/stp/babs/working/boeings/Projects/bonfantip/roberta.ragazzini/449D_subclustering_449C_SC20193_C1_2_3_4_5/workdir/html_local/sc_PartB_Analysis.html --lua-filter /camp/apps/misc/stp/babs/manual/software/r/r-site-library/bioc-3.9/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /camp/apps/misc/stp/babs/manual/software/r/r-site-library/bioc-3.9/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --standalone --section-divs --table-of-contents --toc-depth 5 --variable toc_float=1 --variable toc_selectors=h1,h2,h3,h4,h5 --variable toc_collapsed=1 --variable toc_smooth_scroll=1 --variable toc_print=1 --template /camp/apps/misc/stp/babs/manual/software/r/r-site-library/bioc-3.9/rmarkdown/rmd/h/default.html --no-highlight --variable highlightjs=1 --css src/assets/style/style.css --variable theme=paper --include-in-header /tmp/RtmpgJKUOq/rmarkdown-str84c93007f54a.html --mathjax --variable 'mathjax-url:https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --variable code_folding=hide --variable code_menu=1 
 
-Output created: /camp/stp/babs/working/boeings/Projects/hillc/danielle.park/439_scRNAseq_KPC_PDAC_GSE129455/workdir/html_local/sc_PartB_Analysis.html
-There were 45 warnings (use warnings() to see them)
+Output created: /camp/stp/babs/working/boeings/Projects/bonfantip/roberta.ragazzini/449D_subclustering_449C_SC20193_C1_2_3_4_5/workdir/html_local/sc_PartB_Analysis.html
+There were 23 warnings (use warnings() to see them)

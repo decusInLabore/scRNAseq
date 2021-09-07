@@ -49,7 +49,7 @@ knitr::opts_chunk$set(
 ```{r populate_meta_data_database, eval=TRUE, echo=F, results=F}
 ## libraries ##
 library(tidyverse)
-library(Seurat)
+
 library(scales)
 
 VersionPdfExt <- paste0(".V", gsub("-", "", Sys.Date()), ".pdf")
@@ -75,16 +75,20 @@ dbTable <- read.delim(
 db.pwd <- as.vector(dbTable[1,1])
 
 
+devtools::install_github("decusInLabore/biologicSeqTools")
+devtools::install_github("decusInLabore/biologicToolsSC")
+library(Seurat)
+library(biologicSeqTools)
+library(biologicToolsSC)
 
 
+# source("assets/R/scTools.r")
+# source("assets/R/SBwebtools.pckg.r")
 
-source("assets/R/scTools.r")
-source("assets/R/SBwebtools.pckg.r")
 
-
-if (length(.libPaths()) > 2){
-    .libPaths(.libPaths()[2:3])
-}
+# if (length(.libPaths()) > 2){
+#     .libPaths(.libPaths()[2:3])
+# }
 
 ObioFN <- paste0("../", list.files("..")[grep(".bioLOGIC.Robj", list.files(".."))])
 
@@ -125,6 +129,11 @@ if (Obio@parameterList$scIntegrationMethod == "SCT"){
 } else {
     resultSlot = "RNA"
 }
+
+```
+
+```{r old_res, eval=TRUE, echo=F, results=F}
+
 
 
 
@@ -235,6 +244,17 @@ addFNvec <- c(
 
 row.names(OsC@meta.data) <- OsC@meta.data$cellID
 
+OsC@meta.data$S_Score.1 <- NULL
+OsC@meta.data$G2M_Score.1 <- NULL
+OsC@meta.data$old_ident.1 <- NULL
+OsC@meta.data$G2M.Score <- NULL
+OsC@meta.data$S.Score <- NULL
+OsC@meta.data$old_ident <- NULL
+OsC@meta.data$S_Score_1 <- NULL
+OsC@meta.data$G2M_Score_1 <- NULL
+OsC@meta.data$old_ident_1 <- NULL
+
+
 for (i in 1:length(addFNvec)){
     if (file.exists(addFNvec[i])){
         dfAdd <- read.delim(
@@ -264,28 +284,28 @@ dfdbTable[["sample_group_colors"]] <- dfdbTable$clusterColor
 
 ###############################################################################
 ## Add Sample and G2M colors if available                                    ##
-if (length(grep("sampleID", names(dfdbTable))) > 0){
-    identities <- levels(factor(OsC@meta.data[,"sampleID"]))
-    sample_group_colors <- hue_pal()(length(identities))
-    
-    dfdbTable[["sampleID_colors"]] <- dfdbTable[["sampleID"]]
-    
-    for (i in 1:length(identities)){
-        dfdbTable$sampleID_colors <- gsub(identities[i], sample_group_colors[i], dfdbTable$sampleID_colors)
-    }
-}
-
-## G2M colors ##
-if (length(grep("Phase", names(dfdbTable))) > 0){
-    identities <- levels(factor(OsC@meta.data[,"Phase"]))
-    sample_group_colors <- hue_pal()(length(identities))
-    
-    dfdbTable[["Phase_colors"]] <- dfdbTable[["Phase"]]
-    
-     for (i in 1:length(identities)){
-        dfdbTable$Phase_colors <- gsub(identities[i], sample_group_colors[i], dfdbTable$Phase_colors)
-    }
-}
+# if (length(grep("sampleID", names(dfdbTable))) > 0){
+#     identities <- levels(factor(OsC@meta.data[,"sampleID"]))
+#     sample_group_colors <- hue_pal()(length(identities))
+#     
+#     dfdbTable[["sampleID_colors"]] <- dfdbTable[["sampleID"]]
+#     
+#     for (i in 1:length(identities)){
+#         dfdbTable$sampleID_colors <- gsub(identities[i], sample_group_colors[i], dfdbTable$sampleID_colors)
+#     }
+# }
+# 
+# ## G2M colors ##
+# if (length(grep("Phase", names(dfdbTable))) > 0){
+#     identities <- levels(factor(OsC@meta.data[,"Phase"]))
+#     sample_group_colors <- hue_pal()(length(identities))
+#     
+#     dfdbTable[["Phase_colors"]] <- dfdbTable[["Phase"]]
+#     
+#      for (i in 1:length(identities)){
+#         dfdbTable$Phase_colors <- gsub(identities[i], sample_group_colors[i], dfdbTable$Phase_colors)
+#     }
+# }
 
 if (length(grep("DF_Classification", names(dfdbTable)) > 0)){
     #######################
@@ -319,29 +339,90 @@ pos <- grep("integrated_", names(dfdbTable))
 if (length(pos) > 0){
     dfdbTable <- dfdbTable[,-pos]
 }
+
+
+
+
+
 names(dfdbTable) <- gsub("\\.", "_", names(dfdbTable))
 
-upload.datatable.to.database(
+biologicSeqTools::upload.datatable.to.database(
     host = Obio@dbDetailList$host,
     user = Obio@dbDetailList$db.user,
     password = db.pwd,
     prim.data.db = Obio@dbDetailList$primDataDB,
     dbTableName = Obio@parameterList$PCAdbTableName,
     df.data = dfdbTable,
-    db.col.parameter.list = list(
-        "VARCHAR(100) CHARACTER SET utf8 COLLATE utf8_general_ci" = c("cellType","cellIdent","sample_","cellID","orig_ident","old_ident","clustIdent", "hmIdent","sampleID", "clusterName",  "^ClusterName","clusterColor", "ClusterTestRes","sampleName", "sampleColor", "CellFromTumor", "Patient", "Region",  "Article_Cell_Type", "Gender","Glia_vs_Neuron", "sub_clusters_ExNeurons", "subCluster","NitChol_vs_Serotonergic", "Nitrergic_vs_Cholinergic", "Sample_Group", "CC_Difference", "meta_", "cluster_sample", "^DGE_", "DZ_vs_LZ_FDC"),
-       "VARCHAR(10) CHARACTER SET utf8 COLLATE utf8_general_ci" = c("all","included","Phase", gsub("[.]", "_", Obio@parameterList$singleCellClusterString), "seurat_clusters", "RNA_snn_res"),
-        "BIGINT(8) NULL DEFAULT NULL" = c("row_names"),
-        "INT(8) NULL DEFAULT NULL" = c("nCount_", "nFeature_","DF_Classification"),
-        "DECIMAL(6,3) NULL DEFAULT NULL" = c("percent_mt","PC", "tSNE", "UMAP","^DC","DM_Pseudotime"),
-        "DECIMAL(6,5) NULL DEFAULT NULL" = c("mAUC_","_Score","DF_pANN")
-    ),
+    db.col.parameter.list = biologicSeqTools::inferDBcategories(dfdbTable),
     new.table = TRUE
 )
 
 killDbConnections()
 
 ```
+
+```{r create_app_upload_tables, eval=TRUE, echo=F, results=F}
+
+
+
+devtools::install_github("decusInLabore/biologicSeqTools")
+devtools::install_github("decusinlabore/biologicViewerSC")
+
+###############################################################################
+## Step 1: Load Exampe Seurat object                                         ##
+
+library(Seurat)
+library(dplyr)
+library(biologicViewerSC)
+library(biologicSeqTools)
+
+if (Obio@dbDetailList$host == "10.27.241.234"){
+    shinyBasePath <- "/camp/stp/babs/www/shiny/boeings/"
+    FvDir <- paste0("/camp/stp/babs/www/boeings/bioLOGIC/data/", Obio@parameterList$project_id)
+
+} else {
+    if (dir.exists("/camp/stp/babs/www/shiny/boeings/external/")){
+        shinyBasePath <- "/camp/stp/babs/www/shiny/boeings/external/"  
+    } else {
+        shinyBasePath <- "../"
+    }
+    
+  
+    FvDir <- paste0("/camp/stp/babs/www/boeings/bioLOGIC_external/data/", Obio@parameterList$project_id)
+
+}
+
+
+shinyProjectPath <-paste0(
+    shinyBasePath, 
+    Obio@parameterList$project_id, "_app"
+)
+
+names(OsC@meta.data) <- gsub("\\.", "_", names(OsC@meta.data))
+OsC@meta.data <- OsC@meta.data[,!duplicated(names(OsC@meta.data))]
+
+params <- biologicViewerSC::scanObjParams(OsC)
+
+## Review the default app settings and colors:
+
+
+biologicViewerSC::seuratObjectToViewer(
+    params = params,
+    project_id = Obio@parameterList$project_id,
+    projectPath = shinyBasePath,
+    OsC = OsC,
+    dataMode = "MySQL",
+    host = Obio@dbDetailList$host,
+    dbname = Obio@dbDetailList$primDataDB,
+    db.pwd = db.pwd,
+    db.user = Obio@dbDetailList$db.user,
+    appDomains = c("shiny-bioinformatics.crick.ac.uk","10.%"),
+    geneDefault = "KRT19"
+)
+
+```
+
+
 
 
 ```{r populate_expr_database_1, eval=TRUE, echo=F, results=F}
