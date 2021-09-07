@@ -14,7 +14,10 @@ VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.D
 SampleList <- createNormSampleList(
     obj = Obio,
     reduce = Obio@parameterList$debugReduce, # Default is NULL
-    vars.to.regress = NULL
+    vars.to.regress = NULL,
+    s.genes = NULL,
+    g2m.genes = NULL,
+    annotateCellCyclePhase = F
 )
 
 print(paste0("Cell Recuction: ", Obio@parameterList$debugReduce))
@@ -64,14 +67,14 @@ if (length(SampleList) > 1){
     
         sampleAnchors <- FindIntegrationAnchors(
             object.list = SampleList, 
-            dims = 1:30
+            dims = 1:Obio@parameterList$singleCellSeuratNpcs4PCA
         ) 
 
 
         OsC <- IntegrateData(
             #features.to.integrate = geneIntersectVec,
             anchorset = sampleAnchors, 
-            dims = 1:30
+            dims = 1:Obio@parameterList$singleCellSeuratNpcs4PCA
         )
     }
     Obio@dataTableList$referenceList[["sampleAnchors"]] <- as.vector(sort(sampleAnchors@anchor.features))
@@ -103,7 +106,11 @@ if (length(Obio@sampleDetailList) > 1){
 
 # Run the standard workflow for visualization and clustering
 ## This will scale on the most variable features only
-OsC <- ScaleData(OsC, verbose = FALSE)
+OsC <- ScaleData(
+    OsC, 
+    verbose = FALSE,
+    vars.to.regress = NULL
+)
 
 OsC <- RunPCA(
     OsC, 
@@ -114,9 +121,9 @@ OsC <- RunPCA(
 ## Add PCA clusters to data collection ##
 
 
-OsC <- RunUMAP(OsC, reduction = "pca", dims = 1:20)
+OsC <- RunUMAP(OsC, reduction = "pca", dims = 1: Obio@parameterList$singleCellSeuratNpcs4PCA)
 
-OsC <- FindNeighbors(OsC, reduction = "pca", dims = 1:20)
+OsC <- FindNeighbors(OsC, reduction = "pca", dims = 1: Obio@parameterList$singleCellSeuratNpcs4PCA)
 
 OsC <- FindClusters(OsC, resolution = Obio@parameterList$singleCellClusterParameter)
 
@@ -154,12 +161,18 @@ rm(OsC)
 
 ###############################################################################
 ## Get UMAP coordinates with Phase regression                                ##
-vars.to.regress = "Phase"
+
+# vars.to.regress = "Phase"
+## 09/2021 changed to:
+vars.to.regress <- c("S_Score", "G2M_Score")
 
 SampleList <- createNormSampleList(
     obj = Obio,
     reduce = Obio@parameterList$debugReduce, # Default is NULL
-    vars.to.regress = vars.to.regress
+    vars.to.regress = vars.to.regress,
+    s.genes = s.genes,
+    g2m.genes = g2m.genes,
+    annotateCellCyclePhase = T
 )
 
 print(paste0("Cell Recuction: ", Obio@parameterList$debugReduce))
@@ -209,14 +222,14 @@ if (length(SampleList) > 1){
     
         sampleAnchors <- FindIntegrationAnchors(
             object.list = SampleList, 
-            dims = 1:30
+            dims = 1:Obio@parameterList$singleCellSeuratNpcs4PCA
         ) 
 
 
         OsC <- IntegrateData(
             #features.to.integrate = geneIntersectVec,
             anchorset = sampleAnchors, 
-            dims = 1:30
+            dims = 1:Obio@parameterList$singleCellSeuratNpcs4PCA
         )
     }
     Obio@dataTableList$referenceList[["sampleAnchors"]] <- as.vector(sort(sampleAnchors@anchor.features))
@@ -248,7 +261,11 @@ if (length(Obio@sampleDetailList) > 1){
 
 # Run the standard workflow for visualization and clustering
 ## This will scale on the most variable features only
-OsC <- ScaleData(OsC, verbose = FALSE)
+OsC <- ScaleData(
+    OsC, 
+    verbose = FALSE,
+    vars.to.regress = vars.to.regress
+)
 
 OsC <- RunPCA(
     OsC, 
@@ -259,9 +276,9 @@ OsC <- RunPCA(
 ## Add PCA clusters to data collection ##
 
 
-OsC <- RunUMAP(OsC, reduction = "pca", dims = 1:20)
+OsC <- RunUMAP(OsC, reduction = "pca", dims = 1:Obio@parameterList$singleCellSeuratNpcs4PCA)
 
-OsC <- FindNeighbors(OsC, reduction = "pca", dims = 1:20)
+OsC <- FindNeighbors(OsC, reduction = "pca", dims = 1:Obio@parameterList$singleCellSeuratNpcs4PCA)
 
 OsC <- FindClusters(OsC, resolution = Obio@parameterList$singleCellClusterParameter)
 
@@ -308,7 +325,10 @@ vars.to.regress = "CC_Difference"
 SampleList <- createNormSampleList(
     obj = Obio,
     reduce = Obio@parameterList$debugReduce, # Default is NULL
-    vars.to.regress = vars.to.regress
+    vars.to.regress = vars.to.regress,
+    s.genes = s.genes,
+    g2m.genes = g2m.genes,
+    annotateCellCyclePhase = T
 )
 
 print(paste0("Cell Recuction: ", Obio@parameterList$debugReduce))
@@ -358,14 +378,14 @@ if (length(SampleList) > 1){
     
         sampleAnchors <- FindIntegrationAnchors(
             object.list = SampleList, 
-            dims = 1:30
+            dims = 1:Obio@parameterList$singleCellSeuratNpcs4PCA
         ) 
 
 
         OsC <- IntegrateData(
             #features.to.integrate = geneIntersectVec,
             anchorset = sampleAnchors, 
-            dims = 1:30
+            dims = 1:Obio@parameterList$singleCellSeuratNpcs4PCA
         )
     }
     Obio@dataTableList$referenceList[["sampleAnchors"]] <- as.vector(sort(sampleAnchors@anchor.features))
@@ -397,20 +417,32 @@ if (length(Obio@sampleDetailList) > 1){
 
 # Run the standard workflow for visualization and clustering
 ## This will scale on the most variable features only
-OsC <- ScaleData(OsC, verbose = FALSE)
+OsC <- ScaleData(
+    OsC, 
+    verbose = FALSE,
+    vars.to.regress = vars.to.regress
+)
 
 OsC <- RunPCA(
     OsC, 
-    npcs = Obio@parameterList$singleCellSeuratNpcs4PCA, verbose = FALSE
+    npcs = Obio@parameterList$singleCellSeuratNpcs4PCA, 
+    verbose = FALSE
 )
 # t-SNE and Clustering
 
 ## Add PCA clusters to data collection ##
 
 
-OsC <- RunUMAP(OsC, reduction = "pca", dims = 1:20)
+OsC <- RunUMAP(
+    OsC, 
+    reduction = "pca", 
+    dims = 1:Obio@parameterList$singleCellSeuratNpcs4PCA
+)
 
-OsC <- FindNeighbors(OsC, reduction = "pca", dims = 1:20)
+OsC <- FindNeighbors(
+    OsC, reduction = "pca", 
+    dims = 1:Obio@parameterList$singleCellSeuratNpcs4PCA
+)
 
 OsC <- FindClusters(OsC, resolution = Obio@scDetailList$singleCellClusterParameter)
 

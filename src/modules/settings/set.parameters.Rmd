@@ -92,7 +92,7 @@ projectDetailList <- list(
     "lab.categories.table" = as.vector(dfObio$lab.categories.table[1]), # default NULL
     "sra.id.vector" = as.vector(dfObio$sra.id.vector[1]),
     "gse.id.vector" = as.vector(dfObio$gse.id.vector[1]),
-    "asf.id" = as.vector(dfObio$asf.id[1]),
+    "lims.id" = as.vector(dfObio$lims.id[1]),
     "experiment.type" = as.vector(dfObio$experiment.type[1]),   
     "species" = as.vector(dfObio$species[1]), 
     "release" = as.vector(dfObio$release[1]), 
@@ -128,7 +128,10 @@ documentationParams <- list(
 if (dfObio$vars.to.regress[1] == "" | toupper(dfObio$vars.to.regress[1]) == "NULL"){
     vars.to.regress <- NULL
 } else {
-    vars.to.regress = dfObio$vars.to.regress[1]
+    
+    vars.to.regress = as.vector(dfObio$vars.to.regress)
+    vars.to.regress <- vars.to.regress[vars.to.regress != ""]
+    
 }
 
 if (toupper(as.vector(dfObio$scIntegrationMethod[1])) == "SCT"){
@@ -320,7 +323,7 @@ Obio = new(
     referenceTableList = referenceTableList,
     scDetailList = scDetailList,
     parameterList = list(
-
+        "vars.to.regress" = vars.to.regress,
         "debugReduce" = debugReduce, # Default NULL
 
         "lab.categories.table" = projectDetailList$lab.categories.table, # default NULL
@@ -477,4 +480,28 @@ if (exists("dfRes")){
     cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = '\n'))
     
 } 
+```
+
+
+### Display Parameter Table
+```{r parameter_table, echo=TRUE, eval=TRUE, warning=FALSE, results="asis"}
+
+
+tabLegend = paste0(
+    "**Table: ",tableCount,"** Analysis Parameter Table"
+)
+
+tableCount <- tableCount + 1
+
+chnkVec <- paste0(
+        #"#### ", names(dtList),
+        "\n```{r analysis_parameter_table, results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",
+        tabLegend,"'}\n",
+        "\n",
+        "\n DT::datatable(dfObio,rownames = FALSE,  escape = FALSE)",
+        "\n cat(  '\n')",
+        "\n\n\n```\n"   
+    )
+    
+
 ```
