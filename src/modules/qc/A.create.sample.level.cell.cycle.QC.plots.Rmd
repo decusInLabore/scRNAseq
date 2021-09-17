@@ -9,8 +9,8 @@ VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.D
 
 
 ```{r UMAP_data_CC, echo=TRUE, eval=FALSE, warning=FALSE, results=F}
-###############################################################################
-## Do percent mt plots                                                       ##
+##############################################################################
+# Do percent mt plots                                                       ##
 resList <- doUMAP_cellCyle(
         SampleList,
         obj = Obio,
@@ -18,7 +18,7 @@ resList <- doUMAP_cellCyle(
         VersionPdfExt = ".pdf",
         tocSubLevel = 4,
         dotsize = 0.5,
-        s.genes, 
+        s.genes,
         g2m.genes,
         cellCycleRefFile = NULL
 )
@@ -39,6 +39,7 @@ if (length(plotList) > 3){
 }
 
 
+
 ```
 
 
@@ -54,29 +55,29 @@ tabVar <- ""
 ```{r cell_cyle_hist_data, echo=TRUE, eval=FALSE, warning=FALSE, results=F}
 ###############################################################################
 ## Do percent mt plots                                                       ##
-resList <- doCellCycleBarchart(
-        SampleList,
-        obj = Obio,
-        figureCount = figureCount,
-        VersionPdfExt = ".pdf",
-        tocSubLevel = 4,
-        s.genes = s.genes,
-        g2m.genes = g2m.genes,
-        cellCycleRefFile = NULL
-)
-
-plotList <- resList$plotList
-chnkVec <- resList$chnkVec
-figureCount <- resList$figureCount
-
-## Done create cellRanger QC plots                                           ##
-###############################################################################
-
-if (length(plotList) > 3){
-    tabVar <- "### Plot Per Sample Cell Cycle Estimate .tabset .tabset-fade .tabset-dropdown"
-} else {
-    tabVar <- "### Plot Per Sample Cell Cycle Estimate .tabset .tabset-fade .tabset-pills"
-}
+# resList <- doCellCycleBarchart(
+#         SampleList,
+#         obj = Obio,
+#         figureCount = figureCount,
+#         VersionPdfExt = ".pdf",
+#         tocSubLevel = 4,
+#         s.genes = s.genes,
+#         g2m.genes = g2m.genes,
+#         cellCycleRefFile = NULL
+# )
+# 
+# plotList <- resList$plotList
+# chnkVec <- resList$chnkVec
+# figureCount <- resList$figureCount
+# 
+# ## Done create cellRanger QC plots                                           ##
+# ###############################################################################
+# 
+# if (length(plotList) > 3){
+#     tabVar <- "### Plot Per Sample Cell Cycle Estimate .tabset .tabset-fade .tabset-dropdown"
+# } else {
+#     tabVar <- "### Plot Per Sample Cell Cycle Estimate .tabset .tabset-fade .tabset-pills"
+# }
 
 
 ```
@@ -88,9 +89,6 @@ if (length(plotList) > 3){
 cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = '\n'))
 
 
-if (!exists("runDoubletFinder")){
-    runDoubletFinder <- TRUE
-}
 
 tabVar <- ""
 
