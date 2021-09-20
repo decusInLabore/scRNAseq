@@ -48,9 +48,9 @@ knitr::opts_chunk$set(
 
 ```{r populate_meta_data_database, eval=TRUE, echo=F, results=F}
 ## libraries ##
-library(tidyverse)
+#library(tidyverse)
 
-library(scales)
+#library(scales)
 
 VersionPdfExt <- paste0(".V", gsub("-", "", Sys.Date()), ".pdf")
 
@@ -74,10 +74,11 @@ dbTable <- read.delim(
 
 db.pwd <- as.vector(dbTable[1,1])
 
-
-devtools::install_github("decusInLabore/biologicSeqTools")
-devtools::install_github("decusInLabore/biologicToolsSC")
+#install.packages("remotes")
+remotes::install_github("decusInLabore/biologicSeqTools")
+remotes::install_github("decusInLabore/biologicToolsSC")
 library(Seurat)
+library(tidyverse)
 library(biologicSeqTools)
 library(biologicToolsSC)
 
@@ -365,8 +366,8 @@ killDbConnections()
 
 
 
-devtools::install_github("decusInLabore/biologicSeqTools")
-devtools::install_github("decusinlabore/biologicViewerSC")
+remotes::install_github("decusInLabore/biologicSeqTools")
+remotes::install_github("decusinlabore/biologicViewerSC")
 
 ###############################################################################
 ## Step 1: Load Exampe Seurat object                                         ##
@@ -375,6 +376,39 @@ library(Seurat)
 library(dplyr)
 library(biologicViewerSC)
 library(biologicSeqTools)
+
+###############################################################################
+## Determine default gene                                                    ##
+
+DefaultAssay(OsC) <- "RNA"
+my_genes <- rownames(x = OsC@assays$RNA)
+exp <- FetchData(OsC, my_genes)
+ExprMatrix <- round(as.matrix(colMeans(exp  > 0)) *100,1)
+colnames(ExprMatrix)[1] <- "count_cut_off"
+dfExprMatrix <- data.frame(ExprMatrix)
+dfExprMatrix[["gene"]] <- row.names(dfExprMatrix)
+
+
+
+dfPercCellsExpr <- dfExprMatrix
+dfPercCellsExpr <- dfPercCellsExpr[dfPercCellsExpr$gene %in% Obio@dataTableList$referenceList$integrated_top30var, ]
+dfPercCellsExpr <- dfPercCellsExpr[order(dfPercCellsExpr$count_cut_off, decreasing = T),]
+
+geneDefault <- as.vector(dfPercCellsExpr[1,"gene"])
+
+if (is.na(geneDefault)){
+  if (Obio@parameterList$geneIDcolumn == "mgi_symbol"){
+    geneDefault = "GAPDH"  
+  } else {
+    geneDefault = "Gapdh"
+  }
+  
+}
+
+## Done                                                                      ##
+###############################################################################
+
+
 
 if (Obio@dbDetailList$host == "10.27.241.234"){
     shinyBasePath <- "/camp/stp/babs/www/shiny/boeings/"
@@ -406,19 +440,6 @@ params <- biologicViewerSC::scanObjParams(OsC)
 ## Review the default app settings and colors:
 
 
-biologicViewerSC::seuratObjectToViewer(
-    params = params,
-    project_id = Obio@parameterList$project_id,
-    projectPath = shinyBasePath,
-    OsC = OsC,
-    dataMode = "MySQL",
-    host = Obio@dbDetailList$host,
-    dbname = Obio@dbDetailList$primDataDB,
-    db.pwd = db.pwd,
-    db.user = Obio@dbDetailList$db.user,
-    appDomains = c("shiny-bioinformatics.crick.ac.uk","10.%"),
-    geneDefault = "KRT19"
-)
 
 ```
 
@@ -553,453 +574,27 @@ dfExpr <- dfExpr[order(dfExpr$gene, decreasing = F),]
 dfExpr[["row_names"]] <- 1:nrow(dfExpr)
 #dfExpr.store <- dfExpr
 
-#dfExpr <- dfExpr[sample(dfExpr$row_names, 10000),]
 
 
-
-tempFN <- paste0(Obio@parameterList$localWorkDir, "temp.",Obio@parameterList$project_id,".csv")
-write.csv(dfExpr, tempFN, row.names = F)
-rm(dfExpr)
-
-dbtable <- paste0(Obio@parameterList$project_id, "_gene_expr_tb")
-expDbTable <- dbtable
-
-doQuery <- function(
-    Obio, 
-    query
-){
-    library(RMySQL)
-dbDB <- dbConnect(
-    drv = RMySQL::MySQL(), 
-    user = Obio@dbDetailList$db.user, 
-    password = db.pwd, 
+###############################################################################
+##
+biologicViewerSC::seuratObjectToViewer(
+    params = params,
+    project_id = Obio@parameterList$project_id,
+    projectPath = shinyBasePath,
+    OsC = OsC,
+    dataMode = "MySQL",
     host = Obio@dbDetailList$host,
-    dbname = Obio@dbDetailList$primDataDB
-) 
-
-tryCatch(dbGetQuery(dbDB, query), error = function(c) {
-    c$message <- stop(paste0("Error in ", query, "."))
-  })
-
-
-
-
-
-dbDisconnect(dbDB)
-
-}
-
-query1 <- paste0("DROP TABLE IF EXISTS ", dbtable, ";\n")
-query <- query1
-
-doQuery(Obio, query = query1)
-
-query2 <- paste0(
-    #query,
-    "CREATE TABLE IF NOT EXISTS ",
-    dbtable,
-    " (gene VARCHAR(100) CHARACTER SET latin1 COLLATE latin1_swedish_ci, cellID VARCHAR(100) CHARACTER SET latin1 COLLATE latin1_swedish_ci, lg10Expr DECIMAL(6,3) NULL DEFAULT NULL, row_names INT(10) NOT NULL AUTO_INCREMENT,PRIMARY KEY (row_names)); "
-    )
-
-doQuery(Obio, query = query2)
-query <- c(query, query2)
-
-#CREATE TABLE IF NOT EXISTS test_expr (`row_names` bigint(10) NOT NULL, `gene_id` INT(5), `gene` VARCHAR(100) CHARACTER SET latin1 COLLATE latin1_swedish_ci, `lg10Expr` DECIMAL(6,3) NULL DEFAULT NULL, PRIMARY KEY (`row_names`));
-
-query3 <- paste0(
-    #query,
-    "LOAD DATA LOCAL INFILE '",
-    Obio@parameterList$workdir,
-    "temp.",Obio@parameterList$project_id,".csv",
-    "' INTO TABLE ",
-    dbtable, 
-    " FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\n' IGNORE 1 LINES (gene, cellID, lg10Expr, row_names);"
+    dbname = Obio@dbDetailList$primDataDB,
+    db.pwd = db.pwd,
+    db.user = Obio@dbDetailList$db.user,
+    appDomains = c("shiny-bioinformatics.crick.ac.uk","10.%"),
+    geneDefault = geneDefault,
+    dfExpr = dfExpr
 )
-
-
-doQuery(Obio, query = query3)
-query <- c(query, query3)
-
-
-
-#LOAD DATA LOCAL INFILE '/camp/stp/babs/working/boeings/Projects//schaefera/tobias.ackels/319_scRNAseq_mm_olfactory_bulb_proj_neuron_analysis_SC19135/workdir/temp.csv' INTO TABLE test_expr FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES (id, mycol1, mycol2);
-
-
-query4 <- paste0(
-    #query,
-    "ALTER TABLE ", dbtable, " ADD UNIQUE(row_names);"
-)
-
-doQuery(Obio, query = query4)
-query <- c(query, query4)
-
-query5 <- paste0(
-    #query,
-    "CREATE INDEX idx_gene ON ", dbtable, " (gene);"
-)
-
-doQuery(Obio, query = query5)
-query <- c(query, query5)
-## Add user managment ##
-
-# mysql -h 10.27.241.234 -u boeingS -p
-# 5+3f4nB0404201
-# 
-# CREATE USER 'csl316data'@'10.%' IDENTIFIED BY 'csl316data123';
-# 
-# GRANT SELECT on csl_data.p316_rna_seq_table TO csl316data@'10.%';
-# 
-## check if shiny dir exists and get user name and password from there if it does
-if (Obio@dbDetailList$host == "10.27.241.234"){
-    shinyBasePath <- "/camp/stp/babs/www/shiny/boeings/"
-    FvDir <- paste0("/camp/stp/babs/www/boeings/bioLOGIC/data/", Obio@parameterList$project_id)
-
-} else {
-    if (dir.exists("/camp/stp/babs/www/shiny/boeings/external/")){
-        shinyBasePath <- "/camp/stp/babs/www/shiny/boeings/external/"  
-    } else {
-        shinyBasePath <- "../"
-    }
-    
-  
-    FvDir <- paste0("/camp/stp/babs/www/boeings/bioLOGIC_external/data/", Obio@parameterList$project_id)
-
-}
-
-
-shinyProjectPath <-paste0(
-    shinyBasePath, 
-    Obio@parameterList$project_id, "_app"
-)
-
-if (!dir.exists(shinyProjectPath)){
-    dir.create(shinyProjectPath)
-}
-
-shinyDataPath <-paste0(shinyProjectPath, "/data/connect/")
-if (!dir.exists(shinyDataPath)){
-    dir.create(shinyDataPath, recursive = T)
-}
-
-shinyParamPath <-paste0(shinyProjectPath, "/parameters/")
-if (!dir.exists(shinyParamPath)){
-    dir.create(shinyParamPath)
-}
-
-aFN <- paste0(shinyDataPath, "db.txt")
-
-
-if (file.exists(aFN)){
-    df <- read.delim(aFN, header = T, sep="\t", stringsAsFactors = F)
-    sPwd <- as.vector(df$id2)
-    sUser <- as.vector(df$id)
-} else {
-    sUser <- substr(paste0(Obio@parameterList$project_id, "_scData"), 1, 15)
-    sPwd <-c(2:9,letters,LETTERS)
-    sPwd <- paste(sample(sPwd,8),collapse="")
-    query6 <- paste0(
-        "CREATE USER '",
-        sUser, 
-        "'@'shiny-bioinformatics.crick.ac.uk' IDENTIFIED BY '",
-        sPwd,
-        "';"
-    )
-    
-    doQuery(Obio, query = query6)
-    query <- c(query, query6)
-    
-    ## Add user for debugging ##
-    query6a <- paste0(
-       "CREATE USER '",
-        sUser, 
-        "'@'10.%' IDENTIFIED BY '",
-        sPwd,
-        "';"
-    )
-    
-    doQuery(Obio, query = query6a)
-    query <- c(query, query6a)
-
-}
-
-query7 <- paste0(
-    "GRANT SELECT on ", Obio@dbDetailList$primDataDB,".",Obio@parameterList$PCAdbTableName, " TO ",sUser,"@'shiny-bioinformatics.crick.ac.uk';"
-)
-
-doQuery(Obio, query = query7)
-query <- c(query, query7)
-
-query7a <- paste0(
-    "GRANT SELECT on ", Obio@dbDetailList$primDataDB,".",Obio@parameterList$PCAdbTableName, " TO ",sUser,"@'10.%';"
-)
-
-doQuery(Obio, query = query7a)
-query <- c(query, query7a)
-
-query8 <- paste0(
-    "GRANT SELECT on ", Obio@dbDetailList$primDataDB,".",expDbTable, " TO ",sUser,"@'shiny-bioinformatics.crick.ac.uk';"
-)
-
-doQuery(Obio, query = query8)
-query <- c(query, query8)
-
-query8a <- paste0(
-    "GRANT SELECT on ", Obio@dbDetailList$primDataDB,".",expDbTable, " TO ",sUser,"@'10.%';"
-)
-
-doQuery(Obio, query = query8a)
-query <- c(query, query8a)
-
-geneTb <- paste0(Obio@parameterList$project_id, "_geneID_tb")
-query9 <- paste0(
-    "GRANT SELECT on ", Obio@dbDetailList$primDataDB,".",geneTb, " TO ",sUser,"@'shiny-bioinformatics.crick.ac.uk';"
-)
-
-doQuery(Obio, query = query9)
-query <- c(query, query9)
-
-geneTb <- paste0(Obio@parameterList$project_id, "_geneID_tb")
-query9a <- paste0(
-    "GRANT SELECT on ", Obio@dbDetailList$primDataDB,".",geneTb, " TO ",sUser,"@'10.%';"
-)
-
-doQuery(Obio, query = query9a)
-query <- c(query, query9a)
-
-
-# 
-# GRANT SELECT on csl_data.p316_rna_seq_table TO csl316data@'shiny-bioinformatics.crick.ac.uk';
-
-
-## Create relevant directory ##
-
-
-
-
-## Create log-in file ##
-url <- Obio@dbDetailList$host
-id <- sUser
-id2 <- sPwd
-db <- Obio@dbDetailList$primDataDB
-coordTb <- Obio@parameterList$PCAdbTableName
-exprTb <- paste0(Obio@parameterList$project_id, "_gene_expr_tb")
-geneTb <- paste0(Obio@parameterList$project_id, "_geneID_tb")
-
-dfPercCellsExpr <- Obio@dataTableList$dfPercCellsExpr
-dfPercCellsExpr <- dfPercCellsExpr[dfPercCellsExpr$gene %in% Obio@dataTableList$referenceList$integrated_top30var, ]
-dfPercCellsExpr <- dfPercCellsExpr[order(dfPercCellsExpr$count_cut_off, decreasing = T),]
-
-default <- as.vector(dfPercCellsExpr[1,"gene"])
-
-if (is.na(default)){
-  if (Obio@parameterList$geneIDcolumn == "mgi_symbol"){
-    default = GAPDH  
-  } else {
-    default = "Gapdh"
-  }
-  
-}
-
-dfID <- data.frame(
-    url,
-    id,
-    id2,
-    db,
-    coordTb,
-    exprTb,
-    geneTb,
-    default
-)
-
-## Maintain old password if exists
-FN <- paste0(shinyDataPath, "db.txt")
-if (file.exists(FN)){
-    dfCont <- read.delim(
-        FN, 
-        header = T,
-        sep = "\t",
-        stringsAsFactors = F
-    )
-    dfID$id2 <- dfCont$id2
-}
-
-write.table(dfID, FN, row.names = F, sep="\t")
-
-## Copy rest ##
-cpString1 <- paste0("cp -r assets/scAppTemplate/* ", shinyProjectPath)
-
-#cpString1 <- paste0("cp assets/template_sc_app/ui.r ", shinyProjectPath)
-system(cpString1)
-
-# cpString2 <- paste0("cp assets/template_sc_app/server.r ", shinyProjectPath)
-# system(cpString2)
-
-## Done creating app ##
-
-## Make featureView entry ##
-FvDir <- paste0("/camp/stp/babs/www/boeings/bioLOGIC_external/data/", Obio@parameterList$project_id)
-
-
-if (!dir.exists(FvDir)){
-    dir.create(FvDir)
-}
-
-FvDir <- Obio@parameterList$html_local_dir
-#[1] "/camp/stp/babs/working/boeings/P
-#paste0("/camp/stp/babs/www/boeings/bioLOGIC_external/data/", Obio@parameterList$project_id, "/html")
-
-
-if (!dir.exists(FvDir)){
-    dir.create(FvDir)
-}
-
-
-
-## Feature View Created ##
-
-
-
-## Export upload string ##
-write.table(
-    data.frame(query),
-    "query.string.txt",
-    row.names = F,
-    sep = "\t"
-)
-
-
-###############################################################################
-## Make XY list                                                              ##
-XYselVec <- c(
-    names(dfdbTable)[grep("UMAP", names(dfdbTable))],
-    "lg10Expr",
-    names(dfdbTable)[grep("DM_Pseudotime", names(dfdbTable))],
-    names(dfdbTable)[grep("DF_Classification", names(dfdbTable))],
-    names(dfdbTable)[grep("nCount", names(dfdbTable))],
-    names(dfdbTable)[grep("nFeatures", names(dfdbTable))],
-    names(dfdbTable)[grep("percent", names(dfdbTable))],
-    names(dfdbTable)[grep("seurat_clusters", names(dfdbTable))],
-    names(dfdbTable)[grep("Gender", names(dfdbTable))],
-    names(dfdbTable)[grep("CellFromTumor", names(dfdbTable))],
-    names(dfdbTable)[grep("Patient", names(dfdbTable))],
-    names(dfdbTable)[grep("Region", names(dfdbTable))],
-    names(dfdbTable)[grep("Article_Cell_Type", names(dfdbTable))],
-    names(dfdbTable)[grep("PC", names(dfdbTable))]
-)
-
-XYnameVec <- gsub("_", " ", XYselVec)
-XYnameVec <- gsub("DF_Classification", "Doublet Classfication", XYselVec)
-XYnameVec <- gsub("lg10Expr", "log10 Expression", XYselVec)
-XYnameVec <- gsub("seurat_clusters", "Clusters", XYselVec)
-
-XYlist <- as.list(XYselVec)
-names(XYlist) <- XYnameVec
-
-## Done with xy list                                                         ##
-###############################################################################
-
-###############################################################################
-## Do Color options                                                          ##
-
-allColorOptionsVec <- c(
-    "lg10Expr",
-    names(dfdbTable)[grep("DM_Pseudotime", names(dfdbTable))],
-    names(dfdbTable)[grep("Sample_Group", names(dfdbTable))],
-    names(dfdbTable)[grep("sampleID", names(dfdbTable))],
-    names(dfdbTable)[grep("Gender", names(dfdbTable))],
-    names(dfdbTable)[grep("CellFromTumor", names(dfdbTable))],
-    names(dfdbTable)[grep("Patient", names(dfdbTable))],
-    names(dfdbTable)[grep("Region", names(dfdbTable))],
-    names(dfdbTable)[grep("DF_Classification", names(dfdbTable))],
-    names(dfdbTable)[grep("seurat_clusters", names(dfdbTable))],
-    names(dfdbTable)[grep("sub_clusters_", names(dfdbTable))],
-    names(dfdbTable)[grep("nFeature_RNA", names(dfdbTable))],
-    names(dfdbTable)[grep("percent_mt", names(dfdbTable))],
-    names(dfdbTable)[grep("S_Score", names(dfdbTable))],
-    names(dfdbTable)[grep("G2M_Score", names(dfdbTable))],
-    names(dfdbTable)[grep("Phase", names(dfdbTable))],
-    names(dfdbTable)[grep("all", names(dfdbTable))]
-)
-    
-allColorOptionsNames <- allColorOptionsVec
-allColorOptionsNames <- gsub("SampleID", "sampleID", allColorOptionsNames)
-allColorOptionsNames <- gsub("CellFromTumor", "Cells From Tumor", allColorOptionsNames)
-allColorOptionsNames <- gsub("DF_Classification", "Doublet Classification", allColorOptionsNames)
-allColorOptionsNames <- gsub("sub_clusters_", "Sub-clusters ", allColorOptionsNames)
-allColorOptionsNames <- gsub("_", " ", allColorOptionsNames)
-allColorOptionsNames <- gsub("all", "Uniform", allColorOptionsNames)
-allColorOptionsNames <- gsub("lg10Expr", "log10 Expr", allColorOptionsNames)
-
-allColorOptionsList <- as.list(allColorOptionsVec)
-names(allColorOptionsList) <- allColorOptionsNames
-   
-
-## Done color options                                                        ##
-###############################################################################
-
-###############################################################################
-## Do split options                                                          ##
-
-splitOptionsVec <- c(
-    names(dfdbTable)[grep("Sample_Group", names(dfdbTable))],
-    names(dfdbTable)[grep("sampleID", names(dfdbTable))],
-    names(dfdbTable)[grep("all", names(dfdbTable))],
-    names(dfdbTable)[grep("DM_Pseudotime", names(dfdbTable))],
-    names(dfdbTable)[grep("Gender", names(dfdbTable))],
-    names(dfdbTable)[grep("CellFromTumor", names(dfdbTable))],
-    names(dfdbTable)[grep("Patient", names(dfdbTable))],
-    names(dfdbTable)[grep("Region", names(dfdbTable))],
-    names(dfdbTable)[grep("DF_Classification", names(dfdbTable))],
-    names(dfdbTable)[grep("seurat_clusters", names(dfdbTable))],
-    names(dfdbTable)[grep("sub_clusters_", names(dfdbTable))],
-    names(dfdbTable)[grep("Phase", names(dfdbTable))]
-)
-    
-splitOptionsNames <- splitOptionsVec
-splitOptionsNames <- gsub("SampleID", "sampleID", splitOptionsNames)
-splitOptionsNames <- gsub("CellFromTumor", "Cells From Tumor", splitOptionsNames)
-splitOptionsNames <- gsub("DF_Classification", "Doublet Classification", splitOptionsNames)
-splitOptionsNames <- gsub("sub_clusters_", "Sub-clusters ", splitOptionsNames)
-splitOptionsNames <- gsub("_", " ", splitOptionsNames)
-splitOptionsNames <- gsub("all", "None", splitOptionsNames)
-
-
-splitOptionsList <- as.list(splitOptionsVec)
-names(splitOptionsList) <- splitOptionsNames
-
-## Done split options                                                        ##
-###############################################################################
-
-
-yamlList <- list(
-    "XYsel" = XYlist,
-    "allColorOptions" = allColorOptionsList,
-    "splitOptions" = splitOptionsList
-)
-
-
-shinyParamPath <-paste0(shinyProjectPath, "/parameters/")
-if (!dir.exists(shinyParamPath)){
-    dir.create(shinyParamPath)
-}
-
-
-library(yaml)
-
-FN <- paste0(shinyParamPath, "parameters.yaml")
-write_yaml(as.yaml(yamlList), FN, fileEncoding = "UTF-8")
-    
-
 
 ##                                                                           ##
 ###############################################################################
-
-
-#ALTER TABLE vpl309_gene_expr_tb ADD UNIQUE(`row_names`);
-
-#alter table xx drop primary key, add primary key(k1, k2, k3);
-
-# dfdbTable <- dfdbTable[, !(names(dfdbTable) %in% c("MKI67","GFAP","EGR1","SERINC5","ATF3"))]
 
 
 ```
