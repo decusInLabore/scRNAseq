@@ -276,6 +276,11 @@ for (i in 1:length(addFNvec)){
     }
 }
 
+
+
+
+
+
 dfdbTable <- OsC@meta.data  
 
 dfdbTable[["sample_group"]] <- dfdbTable$clusterName
@@ -404,6 +409,8 @@ if (is.na(geneDefault)){
   }
   
 }
+
+
 
 ## Done                                                                      ##
 ###############################################################################
