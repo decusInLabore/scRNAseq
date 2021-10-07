@@ -41,6 +41,7 @@ if (dir.exists("/Volumes/babs/working/boeings/")){
 devtools::install_github("decusInLabore/biologicSeqTools")
 devtools::install_github("decusInLabore/biologicToolsSC")
 library(Seurat)
+library(Matrix)
 library(biologicSeqTools)
 library(biologicToolsSC)
 

@@ -1,6 +1,2 @@
 "sampleID"	"sampleName"	"sampleColor"
-"BackgroundLiverM3"	"BackgroundLiverM3"	"#F8766D"
-"LiverMetM3"	"LiverMetM3"	"#A3A500"
-"LiverNormalM1"	"LiverNormalM1"	"#00BF7D"
-"SubcutM3"	"SubcutM3"	"#00B0F6"
-"SubcutNoLiverMetM2"	"SubcutNoLiverMetM2"	"#E76BF3"
+"HEA614A1"	"HEA614A1"	"#F8766D"

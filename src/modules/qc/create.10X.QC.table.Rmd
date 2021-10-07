@@ -162,7 +162,7 @@ if (exists("dfRes")){
 ## Create Cell Ranger QC Plots                                               ##
 if (exists("dfRes")){
 ## Add if clause to check 10X
-resList <- doCRplots(
+resList <- biologicToolsSC::doCRplots(
     obj = Obio,
     figureCount = figureCount,
     VersionPdfExt = VersionPdfExt,
