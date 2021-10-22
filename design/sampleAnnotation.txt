@@ -1,2 +1,4 @@
 "sampleID"	"sampleName"	"sampleColor"
-"HEA614A1"	"HEA614A1"	"#F8766D"
+"E185subC"	"E185subC"	"#F8766D"
+"PD4subC"	"PD4subC"	"#00BA38"
+"PD7subC"	"PD7subC"	"#619CFF"

@@ -22,6 +22,20 @@ knitr::opts_chunk$set(
     warning = FALSE
 )
 
+
+if (!requireNamespace("remotes")){
+  install.packages("remotes")
+}
+
+remotes::install_github("rstudio/renv")
+
+if (!file.exists("renv.lock")){
+    renv::init()
+} else {
+    renv::restore()
+}
+
+
 library(tidyverse)
 library(dplyr)
 library(Seurat)
@@ -36,8 +50,8 @@ tempWorkDir <- paste0(cwd, "../")
 #source("assets/R/scTools.r")
 #source("assets/R/SBwebtools.pckg.r")
 
-devtools::install_github("decusInLabore/biologicSeqTools")
-devtools::install_github("decusInLabore/biologicToolsSC")
+renv::install("decusInLabore/biologicSeqTools")
+renv::install("decusInLabore/biologicToolsSC")
 library(Seurat)
 library(biologicSeqTools)
 library(biologicToolsSC)
@@ -188,6 +202,8 @@ save(OsC,
         ".Seurat.Robj"
      )
 )
+
+renv::snapshot()
 
 ```
 
