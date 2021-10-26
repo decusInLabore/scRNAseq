@@ -42,13 +42,36 @@ knitr::opts_chunk$set(
 
 ## Prepare Data
 
-module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/3.6.0-foss-2016b-BABS;R;
+
 
 ```{r populate_meta_data_database, eval=TRUE, echo=F, results=F}
+
+###############################################################################
+##                                                                           ##
+if (!requireNamespace("remotes")){
+    install.packages("remotes")
+}
+
+remotes::install_github("rstudio/renv")
+
+if (file.exists("renv.lock")){
+    renv::restore()
+} else {
+    renv::init()
+}
+
+## Done                                                                      ##
+###############################################################################
+
+renv::install("decusInLabore/biologicSeqTools")
+renv::install("decusInLabore/biologicToolsSC")
+
 ## libraries ##
 library(tidyverse)
 library(Seurat)
 library(knitr)
+library(biologicSeqTools)
+library(biologicToolsSC)
 
 figureCount <- 1
 
@@ -69,13 +92,8 @@ if (dir.exists("/Volumes/babs/working/boeings/")){
 }
 
 
-source("assets/R/scTools.r")
-source("assets/R/SBwebtools.pckg.r")
 
 
-if (length(.libPaths()) > 2){
-    .libPaths(.libPaths()[2:3])
-}
 
 ObioFN <- paste0("../", list.files("..")[grep(".bioLOGIC.Robj", list.files(".."))])
 
@@ -380,5 +398,6 @@ cat(paste(knit(text = chnkVec, quiet = T), collapse = '\n'))
 
 ## Documentation
 ```{r documentation, eval=TRUE, echo=T, results=T}
+
 sessionInfo()
 ```

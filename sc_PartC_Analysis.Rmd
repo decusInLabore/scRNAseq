@@ -74,9 +74,27 @@ dbTable <- read.delim(
 
 db.pwd <- as.vector(dbTable[1,1])
 
+###############################################################################
+##                                                                           ##
+if (!requireNamespace("remotes")){
+    install.packages("remotes")
+}
+
+remotes::install_github("rstudio/renv")
+
+if (file.exists("renv.lock")){
+    renv::restore()
+} else {
+    renv::init()
+}
+
+## Done                                                                      ##
+###############################################################################
+
 #install.packages("remotes")
-remotes::install_github("decusInLabore/biologicSeqTools")
-remotes::install_github("decusInLabore/biologicToolsSC")
+renv::install("decusInLabore/biologicSeqTools")
+renv::install("decusInLabore/biologicToolsSC")
+
 library(Seurat)
 library(tidyverse)
 library(biologicSeqTools)
@@ -419,7 +437,7 @@ if (is.na(geneDefault)){
 
 if (Obio@dbDetailList$host == "10.27.241.234"){
     shinyBasePath <- "/camp/stp/babs/www/shiny/boeings/"
-    FvDir <- paste0("/camp/stp/babs/www/boeings/bioLOGIC/data/", Obio@parameterList$project_id)
+    FvDir <- paste0("/camp/stp/babs/www/boeings/bioLOGIC/data/", Obio@parameterList$project_id,"/")
 
 } else {
     if (dir.exists("/camp/stp/babs/www/shiny/boeings/external/")){
@@ -429,7 +447,7 @@ if (Obio@dbDetailList$host == "10.27.241.234"){
     }
     
   
-    FvDir <- paste0("/camp/stp/babs/www/boeings/bioLOGIC_external/data/", Obio@parameterList$project_id)
+    FvDir <- paste0("/camp/stp/babs/www/boeings/bioLOGIC_external/data/", Obio@parameterList$project_id,"/")
 
 }
 
@@ -1499,5 +1517,6 @@ createHTMLoutput(
 
 ## Documentation
 ```{r documentation, eval=TRUE, echo=T, results=T}
+renv::snapshot()
 sessionInfo()
 ```

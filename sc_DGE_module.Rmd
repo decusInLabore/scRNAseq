@@ -40,14 +40,25 @@ knitr::opts_chunk$set(
 
 ```
 
-```{r populate_meta_data_database, eval=TRUE, echo=F, results=F}
+```{r populate_meta_data_database_part1, eval=TRUE, echo=F, results=F}
 #Create the environment and load a suitable version of R, e.g. so:
+if (!requireNamespace("remotes")){
+  install.packages("remotes")
+}
 
-myPaths <- .libPaths()
-myNewPaths <- c("/camp/stp/babs/working/boeings/Projects/pachnisv/song.chng/330_10xscRNAseq_DIV4_DIV11_DIV20_SC19069/basedata", myPaths)
-.libPaths(myNewPaths)
+remotes::install_github("rstudio/renv")
+
+if (!file.exists("renv.lock")){
+    renv::init()
+} else {
+    renv::restore()
+}
+
+#myPaths <- .libPaths()
+#myNewPaths <- c("/camp/stp/babs/working/boeings/Projects/pachnisv/song.chng/330_10xscRNAseq_DIV4_DIV11_DIV20_SC19069/basedata", myPaths)
+#.libPaths(myNewPaths)
 library(glmGamPoi)
-.libPaths(myPaths)
+#.libPaths(myPaths)
 
 library(Seurat)
 library(ggplot2)
@@ -78,11 +89,12 @@ db.pwd <- as.vector(dbTable[1,1])
 
 figureCount <- 1
 
-source("assets/R/SBwebtools.pckg.r")
+library(biologicSeqTools)
+#source("assets/R/SBwebtools.pckg.r")
 
-if (length(.libPaths()) > 2){
-    .libPaths(.libPaths()[2:3])
-}
+# if (length(.libPaths()) > 2){
+#     .libPaths(.libPaths()[2:3])
+# }
 ## Create biologic Object for visualization ##
 
 ObioFN <- paste0("../", list.files("..")[grep(".bioLOGIC.Robj", list.files(".."))])
@@ -143,7 +155,7 @@ FNrel <- paste0("report_tables/", baseFN)
 
 ## Create table link string ##
 
-tableLink <- paste0('<a href="https://',urlString,'/mdata/',Obio@parameterList$project_id, '/html/', FNrel,' target="_blank">here</a>')  
+tableLink <- paste0(' <a href="https://',urlString,'/mdata/',Obio@parameterList$project_id, '/html/', FNrel,' target="_blank">here</a> ')
 
 tableString <- paste0('An Excel table with the DGE results can be downloaded ',
                       tableLink
@@ -181,11 +193,11 @@ setGeneric(
     colName <- unlist(colName)
     DGEselCol <- unlist(DGEselCol)
 
-    myPaths <- .libPaths()
-    myNewPaths <- c("/camp/stp/babs/working/boeings/Projects/pachnisv/song.chng/330_10xscRNAseq_DIV4_DIV11_DIV20_SC19069/basedata", myPaths)
-    .libPaths(myNewPaths)
+    #myPaths <- .libPaths()
+    #myNewPaths <- c("/camp/stp/babs/working/boeings/Projects/pachnisv/song.chng/330_10xscRNAseq_DIV4_DIV11_DIV20_SC19069/basedata", myPaths)
+    #.libPaths(myNewPaths)
     library(glmGamPoi)
-    .libPaths(myPaths)
+    #.libPaths(myPaths)
 
     library(Seurat)
     pos <- grep(colName, names(obj@meta.data))
@@ -287,13 +299,37 @@ DGEtagVec <- as.vector(NULL, mode = "character")
 
 DGEinputList <- list(
   "comp_1" = list(
-      "name"    = "DGE_C5_vs_C7",
+      "name"    = "DGE_C2_vs_C0_1",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "C2"   = c(2),
+          "C0_1" = c(0,1)
+      )
+  ),
+  "comp_2" = list(
+      "name"    = "DGE_C2_vs_C6",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "C2"   = c(2),
+          "C6" = c(6)
+      )
+  ),
+  "comp_3" = list(
+      "name"    = "DGE_C2_vs_C5",
+      "DGEselCol" = "seurat_clusters",
+      "DGEsampleList" = list(
+          "C2"   = c(2),
+          "C5" = c(5)
+      )
+  ),
+  "comp_4" = list(
+      "name"    = "DGE_C5_vs_C0_1",
       "DGEselCol" = "seurat_clusters",
       "DGEsampleList" = list(
           "C5"   = c(5),
-          "C7" = c(7)
+          "C0_1" = c(0,1)
       )
-  ) 
+  )
 )
 
 
@@ -331,7 +367,7 @@ for (i in 1:length(DGEinputList)){
     
     OsC_DGE@meta.data[OsC_DGE@meta.data[,unlist(DGEinputList[[i]]["DGEselCol"])] != "", "DGE_sel"] <- 1
     
-    row.names(OsC_DGE@meta.data) <- OsC_DGE@meta.data[,"cellID"]
+    #row.names(OsC_DGE@meta.data) <- OsC_DGE@meta.data[,"cellID"]
     
     OsC_DGE <- subset(x = OsC_DGE, subset = DGE_sel == 1)
     
@@ -347,8 +383,8 @@ for (i in 1:length(DGEinputList)){
     dfAvgExpr[["gene"]] <- row.names(dfAvgExpr)
     row.names(dfAvgExpr) <- NULL
     
-    nameTag <- paste0("add_MA_cts_MA_Avg_", unlist(DGEinputList[[i]]))
-    names(dfAvgExpr) <- gsub("X1", nameTag, names(dfAvgExpr))
+    nameTag <- paste0("add_MA_cts_MA_Avg_", unlist(DGEinputList[[i]]$name))
+    names(dfAvgExpr) <- gsub("all", nameTag, names(dfAvgExpr))
     
     dfDataTable <- resList$DGEtable
     
@@ -627,6 +663,10 @@ outPutFN <- paste0(
      Obio@parameterList$reportTableDir,
      baseFN
 )
+
+if (!dir.exists(Obio@parameterList$reportTableDir)){
+    dir.create(Obio@parameterList$reportTableDir, recursive=T)
+}
 
 saveWorkbook(
         wb,
@@ -1074,7 +1114,7 @@ library(clusterProfiler)
     ## Select colors ##
     library(scales)
     enrCols <- hue_pal()(length(gmtList))
-    names(enrCols) <- names(gmtList)
+    names(enrCols) <- substr(names(gmtList),1,10)
 
 
 
@@ -1403,9 +1443,11 @@ outPutFN <- paste0(
  
 FNrel <- paste0("report_table/", baseFN)
     
+sheetName <- substr(paste0(Obio@parameterList$project_id, "_subcluster_DGE"),1,30)
+
 wb <- createWorkbook()
-    addWorksheet(wb, paste0(Obio@parameterList$project_id, "_subcluster_DGE"))
-    freezePane(wb, paste0(Obio@parameterList$project_id, "_subcluster_DGE") ,  firstActiveRow = 2)
+    addWorksheet(wb, sheetName)
+    freezePane(wb, sheetName ,  firstActiveRow = 2)
     
     ## Filter is inactivated, as it does not appear to be compatible with the current version of Excel
     #addFilter(wb, 1, row = 1, cols = 1:ncol(dfOutput))
@@ -1432,7 +1474,7 @@ saveWorkbook(
 
 ############
 ## Add to main dbTable
-database.table <- import.db.table.from.db(
+database.table <- biologicSeqTools::import.db.table.from.db(
     dbtable= Obio@parameterList$rnaseqdbTableName,   
     dbname= Obio@dbDetailList$primDataDB,   
     user= Obio@dbDetailList$db.user,     
@@ -1476,15 +1518,7 @@ cmd.vec <- upload.datatable.to.database(
     prim.data.db = Obio@dbDetailList$primDataDB,
     dbTableName = Obio@parameterList$rnaseqdbTableName,
     df.data = Obio@databaseTable, #[Obio@databaseTable$count_cut_off > 1, ],
-    db.col.parameter.list = list(
-        "VARCHAR(255) CHARACTER SET latin1 COLLATE latin1_swedish_ci" = c("Gene_name","gene_description"),
-        "VARCHAR(50) CHARACTER SET latin1 COLLATE latin1_swedish_ci" = c("ENSDARG", "dr_symbol","clone_based_gene_ID","Gene_description","Gene_type","ENSG", "ENSMUSG", "hgnc_symbol", "mgi_symbol", "uniprot", "entrezgene","display_ptm", "^sequence_window", "p_site_env","for_GSEA_gene_chip","associated_gene_name", "gene_type"),
-        "VARCHAR(1) CHARACTER SET latin1 COLLATE latin1_swedish_ci" = c("ppos", "amino_acid", "charge","known_site"),
-        "BIGINT(8) NULL DEFAULT NULL" = c("row_names"),
-        "INT(8) NULL DEFAULT NULL" = c("DEseq2Normalized","CoVarOrder","row_id", "cluster_order","cluster_id", "count_cut_off", "^position$", "raw_counts"),
-        "DECIMAL(6,3) NULL DEFAULT NULL" = c("Integrated_Samples_","_avg_diff_","Ind_var","add_counts_",  "lg2BaseMean","lg2baseMean","contrast_P_PCA_estimatePCA","^CoVar$","NES", "logFC", "lg2_avg","norm_counts", "intensity", "^int", "iBAQ","^localization_prob$", "stat", "lg10p","contrast_x_", "add_MA_cts_MA"),
-        "DECIMAL(6,5) NULL DEFAULT NULL" = c("r2_PCA","padj", "pvalue","^pep$", "p_value_PCA")
-    ),
+    db.col.parameter.list = biologicSeqTools::inferDBcategories(Obio@databaseTable),
     new.table = TRUE,
     cols2Index = c(Obio@parameterList$geneIDcolumn)
 )
@@ -1546,7 +1580,7 @@ nSampleGroups <- length(unique(color.groups))
 # library(RColorBrewer)
 # selcol <- colorRampPalette(brewer.pal(12,"Set3"))
 
-color.sel = hue_pal()(length(color.groups))
+color.sel = scales::hue_pal()(length(color.groups))
 
 for (i in 1:length(color.groups)){
     sample.colors[grep(color.groups[i], sample.colors)] <- color.sel[i]
@@ -1697,7 +1731,7 @@ defaultVennSel <- c(
 
 ###############################################################################
 ## Deploy next generation website                                            ##
-createSettingsFile(
+biologicSeqTools::createSettingsFile(
     obj = Obio,
     df.data = Obio@databaseTable,
     defaultXcolName = defaultX,

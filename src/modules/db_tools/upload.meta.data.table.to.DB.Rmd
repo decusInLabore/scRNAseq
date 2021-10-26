@@ -39,7 +39,7 @@ addFNvec <- c(
   "../temp/ClusterFinder.output.txt" 
 )
 
-row.names(OsC@meta.data) <- OsC@meta.data$cellID
+#row.names(OsC@meta.data) <- OsC@meta.data$cellID
 
 for (i in 1:length(addFNvec)){
     if (file.exists(addFNvec[i])){
@@ -54,7 +54,7 @@ for (i in 1:length(addFNvec)){
         dfAdd$cellID <- NULL
         dfAdd <- dfAdd[row.names(dfAdd) %in% OsC@meta.data$cellID,]
         
-        OsC <- addDf2seuratMetaData(
+        OsC <- biologicToolsSC::addDf2seuratMetaData(
             obj = OsC,
             dfAdd = dfAdd
         )
@@ -121,27 +121,30 @@ if (length(grep("DF_Classification", names(dfdbTable)) > 0)){
 ##
 ###############################################################################
 
+names(dfdbTable) <- gsub("\\.", "_", names(dfdbTable))
+
+selVec <- names(dfdbTable)[!duplicated(names(dfdbTable))]
+
+dfdbTable <- dfdbTable[,selVec]
+dfdbTable$G2M_Score_1 <- NULL
+dfdbTable$S_Score_1 <- NULL
+dfdbTable$old_ident_1 <- NULL
+
+
 pos <- grep("integrated_", names(dfdbTable))
 if (length(pos) > 0){
     dfdbTable <- dfdbTable[,-pos]
 }
-names(dfdbTable) <- gsub("\\.", "_", names(dfdbTable))
 
-upload.datatable.to.database(
+
+biologicSeqTools::upload.datatable.to.database(
     host = Obio@dbDetailList$host,
     user = Obio@dbDetailList$db.user,
     password = db.pwd,
     prim.data.db = Obio@dbDetailList$primDataDB,
     dbTableName = Obio@parameterList$PCAdbTableName,
     df.data = dfdbTable,
-    db.col.parameter.list = list(
-        "VARCHAR(100) CHARACTER SET utf8 COLLATE utf8_general_ci" = c("cellType","cellIdent","sample_","cellID","orig_ident","old_ident","clustIdent", "hmIdent","sampleID", "clusterName",  "^ClusterName","clusterColor", "ClusterTestRes","sampleName", "sampleColor", "CellFromTumor", "Patient", "Region",  "Article_Cell_Type", "Gender","Glia_vs_Neuron", "sub_clusters_ExNeurons", "subCluster","NitChol_vs_Serotonergic", "Nitrergic_vs_Cholinergic", "Sample_Group", "CC_Difference", "meta_", "cluster_sample", "^DGE_", "DZ_vs_LZ_FDC"),
-       "VARCHAR(10) CHARACTER SET utf8 COLLATE utf8_general_ci" = c("all","included","Phase", gsub("[.]", "_", Obio@parameterList$singleCellClusterString), "seurat_clusters", "RNA_snn_res"),
-        "BIGINT(8) NULL DEFAULT NULL" = c("row_names"),
-        "INT(8) NULL DEFAULT NULL" = c("nCount_", "nFeature_","DF_Classification"),
-        "DECIMAL(6,3) NULL DEFAULT NULL" = c("percent_mt","PC", "tSNE", "UMAP","^DC","DM_Pseudotime"),
-        "DECIMAL(6,5) NULL DEFAULT NULL" = c("mAUC_","_Score","DF_pANN")
-    ),
+    db.col.parameter.list = biologicSeqTools::inferDBcategories(dfData = dfdbTable),
     new.table = TRUE
 )
 

@@ -24,6 +24,18 @@ knitr::opts_chunk$set(
     warning = FALSE
 )
 
+if (!requireNamespace("remotes")){
+  install.packages("remotes")
+}
+
+remotes::install_github("rstudio/renv")
+
+if (!file.exists("renv.lock")){
+    renv::init()
+} else {
+    renv::restore()
+}
+
 workdir <- getwd()
 figureCount <- 1
 tableCount <- 1
@@ -38,8 +50,11 @@ if (dir.exists("/Volumes/babs/working/boeings/")){
     hpc.mount <- ""
 }
 
-devtools::install_github("decusInLabore/biologicSeqTools")
-devtools::install_github("decusInLabore/biologicToolsSC")
+###############################################################################
+## An older version of the Matrix package is required                        ##
+
+renv::install("decusInLabore/biologicSeqTools")
+renv::install("decusInLabore/biologicToolsSC")
 library(Seurat)
 library(Matrix)
 library(biologicSeqTools)
@@ -117,6 +132,8 @@ save(Obio,
 )
 
 print("R bioLOGIC single cell object initialized.")
+
+renv::snapshot()
 
 ```
 
