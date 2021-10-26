@@ -437,7 +437,7 @@ if (is.na(geneDefault)){
 
 if (Obio@dbDetailList$host == "10.27.241.234"){
     shinyBasePath <- "/camp/stp/babs/www/shiny/boeings/"
-    FvDir <- paste0("/camp/stp/babs/www/boeings/bioLOGIC/data/", Obio@parameterList$project_id)
+    FvDir <- paste0("/camp/stp/babs/www/boeings/bioLOGIC/data/", Obio@parameterList$project_id,"/")
 
 } else {
     if (dir.exists("/camp/stp/babs/www/shiny/boeings/external/")){
@@ -447,7 +447,7 @@ if (Obio@dbDetailList$host == "10.27.241.234"){
     }
     
   
-    FvDir <- paste0("/camp/stp/babs/www/boeings/bioLOGIC_external/data/", Obio@parameterList$project_id)
+    FvDir <- paste0("/camp/stp/babs/www/boeings/bioLOGIC_external/data/", Obio@parameterList$project_id,"/")
 
 }
 

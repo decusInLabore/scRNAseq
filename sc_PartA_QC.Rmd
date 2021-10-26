@@ -53,7 +53,6 @@ if (dir.exists("/Volumes/babs/working/boeings/")){
 ###############################################################################
 ## An older version of the Matrix package is required                        ##
 
-renv::install("https://cran.r-project.org/src/contrib/Archive/Matrix/Matrix_1.3-2.tar.gz")
 renv::install("decusInLabore/biologicSeqTools")
 renv::install("decusInLabore/biologicToolsSC")
 library(Seurat)
