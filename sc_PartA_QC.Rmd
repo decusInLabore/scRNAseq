@@ -24,7 +24,7 @@ knitr::opts_chunk$set(
     warning = FALSE
 )
 
-if (!requireNamespace("remotes")){
+if (!require("remotes")){
   install.packages("remotes")
 }
 
@@ -52,6 +52,12 @@ if (dir.exists("/Volumes/babs/working/boeings/")){
 
 ###############################################################################
 ## An older version of the Matrix package is required                        ##
+if (!requireNamespace("BiocManager", quietly = TRUE)){
+    renv::install("BiocManager")
+}
+
+BiocManager::install("DESeq2",version = "3.12")
+
 
 renv::install("decusInLabore/biologicSeqTools")
 renv::install("decusInLabore/biologicToolsSC")

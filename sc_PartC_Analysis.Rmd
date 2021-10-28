@@ -364,6 +364,10 @@ if (length(pos) > 0){
     dfdbTable <- dfdbTable[,-pos]
 }
 
+pos <- grep("snn_", names(dfdbTable))
+if (length(pos) > 0){
+    dfdbTable <- dfdbTable[,-pos]
+}
 
 
 
@@ -389,8 +393,8 @@ killDbConnections()
 
 
 
-remotes::install_github("decusInLabore/biologicSeqTools")
-remotes::install_github("decusinlabore/biologicViewerSC")
+renv::install("decusInLabore/biologicSeqTools")
+renv::install("decusinlabore/biologicViewerSC")
 
 ###############################################################################
 ## Step 1: Load Exampe Seurat object                                         ##
