@@ -15,24 +15,27 @@ done
 project_id=358Bsub
 
 project=rA_$project_id
-sbatch --time=12:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;Rscript runRmd.r sc_PartA_QC.Rmd" --job-name=$project -p hmem --mem=300G -o ../rA.$project_id.slurm >> ../commands.txt
+sbatch --time=12:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;Rscript runRmd.r sc_PartA_QC.Rmd" --job-name=$project_id -p hmem --mem=300G -o ../rA.$project_id.slurm >> ../commands.txt
 
 wait_on_lsf
 project=rB_$project_id
-sbatch --time=12:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;Rscript runRmd.r sc_PartB_Analysis.Rmd" --job-name=$project -p hmem --mem=300G -o ../rB.$project_id.slurm >> ../commands.txt
+sbatch --time=12:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;Rscript runRmd.r sc_PartB_Analysis.Rmd" --job-name=$project_id -p hmem --mem=300G -o ../rB.$project_id.slurm >> ../commands.txt
 
 wait_on_lsf
 project=rCF_$project_id
-sbatch --time=12:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;Rscript runRmd.r ClusterFinder.Rmd" --job-name=$project -p hmem --mem=300G -o ../rCF.$project_id.tslurm >> ../commands.txt
+sbatch --time=12:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;Rscript runRmd.r ClusterFinder.Rmd" --job-name=$project_id -p hmem --mem=300G -o ../rCF.$project_id.tslurm >> ../commands.txt
 
 wait_on_lsf
 project=rC_$project_id
-sbatch --time=12:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;Rscript runRmd.r sc_PartC_Analysis.Rmd " --job-name=$project -p hmem --mem=300G -o ../rC.$project_id.slurm >> commands.txt
+sbatch --time=12:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;Rscript runRmd.r sc_PartC_Analysis.Rmd " --job-name=$project_id -p hmem --mem=300G -o ../rC.$project_id.slurm >> commands.txt
 
 wait_on_lsf
 project=rDGE_$project_id
-sbatch --time=12:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;Rscript runRmd.r sc_DGE_module.Rmd " --job-name=$project -p hmem --mem=300G -o ../rDGE.$project_id.slurm >> commands.txt
+sbatch --time=12:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;Rscript runRmd.r sc_DGE_module.Rmd " --job-name=$project_id -p hmem --mem=300G -o ../rDGE.$project_id.slurm >> commands.txt
 
+wait_on_lsf
+project=rT_$project_id
+sbatch --time=24:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;Rscript runRmd.r sc_Trajectory_Analysis_Module.Rmd " --job-name=$project_id -p hmem --mem=300G -o ../rT.$project_id.slurm >> commands.txt
 
 
 sbatch --time=18:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/3.6.0-foss-2016b-BABS;Rscript runCM.r" --job-name=$project -p hmem --mem=300G -o rCN.slurm >> commands.txt
