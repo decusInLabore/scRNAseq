@@ -364,10 +364,6 @@ if (length(pos) > 0){
     dfdbTable <- dfdbTable[,-pos]
 }
 
-pos <- grep("snn_", names(dfdbTable))
-if (length(pos) > 0){
-    dfdbTable <- dfdbTable[,-pos]
-}
 
 
 
@@ -393,8 +389,8 @@ killDbConnections()
 
 
 
-renv::install("decusInLabore/biologicSeqTools")
-renv::install("decusinlabore/biologicViewerSC")
+#remotes::install_github("decusInLabore/biologicSeqTools")
+#remotes::install_github("decusinlabore/biologicViewerSC")
 
 ###############################################################################
 ## Step 1: Load Exampe Seurat object                                         ##
@@ -441,7 +437,10 @@ if (is.na(geneDefault)){
 
 if (Obio@dbDetailList$host == "10.27.241.234"){
     shinyBasePath <- "/camp/stp/babs/www/shiny/boeings/"
-    FvDir <- paste0("/camp/stp/babs/www/boeings/bioLOGIC/data/", Obio@parameterList$project_id,"/")
+    FvDir <- paste0("/camp/stp/babs/www/boeings/bioLOGIC/data/", Obio@parameterList$project_id,"/html/")
+    if (!dir.exists(FvDir)){
+        dir.create(FvDir, recursive=T)
+    }
 
 } else {
     if (dir.exists("/camp/stp/babs/www/shiny/boeings/external/")){
@@ -451,7 +450,7 @@ if (Obio@dbDetailList$host == "10.27.241.234"){
     }
     
   
-    FvDir <- paste0("/camp/stp/babs/www/boeings/bioLOGIC_external/data/", Obio@parameterList$project_id,"/")
+    FvDir <- paste0("/camp/stp/babs/www/boeings/bioLOGIC_external/data/", Obio@parameterList$project_id,"/html/")
 
 }
 
@@ -1055,15 +1054,7 @@ cmd.vec <- upload.datatable.to.database(
     prim.data.db = Obio@dbDetailList$primDataDB,
     dbTableName = Obio@parameterList$rnaseqdbTableName,
     df.data = Obio@databaseTable, #[Obio@databaseTable$count_cut_off > 1, ],
-    db.col.parameter.list = list(
-        "VARCHAR(255) CHARACTER SET latin1 COLLATE latin1_swedish_ci" = c("Gene_name","gene_description"),
-        "VARCHAR(50) CHARACTER SET latin1 COLLATE latin1_swedish_ci" = c("ENSDARG", "dr_symbol","clone_based_gene_ID","Gene_description","Gene_type","ENSG", "ENSMUSG", "hgnc_symbol", "mgi_symbol", "uniprot", "entrezgene","display_ptm", "^sequence_window", "p_site_env","for_GSEA_gene_chip","associated_gene_name", "gene_type"),
-        "VARCHAR(1) CHARACTER SET latin1 COLLATE latin1_swedish_ci" = c("ppos", "amino_acid", "charge","known_site"),
-        "BIGINT(8) NULL DEFAULT NULL" = c("row_names"),
-        "INT(8) NULL DEFAULT NULL" = c("DEseq2Normalized","CoVarOrder","row_id", "cluster_order","cluster_id", "count_cut_off", "^position$", "raw_counts"),
-        "DECIMAL(6,3) NULL DEFAULT NULL" = c("contrast_C_Inhba_Correlation_Coef","avg_diff_Cluster","add_counts_",  "lg2BaseMean","lg2baseMean","contrast_P_PCA_estimatePCA","^CoVar$","NES", "logFC", "lg2_avg","norm_counts", "intensity", "^int", "iBAQ","^localization_prob$", "stat", "lg10p","contrast_x_", "_AvgExpr$", "_var_std$", "add_MA_cts"),
-        "DECIMAL(6,5) NULL DEFAULT NULL" = c("r2_PCA","padj", "pvalue","^pep$", "p_value_PCA")
-    ),
+    db.col.parameter.list = biologicSeqTools::inferDBcategories(Obio@databaseTable),
     new.table = TRUE,
     cols2Index = c(Obio@parameterList$geneIDcolumn)
 )
@@ -1227,15 +1218,7 @@ upload.datatable.to.database(
     prim.data.db =  Obio@dbDetailList$primDataDB,
     dbTableName = Obio@parameterList$cat.ref.db.table,
     df.data = df.db.table,
-    db.col.parameter.list = list(
-        "VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci" = c("comments_1","cat_name"),
-        "VARCHAR(50) CHARACTER SET utf8 COLLATE utf8_general_ci" = c("cat_id", "cat_group"),
-        "VARCHAR(1) CHARACTER SET utf8 COLLATE utf8_general_ci" = c("ppos", "amino_acid", "charge","known_site"),
-        "BIGINT(8) NULL DEFAULT NULL" = c("row_names"),
-        "INT(8) NULL DEFAULT NULL" = c("cat_item_size", "cat_count", "cat_views"),
-        "DECIMAL(6,3) NULL DEFAULT NULL" = c("cat_weight"),
-        "DECIMAL(6,5) NULL DEFAULT NULL" = c("padj", "pvalue","^pep$")
-    ),
+    db.col.parameter.list = biologicSeqTools::inferDBcategories(df.db.table),
     new.table = TRUE,
     cols2Index = c("cat_id")
 )
