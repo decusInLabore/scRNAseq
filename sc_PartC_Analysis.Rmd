@@ -365,7 +365,10 @@ if (length(pos) > 0){
 }
 
 
-
+pos <- grep("snn_", names(dfdbTable))
+if (length(pos) > 0){
+    dfdbTable <- dfdbTable[,-pos]
+}
 
 
 names(dfdbTable) <- gsub("\\.", "_", names(dfdbTable))
