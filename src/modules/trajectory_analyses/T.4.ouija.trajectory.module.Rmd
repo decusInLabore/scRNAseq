@@ -457,7 +457,7 @@ gam.pval <- gam.pval[gam.pval < 0.01]
 gam.pval <- sort(gam.pval, decreasing=FALSE)
 
 
-display.gam.pval <- log10(gam.pval)
+display.gam.pval <- -1*log10(gam.pval)
 maxVal <- max(display.gam.pval[display.gam.pval < Inf])
 display.gam.pval[display.gam.pval == Inf] <- maxVal
 
@@ -537,7 +537,7 @@ outPutFN <- paste0(
 )
   
  
-FNrel <- paste0("report_table/", baseFN)
+FNrel <- paste0("report_tables/", baseFN)
 
 wb <- openxlsx::createWorkbook()
 

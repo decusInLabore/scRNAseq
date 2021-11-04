@@ -15,9 +15,14 @@ always_allow_html: yes
 
 
 ```{r setup, include=FALSE}
-## Load conda environment 
-# conda activate R-monocle3
+###############################################################################
+## Load conda environment                                                    ##
+# conda activate R-monocle3;R
+# ml cairo/1.16.0-GCCcore-10.3.0;ml rgdal/1.5-16-foss-2020a-R-4.0.0
 # R version 4.0.2
+
+##
+###############################################################################
 
 knitr::opts_chunk$set(
     tidy = F,
@@ -27,45 +32,45 @@ knitr::opts_chunk$set(
 )
 
 
+## If data analysis mode is used, no renv is used in order to prevent 
+## interference with bespoke packages and environments
+data.analysis.mode <- TRUE
 
-#Create the environment and load a suitable version of R, e.g. so:
-if (!require("remotes")){
-  install.packages("remotes")
+
+if (!data.analysis.mode){
+    #Create the environment and load a suitable version of R, e.g. so:
+    if (!require("remotes")){
+      install.packages("remotes")
+    }
+
+    remotes::install_github("rstudio/renv")
+
+    if (!file.exists("renv.lock")){
+        renv::init()
+    } else {
+        renv::restore()
+    }
+    
+    # renv::install("bioc::ComplexHeatmap")
+    # devtools::install_github("decusInLabore/biologicSeqTools")
+    # devtools::install_github("decusInLabore/biologicToolsSC")
+
+    #remotes::install_github("decusInLabore/biologicSeqTools")
+    #remotes::install_github("decusInLabore/biologicToolsSC")
+    # install.packages("gam")
+    # install.packages('circlize')
 }
 
-remotes::install_github("rstudio/renv")
 
-if (!file.exists("renv.lock")){
-    renv::init()
-} else {
-    renv::restore()
-}
 
-packages <- c("DESeq2")
-
-if (!requireNamespace("BiocManager", quietly = TRUE)){
-  install.packages("BiocManager")
-}
-
-BiocManager::install(setdiff(packages, rownames(installed.packages())))
-
-renv::install("gam")
-renv::install('circlize')
-renv::install("bioc::ComplexHeatmap")
-
-# if (!requireNamespace("BiocManager", quietly=TRUE))
-#     install.packages("BiocManager")
-# BiocManager::install("ComplexHeatmap")
-                    
 source("src/modules/trajectory_analyses/trajectory.helper.functions.R")                 
-# devtools::install_github("decusInLabore/biologicSeqTools")
-# devtools::install_github("decusInLabore/biologicToolsSC")
 
-renv::install("decusInLabore/biologicSeqTools")
-renv::install("decusInLabore/biologicToolsSC")
 
 library(Seurat)
 library(biologicSeqTools)
+library(SingleCellExperiment)
+library(dplyr)
+library(ggplot2)
 # library(biologicToolsSC)
 
 # library(tidyverse)
@@ -127,11 +132,11 @@ figureCount <- 1
 ```
 
 <!-- Optional 5: monocle3 -->
-```{r child = 'src/modules/trajectory_analyses/T.3.monocle3.trajectory.module.Rmd', eval=FALSE}
+```{r child = 'src/modules/trajectory_analyses/T.3.monocle.trajectory.module.Rmd', eval=TRUE}
 ```
 
 <!-- Optional 6: ouija -->
-```{r child = 'src/modules/trajectory_analyses/T.4.ouija.trajectory.module.Rmd', eval=TRUE}
+```{r child = 'src/modules/trajectory_analyses/T.4.ouija.trajectory.module.Rmd', eval=FALSE}
 ```
 
 
@@ -148,13 +153,16 @@ save(Obio,
 
 print("Obio Object saved.")
 
-save(OsC,
-    file = paste0(
-         Obio@parameterList$localWorkDir,
-         Obio@parameterList$project_id,
-        ".Seurat.Robj"
-     )
-)
+## OsC saving occurs within the modules already
+# save(OsC,
+#     file = paste0(
+#          Obio@parameterList$localWorkDir,
+#          Obio@parameterList$project_id,
+#         ".Seurat.Robj"
+#      )
+# )
+
+
 
 ```
 
@@ -228,7 +236,10 @@ projectParams <- lapply(
 
 ## Documentation
 ```{r documentation, eval=TRUE, echo=T, results=T}
-renv::snapshot()
+if (!data.analysis.mode){
+    renv::snapshot()
+}
+
 sessionInfo()
 ```
 
