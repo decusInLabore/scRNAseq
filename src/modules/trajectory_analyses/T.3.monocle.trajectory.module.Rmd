@@ -19,7 +19,7 @@ VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.D
 
 invertMonoclePseudotime <- FALSE
 useCachedMonocleObject <- TRUE
-startClusterID <- 8
+startClusterID <- 5
 startClusterColName <- "seurat_clusters"
 plotTopNgenes <- 100
 nMonocleTimeBins <- 100
@@ -50,8 +50,8 @@ library(Seurat)
 library(monocle3)
 library(htmlwidgets)
 
-## An old version of the matrix package is required
-install.packages("https://cran.r-project.org/src/contrib/Archive/Matrix/Matrix_1.3-3.tar.gz")
+## An old version of the matrix package is required for some downstream analyses
+# install.packages("https://cran.r-project.org/src/contrib/Archive/Matrix/Matrix_1.3-3.tar.gz")
 
 seurat <- OsC
 
@@ -326,6 +326,10 @@ plotList[[tag]] <- plot_cells(cds_from_seurat,
 FNbase <- paste0(tag, VersionPdfExt)
 FN <- paste0(Obio@parameterList$reportFigDir, FNbase)
 FNrel <- paste0("report_figures/", FNbase)
+
+pdf(FN)
+    print(plotList[[tag]])
+dev.off()
             
 if (exists("shinyURL") & !is.null(shinyURL)){
     link <- paste0(
@@ -391,7 +395,8 @@ pseudotimeLineageName <- "Pseudotime_MC"
 # plotTopNgenes <- 100
 
 Y <- data.matrix( OsC@assays[["RNA"]]@data)
-        
+
+## Focus on most variable genes in the study        
 Y <-  Y[OsC@assays$integrated@var.features,]
         
 t <- OsC@meta.data[,pseudotimeLineageName]
@@ -472,6 +477,122 @@ dfOutDisplay <- dfOut[dfOut$Percent_cells_expressing >= 10, ]
 
 ##
 #########################################
+
+###############################################################################
+## Detect peak genes among most variable genes                               ##
+
+## Get data
+dfData <- OsC@assays[["RNA"]]@data[names(gam.pval),]
+
+dfData <- dfData[unique(c(topgenes, topgenes.TF)), ]
+
+dfPT <- OsC@meta.data[,c("cellID", "Pseudotime_MC")]
+
+first <- TRUE
+maxPeakPosition <- as.vector(NULL, mode="numeric")
+peakType <- as.vector(NULL, mode="character")
+gene <- as.vector(NULL, mode="character")
+peakMax <- as.vector(NULL, mode="numeric")
+
+for (i in 1:nrow(dfData)){
+    dfTempData <- data.frame(cellID=colnames(dfData), assign(row.names(dfData)[i], as.vector(dfData[i,])))
+    names(dfTempData)[2] <- "gene"
+    
+    dfTempData <- merge(
+        dfPT, 
+        dfTempData, 
+        by.x = "cellID",
+        by.y = "cellID"
+    )
+    smoothing <- 0.1
+    loessMod <- loess(gene ~ Pseudotime_MC, data=dfTempData, span=smoothing)
+    
+    xl <- seq(min(dfTempData$Pseudotime_MC),max(dfTempData$Pseudotime_MC), (max(dfTempData$Pseudotime_MC) - min(dfTempData$Pseudotime_MC))/99)
+    yl <- predict(loessMod,xl)
+        
+    yl[is.na(yl)] <- 0
+      
+    ## Annotate peak position ##
+    if (sum(yl) > 0){
+        peakPos <- find_peaks(yl, m=length(yl)/2)  
+        
+        if (length(peakPos) > 0){
+            pos <- grep( max(yl[peakPos]), yl[peakPos])
+            peakPos <- peakPos[pos]   
+        }
+        
+        peakMax[i] <- max(yl)
+        
+        gene[i] <- row.names(dfData)[i]
+        
+        if (length(peakPos) > 0){
+            maxPeakPosition[i] <- peakPos  
+            
+            if (peakPos <= 15){
+            peakType[i] <- "proximal"
+        } else if (peakPos >15 & peakPos < 85) {
+            peakType[i] <- "middle"
+        } else if (peakPos >= 85){
+            peakType[i] <- "distal"
+        } else {
+            "none"
+        }
+            
+        } else {
+            maxPeakPosition[i] <- NA
+            peakType[i] <- ""
+            peakMax[i] <- 0
+        }
+        
+        
+        
+    }
+    
+    
+        #row_mean <- mean(yl)
+        #row_hm <- log2(yl/row_mean)
+        #row_hm[row_hm > setMax] = setMax
+        #row_hm[row_hm < setMin] = setMin
+        
+    new.row <- data.frame(t(yl))
+    row.names(new.row) <- row.names(dfData)[i]
+        
+        
+    if (first){
+        dfRes <- new.row
+        first <- FALSE
+    } else {
+        dfRes <- rbind(
+            dfRes, 
+            new.row
+        )
+    }
+    
+    if (i%%20 == 0){
+      print(i)
+    }
+}
+
+# bs = cr, denoting cubic regression splines
+###############################################################################
+## Classify peaks                                                            ##
+
+## Classify as peak everything peaking between bin 15 and 85
+dfPeak <- data.frame(
+    gene, 
+    peakType,
+    maxPeakPosition,
+    peakMax
+)
+
+dfPeak <- dfPeak[order(dfPeak$maxPeakPosition, decreasing = F),]
+
+
+## Done                                                                      ##
+###############################################################################
+
+##                                                                           ##
+###############################################################################
 
 #########################################
 ## Write to Excel 
@@ -676,4 +797,15 @@ cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = '\n'))
 
 ```
 
+```{r partT_detect_peaks, echo=TRUE, eval=TRUE, warning=FALSE, results=F}
 
+
+
+###############################################################################
+if (length(plotList) > 3){
+    tabVar <- ".tabset .tabset-fade .tabset-dropdown"
+} else {
+    tabVar <- ".tabset .tabset-fade .tabset-pills"
+}
+
+```
