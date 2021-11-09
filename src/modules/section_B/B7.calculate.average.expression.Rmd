@@ -140,7 +140,7 @@ data.dist <- dist(x = t(x = data.avg[features, ]))
 dforder <- hclust(d = data.dist)
 orderVec <- names(dfAvgExpr)[dforder$order]
 } else {
-  orderVec <- names(data.avg)
+  orderVec <- colnames(data.avg)
 }
 
 Obio@parameterList[["sampleIDOrder"]] <- orderVec
