@@ -63,7 +63,8 @@ if (!data.analysis.mode){
 
 
 
-source("src/modules/trajectory_analyses/trajectory.helper.functions.R")                 
+source("src/modules/trajectory_analyses/trajectory.helper.functions.R")         
+
 
 
 library(Seurat)
@@ -132,8 +133,33 @@ figureCount <- 1
 ```
 
 <!-- Optional 5: monocle3 -->
-```{r child = 'src/modules/trajectory_analyses/T.3.monocle.trajectory.module.Rmd', eval=TRUE}
+```{r child = 'src/modules/trajectory_analyses/T.3.monocle.trajectory.module.overview.Rmd', eval=TRUE}
 ```
+
+<!-- Optional 5: monocle3 Branch 1 Subtrajectory -->
+```{r child = 'src/modules/trajectory_analyses/T.3.monocle.trajectory.module.branch.1.Rmd', eval=TRUE}
+```
+
+<!-- Optional 5: monocle3 Branch 2 Subtrajectory -->
+```{r child = 'src/modules/trajectory_analyses/T.3.monocle.trajectory.module.branch.2.Rmd', eval=TRUE}
+```
+
+<!-- Optional 5: monocle3 Branch 3 Subtrajectory -->
+```{r child = 'src/modules/trajectory_analyses/T.3.monocle.trajectory.module.branch.3.Rmd', eval=TRUE}
+```
+
+<!-- Optional 5: monocle3 Branch 4 Subtrajectory -->
+```{r child = 'src/modules/trajectory_analyses/T.3.monocle.trajectory.module.branch.4.Rmd', eval=TRUE}
+```
+
+<!-- Optional 5: monocle3 Branch 5 Subtrajectory -->
+```{r child = 'src/modules/trajectory_analyses/T.3.monocle.trajectory.module.branch.5.Rmd', eval=TRUE}
+```
+
+<!-- Optional 5: monocle3 Branch 6 Subtrajectory -->
+```{r child = 'src/modules/trajectory_analyses/T.3.monocle.trajectory.module.branch.6.Rmd', eval=TRUE}
+```
+
 
 <!-- Optional 6: ouija -->
 ```{r child = 'src/modules/trajectory_analyses/T.4.ouija.trajectory.module.Rmd', eval=FALSE}
