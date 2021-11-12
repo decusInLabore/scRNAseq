@@ -20,6 +20,12 @@ createLineageHeatmap <- function(
         OsC_branch1 <- OsC
     }
     
+    if (plotAbsoluteValues){
+        nameTag <- "log10 Expr"
+    } else {
+        nameTag <- "relative Expr"
+    }
+    
     
     if (is.null(heatmapGeneVec)){
         Y <- data.matrix( OsC_branch1@assays[["RNA"]]@data)
@@ -144,19 +150,22 @@ createLineageHeatmap <- function(
     #     df = df2, col = list(Group = GroupVec)
     # )
     
+    
+    
+    ComplexHeatmap::ht_opt(
+        legend_border = "black",
+        heatmap_border = TRUE,
+        annotation_border = TRUE
+    )
+    
     ha = ComplexHeatmap::HeatmapAnnotation(
         Pseudotime = PTorder, 
         Cluster = ClusterVec,
         col = list(
             Pseudotime = col_fun,
             Cluster = GroupVec
-        )
-    )
-    
-    ComplexHeatmap::ht_opt(
-        legend_border = "black",
-        heatmap_border = TRUE,
-        annotation_border = TRUE
+        ),
+        annotation_name_side = "right"
     )
     
     h1 = ComplexHeatmap::Heatmap(
@@ -166,7 +175,8 @@ createLineageHeatmap <- function(
             " ", 
             paste0("Heatmap_", pseudotimeLineageName)
         ),
-        name = pseudotimeLineageName, 
+        #name = pseudotimeLineageName, 
+        name = nameTag, 
         #row_km = 5,
         col = f1,
         
