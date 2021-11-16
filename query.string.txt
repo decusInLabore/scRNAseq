@@ -1,0 +1,14 @@
+"query"
+"DROP TABLE IF EXISTS pbl359subCluster07_gene_expr_tb;
+"
+"CREATE TABLE IF NOT EXISTS pbl359subCluster07_gene_expr_tb (gene VARCHAR(100) CHARACTER SET latin1 COLLATE latin1_swedish_ci, cellID VARCHAR(100) CHARACTER SET latin1 COLLATE latin1_swedish_ci, lg10Expr DECIMAL(6,3) NULL DEFAULT NULL, row_names INT(10) NOT NULL AUTO_INCREMENT,PRIMARY KEY (row_names)); "
+"LOAD DATA LOCAL INFILE '/camp/stp/babs/working/boeings/Projects/bonfantip/roberta.ragazzini/446B_scRNAseq_subClustering_pbl359B_12clusters/workdir/temp.pbl359subCluster07.csv' INTO TABLE pbl359subCluster07_gene_expr_tb FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '
+' IGNORE 1 LINES (gene, cellID, lg10Expr, row_names);"
+"ALTER TABLE pbl359subCluster07_gene_expr_tb ADD UNIQUE(row_names);"
+"CREATE INDEX idx_gene ON pbl359subCluster07_gene_expr_tb (gene);"
+"GRANT SELECT on pbl_data.pbl359subCluster07_PCA TO pbl359subCluste@'shiny-bioinformatics.crick.ac.uk';"
+"GRANT SELECT on pbl_data.pbl359subCluster07_PCA TO pbl359subCluste@'10.%';"
+"GRANT SELECT on pbl_data.pbl359subCluster07_gene_expr_tb TO pbl359subCluste@'shiny-bioinformatics.crick.ac.uk';"
+"GRANT SELECT on pbl_data.pbl359subCluster07_gene_expr_tb TO pbl359subCluste@'10.%';"
+"GRANT SELECT on pbl_data.pbl359subCluster07_geneID_tb TO pbl359subCluste@'shiny-bioinformatics.crick.ac.uk';"
+"GRANT SELECT on pbl_data.pbl359subCluster07_geneID_tb TO pbl359subCluste@'10.%';"

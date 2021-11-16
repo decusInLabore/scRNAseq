@@ -66,12 +66,21 @@ db.pwd <- as.vector(dbTable[1,1])
 
 figureCount <- 1
 
-source("assets/R/SBwebtools.pckg.r")
-source("assets/R/scTools.r")
 
-if (length(.libPaths()) > 2){
-    .libPaths(.libPaths()[2:3])
-}
+
+devtools::install_github("decusInLabore/biologicSeqTools")
+devtools::install_github("decusInLabore/biologicToolsSC")
+library(Seurat)
+library(biologicSeqTools)
+library(biologicToolsSC)
+
+
+# source("assets/R/SBwebtools.pckg.r")
+# source("assets/R/scTools.r")
+# 
+# if (length(.libPaths()) > 2){
+#     .libPaths(.libPaths()[2:3])
+# }
 ## Create biologic Object for visualization ##
 
 ObioFN <- paste0("../", list.files("..")[grep(".bioLOGIC.Robj", list.files(".."))])
@@ -160,11 +169,47 @@ dim(dfPerc)
 # Reduce object to the most variable genes 
 # @ OsC@assays$integrated@var.features
 
+
 OsC <- subset(
     OsC, 
     cells = NULL, 
     features = unique(dfPerc$gene)
 )
+
+###############################################################################
+## Get paths in overall project                                              ##
+OsC_sce <- as.SingleCellExperiment(OsC)
+
+OsC_sce <- slingshot(
+    OsC_sce, 
+    clusterLabels = 'seurat_clusters',
+    reducedDim = "PCA",
+    allow.breaks = FALSE
+)
+save(OsC_sce, file = paste0(Obio@parameterList$localWorkDir, "sceFullTrajectories.rds"))
+stop()
+
+## Done                                                                      ##
+###############################################################################
+
+###############################################################################
+## paths in overall object
+
+
+##
+###############################################################################
+OsubT1 <- SplitObject(OsC, split.by = "subT1")
+OsubT1 <- OsubT1[["Selected"]]
+OsubT1_sce <- as.SingleCellExperiment(OsubT1)
+
+sceSubT1 <- slingshot(
+    OsubT1_sce, 
+    clusterLabels = 'seurat_clusters',
+    reducedDim = "PCA",
+    allow.breaks = FALSE
+)
+save(sceSubT1, file = paste0(Obio@parameterList$localWorkDir, "sceSubT1.rds"))
+
 
 ###############################################################################
 ## Annotate lineages in seurat object and split                              ##

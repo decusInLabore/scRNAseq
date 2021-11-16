@@ -1,17 +1,17 @@
 C4 Polykeratins,,,,,,,
-singleCellClusterParameter,0.5,,,,,,
+singleCellClusterParameter,0.7,,,,,,
 NtopGenes,2000,,,,,,
 scNintegrationFeatures,3000,,,,,,
 primReduction,umap,,,,,,
-vars.to.regress,S_Score,G2M_Score,,,,,
+vars.to.regress,,,,,,,
 singleCellSeuratNpcs4PCA,30,,,,,,
-folder,/camp/stp/babs/working/boeings/Projects/bonfantip/roberta.ragazzini/449D_subclustering_449C_SC20193_C1_2_3_4_5/,,,,,,
+folder,/camp/stp/babs/working/boeings/Projects/bonfantip/roberta.ragazzini/446B_scRNAseq_subClustering_pbl359B_12clusters/,,,,,,
 lab.categories.table,pb_lab_categories,,,,,,
-project_id,pbl449DsubCluster,,,,,,
+project_id,pbl359subCluster07,,,,,,
 labname,Bonfanti,,,,,,
 sra.id.vector,,,,,,,
 gse.id.vector,,,,,,,
-lims.id,SC20193,,,,,,
+lims.id,SC19153,,,,,,
 experiment.type,sc_rna_seq,,,,,,
 species,homo_sapiens,,,,,,
 release,release-89,,,,,,
@@ -29,16 +29,15 @@ catRefFile,/camp/stp/babs/working/boeings/Projects/bonfantip/sara.campinoti/321_
 scIntegrationMethod,RNA,,,"# ""SCT"" or ""RNA""",,,
 ,,,,,,,
 Sample Parameters,,,,,,,
-,,,,,,,
-meta_SampleType,Skin,BulkThymus,BulkThymus,Medulla,Medulla,Cortex,Cortex
-sampleName,Skin01sub,ThyP89sub,ThyP94sub,MedullaThy89sub,MedullaThy94sub,CortexThy89sub,CortexThy94sub
-limsID,RAG1452A1,RAG1452A3,RAG1452A4,RAG1452A5,RAG1452A6,RAG1452A7,RAG1452A8
-type,matrixFiles,matrixFiles,matrixFiles,matrixFiles,matrixFiles,matrixFiles,matrixFiles
-gene.column,2,2,2,2,2,2,2
-path,/camp/stp/babs/working/boeings/projects/bonfantip/roberta.ragazzini/449C_customAsubc_scRNAseq_human_thymus_cultures_SC20193_skin_thymus_custom_anchors/basedata/input_Skin01_C1234510.txt,/camp/stp/babs/working/boeings/projects/bonfantip/roberta.ragazzini/449C_customAsubc_scRNAseq_human_thymus_cultures_SC20193_skin_thymus_custom_anchors/basedata/input_ThyP89_C1234510.txt,/camp/stp/babs/working/boeings/projects/bonfantip/roberta.ragazzini/449C_customAsubc_scRNAseq_human_thymus_cultures_SC20193_skin_thymus_custom_anchors/basedata/input_ThyP94_C1234510.txt,/camp/stp/babs/working/boeings/projects/bonfantip/roberta.ragazzini/449C_customAsubc_scRNAseq_human_thymus_cultures_SC20193_skin_thymus_custom_anchors/basedata/input_ThyP89_C1234510.txt,/camp/stp/babs/working/boeings/projects/bonfantip/roberta.ragazzini/449C_customAsubc_scRNAseq_human_thymus_cultures_SC20193_skin_thymus_custom_anchors/basedata/input_ThyP94_C1234510.txt,/camp/stp/babs/working/boeings/projects/bonfantip/roberta.ragazzini/449C_customAsubc_scRNAseq_human_thymus_cultures_SC20193_skin_thymus_custom_anchors/basedata/input_CortexThy89_C1234510.txt,/camp/stp/babs/working/boeings/projects/bonfantip/roberta.ragazzini/449C_customAsubc_scRNAseq_human_thymus_cultures_SC20193_skin_thymus_custom_anchors/basedata/input_CortexThy94_C1234510.txt
-singleCellSeuratMtCutoff,20,20,20,20,20,20,20
-SeuratNrnaMaxFeatures,10000,10000,10000,10000,10000,10000,10000
-SeuratNrnaMinFeatures,750,750,750,750,750,750,750
+meta_Type,mTEC,mTEC,cTEC,cTEC,,,
+sampleName,Epip6sub,Epip7sub,Epip10sub,Epip14sub,,,
+limsID,Epip6sub,Epip7sub,Epip10sub,Epip14sub,,,
+type,matrixFiles,matrixFiles,matrixFiles,matrixFiles,,,"# type must be in c(""TenX"", ""matrixFiles"", ""loomFiles"", ""hdf5Files"")"
+gene.column,2,2,2,2,,,# default 2
+path,/camp/stp/babs/working/boeings/Projects/bonfantip/sara.campinoti/359B_PBL_SC_subset_P6_P7_P10_P14_scRNAseq_lung_thymus_SC19153/basedata/input_Epip6_subClustering446.txt,/camp/stp/babs/working/boeings/Projects/bonfantip/sara.campinoti/359B_PBL_SC_subset_P6_P7_P10_P14_scRNAseq_lung_thymus_SC19153/basedata/input_Epip7_subClustering446.txt,/camp/stp/babs/working/boeings/Projects/bonfantip/sara.campinoti/359B_PBL_SC_subset_P6_P7_P10_P14_scRNAseq_lung_thymus_SC19153/basedata/input_Epip10_subClustering446.txt,/camp/stp/babs/working/boeings/Projects/bonfantip/sara.campinoti/359B_PBL_SC_subset_P6_P7_P10_P14_scRNAseq_lung_thymus_SC19153/basedata/input_Epip14_subClustering446.txt,,,
+singleCellSeuratMtCutoff,20,20,30,30,,,
+SeuratNrnaMaxFeatures,10000,10000,10000,10000,,,
+SeuratNrnaMinFeatures,200,200,200,200,,,
 ,,,,,,,
 Database Parameters,,,,,,,
 primDataDB,pbl_data,,,,,,
@@ -47,9 +46,9 @@ db.user,boeingS,,,,,,
 host,10.27.241.82,,,,,,
 ,,,,,,,
 Documentation Parameter,,,,,,,
-title,Cell Culsture Single-cell Experiment,,,,,,
-subtitle,Bonfanti Lab - Roberta Ragazzini,,,,,,
-abstract,TBD,,,,,,
+title,Comprehensive characterisation of Human thymic stromal compartment - Subcluster P6 - P7 - P10 - P14,,,,,,
+subtitle,"Sara Campinoti, Roberta Ragazzini - Bonfanti Lab",,,,,,
+abstract,"Subclustering of pbl359B based on Robertas instructions. Thymus is the anatomical site where central tolerance occurs. It is composed by two main distinct regions, the cortex and medulla, who provide signals that will allow bone-marrow-derived progenitor cells to medullary thymic epithelial cells, mesenchymal cells and endothelial components using specific antibodies and we will isolate them by FACS sorting 7 populations (6 CD45- samples and 1 CD45+ sample in total) will be isolated in the appropriate buffer according to the facility requirements.",,,,,,
 ,,,,,,,
 ReferenceTableSelection,,,,,,,
 referenceTableListDB,Hallmark Signatures,mysigdb_h_hallmarks,,,,,

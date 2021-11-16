@@ -44,6 +44,27 @@ if (!is.null(Obio@dbDetailList$host)){
                           gene.symbol = queryGS,
                           user = Obio@dbDetailList$db.user,
                           host = Obio@dbDetailList$host
+                    ),
+        "Chromatin_Silencing" = retrieve.gene.category.from.db(
+                          cat_id = "GO_Biological_Process_2017__6",
+                          password = db.pwd,
+                          gene.symbol = queryGS,
+                          user = Obio@dbDetailList$db.user,
+                          host = Obio@dbDetailList$host
+                    ),
+        "Chromatin_Remodeling" = retrieve.gene.category.from.db(
+                          cat_id = "GO_Biological_Process_2017__2718",
+                          password = db.pwd,
+                          gene.symbol = queryGS,
+                          user = Obio@dbDetailList$db.user,
+                          host = Obio@dbDetailList$host
+                    ),
+        "Chromatin_Organisation" = retrieve.gene.category.from.db(
+                          cat_id = "GO_Biological_Process_2017__2959",
+                          password = db.pwd,
+                          gene.symbol = queryGS,
+                          user = Obio@dbDetailList$db.user,
+                          host = Obio@dbDetailList$host
                     )
         
       )
