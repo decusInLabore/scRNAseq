@@ -45,24 +45,27 @@ if (nrow(OsC@meta.data) > 5000){
 allGenes <- rownames(x = OsC_HM@assays$RNA)
 OsC_HM <- ScaleData(OsC_HM, verbose = FALSE, features=allGenes)
 
-
+## Set cluster order ##
 Idents(OsC_HM) <- "clusterName"
+Idents(OsC_HM) <- factor(Idents(OsC_HM), levels = Obio@parameterList[["clusterNameOrder"]])
 
-selVec <- c(
-  grep("cluster_order", gsub("\\.", "_",names(OsC@meta.data))),
-  grep("clusterName", names(OsC@meta.data))
-)
+#Idents(OsC_HM) <- "clusterName"
 
-if (length(selVec) == 2) {
-    dfCO <- unique(OsC@meta.data[,selVec])    
-    
-    names(dfCO) <- gsub("\\.", "_", names(dfCO))
-dfCO <- dfCO[order(dfCO$cluster_order, decreasing=F),]
-
-Idents(OsC_HM) <- factor(Idents(OsC_HM), levels = as.vector(dfCO$clusterName))
-
-Obio@parameterList$clusterNameOrder <- as.vector(dfCO$clusterName)
-}
+# selVec <- c(
+#   grep("cluster_order", gsub("\\.", "_",names(OsC@meta.data))),
+#   grep("clusterName", names(OsC@meta.data))
+# )
+# 
+# if (length(selVec) == 2) {
+#     dfCO <- unique(OsC@meta.data[,selVec])    
+#     
+#     names(dfCO) <- gsub("\\.", "_", names(dfCO))
+# dfCO <- dfCO[order(dfCO$cluster_order, decreasing=F),]
+# 
+# Idents(OsC_HM) <- factor(Idents(OsC_HM), levels = as.vector(dfCO$clusterName))
+# 
+# Obio@parameterList$clusterNameOrder <- as.vector(dfCO$clusterName)
+# }
 
 ## Order Heatmap Genes by cluster similarity
 

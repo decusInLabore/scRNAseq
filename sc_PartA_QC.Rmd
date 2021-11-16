@@ -56,7 +56,9 @@ if (!requireNamespace("BiocManager", quietly = TRUE)){
     renv::install("BiocManager")
 }
 
-BiocManager::install("DESeq2",version = "3.12")
+renv::install("bioc::DESeq2")
+
+# BiocManager::install("DESeq2",version = "3.12")
 
 
 renv::install("decusInLabore/biologicSeqTools")
