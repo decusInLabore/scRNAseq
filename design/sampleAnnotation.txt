@@ -1,4 +1,3 @@
 "sampleID"	"sampleName"	"sampleColor"
-"E185subC"	"E185subC"	"#F8766D"
-"PD4subC"	"PD4subC"	"#00BA38"
-"PD7subC"	"PD7subC"	"#619CFF"
+"E50hpf"	"E50hpf"	"#F8766D"
+"E70hpf"	"E70hpf"	"#00BFC4"
