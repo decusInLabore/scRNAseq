@@ -177,7 +177,9 @@ orderVec <- c(
 # Obio@parameterList$cat2HMplotList <- Obio@parameterList$cat2HMplotList[orderVec]
 # 
 # lapply(Obio@parameterList[["cat2HMplotList"]], function(x) x[length(x) > 2])
-
+## Set cluster order ##
+Idents(OsC_HM) <- "clusterName"
+Idents(OsC_HM) <- factor(Idents(OsC_HM), levels = Obio@parameterList[["clusterNameOrder"]])
 
 l <- unlist(lapply(Obio@parameterList[["cat2HMplotList"]], function(x) length(as.vector(x)) > 2))
 selVec <- names(Obio@parameterList[["cat2HMplotList"]] )[l]
@@ -189,6 +191,12 @@ for (i in 1:length(Obio@parameterList[["cat2HMplotList"]])){
     tag <- paste0("HM_", names(Obio@parameterList$cat2HMplotList)[i])
     textSize <- 5
     HMname <- names(Obio@parameterList[["cat2HMplotList"]])[i]
+    
+    dfCol <- unique(OsC@meta.data[,c("clusterName", "clusterColor")])
+    dfCol <- dfCol[dfCol$clusterName %in% Obio@parameterList[["clusterNameOrder"]], ]
+    row.names(dfCol) <- dfCol$clusterName
+    dfCol <- dfCol[Obio@parameterList[["clusterNameOrder"]], ]
+    colors <- dfCol$clusterColor
     
     colors <- unique(OsC_HM@meta.data$clusterColor)
     

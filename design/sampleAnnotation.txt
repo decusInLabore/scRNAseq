@@ -1,3 +1,5 @@
 "sampleID"	"sampleName"	"sampleColor"
-"E50hpf"	"E50hpf"	"#F8766D"
-"E70hpf"	"E70hpf"	"#00BFC4"
+"Epip10sub"	"Epip10sub"	"#F8766D"
+"Epip14sub"	"Epip14sub"	"#7CAE00"
+"Epip6sub"	"Epip6sub"	"#00BFC4"
+"Epip7sub"	"Epip7sub"	"#C77CFF"
