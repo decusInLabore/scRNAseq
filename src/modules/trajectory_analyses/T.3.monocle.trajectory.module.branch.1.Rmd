@@ -644,6 +644,36 @@ if (length(pos > 0)){
 }
 
 ###############################################################################
+## Add chromatin remodelling                                                 ##
+
+addList <- c(
+    "Chromatin_Silencing", 
+    "Chromatin_Remodeling", 
+    "Chromatin_Organisation"
+)
+
+for (i in 1:length(addList)){
+    pos <- grep(addList[i], names(Obio@dataTableList$referenceList))
+
+    if (length(pos > 0)){
+        topgenes <- names(sort(gam.pval, decreasing = FALSE))[names(sort(gam.pval, decreasing = FALSE)) %in% Obio@dataTableList[["referenceList"]][[addList[i]]]]
+        
+        if (length(topgenes) > plotTopNgenes){
+            topgenes <- topgenes[1:plotTopNgenes]    
+        }
+        
+        
+        heatmapGeneList[[paste0("Top_Pseudotime_Variable_", addList[i])]] <- topgenes
+      
+    }
+}
+
+
+##
+###############################################################################
+
+
+###############################################################################
 ## Add additional gene sets to heatmapset                                    ##
 
 if (exists("heatmapGeneListAdditions") & (length(heatmapGeneListAdditions) > 0)){

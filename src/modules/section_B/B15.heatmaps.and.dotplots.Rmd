@@ -198,7 +198,6 @@ for (i in 1:length(Obio@parameterList[["cat2HMplotList"]])){
     dfCol <- dfCol[Obio@parameterList[["clusterNameOrder"]], ]
     colors <- dfCol$clusterColor
     
-    colors <- unique(OsC_HM@meta.data$clusterColor)
     
     plotList[[tag]] <- DoHeatmap(
                 object = OsC_HM,

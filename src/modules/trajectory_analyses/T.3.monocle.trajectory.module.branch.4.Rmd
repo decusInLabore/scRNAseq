@@ -10,7 +10,7 @@
 # Clusters Polykeratins (5) > cTecDiff (9) > cTECI (0) > cTECIII (6) > cTECII (3)
 # Clusters Polykeratins (5) > mTecDiff (12) > mTec MYO (8)
 branchSelectionCol <- "seurat_clusters"
-branchSelection <- c(2, 5, 3)
+branchSelection <- c(5, 10)
 
 #branch1 <- c(5, 9, 0, 6,3)
 #branch1 <- c(5, 12, 1, 4, 2, 11)
@@ -35,7 +35,7 @@ VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.D
 
 invertMonoclePseudotime <- FALSE
 useCachedMonocleObject <- TRUE
-startClusterID <- 2
+startClusterID <- 5
 startClusterColName <- "seurat_clusters"
 plotTopNgenes <- 100
 nMonocleTimeBins <- 100
@@ -44,10 +44,60 @@ mainPTcol <- "Pseudotime_MC"
 ###############################################################################
 ## Gene list to plot                                                         ##
 heatmapGeneListAdditions <- list(
+    "Custom_Gene_List_Branch_4" = unique(c(
+        "HES1",
+        "CEBPD",
+        "CH25H",
+        "CLU",
+        "KRT14",
+        "KRT15",
+        "KRT19",
+        "KRT17",
+        "IFITM3",
+        "PRRX1",
+        "ARID5B",
+        "FN1",
+        "TIMP1",
+        "SOX4",
+        "THY1",
+        "BCAM",
+        "DCN",
+        "SFN",
+        "CH25H",
+        "TUBA1A",
+        "KRT18",
+        "PPDPF",
+        "ATP1B1",
+        "CLDN4",
+        "CLDN3",
+        "BTG2",
+        "RARRES3",
+        "CD24",
+        "ELF3",
+        "KRT7",
+        "MGST1",
+        "HES6",
+        "NCOA7",
+        "ZBTB20",
+        "HERPUD1",
+        "GADD45G",
+        "CAMK2N1",
+        "CKB",
+        "PCP4",
+        "TMEM61",
+        "FOXI1",
+        "TCFPL1",
+        "CHD7",
+        "RAB11FIP1",
+        "PFKP",
+        "ASCL3"
+    ))
 )
 
 ##                                                                           ##
 ###############################################################################
+
+heatmapGeneListAdditionsOrdered <- list()
 
 ```
   
@@ -519,6 +569,36 @@ if (length(pos > 0)){
 }
 
 ###############################################################################
+## Add chromatin remodelling                                                 ##
+
+addList <- c(
+    "Chromatin_Silencing", 
+    "Chromatin_Remodeling", 
+    "Chromatin_Organisation"
+)
+
+for (i in 1:length(addList)){
+    pos <- grep(addList[i], names(Obio@dataTableList$referenceList))
+
+    if (length(pos > 0)){
+        topgenes <- names(sort(gam.pval, decreasing = FALSE))[names(sort(gam.pval, decreasing = FALSE)) %in% Obio@dataTableList[["referenceList"]][[addList[i]]]]
+        
+        if (length(topgenes) > plotTopNgenes){
+            topgenes <- topgenes[1:plotTopNgenes]    
+        }
+        
+        
+        heatmapGeneList[[paste0("Top_Pseudotime_Variable_", addList[i])]] <- topgenes
+      
+    }
+}
+
+
+##
+###############################################################################
+
+
+###############################################################################
 ## Add additional gene sets to heatmapset                                    ##
 
 if (exists("heatmapGeneListAdditions") & (length(heatmapGeneListAdditions) > 0)){
@@ -865,6 +945,115 @@ for (i in 1:length(heatmapGeneList)){
     ###############################################################################
 }
 
+
+###############################################################################
+## Add ordered gene lists                                                    ##
+if (exists("heatmapGeneListAdditionsOrdered") & (length(heatmapGeneListAdditionsOrdered) > 0)){
+    for (i in 1:length(heatmapGeneListAdditionsOrdered)){
+        ## Relative Heatmap
+        tag <- paste0(names(heatmapGeneListAdditionsOrdered)[i], "_relative")
+        plotList[[tag]] <- createLineageHeatmap(
+        seurat,  
+        lineageSelection = NULL,
+        pseudotimeLineageName = "Pseudotime_MC",
+        heatmapGeneVec = heatmapGeneListAdditionsOrdered[[i]],
+        clusterRows = FALSE
+        )
+     
+        ## Save to file ##
+        FNbase <- paste0(tag, VersionPdfExt)
+        FN <- paste0(Obio@parameterList$reportFigDir, FNbase)
+        FNrel <- paste0("report_figures/", FNbase)
+        
+        
+        pdf(FN)
+            print(plotList[[tag]])
+        dev.off()
+        
+        
+        
+        ## Create R markdown chunk ##
+        figLegend <- paste0(
+            '**Figure ', 
+            figureCount, 
+            '**: Heatmap (relative values) ',tag,
+            '. Download a pdf of this figure <a href="',FNrel,'" target="_blank">here</a>. '
+        )
+        figureCount <- figureCount + 1 
+        
+        NewChnk <- paste0(
+            "\n#### ", tag, 
+            "\n```{r, results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",
+            figLegend,"'}\n",
+            "\n",
+            "\n print(plotList[['",tag,"']])",
+            "\n cat(  '\n')",
+            "\n\n\n```\n"   
+        )
+        
+        chnkVec <- c(
+            chnkVec,
+            NewChnk
+        )
+        
+        ## Absolute Heatmap
+        tag <- paste0(names(heatmapGeneListAdditionsOrdered)[i], "_absolute")
+        plotList[[tag]] <- createLineageHeatmap(
+            seurat,  
+            lineageSelection = NULL,
+            pseudotimeLineageName = "Pseudotime_MC",
+            heatmapGeneVec = heatmapGeneListAdditionsOrdered[[i]],
+            clusterRows = FALSE,
+            #plotTopNgenes = 100,
+            plotAbsoluteValues = TRUE,  # otherwise: relative
+            highColor = "#00008B",
+            #midColor = "#fffbbc",
+            lowColor = "#d3d3d3"
+        )
+     
+        ## Save to file ##
+        FNbase <- paste0(tag, VersionPdfExt)
+        FN <- paste0(Obio@parameterList$reportFigDir, FNbase)
+        FNrel <- paste0("report_figures/", FNbase)
+        
+        
+        pdf(FN)
+            print(plotList[[tag]])
+        dev.off()
+        
+        
+        
+        ## Create R markdown chunk ##
+        figLegend <- paste0(
+            '**Figure ', 
+            figureCount, 
+            '**: Heatmap ',tag,
+            '. Download a pdf of this figure <a href="',FNrel,'" target="_blank">here</a>. '
+        )
+        figureCount <- figureCount + 1 
+        
+        NewChnk <- paste0(
+            "\n#### ", tag, 
+            "\n```{r, results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",
+            figLegend,"'}\n",
+            "\n",
+            "\n print(plotList[['",tag,"']])",
+            "\n cat(  '\n')",
+            "\n\n\n```\n"   
+        )
+        
+        chnkVec <- c(
+            chnkVec,
+            NewChnk
+        )
+        
+        
+        ## Done                                                                      ##
+        ###############################################################################
+    } 
+}
+##                                                                           ##
+###############################################################################
 
 ## Done                                                                      ##
 ###############################################################################

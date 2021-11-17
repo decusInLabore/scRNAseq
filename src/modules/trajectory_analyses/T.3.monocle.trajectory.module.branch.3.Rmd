@@ -1,6 +1,6 @@
 <!-- Set Parameters Module -->
 <!-- Set the chnkPrefix to make all chunks unique in the overall folder -->
-## Branch 3
+## Branch 2
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE}
 
 ## Export Pseudotime to Seurat object ##
@@ -9,7 +9,7 @@
 
 # Clusters Polykeratins (5) > cTecDiff (9) > cTECI (0) > cTECIII (6) > cTECII (3)
 # Clusters Polykeratins (5) > mTecDiff (12) > mTec MYO (8)
-branch1 <- c(1, 0, 3)
+branch1 <- c(5, 12, 8)
 
 #branch1 <- c(5, 9, 0, 6,3)
 #branch1 <- c(5, 12, 1, 4, 2, 11)
@@ -34,7 +34,7 @@ VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.D
 
 invertMonoclePseudotime <- FALSE
 useCachedMonocleObject <- TRUE
-startClusterID <- 1
+startClusterID <- 5
 startClusterColName <- "seurat_clusters"
 plotTopNgenes <- 100
 nMonocleTimeBins <- 100
@@ -42,10 +42,111 @@ mainPTcol <- "Pseudotime_MC"
 
 ###############################################################################
 ## Gene list to plot                                                         ##
-heatmapGeneListAdditions <- list()
+heatmapGeneListAdditions <- list(
+    "Custom_GeneSet_Branch_3" = c(
+    "HES1",
+    "CEBPD",
+    "ZFP36L2",
+    "CLU",
+    "KRT15",
+    "KRT19",
+    "FN1",
+    "IFITM3",
+    "CCL19",
+    "PRRX1",
+    "ARID5B",
+    "HEY1",
+    "ASCL1",
+    "CLDN3",
+    "CLDN4",
+    "CLDN9",
+    "CD24",
+    "EpCAM",
+    "HES6",
+    "NELL1",
+    "UCP2",
+    "FNDC5",
+    "ZEB2",
+    "CKB",
+    "FRMD3",
+    "MEGF10",
+    "RBP1",
+    "NNAT",
+    "DBN1",
+    "MYOG",
+    "KLHL41",
+    "TPM2",
+    "MYL4",
+    "ACTC1",
+    "MYH3",
+    "TNNT3",
+    "TNNT2",
+    "TNNT1",
+    "ACTA1",
+    "NES",
+    "NEXN",
+    "TTN",
+    "MEF2C",
+    "MEG3",
+    "ARPP21",
+    "LRRN1",
+    "HSPB3",
+    "MYLPF",
+    "TNNC1"
+)
+)
 
 ##                                                                           ##
 ###############################################################################
+
+heatmapGeneListAdditionsOrdered <- list(
+    "Ordered_GeneSet_Branch_3" = c(
+        "CLU",
+        "KRT15",
+        "FN1",
+        "ZFP36L2",
+        "ARID5B",
+        "PRRX1",
+        "IFITM3",
+        "CEBPD",
+        "KRT19",
+        "HES1",
+        "HEY1",
+        "ASCL1",
+        "CLDN3",
+        "CLDN4",
+        "CLDN9",
+        "CD24",
+        "RBP1",
+        "HES6",
+        "NNAT",
+        "CKB",
+        "ZEB2",
+        "DBN1",
+        "MEGF10",
+        "FNDC5",
+        "KLHL41",
+        "NES",
+        "NEXN",
+        "LRRN1",
+        "ARPP21",
+        "HSPB3 ",
+        "MYOG",
+        "TPM2",
+        "TNNT3",
+        "ACTC1",
+        "MEG3",
+        "TTN",
+        "TNNT1",
+        "MYL4",
+        "MYH3",
+        "TNNT2",
+        "MEF2C",
+        "ACTA1",
+        "MYLPF",
+        "TNNC1"
+    )
+)
 
 ```
   
@@ -187,7 +288,7 @@ cds_from_seurat <- learn_graph(cds_from_seurat, use_partition = T)
 
 ## Set root cells - here polykeratin cluster ##
 root_cells <- as.vector(
-    seurat@meta.data[seurat@meta.data[,startClusterColName] == startClusterID,"cellID"]
+    OsC@meta.data[OsC@meta.data[,startClusterColName] == startClusterID,"cellID"]
 )
 
 closest_vertex <- cds_from_seurat@principal_graph_aux[["UMAP"]]$pr_graph_cell_proj_closest_vertex
@@ -513,6 +614,36 @@ if (length(pos > 0)){
 } else {
     topgenes.TF <- 0
 }
+
+###############################################################################
+## Add chromatin remodelling                                                 ##
+
+addList <- c(
+    "Chromatin_Silencing", 
+    "Chromatin_Remodeling", 
+    "Chromatin_Organisation"
+)
+
+for (i in 1:length(addList)){
+    pos <- grep(addList[i], names(Obio@dataTableList$referenceList))
+
+    if (length(pos > 0)){
+        topgenes <- names(sort(gam.pval, decreasing = FALSE))[names(sort(gam.pval, decreasing = FALSE)) %in% Obio@dataTableList[["referenceList"]][[addList[i]]]]
+        
+        if (length(topgenes) > plotTopNgenes){
+            topgenes <- topgenes[1:plotTopNgenes]    
+        }
+        
+        
+        heatmapGeneList[[paste0("Top_Pseudotime_Variable_", addList[i])]] <- topgenes
+      
+    }
+}
+
+
+##
+###############################################################################
+
 
 ###############################################################################
 ## Add additional gene sets to heatmapset                                    ##
@@ -858,6 +989,115 @@ for (i in 1:length(heatmapGeneList)){
     ## Done                                                                      ##
     ###############################################################################
 }
+
+###############################################################################
+## Add ordered gene lists                                                    ##
+if (exists("heatmapGeneListAdditionsOrdered") & (length(heatmapGeneListAdditionsOrdered) > 0)){
+    for (i in 1:length(heatmapGeneListAdditionsOrdered)){
+        ## Relative Heatmap
+        tag <- paste0(names(heatmapGeneListAdditionsOrdered)[i], "_relative")
+        plotList[[tag]] <- createLineageHeatmap(
+        seurat,  
+        lineageSelection = NULL,
+        pseudotimeLineageName = "Pseudotime_MC",
+        heatmapGeneVec = heatmapGeneListAdditionsOrdered[[i]],
+        clusterRows = FALSE
+        )
+     
+        ## Save to file ##
+        FNbase <- paste0(tag, VersionPdfExt)
+        FN <- paste0(Obio@parameterList$reportFigDir, FNbase)
+        FNrel <- paste0("report_figures/", FNbase)
+        
+        
+        pdf(FN)
+            print(plotList[[tag]])
+        dev.off()
+        
+        
+        
+        ## Create R markdown chunk ##
+        figLegend <- paste0(
+            '**Figure ', 
+            figureCount, 
+            '**: Heatmap (relative values) ',tag,
+            '. Download a pdf of this figure <a href="',FNrel,'" target="_blank">here</a>. '
+        )
+        figureCount <- figureCount + 1 
+        
+        NewChnk <- paste0(
+            "\n#### ", tag, 
+            "\n```{r, results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",
+            figLegend,"'}\n",
+            "\n",
+            "\n print(plotList[['",tag,"']])",
+            "\n cat(  '\n')",
+            "\n\n\n```\n"   
+        )
+        
+        chnkVec <- c(
+            chnkVec,
+            NewChnk
+        )
+        
+        ## Absolute Heatmap
+        tag <- paste0(names(heatmapGeneListAdditionsOrdered)[i], "_absolute")
+        plotList[[tag]] <- createLineageHeatmap(
+            seurat,  
+            lineageSelection = NULL,
+            pseudotimeLineageName = "Pseudotime_MC",
+            heatmapGeneVec = heatmapGeneListAdditionsOrdered[[i]],
+            clusterRows = FALSE,
+            #plotTopNgenes = 100,
+            plotAbsoluteValues = TRUE,  # otherwise: relative
+            highColor = "#00008B",
+            #midColor = "#fffbbc",
+            lowColor = "#d3d3d3"
+        )
+     
+        ## Save to file ##
+        FNbase <- paste0(tag, VersionPdfExt)
+        FN <- paste0(Obio@parameterList$reportFigDir, FNbase)
+        FNrel <- paste0("report_figures/", FNbase)
+        
+        
+        pdf(FN)
+            print(plotList[[tag]])
+        dev.off()
+        
+        
+        
+        ## Create R markdown chunk ##
+        figLegend <- paste0(
+            '**Figure ', 
+            figureCount, 
+            '**: Heatmap ',tag,
+            '. Download a pdf of this figure <a href="',FNrel,'" target="_blank">here</a>. '
+        )
+        figureCount <- figureCount + 1 
+        
+        NewChnk <- paste0(
+            "\n#### ", tag, 
+            "\n```{r, results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",
+            figLegend,"'}\n",
+            "\n",
+            "\n print(plotList[['",tag,"']])",
+            "\n cat(  '\n')",
+            "\n\n\n```\n"   
+        )
+        
+        chnkVec <- c(
+            chnkVec,
+            NewChnk
+        )
+        
+        
+        ## Done                                                                      ##
+        ###############################################################################
+    } 
+}
+##                                                                           ##
+###############################################################################
 
 
 ## Done                                                                      ##

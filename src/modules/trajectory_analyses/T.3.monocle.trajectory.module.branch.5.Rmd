@@ -10,7 +10,7 @@
 # Clusters Polykeratins (5) > cTecDiff (9) > cTECI (0) > cTECIII (6) > cTECII (3)
 # Clusters Polykeratins (5) > mTecDiff (12) > mTec MYO (8)
 branchSelectionCol <- "seurat_clusters"
-branchSelection <- c(2, 5, 0, 3)
+branchSelection <- c(5, 12, 10)
 
 #branch1 <- c(5, 9, 0, 6,3)
 #branch1 <- c(5, 12, 1, 4, 2, 11)
@@ -35,7 +35,7 @@ VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.D
 
 invertMonoclePseudotime <- FALSE
 useCachedMonocleObject <- TRUE
-startClusterID <- 2
+startClusterID <- 5
 startClusterColName <- "seurat_clusters"
 plotTopNgenes <- 100
 nMonocleTimeBins <- 100
@@ -517,6 +517,36 @@ if (length(pos > 0)){
 } else {
     topgenes.TF <- 0
 }
+
+###############################################################################
+## Add chromatin remodelling                                                 ##
+
+addList <- c(
+    "Chromatin_Silencing", 
+    "Chromatin_Remodeling", 
+    "Chromatin_Organisation"
+)
+
+for (i in 1:length(addList)){
+    pos <- grep(addList[i], names(Obio@dataTableList$referenceList))
+
+    if (length(pos > 0)){
+        topgenes <- names(sort(gam.pval, decreasing = FALSE))[names(sort(gam.pval, decreasing = FALSE)) %in% Obio@dataTableList[["referenceList"]][[addList[i]]]]
+        
+        if (length(topgenes) > plotTopNgenes){
+            topgenes <- topgenes[1:plotTopNgenes]    
+        }
+        
+        
+        heatmapGeneList[[paste0("Top_Pseudotime_Variable_", addList[i])]] <- topgenes
+      
+    }
+}
+
+
+##
+###############################################################################
+
 
 ###############################################################################
 ## Add additional gene sets to heatmapset                                    ##
