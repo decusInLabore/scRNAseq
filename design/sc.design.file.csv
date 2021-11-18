@@ -1,4 +1,4 @@
-C4 Polykeratins,,,,,,,,,,,
+﻿C4 Polykeratins,,,,,,,,,,,
 singleCellClusterParameter,0.3,,,,,,,,,,
 NtopGenes,2000,,,,,,,,,,
 scNintegrationFeatures,3000,,,,,,,,,,
@@ -36,7 +36,7 @@ limsID,PAR4411A1,PAR4411A2,PAR4411A3,PAR4411A4,PAR4411A5,PAR4411A6,PAR4411A7,PAR
 type,TenX,TenX,TenX,TenX,TenX,TenX,TenX,TenX,TenX,,"# type must be in c(""TenX"", ""matrixFiles"", ""loomFiles"", ""hdf5Files"")"
 gene.column,2,2,2,2,2,2,2,2,2,,# default 2
 path,/camp/stp/babs/inputs/sequencing/fastq/211108_A01366_0081_AHTC7NDSX2/cellranger-count/SC21185/PAR4411A1/outs/filtered_feature_bc_matrix,/camp/stp/babs/inputs/sequencing/fastq/211108_A01366_0081_AHTC7NDSX2/cellranger-count/SC21185/PAR4411A2/outs/filtered_feature_bc_matrix,/camp/stp/babs/inputs/sequencing/fastq/211108_A01366_0081_AHTC7NDSX2/cellranger-count/SC21185/PAR4411A3/outs/filtered_feature_bc_matrix,/camp/stp/babs/inputs/sequencing/fastq/211108_A01366_0081_AHTC7NDSX2/cellranger-count/SC21185/PAR4411A4/outs/filtered_feature_bc_matrix,/camp/stp/babs/inputs/sequencing/fastq/211108_A01366_0081_AHTC7NDSX2/cellranger-count/SC21185/PAR4411A5/outs/filtered_feature_bc_matrix,/camp/stp/babs/inputs/sequencing/fastq/211108_A01366_0081_AHTC7NDSX2/cellranger-count/SC21185/PAR4411A6/outs/filtered_feature_bc_matrix,/camp/stp/babs/inputs/sequencing/fastq/211108_A01366_0081_AHTC7NDSX2/cellranger-count/SC21185/PAR4411A7/outs/filtered_feature_bc_matrix,/camp/stp/babs/inputs/sequencing/fastq/211108_A01366_0081_AHTC7NDSX2/cellranger-count/SC21185/PAR4411A8/outs/filtered_feature_bc_matrix,/camp/stp/babs/inputs/sequencing/fastq/211108_A01366_0081_AHTC7NDSX2/cellranger-count/SC21185/PAR4411A9/outs/filtered_feature_bc_matrix,,
-singleCellSeuratMtCutoff,20,20,30,30,20,20,20,20,20,,
+singleCellSeuratMtCutoff,10,10,10,10,10,10,10,10,10,,
 SeuratNrnaMaxFeatures,10000,10000,10000,10000,10000,10000,10000,10000,10000,,
 SeuratNrnaMinFeatures,200,200,200,200,200,200,200,200,200,,
 ,,,,,,,,,,,
