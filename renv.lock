@@ -793,10 +793,12 @@
     },
     "future": {
       "Package": "future",
-      "Version": "1.23.0",
-      "Source": "Repository",
+      "Version": "1.19.1",
+      "Source": "URL",
       "Repository": "CRAN",
-      "Hash": "7bf6fbed7f00cae876901fd70c04f3a4"
+      "RemoteType": "url",
+      "RemoteUrl": "https://cran.r-project.org/src/contrib/Archive/future/future_1.19.1.tar.gz",
+      "Hash": "994664db7d0c1fe2a6bddcab296e3875"
     },
     "future.apply": {
       "Package": "future.apply",
@@ -1334,13 +1336,6 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "664378f856aceb385eabbce0f202abd8"
-    },
-    "parallelly": {
-      "Package": "parallelly",
-      "Version": "1.28.1",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "5300c9fc71841550bdca64d39e82af0e"
     },
     "parsedate": {
       "Package": "parsedate",
