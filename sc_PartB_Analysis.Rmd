@@ -58,7 +58,11 @@ library(biologicToolsSC)
 
 ## Make sure the correct future version (> 1.2) is installed
 renv::install("https://cran.r-project.org/src/contrib/Archive/future/future_1.19.1.tar.gz")
-
+## Doublet Finder
+renv::install("chris-mcginnis-ucsf/DoubletFinder")
+renv::install("bioc::clusterProfiler")
+renv::install("bioc::AUCell")
+renv::install("YuLab-SMU/ggtree")
 
 upload.results.to.database <- TRUE
 save.chunk.intermediates <- TRUE

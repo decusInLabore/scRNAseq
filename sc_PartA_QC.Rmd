@@ -65,6 +65,9 @@ renv::install("https://cran.r-project.org/src/contrib/Archive/future/future_1.19
 
 ## Doublet Finder
 renv::install("chris-mcginnis-ucsf/DoubletFinder")
+renv::install("bioc::clusterProfiler")
+renv::install("bioc::AUCell")
+renv::install("YuLab-SMU/ggtree")
 
 
 renv::install("decusInLabore/biologicSeqTools")
