@@ -473,52 +473,65 @@ params <- biologicViewerSC::scanObjParams(OsC)
 ###############################################################################
 ## Add custom cluster annotation if specified                                ##
 cwd <- getwd()
-FNcol <- paste0(cwd, "/design/customClusterAnnotation.txt")
 tableValid <- FALSE
+colVec <- as.vector(NULL, mode = "character")
 
-if (file.exists(FNcol)){
-  dfClusterAnnotation <- read.delim(
-    FNcol, 
-    header = T, 
-    sep = "\t",
-    stringsAsFactors = F
-  )
-  
-  ## Check column names ##
-  pos1 <- grep("seurat_clusters", names(dfClusterAnnotation))
-  pos2 <- grep("clusterName", names(dfClusterAnnotation))
-  pos3 <- grep("clusterColor", names(dfClusterAnnotation))
-  
-  ## Check if clusters match ##
-  inClust <- unique(as.character(dfClusterAnnotation$seurat_clusters))
-  oClust <- unique(as.character(OsC@meta.data$seurat_clusters))
-  
-  
-  if (length(pos1) != 0 & length(pos2) != 0 & length(pos3) != 0 ){
-    ## Remove spaces ##
-    dfClusterAnnotation$clusterName <- gsub(" ", "_", dfClusterAnnotation$clusterName)
-    dfClusterAnnotation$clusterName <- gsub("\\.", "_", dfClusterAnnotation$clusterName)
-    dfClusterAnnotation$clusterName <- gsub("-", "_", dfClusterAnnotation$clusterName)
-    dfClusterAnnotation$clusterName <- gsub("__", "_", dfClusterAnnotation$clusterName)
-    dfClusterAnnotation$clusterName <- gsub("_$", "", dfClusterAnnotation$clusterName)
+## Load cluster annotation
+FNcolCustom <- paste0(cwd, "/design/customClusterAnnotation.txt")
+FNcol <- paste0(cwd, "/design/clusterAnnotation.txt")
+
+
+
+
+if (file.exists(FNcol) | file.exists(FNcolCustom)){
+    if (file.exists(FNcolCustom)){
+        dfClusterAnnotation <- read.delim(
+          FNcolCustom, 
+          header = T, 
+          sep = "\t",
+          stringsAsFactors = F
+        )
+    } else if (file.exists(FNcol)){
+        dfClusterAnnotation <- read.delim(
+        FNcol, 
+        header = T, 
+        sep = "\t",
+        stringsAsFactors = F
+        )
+    }
+    
+    ## Check column names ##
+    pos1 <- grep("seurat_clusters", names(dfClusterAnnotation))
+    pos2 <- grep("clusterName", names(dfClusterAnnotation))
+    pos3 <- grep("clusterColor", names(dfClusterAnnotation))
+    
     ## Check if clusters match ##
     inClust <- unique(as.character(dfClusterAnnotation$seurat_clusters))
     oClust <- unique(as.character(OsC@meta.data$seurat_clusters))
-    if (length(inClust) == length(intersect(inClust, oClust))){
-      tableValid <- TRUE
-      dfTemp <- unique(dfClusterAnnotation[,c("clusterName", "clusterColor")])
-      colVec <- dfClusterAnnotation$clusterColor
-      names(colVec) <- dfClusterAnnotation$clusterName
-    } else {
-      tableValid <- FALSE
-      colVec <- as.vector(NULL, mode = "character")
-    }
     
-  } else {
-    tableValid <- FALSE
-    colVec <- as.vector(NULL, mode = "character")
-  }
-}
+    
+    if (length(pos1) != 0 & length(pos2) != 0 & length(pos3) != 0 ){
+        ## Remove spaces ##
+        dfClusterAnnotation$clusterName <- gsub(" ", "_", dfClusterAnnotation$clusterName)
+        dfClusterAnnotation$clusterName <- gsub("\\.", "_", dfClusterAnnotation$clusterName)
+        dfClusterAnnotation$clusterName <- gsub("-", "_", dfClusterAnnotation$clusterName)
+        dfClusterAnnotation$clusterName <- gsub("__", "_", dfClusterAnnotation$clusterName)
+        dfClusterAnnotation$clusterName <- gsub("_$", "", dfClusterAnnotation$clusterName)
+        ## Check if clusters match ##
+        inClust <- unique(as.character(dfClusterAnnotation$seurat_clusters))
+        oClust <- unique(as.character(OsC@meta.data$seurat_clusters))
+        if (length(inClust) == length(intersect(inClust, oClust))){
+            tableValid <- TRUE
+            dfTemp <- unique(dfClusterAnnotation[,c("clusterName", "clusterColor")])
+            colVec <- dfClusterAnnotation$clusterColor
+            names(colVec) <- dfClusterAnnotation$clusterName
+        } else {
+            tableValid <- FALSE
+            colVec <- as.vector(NULL, mode = "character")
+        } 
+    }
+  } 
+
 
 if (length(params$catColorList$clusterName) == length(colVec)){
     params$catColorList$clusterName <- colVec

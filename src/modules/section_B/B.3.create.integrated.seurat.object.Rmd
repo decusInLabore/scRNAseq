@@ -122,6 +122,61 @@ Seurat::Idents(OsC) <- factor(Seurat::Idents(OsC), levels = names(Obio@sampleDet
 OsC@meta.data[["cellID"]] <- row.names(OsC@meta.data)
 
 DefaultAssay(OsC) <- "RNA"
+
+###############################################################################
+## Add meta data                                                             ##
+FN <- paste0(Obio@parameterList$workdir, "scRNAseq/design/sc.design.file.csv")
+if (file.exists(FN)){
+    if (file.exists(FN)){
+        dfObio <- read.csv(FN, header = F, stringsAsFactors = F)
+    }
+    dfObio[is.na(dfObio)] <- ""
+    
+    dfObio <- dfObio[dfObio[,1] != "", ]
+    
+    dfObio <- data.frame(t(dfObio), stringsAsFactors = F)
+    
+    names(dfObio) <- as.vector(t(dfObio[1,]))
+    dfObio <- dfObio[-1,]
+    pos <- unique(
+        c(
+            grep("meta_", names(dfObio)),
+            grep("META_", toupper(names(dfObio)))
+        )
+    )
+    
+    if (length(pos) > 0){
+        selVec <- c(
+            "sampleName",
+            names(dfObio)[pos]
+        )
+      
+        dfTemp <- dfObio[,selVec]
+        
+        dfMeta <- OsC@meta.data
+        dfMeta[["cellID"]] <- row.names(dfMeta)
+        dfMeta <- dfMeta[,c("cellID", "sampleID")]
+        
+        dfTemp <- merge(
+            dfTemp, 
+            dfMeta, 
+            by.x = "sampleName",
+            by.y = "sampleID"
+        )
+        
+        row.names(dfTemp) <- dfTemp$cellID
+        dfTemp$cellID <- NULL
+        
+        OsC <- addDf2seuratMetaData(
+            obj = OsC, 
+            dfAdd = dfTemp
+        )
+    }
+}
+## Done create cellRanger QC plots                                           ##
+###############################################################################
+
+
 ###############################################################################
 ## Setting plotting parameters                                               ##
 dotsize  = 1
@@ -152,6 +207,7 @@ Obio@parameterList$dendrofactor <- dendrofactor
 
 
 if (length( Obio@dataTableList[["referenceList"]]$s.genes) > 3 & length( Obio@dataTableList[["referenceList"]]$g2m.genes) > 3){
+  
     OsC <- Seurat::CellCycleScoring(
           OsC, 
           s.features = Obio@dataTableList[["referenceList"]]$s.genes, 

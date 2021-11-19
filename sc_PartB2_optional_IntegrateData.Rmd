@@ -45,12 +45,7 @@ knitr::opts_chunk$set(
 
 ```
 
-
-```{r populate_meta_data_database, eval=TRUE, echo=F, results=F}
-## libraries ##
-library(tidyverse)
-library(Seurat)
-
+```{r, eval=TRUE, echo=F, results=F}
 VersionPdfExt <- paste0(".V", gsub("-", "", Sys.Date()), ".pdf")
 
 if (dir.exists("/Volumes/babs/working/boeings/")){
@@ -73,32 +68,41 @@ dbTable <- read.delim(
 
 db.pwd <- as.vector(dbTable[1,1])
 
-
-
-
-
-
-# source(
-#     paste0(
-#         hpc.mount,
-#         "Stefan/protocol_files/github/boeings/packages/packageSourceCode/SBwebtools.pckg.r"
-#     )
-# )
-
-# source(
-#     paste0(
-#         hpc.mount,
-#         "Stefan/protocol_files/github/boeings/packages/scTools/scTools.r"
-#     )
-# )
-
-source("assets/R/scTools.r")
-source("assets/R/SBwebtools.pckg.r")
-
-
-if (length(.libPaths()) > 2){
-    .libPaths(.libPaths()[2:3])
+###############################################################################
+##                                                                           ##
+if (!requireNamespace("remotes")){
+    install.packages("remotes")
 }
+
+remotes::install_github("rstudio/renv")
+
+if (file.exists("renv.lock")){
+    renv::restore()
+} else {
+    renv::init()
+}
+
+## Done                                                                      ##
+###############################################################################
+
+#install.packages("remotes")
+renv::install("decusInLabore/biologicSeqTools")
+renv::install("decusInLabore/biologicToolsSC")
+renv::install("decusinlabore/biologicViewerSC")
+
+library(Seurat)
+library(tidyverse)
+library(biologicSeqTools)
+library(biologicToolsSC)
+
+
+# source("assets/R/scTools.r")
+# source("assets/R/SBwebtools.pckg.r")
+
+
+# if (length(.libPaths()) > 2){
+#     .libPaths(.libPaths()[2:3])
+# }
 
 ObioFN <- paste0("../", list.files("..")[grep(".bioLOGIC.Robj", list.files(".."))])
 
@@ -110,39 +114,46 @@ if (file.exists(ObioFN)){
 }
 
 ## Reset paths to local environment
-
-
 Obio <- setMountingPoint(Obio)
 Obio <- setAnalysisPaths(Obio)
 Obio <- setCrickGenomeAndGeneNameTable(Obio)
 Obio <- createAnalysisFolders(
-    Obio,
-    baseDir="/camp/stp/babs/working/boeings/Projects/",
-    localBaseDir = paste0(hpc.mount, "Projects/")
+    Obio
 )
 Obio <- setDataBaseParameters(Obio)
 
-Obio@parameterList$species <- "mus_musculus"
-###############################################################################
-## Add annotation file                                                       ##
-Obio@parameterList$species <- "mus_musculus"
-Obio <- addGeneAnnotation(Obio)
 
-dfMM_Anno <- Obio@dfGeneAnnotation
-dfMM_Anno <- unique(dfMM_Anno[,c("mgi_symbol", "hgnc_symbol")])
-dfMM_Anno <- dfMM_Anno[dfMM_Anno$hgnc_symbol != "",]
 
-#Obio@parameterList$species <- "homo_sapiens"
-Obio <- addGeneAnnotation(Obio)
+## Load Seurat object
+SeuratFN <- paste0(Obio@parameterList$localWorkDir,list.files(Obio@parameterList$localWorkDir)[grep(".Seurat.Robj", list.files(Obio@parameterList$localWorkDir))])
 
-## Done adding annotation file                                               ##
-###############################################################################
+
+if (file.exists(SeuratFN)){
+    load(SeuratFN)
+    print(paste0("Obio object ", Obio@parameterList$localWorkDir,SeuratFN, " exists and is loaded."))
+    
+} else {
+    exit()
+}
+
+row.names(OsC@meta.data) <- OsC@meta.data$cellID
+
+if (Obio@parameterList$scIntegrationMethod == "SCT"){
+    resultSlot = "SCT"
+} else {
+    resultSlot = "RNA"
+}
 
 ```
 
+```{r, eval=TRUE, echo=F, results=F}
+## Add extra metadata columns ##
+OsC@meta.data[["nFeaturesRNA"]] <- "Below_1000"
+OsC@meta.data[OsC@meta.data$nFeaturesRNA >= 1000, "nFeaturesRNA"] <- "Above_1000"
 
+```
 
-```{r populate_expr_database, eval=TRUE, echo=F, results=F}
+```{r, eval=TRUE, echo=F, results=F}
 ###############################################################################
 ## Otional add extra data set                                                ##
 
