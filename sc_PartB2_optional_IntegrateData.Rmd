@@ -148,8 +148,8 @@ if (Obio@parameterList$scIntegrationMethod == "SCT"){
 
 ```{r, eval=TRUE, echo=F, results=F}
 ## Add extra metadata columns ##
-OsC@meta.data[["nFeaturesRNA"]] <- "Below_1000"
-OsC@meta.data[OsC@meta.data$nFeaturesRNA >= 1000, "nFeaturesRNA"] <- "Above_1000"
+OsC@meta.data[["nFeaturesRNA_High_Low"]] <- "Below_1000"
+OsC@meta.data[OsC@meta.data$nFeaturesRNA >= 1000, "nFeaturesRNA_High_Low"] <- "Above_1000"
 
 ```
 

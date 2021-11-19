@@ -299,99 +299,27 @@ DGEtagVec <- as.vector(NULL, mode = "character")
 
 DGEinputList <- list(
   "comp_1" = list(
-      "name"    = "DGE_C9_vs_C5",
-      "DGEselCol" = "seurat_clusters",
+      "name"    = "DGE_MatB52_vs_Control",
+      "DGEselCol" = "meta_Treatment",
       "DGEsampleList" = list(
-          "C9"   = c(9),
-          "C5" = c(5)
+          "MatB52"   = c("MatB52"),
+          "Control" = c("Control")
       )
   ),
   "comp_2" = list(
-      "name"    = "DGE_C9_vs_C0",
-      "DGEselCol" = "seurat_clusters",
+      "name"    = "DGE_Regeneron_vs_Control",
+      "DGEselCol" = "meta_Treatment",
       "DGEsampleList" = list(
-          "C9"   = c(9),
-          "C0" = c(0)
+          "Regeneron"   = c("Regeneron"),
+          "Control" = c("Control")
       )
   ),
   "comp_3" = list(
-      "name"    = "DGE_C9_vs_C3",
-      "DGEselCol" = "seurat_clusters",
+      "name"    = "DGE_Regeneron_vs_MatB52",
+      "DGEselCol" = "meta_Treatment",
       "DGEsampleList" = list(
-          "C9"   = c(9),
-          "C3" = c(3)
-      )
-  ),
-  "comp_4" = list(
-      "name"    = "DGE_C5_PK_vs_C0_3",
-      "DGEselCol" = "seurat_clusters",
-      "DGEsampleList" = list(
-          "C5_PK"   = c(5),
-          "C0_3" = c(0,3)
-      )
-  ),
-  "comp_5" = list(
-      "name"    = "DGE_C5_PK_vs_C3",
-      "DGEselCol" = "seurat_clusters",
-      "DGEsampleList" = list(
-          "C5_PK"   = c(5),
-          "C3" = c(3)
-      )
-  ),
-  "comp_6" = list(
-      "name"    = "DGE_C7_vs_C5_PK",
-      "DGEselCol" = "seurat_clusters",
-      "DGEsampleList" = list(
-          "C7"   = c(7),
-          "C5_PK" = c(5)
-      )
-  ),
-  "comp_7" = list(
-      "name"    = "DGE_C7_vs_C9",
-      "DGEselCol" = "seurat_clusters",
-      "DGEsampleList" = list(
-          "C7"   = c(7),
-          "C9" = c(9)
-      )
-  ),
-  "comp_8" = list(
-      "name"    = "DGE_C7_vs_C0_3",
-      "DGEselCol" = "seurat_clusters",
-      "DGEsampleList" = list(
-          "C7"   = c(7),
-          "C0_3" = c(0,3)
-      )
-  ),
-  "comp_9" = list(
-      "name"    = "DGE_C7_vs_C0_3_6",
-      "DGEselCol" = "seurat_clusters",
-      "DGEsampleList" = list(
-          "C7"   = c(7),
-          "C0_3_6" = c(0,3,6)
-      )
-  ),
-  "comp_9" = list(
-      "name"    = "DGE_C7_vs_C6",
-      "DGEselCol" = "seurat_clusters",
-      "DGEsampleList" = list(
-          "C7"   = c(7),
-          "C6" = c(6)
-      )
-  ),
-  "comp_10" = list(
-      "name"    = "DGE_C7_vs_C0",
-      "DGEselCol" = "seurat_clusters",
-      "DGEsampleList" = list(
-          "C7"   = c(7),
-          "C0" = c(0)
-      )
-  ),
-  "comp_11" = list(
-      "name"    = "DGE_C7_vs_C3",
-      "DGEselCol" = "seurat_clusters",
-      "DGEsampleList" = list(
-          "C7"   = c(7),
-          "C3" = c(3)
+          "Regeneron"   = c("Regeneron"),
+          "Control" = c("MatB52")
       )
   )
 )

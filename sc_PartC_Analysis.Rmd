@@ -535,7 +535,7 @@ if (file.exists(FNcol) | file.exists(FNcolCustom)){
 
 if (length(params$catColorList$clusterName) == length(colVec)){
     params$catColorList$clusterName <- colVec
-    params$catColorList$clusterColor <-  as.vector(colVec)
+    params$catColorList$clusterColor <-  colVec
 }
 ## Review the default app settings and colors:
 
@@ -546,7 +546,7 @@ if (length(params$catColorList$clusterName) == length(colVec)){
 
 
 
-```{r populate_expr_database_1, eval=TRUE, echo=F, results=F}
+```{r, eval=TRUE, echo=F, results=F}
 
 
 #dfIDTable <- Obio@dataTableList$dfExpr

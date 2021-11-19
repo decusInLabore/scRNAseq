@@ -447,6 +447,18 @@
       "RemoteSha": "b42c6599f15af23a84b20e045ac0ca31102ceb22",
       "Hash": "97cfcda47548dd979d7870e184959791"
     },
+    "biologicViewerSC": {
+      "Package": "biologicViewerSC",
+      "Version": "0.0.1.0",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteUsername": "decusinlabore",
+      "RemoteRepo": "biologicViewerSC",
+      "RemoteRef": "main",
+      "RemoteSha": "e9f0928579ff260ea398838aaed04340ef8fa1c7",
+      "Hash": "24fc9624a4e6919d2a682a014dffc686"
+    },
     "bit": {
       "Package": "bit",
       "Version": "1.1-15.2",
@@ -928,6 +940,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "465ccb84427f5fe2c54f8620666db131"
+    },
+    "gdtools": {
+      "Package": "gdtools",
+      "Version": "0.2.3",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "12a524de5a491ff39debb9311fc0763f"
     },
     "genefilter": {
       "Package": "genefilter",
@@ -1499,6 +1518,13 @@
       "Repository": "CRAN",
       "Hash": "63576bc6d9730443164d9108c7c05044"
     },
+    "officer": {
+      "Package": "officer",
+      "Version": "0.4.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "0a93ccc072f566f8a65fe75b5b6f81e7"
+    },
     "openssl": {
       "Package": "openssl",
       "Version": "1.4.5",
@@ -1731,15 +1757,15 @@
     },
     "renv": {
       "Package": "renv",
-      "Version": "0.14.0-46",
+      "Version": "0.14.0-59",
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
       "RemoteRepo": "renv",
       "RemoteUsername": "rstudio",
-      "RemoteRef": "master",
-      "RemoteSha": "78612cff6dd90b9e418f44af269893bc3a7cd2d8",
-      "Hash": "12d66b27af736b85a28ad428628eb8d9"
+      "RemoteRef": "HEAD",
+      "RemoteSha": "a614122a1daf1ffb0a96c8d393eb58f88c1a84fb",
+      "Hash": "6a4257c12c1a87b15e4baac1fdd6ab6b"
     },
     "reprex": {
       "Package": "reprex",
@@ -1871,6 +1897,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "6a20c2cdf133ebc7ac45888c9ccc052b"
+    },
+    "rvg": {
+      "Package": "rvg",
+      "Version": "0.2.5",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "a823d1d2fd9dcb8eb648d85ad68be046"
     },
     "sass": {
       "Package": "sass",
@@ -2075,6 +2108,13 @@
       "Repository": "CRAN",
       "Hash": "b227d13e29222b4574486cfcbde077fa"
     },
+    "systemfonts": {
+      "Package": "systemfonts",
+      "Version": "1.0.3",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "5be9fcf8ef6763e8cb13ab009e273a1d"
+    },
     "tensor": {
       "Package": "tensor",
       "Version": "1.5",
@@ -2088,6 +2128,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "89e55ebe4f5ddd7f43f0f2bc6d96c950"
+    },
+    "thinkr": {
+      "Package": "thinkr",
+      "Version": "0.15",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "dc851be53475bad85573d6893c3046d6"
     },
     "tibble": {
       "Package": "tibble",
