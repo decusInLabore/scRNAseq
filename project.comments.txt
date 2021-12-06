@@ -1,0 +1,47 @@
+ml CellRanger/3.0.2-bcl2fastq-2.20.0
+
+sbatch --time=48:00:00 --wrap "cellranger count --id=CAM441A4 --transcriptome=/camp/svc/reference/Genomics/10x/10x_transcriptomes/GRCh38-3.0.0_GFP-tdT --fastqs=/camp/stp/babs/inputs/sequencing/fastq/190719_K00102_0367_BH7V
+NFBBXY/fastq/SC19153 --sample=CAM441A7" --job-name="cellRanger.vpl359A" -c 16 --mem-per-cpu=7000 -o cellranger.A7.slurm >> commands.txt
+
+sbatch --time=48:00:00 --wrap "cellranger count --id=CAM441A5 --transcriptome=/camp/svc/reference/Genomics/10x/10x_transcriptomes/GRCh38-3.0.0_GFP-tdT --fastqs=/camp/stp/babs/inputs/sequencing/fastq/190719_K00102_0367_BH7V
+NFBBXY/fastq/SC19153 --sample=CAM441A8" --job-name="cellRanger.vpl359A" -c 16 --mem-per-cpu=7000 -o cellranger.A8.slurm >> commands.txt
+
+A7:
+    /camp/stp/babs/inputs/sequencing/data/bonfantip/roberta.ragazzini/SC21201/primary_data/211123_A01366_0094_BHV7G7DSX2/fastq/
+A8:
+    /camp/stp/babs/inputs/sequencing/data/bonfantip/roberta.ragazzini/SC21201/primary_data/211123_A01366_0094_BHV7G7DSX2/fastq/
+    
+    
+/camp/stp/babs/inputs/sequencing/fastq/211108_A01366_0081_AHTC7NDSX2/cellranger-count/SC21185/PAR4411A1/outs/filtered_feature_bc_matrix
+
+
+The new SC21201 has two samples:
+    -A7total cortex that corresponds to SC19153 Epi10+Epi14
+-A8total medulla that corresponds to SC19163 Epi6+Epi10
+
+( cannot retrieve RAG codes of SC19153, I put the original names)
+
+Ideally, we would like to have the new analysis with the two new samples only and another one with the new samples with the 4 others from SC19153 so that we combine the two biological replicates together.
+
+A7 - quickstart
+/camp/stp/babs/inputs/sequencing/fastq/211123_A01366_0094_BHV7G7DSX2/cellranger-count/SC21201/RAG4463A7/outs/filtered_feature_bc_matrix
+
+A8 - quickstart
+/camp/stp/babs/inputs/sequencing/fastq/211123_A01366_0094_BHV7G7DSX2/cellranger-count/SC21201/RAG4463A8/outs/filtered_feature_bc_matrix
+
+
+,,,
+
+Epi6 - SC1953 - CAM441A4
+Epi10 - SC1953 - CAM441A6
+sampleName,Epip6,Epip7,Epip10,Epip14,,,
+limsID,CAM441A4,CAM441A5,CAM441A6,CAM441A7,,,
+
+Epi6
+/camp/stp/babs/working/boeings/Projects/bonfantip/sara.campinoti/359B_PBL_SC_subset_P6_P7_P10_P14_scRNAseq_lung_thymus_SC19153/FASTQ_files/CAM441A4/outs/filtered_feature_bc_matrix
+Epi10
+/camp/stp/babs/working/boeings/Projects/bonfantip/sara.campinoti/359B_PBL_SC_subset_P6_P7_P10_P14_scRNAseq_lung_thymus_SC19153/FASTQ_files/CAM441A6/outs/filtered_feature_bc_matrix
+
+
+
+/camp/stp/babs/inputs/sequencing/fastq/211123_A01366_0094_BHV7G7DSX2/cellranger-count/SC21201/RAG4463A8/outs/filtered_feature_bc_matrix

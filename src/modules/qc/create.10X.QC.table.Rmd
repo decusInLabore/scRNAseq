@@ -88,6 +88,10 @@ dfRes$Parameter <- gsub("[.]", " ", dfRes$Parameter)
 
 sheetName <- substr(paste0(Obio@parameterList$project_id, "_QC_Parameter_Table"), 1, 31)
 
+if (!dir.exists(Obio@parameterList$reportTableDir)){
+    dir.create(Obio@parameterList$reportTableDir, recursive = T)
+}
+
 createXLSXoutput(
     dfTable = dfRes,
     outPutFN = paste0(Obio@parameterList$reportTableDir ,Obio@parameterList$project_id, "_QC_Parameter_Table.xlsx"),
