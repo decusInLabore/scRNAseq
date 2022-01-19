@@ -107,6 +107,60 @@ for (i in 1:length(cellTypeIDs)){
   levels <- df$Cluster
   dfResTemp$Cluster <- factor(dfResTemp$Cluster, levels = levels)
   
+  #############################################################################
+  ##
+  tableOutPutFN <- NULL
+  
+  if (!is.null(Obio@parameterList$reportTableDir) & dir.exists(Obio@parameterList$reportTableDir)){
+      tabBaseFN <- paste0(
+          Obio@parameterList$project_id, 
+          "_",
+          cellTypeIDs[i],
+          "_cell_number_cluster_sample_table.xlsx"
+      )
+    
+      tableOutPutFN <- paste0(
+          Obio@parameterList$reportTableDir,
+          tabBaseFN
+      )
+      
+      library(openxlsx)
+      wb <- createWorkbook()
+
+      hs1 <- createStyle(
+          fontColour = "#ffffff",
+          fgFill = "#000000",
+          halign = "CENTER",
+          textDecoration = "Bold"
+      )
+      
+      sheetName <- substr(paste0("Cell_numbers_", Obio@parameterList$project_id),1,30)
+  
+      addWorksheet(
+          wb, 
+          sheetName = sheetName
+      )
+  
+  
+      freezePane(wb, sheetName ,  firstActiveRow = 2)
+      writeData(wb, 1, dfResTemp, startRow = 1, startCol = 1, headerStyle = hs1)
+      
+      saveWorkbook(
+          wb,
+          tableOutPutFN ,
+          overwrite = TRUE
+      )
+ 
+  }
+
+
+
+  
+  
+  
+  ##
+  #############################################################################
+  
   ## Order ##
    
    plotList[[tag]] <- ggplot(
@@ -146,12 +200,22 @@ for (i in 1:length(cellTypeIDs)){
     
   ###########################################################################
   ## Add to chunk                                                          ##
+  
+  if (exists("tableOutPutFN") & !is.null(tableOutPutFN)){
+      FNtab <- paste0("report_tables/", tabBaseFN)
+      downloadTable <- paste0('Download cell numbers per cluster and sample in a table <a href="',FNtab,'">here</a>.')
+      
+  } else {
+      downloadTable <- ""
+  }
+  
   figCap <- paste0(
       '**Figure ',
       figureCount,
       'A:** Cell Count in each cluster for ', 
       tag,
-      'Download a pdf of this figure <a href="',FNrel,'" target="_blank">here</a>. '
+      'Download a pdf of this figure <a href="',FNrel,'" target="_blank">here</a>. ',
+      downloadTable
   )
   
   NewChnk <- paste0(
