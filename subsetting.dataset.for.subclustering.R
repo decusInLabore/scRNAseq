@@ -10,7 +10,7 @@ remotes::install_github("rstudio/renv")
 if (!file.exists("renv.lock")){
     renv::init()
 } else {
-    renv::restore()
+    renv::restore(prompt=FALSE)
 }
 
 
@@ -18,24 +18,24 @@ if (!file.exists("renv.lock")){
 ## Prepare subset for sub-clustering                                         ##
 library(Seurat)
 ## load Seurat object with basedata
-FN <- "/camp/stp/babs/working/boeings/Projects/lovellbadger/emily.frost/358B_RLL_EF_single_cell_p27kip1_in_ovarian_granulosa_cells_SC19235/workdir/rll358B.Seurat.Robj"
+FN <- "/camp/stp/babs/working/boeings/Projects/bonfantip/roberta.ragazzini/471_scRNAseq_newSamples_Epi6_Epi10_SC20193_SC21201/workdir/A4A6A7A8.Seurat.Robj"
 load(FN)
 
 ## Data selection for subsetting:
 sampleID: primaryTumor
 
 
-
-OsC_sel1 <- subset(x = OsC, subset = seurat_clusters %in% c(1,2,3,8,14) )
+# Remove clusters: 4, 8, 11, 13.
+OsC_sel1 <- subset(x = OsC, subset = seurat_clusters %in% c(0:3, 5:7, 9:10, 12) )
 
 sampleIDs <- unique(OsC_sel1$sampleID)
 
 for (i in 1:length(sampleIDs)){
     FNout <- paste0(
-      "/camp/stp/babs/working/boeings/Projects/lovellbadger/emily.frost/358B_RLL_EF_single_cell_p27kip1_in_ovarian_granulosa_cells_SC19235/basedata/",
+      "/camp/stp/babs/working/boeings/Projects/bonfantip/roberta.ragazzini/471_scRNAseq_newSamples_Epi6_Epi10_SC20193_SC21201/basedata/",
       "input_",
       sampleIDs[i],
-      "_C123814.txt"
+      "_C012356791012.txt"
     )
     
     OsC_temp <- subset(x= OsC_sel1, subset = sampleID == sampleIDs[i])
@@ -47,8 +47,8 @@ for (i in 1:length(sampleIDs)){
     }
 }
 
-OsC@meta.data[["meta_Subclustering_rll358B"]] <- "Rest"
-OsC@meta.data[OsC@meta.data$seurat_clusters %in% c(1,2,3,8,14), "meta_Subclustering_rll358B"] <- "Selected"
+OsC@meta.data[["meta_Subclustering_A4A6A7A8"]] <- "Rest"
+OsC@meta.data[OsC@meta.data$seurat_clusters %in% c(0:3, 5:7, 9:10, 12), "meta_Subclustering_A4A6A7A8"] <- "Selected"
 
 save(
   OsC, 
