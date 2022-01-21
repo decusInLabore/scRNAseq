@@ -1,234 +1,176 @@
+if (dir.exists("/Volumes/babs/working/boeings/")){
+    hpc.mount <- "/Volumes/babs/working/boeings/"
+} else if (dir.exists("Y:/working/boeings/")){
+    hpc.mount <- "Y:/working/boeings/"
+} else if (dir.exists("/camp/stp/babs/working/boeings/")){
+    hpc.mount <- "/camp/stp/babs/working/boeings/"
+} else {
+    hpc.mount <- ""
+}
+
+FN <- paste0(hpc.mount, "Projects/reference_data/documentation/BC.parameters.txt")
+dbTable <- read.delim(
+    FN,
+    sep = "\t",
+    stringsAsFactors = F
+)
+
+db.pwd <- as.vector(dbTable[1,1])
 
 
 library(bioLOGIC)
 
+## Load first 
+
 dfMeta <- import.db.table.from.db(
-    dbtable = "vpl412_PCA",
-    dbname = "vpl_data",
+    dbtable = "A4A6A7A8_PCA",
+    dbname = "pbl_data",
     user     = "boeingS",
-    password = "5+3f4nB04042018",
+    password = db.pwd,
     host     = "10.27.241.82"
 )
 
-dfMeta <- dfMeta[,c("PC1", "PC2", "sampleID", "clusterName","clusterColor", "sampleColor", "DM_Pseudotime")]
-dfMeta$sampleID <- factor(dfMeta$sampleID, levels = c("DIV0", "DIV4", "DIV10", "DIV20"))
-dfMeta$DM_Pseudotime
+dfMeta[["seuratSampleID"]] <- sapply(dfMeta$cellID, function(x) unlist(strsplit(x, "_"))[2])
+dfMeta[["mergeID"]] <- sapply(dfMeta$cellID, function(x) unlist(strsplit(x, "_"))[1])
+
+dfMeta[["merge"]] <- paste0(dfMeta$sampleID, "_", dfMeta$mergeID)
+
+#dfMeta <- dfMeta[,c("cellID","UMAP_1", "UMAP_2", "sampleName", "sampleColor", "clusterName", "clusterColor")]
+
+dfMeta <- dfMeta[,c("cellID","UMAP_1", "UMAP_2", "clusterName", "clusterColor")]
+dfMeta[["state"]] <- "Before Subclustering"
+
+## Load second
+dfMeta2 <- import.db.table.from.db(
+    dbtable = "A4A6A7A8sub_PCA",
+    dbname = "pbl_data",
+    user     = "boeingS",
+    password = db.pwd,
+    host     = "10.27.241.82"
+)
+
+dfMeta2 <- dfMeta2[,c("cellID","UMAP_1", "UMAP_2", "sampleName", "sampleColor", "clusterName", "clusterColor")]
+dfMeta2 <- dfMeta2[,c("cellID","UMAP_1", "UMAP_2", "clusterName", "clusterColor")]
+dfMeta2[["state"]] <- "New UMAP After Subclustering A4A6A7A8sub"
 
 
-min(dfMeta$DM_Pseudotime)
-max(dfMeta$DM_Pseudotime)
 
 
-b <- seq(from = 0, to = ceiling(max(dfMeta$DM_Pseudotime)), by = 0.05)
-names <- c(paste0("P", 2:length(b)))
+
+## Add transition state
+dfMetaT1 <- dfMeta
+dfMetaT1[["state"]] <- "Cells Marked for Removal in A4A6A7A8"
+dfMetaT1$clusterName <- gsub("C4", "Remove",dfMetaT1$clusterName)
+dfMetaT1$clusterName <- gsub("C8", "Remove",dfMetaT1$clusterName)
+dfMetaT1$clusterName <- gsub("C11", "Remove",dfMetaT1$clusterName)
+dfMetaT1$clusterName <- gsub("C13", "Remove",dfMetaT1$clusterName)
+dfMetaT1[dfMetaT1$clusterName == "Remove", "clusterColor"] <- "#000000"
 
 
-dfMeta$TimeBin <- cut(dfMeta$DM_Pseudotime, breaks = b, labels = names)
+
+dfMetaT2 <- dfMetaT1
+dfMetaT2[["state"]] <- "UMAP A4A6A7A8 After Cell Removal"
+dfMetaT2 <- dfMetaT2[-grep("Remove", dfMetaT2$clusterName), ]
+
+###############################################################################
+## Add cell cycle states                                                     ##
+dfMetaCS <- import.db.table.from.db(
+    dbtable = "A4A6A7A8sub_PCA",
+    dbname = "pbl_data",
+    user     = "boeingS",
+    password = db.pwd,
+    host     = "10.27.241.82"
+)
+
+dfWO <- dfMetaCS[dfMetaCS$UMAP_1_Without_Regression != 0 & dfMetaCS$UMAP_2_Without_Regression != 0 ,c("cellID", "UMAP_1_Without_Regression", "UMAP_2_Without_Regression", "ClusterNames_CellCycle_Regression",  "clusterColor")]
+
+## Done                                                                      ##
+###############################################################################
+
+
+dfReel <- rbind(
+    dfMeta, 
+    dfMetaT1,
+    dfMetaT2,
+    dfMeta2
+)
+
+dfReel$state <- factor(dfReel$state, levels = c(
+    "Before Subclustering", 
+    "Cells Marked for Removal in A4A6A7A8", 
+    "UMAP A4A6A7A8 After Cell Removal", 
+    "New UMAP After Subclustering A4A6A7A8sub"
+    )
+)
 
 library(gganimate)
 #> Loading required package: ggplot2
-dir.create("partT1")
-dir.create("partT2")
-
 
 # We'll start with a static plot
-p <- ggplot(dfMeta, aes(x = PC1, y = PC2, color = clusterName)) +
-    geom_point()
 
-p2 <- p + facet_wrap( ~ sampleID,  ncol = 2)
+maxX <- 1.1 * max(dfReel$UMAP_1)
+minX <- 1.1 * min(dfReel$UMAP_1)
+maxY <- 1.1 * max(dfReel$UMAP_2)
+minY <- 1.1 * min(dfReel$UMAP_2)
 
-setwd("partT1")
+p <- ggplot(dfReel, aes(x = UMAP_1, y = UMAP_2, color = clusterColor)) +
+    geom_point() + ggplot2::theme_bw(
+    )  +  ggplot2::theme(
+        axis.text.y   = ggplot2::element_text(size=8),
+        axis.text.x   = ggplot2::element_text(size=8),
+        axis.title.y  = ggplot2::element_text(size=8),
+        axis.title.x  = ggplot2::element_text(size=8),
+        axis.line = ggplot2::element_line(colour = "black"),
+        panel.border = ggplot2::element_rect(colour = "black", fill=NA, size=1),
+        plot.title = ggplot2::element_text(hjust = 0.5, size = 12),
+        legend.title = ggplot2::element_blank()
+    ) + scale_colour_identity() + labs(title = 'Stage: {closest_state}') + ggplot2::coord_fixed(ratio=1
+    )  + xlim(c(minX, maxX)) + ylim(c(minY, maxY))
+
+## Check
+p2 <- p + facet_wrap( ~ state,  ncol = 2)
+
+###############################################################################
+## Add cluster labels in plot                                                ##
+library(dplyr)
+dfTextPos <- dfReel %>% group_by(clusterName, clusterColor) %>% select(UMAP_1, UMAP_2) %>% summarize_all(mean)
+p <- p + ggrepel::geom_label_repel(data = dfTextPos,aes(label = clusterName))
+##
+###############################################################################
+
+
+library(gganimate)
 anim <- p +
-    transition_states(sampleID,
-                      transition_length = 3,
-                      state_length = 1)
+    gganimate::transition_states(state,
+                      transition_length = 1,
+                      state_length = 5,
+                      wrap = FALSE)
 
-
-
-anim <- anim +
-    enter_fade() + enter_drift(x_mod = -1) +
-    exit_shrink() + exit_drift(x_mod = 5) +
-    ggtitle('Now showing {closest_state}',
-            subtitle = 'Frame {frame} of {nframes}')
-
-anim
-
-setwd("../partT2")
-anim <- p2 +
-    transition_states(sampleID,
-                      transition_length = 3,
-                      state_length = 1)
-
-
-
-anim <- anim +
-    enter_fade() + enter_drift(x_mod = -1) +
-    exit_shrink() + exit_drift(x_mod = 5) +
-    ggtitle('Now showing {closest_state}',
-            subtitle = 'Frame {frame} of {nframes}')
-
-anim
+animate(anim, fps=5)
 
 
 ###############################################################################
-## Combine both in one video
-setwd("..")
-png1 <- paste0("partT1/", list.files("partT1"))
-png2 <- paste0("partT2/", list.files("partT2"))
+## Save                                                                      ##
+animate(anim, nframes = 24, device = "png",
+        renderer = file_renderer("test_anim", prefix = "A4A5_UMAP", overwrite = TRUE))
 
-videoDir <- "/Volumes/babs/www/boeings/bioLOGIC_external/data/vpl412/html/report_videos/"
+
+#library(av)
+png1 <- paste0("test_anim/", list.files("test_anim"))
+
+videoDir <- "/Volumes/babs/www/boeings/bioLOGIC_external/data/A4A6A7A8sub/html/report_videos/"
 
 if (!dir.exists(videoDir)){
     dir.create(videoDir)
 }
 
-FNtsVideo <- paste0(videoDir, "TSanime.mp4")
+FNtsVideo <- paste0(videoDir, "processAnime.mp4")
 
-library(av)
 png_files <- c(png1) #sprintf("input%03d.png", 1:10)
 av::av_encode_video(png_files, FNtsVideo , framerate = 1)
 
 
 
-## Done
-###############################################################################
-
-###############################################################################
-## Cycle through PCs
-
-library(bioLOGIC)
-library(tidyr)
-
-dfMeta <- import.db.table.from.db(
-    dbtable = "vpl412_PCA",
-    dbname = "vpl_data",
-    user     = "boeingS",
-    password = "5+3f4nB04042018",
-    host     = "10.27.241.82"
-)
-
-dfAnno <- dfMeta[,c("cellID", "sampleID", "sampleColor", "clusterName", "clusterColor", "DM_Pseudotime")]
-
-selVec <- c(
-    names(dfMeta)[grep("^UMAP", names(dfMeta))],
-    names(dfMeta)[grep("^PC", names(dfMeta))]
-)
-
-odd <- seq_along(selVec) %% 2 == 1
-
-dfPair <- data.frame(
-    odd = selVec[odd],
-    even = selVec[!odd]
-)
-
-dfPair[["ID"]] <- paste0(dfPair$odd, "_vs_", dfPair$even)
-
-dfMetaX <- dfMeta[, c("cellID", selVec[odd])] %>% pivot_longer(
-    cols = all_of(selVec[odd]),
-    names_to = "DimX",
-    values_to = "X",
-    values_drop_na = TRUE
-)
-
-dfMetaX[["Dim"]] <- dfMetaX$DimX
-
-for (i in 1:nrow(dfPair)){
-    dfMetaX[["Dim"]] <- gsub(dfPair[i, "odd"], dfPair[i, "ID"], dfMetaX$Dim) 
-}
-
-dfMetaX[["mergeID"]] <- paste0(dfMetaX$cellID, "_", dfMetaX$Dim)
-
-dfMetaY <- dfMeta[,c("cellID", selVec[!odd])] %>% pivot_longer(
-    cols = all_of(selVec[!odd]),
-    names_to = "DimY",
-    values_to = "Y",
-    values_drop_na = TRUE
-)
-
-dfMetaY[["Dim"]] <- dfMetaY$DimY
-for (i in 1:nrow(dfPair)){
-    dfMetaY[["Dim"]] <- gsub(dfPair[i, "even"], dfPair[i, "ID"], dfMetaY$Dim) 
-}
-
-dfMetaY[["mergeID"]] <- paste0(dfMetaY$cellID, "_", dfMetaY$Dim)
-dfMetaY$cellID <- NULL
-dfMetaY$Dim <- NULL
-
-
-dfMeta2 <- merge(
-    dfMetaX,
-    dfMetaY, 
-    by.x = "mergeID",
-    by.y = "mergeID"
-)
-
-dfMeta <- merge(
-    dfAnno, 
-    dfMeta2, 
-    by.x = "cellID",
-    by.y = "cellID"
-)
-
-## Done 
-###############################################################################
-
-###############################################################################
-## Plots and Annimations                                                     ##
-
-library(gganimate)
-#> Loading required package: ggplot2
-
-# We'll start with a static plot
-dfMeta$sampleID <- factor(dfMeta$sampleID, levels = c("DIV0", "DIV4", "DIV10", "DIV20"))
-dfMeta$Dim <- factor(dfMeta$Dim, levels= sort(unique(dfMeta$Dim), decreasing = T))
-dfMeta <- dfMeta[order(dfMeta$Dim, dfMeta$sampleID, dfMeta$clusterName),]
-
-p <- ggplot(dfMeta, aes(x = X, y = Y, color = clusterName)) +
-    geom_point()
-
-p2 <- p + facet_wrap( ~ sampleID,  ncol = 2)
-
-dir.create("part1")
-dir.create("part2")
-setwd("part1")
-
-
-anim <- p + transition_states(
-    Dim,
-    transition_length = 3,
-    state_length = 1
-) 
-
-
-
-anim <- anim + enter_fade() + enter_drift(x_mod = -1) +
-    exit_shrink() + exit_drift(x_mod = 5) +
-    ggtitle('Now showing {closest_state}',
-            subtitle = 'Frame {frame} of {nframes}')
-
-anim
-
-setwd("../part2")
-
-anim <- p2 + transition_states(
-    Dim,
-    transition_length = 3,
-    state_length = 1
-)  
-
-
-anim <- anim +
-    enter_fade() + enter_drift(x_mod = -1) +
-    exit_shrink() + exit_drift(x_mod = 5) + ggtitle('Now showing {closest_state}',
-                                                    subtitle = 'Frame {frame} of {nframes}')
-
-anim
-
-library(av)
-png_files <- list.files() #sprintf("input%03d.png", 1:10)
-av::av_encode_video(png_files, '../PCdim.mp4', framerate = 1)
-utils::browseURL('../output.mp4')
-
-
 ## Done                                                                      ##
 ###############################################################################
+

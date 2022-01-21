@@ -688,7 +688,7 @@ biologicViewerSC::seuratObjectToViewer(
     dbname = Obio@dbDetailList$primDataDB,
     db.pwd = db.pwd,
     db.user = Obio@dbDetailList$db.user,
-    appDomains = c("shiny-bioinformatics.crick.ac.uk","10.%"),
+    appDomains = c("shiny-bioinformatics.crick.ac.uk","10.%", "bioinformatics.crick.ac.uk"),
     geneDefault = geneDefault,
     dfExpr = dfExpr
 )
