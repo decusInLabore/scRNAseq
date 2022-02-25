@@ -1,0 +1,7 @@
+"sampleID"	"sampleName"	"sampleColor"
+"CD34negCD38neg"	"CD34negCD38neg"	"#F8766D"
+"CD34negCD38pos"	"CD34negCD38pos"	"#B79F00"
+"CD34posCD38neg"	"CD34posCD38neg"	"#00BA38"
+"CD34posCD38pos"	"CD34posCD38pos"	"#00BFC4"
+"Lineage_Negative"	"Lineage_Negative"	"#619CFF"
+"Total_Thymoctytes"	"Total_Thymoctytes"	"#F564E3"
