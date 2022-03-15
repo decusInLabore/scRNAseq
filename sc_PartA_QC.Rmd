@@ -26,7 +26,7 @@ if (!requireNamespace("remotes")){
 remotes::install_github("rstudio/renv")
 
 if (!file.exists("renv.lock")){
-    renv::init()
+    renv::init(prompt=F)
 } else {
     renv::restore(prompt = FALSE)
 }
