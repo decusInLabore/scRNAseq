@@ -178,7 +178,7 @@ DGE Marker gene upload Chapter/Module -->
 ```
 
 <!-- Essential 20: (output required later):Category Make cluster table Data Prep Chapter/Module -->
-```{r child = 'src/modules/section_B/B20.pca.cell.and.loading.plots.Rmd', eval=TRUE}
+```{r child = 'src/modules/section_B/B20.pca.cell.and.loading.plots.Rmd', eval=FALSE}
 ```
 
 <!-- Optional 21: (output required later):Category Make cluster table Data Prep Chapter/Module -->
