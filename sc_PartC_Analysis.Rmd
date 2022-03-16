@@ -1531,6 +1531,103 @@ createSettingsFile(
 
 setwd(Obio@parameterList$localWorkDir)
 
+###############################################################################
+## Create settings JSON                                                      ##
+devtools::install_github("decusinlabore/biologicSeqTools2")
+projectJSON <- biologicSeqTools2::createSettingsJSON(
+    obj = Obio,
+    df.data = Obio@databaseTable,
+    defaultXcolName = defaultX,
+    defaultYcolName = defaultY,
+    #timepointName = timepoint,
+    primDataTable = Obio@parameterList$rnaseqdbTableName,
+    pcaDbTable = Obio@parameterList$PCAdbTableName,
+    sample.order = sample.order, #set to "" to go with default sorting
+    heatmapSampleOrder = "",
+    sample.names = "", # default is sample.order
+    count.sample.colors = sample.colors,
+    ptm.colum = "",
+    count.table.headline = Obio@parameterList$count.table.headline,
+    count.table.sidelabel = Obio@parameterList$count.table.sidelabel,
+    venn.slider.selector.strings = defaultVennSel,
+    plot.selection.strings = plotSelection,
+    webSiteDir = paste0(hpc.mount, "Stefan/protocol_files/github/biologic/src/experiments/"),
+    upper_heatmap_limit = 3,
+    lower_heatmap_limit = -3,
+    heamap.headline.text = Obio@parameterList$heamap.headline.text,
+    project_id = Obio@parameterList$project_id
+)
+## Done                                                                      ##
+###############################################################################
+projectJSONstring <- gsub("[\n]", "", toString(projectJSON))
+projectJSONstring <- gsub(" ", "", projectJSONstring)
+###############################################################################
+## Upload JSON
+dfUpload <- data.frame(
+    experiment_code = Obio@projectDetailList$project_id,
+    experiment_settings = projectJSONstring
+)
+###############################################################################
+## Check if an entry for this project exist already. If it does > update     ##
+dbDB <- DBI::dbConnect(
+    drv = RMySQL::MySQL(), 
+    user = Obio@dbDetailList$db.user, 
+    password = db.pwd, 
+    host = Obio@dbDetailList$host, 
+    dbname = "operational"
+)
+query <- paste0("SELECT id, experiment_code, created_at FROM settings WHERE experiment_code = '",Obio@parameterList$project_id,"';")
+dfTest <- DBI::dbGetQuery(dbDB, query)
+DBI::dbDisconnect(dbDB)
+timeStamp <- format(as.POSIXlt(Sys.time()),'%Y-%m-%d %H:%M:%S')
+if (nrow(dfTest) ==1){
+    dfUpload[["id"]] = as.vector(dfTest[1,"id"])
+    dfUpload[["created_at"]] = as.vector(dfTest[1,"created_at"])
+    ## Delete original row ##
+    dbDB <- DBI::dbConnect(
+        drv = RMySQL::MySQL(), 
+        user = Obio@dbDetailList$db.user, 
+        password = db.pwd, 
+        host = Obio@dbDetailList$host, 
+        dbname = "operational"
+    )
+    query <- paste0("DELETE FROM settings WHERE experiment_code = '",Obio@parameterList$project_id,"';")
+    res <- DBI::dbGetQuery(dbDB, query)
+    DBI::dbDisconnect(dbDB)
+    
+    
+} else {
+    dfUpload[["created_at"]] = timeStamp
+}
+dfUpload[["updated_at"]] <- timeStamp
+##                                                                           ##
+###############################################################################
+biologicSeqTools2::upload.datatable.to.database(
+    host = Obio@dbDetailList$host,
+    user = Obio@dbDetailList$db.user,
+    password = db.pwd,
+    prim.data.db = "operational",
+    dbTableName = "settings",
+    df.data = dfUpload,
+    db.col.parameter.list = list(
+        "INT(10) NULL DEFAULT NULL" = c("id"),
+        "LONGTEXT NULL DEFAULT NULL" = c("^experiment_settings$"),
+        "VARCHAR(255) CHARACTER SET latin1 COLLATE latin1_swedish_ci" = c("^experiment_code$"),
+        "TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP" = c("created_at", "updated_at")
+    ),
+    increment = 5000,
+    new.table = FALSE,
+    first.row.name.index = 1,
+    startOnlyWithConnectionCount1 = FALSE,
+    cols2Index = NULL,
+    indexName = NULL,
+    mode = "MySQL",
+    addRowNamesColumn = FALSE
+)
+## Done with uploading settings JSON                                         ##
+###############################################################################
+
+
 
 createHTMLoutput <- function(FvFN = NULL, Obio = NULL){
     sink(FvFN)
