@@ -923,28 +923,30 @@ database.table[["contrast_X_logFC_Expressed_in_N_Percent_Cells"]] <- database.ta
 ## Add pca loadings for plotting                                             ##
 dfAdd <- Obio@dataTableList$dfPCAloadings
 
-pcDims <- sort(unique(dfAdd$condition))
-
-if (length(pcDims) > 20){
-    pcDims <- pcDims[1:20]
+if (!is.null(dfAdd)){
+    pcDims <- sort(unique(dfAdd$condition))
+    
+    if (length(pcDims) > 20){
+        pcDims <- pcDims[1:20]
+    }
+    
+    dfAdd <- dfAdd[dfAdd$condition %in% pcDims, ]
+    
+    dfAdd <- dfAdd %>% tidyr::spread(key=condition, value=measurement)
+    
+    names(dfAdd)[grep("PC_", names(dfAdd))] <- paste0("add_counts_", names(dfAdd)[grep("PC_", names(dfAdd))], "_Loadings")
+    names(dfAdd) <- gsub("PC_", "PCA_Dim_", names(dfAdd))
+    
+    database.table <- merge(
+        database.table, 
+        dfAdd,
+        by.x = Obio@parameterList$geneIDcolumn,
+        by.y = "gene",
+        all = TRUE
+    )
+    
+    database.table[is.na(database.table)] <- 0
 }
-
-dfAdd <- dfAdd[dfAdd$condition %in% pcDims, ]
-
-dfAdd <- dfAdd %>% spread(key=condition, value=measurement)
-
-names(dfAdd)[grep("PC_", names(dfAdd))] <- paste0("add_counts_", names(dfAdd)[grep("PC_", names(dfAdd))], "_Loadings")
-names(dfAdd) <- gsub("PC_", "PCA_Dim_", names(dfAdd))
-
-database.table <- merge(
-    database.table, 
-    dfAdd,
-    by.x = Obio@parameterList$geneIDcolumn,
-    by.y = "gene",
-    all = TRUE
-)
-
-database.table[is.na(database.table)] <- 0
 
 ## Done adding PCA loadings                                                  ##
 ###############################################################################
