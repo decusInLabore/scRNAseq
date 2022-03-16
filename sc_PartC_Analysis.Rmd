@@ -92,7 +92,7 @@ if (file.exists("renv.lock")){
 ###############################################################################
 
 #install.packages("remotes")
-renv::install("decusInLabore/biologicSeqTools")
+renv::install("decusInLabore/biologicSeqTools2")
 renv::install("decusInLabore/biologicToolsSC")
 renv::install("decusinlabore/biologicViewerSC")
 
@@ -374,14 +374,14 @@ if (length(pos) > 0){
 
 names(dfdbTable) <- gsub("\\.", "_", names(dfdbTable))
 
-biologicSeqTools::upload.datatable.to.database(
+biologicSeqTools2::upload.datatable.to.database(
     host = Obio@dbDetailList$host,
     user = Obio@dbDetailList$db.user,
     password = db.pwd,
     prim.data.db = Obio@dbDetailList$primDataDB,
     dbTableName = Obio@parameterList$PCAdbTableName,
     df.data = dfdbTable,
-    db.col.parameter.list = biologicSeqTools::inferDBcategories(dfdbTable),
+    db.col.parameter.list = biologicSeqTools2::inferDBcategories(dfdbTable),
     new.table = TRUE
 )
 
@@ -402,7 +402,7 @@ killDbConnections()
 library(Seurat)
 library(dplyr)
 library(biologicViewerSC)
-library(biologicSeqTools)
+library(biologicSeqTools2)
 
 ###############################################################################
 ## Determine default gene                                                    ##
@@ -1128,7 +1128,7 @@ cmd.vec <- upload.datatable.to.database(
     prim.data.db = Obio@dbDetailList$primDataDB,
     dbTableName = Obio@parameterList$rnaseqdbTableName,
     df.data = Obio@databaseTable, #[Obio@databaseTable$count_cut_off > 1, ],
-    db.col.parameter.list = biologicSeqTools::inferDBcategories(Obio@databaseTable),
+    db.col.parameter.list = biologicSeqTools2::inferDBcategories(Obio@databaseTable),
     new.table = TRUE,
     cols2Index = c(Obio@parameterList$geneIDcolumn)
 )
@@ -1292,7 +1292,7 @@ upload.datatable.to.database(
     prim.data.db =  Obio@dbDetailList$primDataDB,
     dbTableName = Obio@parameterList$cat.ref.db.table,
     df.data = df.db.table,
-    db.col.parameter.list = biologicSeqTools::inferDBcategories(df.db.table),
+    db.col.parameter.list = biologicSeqTools2::inferDBcategories(df.db.table),
     new.table = TRUE,
     cols2Index = c("cat_id")
 )
@@ -1508,7 +1508,7 @@ defaultVennSel <- c(
 
 ###############################################################################
 ## Deploy next generation website                                            ##
-createSettingsFile(
+biologicSeqTools2::createSettingsFile(
     obj = Obio,
     df.data = Obio@databaseTable,
     defaultXcolName = defaultX,
@@ -1535,7 +1535,7 @@ setwd(Obio@parameterList$localWorkDir)
 
 ###############################################################################
 ## Create settings JSON                                                      ##
-devtools::install_github("decusinlabore/biologicSeqTools2")
+#devtools::install_github("decusinlabore/biologicSeqTools2")
 projectJSON <- biologicSeqTools2::createSettingsJSON(
     obj = Obio,
     df.data = Obio@databaseTable,
