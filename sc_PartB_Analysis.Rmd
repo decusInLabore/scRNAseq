@@ -113,6 +113,49 @@ figureCount <- 1
 ```{r child = 'src/modules/section_B/B.3.create.integrated.seurat.object.Rmd', eval=TRUE}
 ```
 
+```{r, eval=TRUE, echo=T}
+
+## The above step is the most time consuming. Saving the Obio and OsC object here allows 
+save(Obio, 
+     file = paste0(
+         Obio@parameterList$localWorkDir,
+         Obio@parameterList$project_id,
+         ".bioLOGIC.Robj"
+     )
+)
+
+print("Obio Object saved.")
+
+save(OsC,
+    file = paste0(
+         Obio@parameterList$localWorkDir,
+         Obio@parameterList$project_id,
+        ".Seurat.Robj"
+     )
+)
+
+print("OsC Object saved.")
+
+
+## Optional: load OsC, Obio instead of the previous three steps. 
+# load(
+#   file = paste0(
+#          Obio@parameterList$localWorkDir,
+#          Obio@parameterList$project_id,
+#         ".Seurat.Robj"
+#      )
+# )
+# 
+# load(
+#   file = paste0(
+#          Obio@parameterList$localWorkDir,
+#          Obio@parameterList$project_id,
+#          ".bioLOGIC.Robj"
+#      )
+# )
+
+```
+
 <!-- Optional 4: (creates output only): Create variation plots Chapter/Module -->
 ```{r child = 'src/modules/section_B/B.4.create.variation.plots.Rmd', eval=TRUE}
 ```
