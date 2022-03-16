@@ -92,7 +92,7 @@ if (file.exists("renv.lock")){
 ###############################################################################
 
 #install.packages("remotes")
-renv::install("decusInLabore/biologicSeqTools")
+renv::install("decusInLabore/biologicSeqTools2")
 renv::install("decusInLabore/biologicToolsSC")
 renv::install("decusinlabore/biologicViewerSC")
 
@@ -374,14 +374,14 @@ if (length(pos) > 0){
 
 names(dfdbTable) <- gsub("\\.", "_", names(dfdbTable))
 
-biologicSeqTools::upload.datatable.to.database(
+biologicSeqTools2::upload.datatable.to.database(
     host = Obio@dbDetailList$host,
     user = Obio@dbDetailList$db.user,
     password = db.pwd,
     prim.data.db = Obio@dbDetailList$primDataDB,
     dbTableName = Obio@parameterList$PCAdbTableName,
     df.data = dfdbTable,
-    db.col.parameter.list = biologicSeqTools::inferDBcategories(dfdbTable),
+    db.col.parameter.list = biologicSeqTools2::inferDBcategories(dfdbTable),
     new.table = TRUE
 )
 
@@ -402,7 +402,7 @@ killDbConnections()
 library(Seurat)
 library(dplyr)
 library(biologicViewerSC)
-library(biologicSeqTools)
+library(biologicSeqTools2)
 
 ###############################################################################
 ## Determine default gene                                                    ##
@@ -923,28 +923,30 @@ database.table[["contrast_X_logFC_Expressed_in_N_Percent_Cells"]] <- database.ta
 ## Add pca loadings for plotting                                             ##
 dfAdd <- Obio@dataTableList$dfPCAloadings
 
-pcDims <- sort(unique(dfAdd$condition))
-
-if (length(pcDims) > 20){
-    pcDims <- pcDims[1:20]
+if (!is.null(dfAdd)){
+    pcDims <- sort(unique(dfAdd$condition))
+    
+    if (length(pcDims) > 20){
+        pcDims <- pcDims[1:20]
+    }
+    
+    dfAdd <- dfAdd[dfAdd$condition %in% pcDims, ]
+    
+    dfAdd <- dfAdd %>% tidyr::spread(key=condition, value=measurement)
+    
+    names(dfAdd)[grep("PC_", names(dfAdd))] <- paste0("add_counts_", names(dfAdd)[grep("PC_", names(dfAdd))], "_Loadings")
+    names(dfAdd) <- gsub("PC_", "PCA_Dim_", names(dfAdd))
+    
+    database.table <- merge(
+        database.table, 
+        dfAdd,
+        by.x = Obio@parameterList$geneIDcolumn,
+        by.y = "gene",
+        all = TRUE
+    )
+    
+    database.table[is.na(database.table)] <- 0
 }
-
-dfAdd <- dfAdd[dfAdd$condition %in% pcDims, ]
-
-dfAdd <- dfAdd %>% spread(key=condition, value=measurement)
-
-names(dfAdd)[grep("PC_", names(dfAdd))] <- paste0("add_counts_", names(dfAdd)[grep("PC_", names(dfAdd))], "_Loadings")
-names(dfAdd) <- gsub("PC_", "PCA_Dim_", names(dfAdd))
-
-database.table <- merge(
-    database.table, 
-    dfAdd,
-    by.x = Obio@parameterList$geneIDcolumn,
-    by.y = "gene",
-    all = TRUE
-)
-
-database.table[is.na(database.table)] <- 0
 
 ## Done adding PCA loadings                                                  ##
 ###############################################################################
@@ -1126,7 +1128,7 @@ cmd.vec <- upload.datatable.to.database(
     prim.data.db = Obio@dbDetailList$primDataDB,
     dbTableName = Obio@parameterList$rnaseqdbTableName,
     df.data = Obio@databaseTable, #[Obio@databaseTable$count_cut_off > 1, ],
-    db.col.parameter.list = biologicSeqTools::inferDBcategories(Obio@databaseTable),
+    db.col.parameter.list = biologicSeqTools2::inferDBcategories(Obio@databaseTable),
     new.table = TRUE,
     cols2Index = c(Obio@parameterList$geneIDcolumn)
 )
@@ -1290,7 +1292,7 @@ upload.datatable.to.database(
     prim.data.db =  Obio@dbDetailList$primDataDB,
     dbTableName = Obio@parameterList$cat.ref.db.table,
     df.data = df.db.table,
-    db.col.parameter.list = biologicSeqTools::inferDBcategories(df.db.table),
+    db.col.parameter.list = biologicSeqTools2::inferDBcategories(df.db.table),
     new.table = TRUE,
     cols2Index = c("cat_id")
 )
@@ -1506,7 +1508,7 @@ defaultVennSel <- c(
 
 ###############################################################################
 ## Deploy next generation website                                            ##
-createSettingsFile(
+biologicSeqTools2::createSettingsFile(
     obj = Obio,
     df.data = Obio@databaseTable,
     defaultXcolName = defaultX,
@@ -1530,6 +1532,103 @@ createSettingsFile(
 )
 
 setwd(Obio@parameterList$localWorkDir)
+
+###############################################################################
+## Create settings JSON                                                      ##
+#devtools::install_github("decusinlabore/biologicSeqTools2")
+projectJSON <- biologicSeqTools2::createSettingsJSON(
+    obj = Obio,
+    df.data = Obio@databaseTable,
+    defaultXcolName = defaultX,
+    defaultYcolName = defaultY,
+    #timepointName = timepoint,
+    primDataTable = Obio@parameterList$rnaseqdbTableName,
+    pcaDbTable = Obio@parameterList$PCAdbTableName,
+    sample.order = sample.order, #set to "" to go with default sorting
+    heatmapSampleOrder = "",
+    sample.names = "", # default is sample.order
+    count.sample.colors = sample.colors,
+    ptm.colum = "",
+    count.table.headline = Obio@parameterList$count.table.headline,
+    count.table.sidelabel = Obio@parameterList$count.table.sidelabel,
+    venn.slider.selector.strings = defaultVennSel,
+    plot.selection.strings = plotSelection,
+    webSiteDir = paste0(hpc.mount, "Stefan/protocol_files/github/biologic/src/experiments/"),
+    upper_heatmap_limit = 3,
+    lower_heatmap_limit = -3,
+    heamap.headline.text = Obio@parameterList$heamap.headline.text,
+    project_id = Obio@parameterList$project_id
+)
+## Done                                                                      ##
+###############################################################################
+projectJSONstring <- gsub("[\n]", "", toString(projectJSON))
+projectJSONstring <- gsub(" ", "", projectJSONstring)
+###############################################################################
+## Upload JSON
+dfUpload <- data.frame(
+    experiment_code = Obio@projectDetailList$project_id,
+    experiment_settings = projectJSONstring
+)
+###############################################################################
+## Check if an entry for this project exist already. If it does > update     ##
+dbDB <- DBI::dbConnect(
+    drv = RMySQL::MySQL(), 
+    user = Obio@dbDetailList$db.user, 
+    password = db.pwd, 
+    host = Obio@dbDetailList$host, 
+    dbname = "operational"
+)
+query <- paste0("SELECT id, experiment_code, created_at FROM settings WHERE experiment_code = '",Obio@parameterList$project_id,"';")
+dfTest <- DBI::dbGetQuery(dbDB, query)
+DBI::dbDisconnect(dbDB)
+timeStamp <- format(as.POSIXlt(Sys.time()),'%Y-%m-%d %H:%M:%S')
+if (nrow(dfTest) ==1){
+    dfUpload[["id"]] = as.vector(dfTest[1,"id"])
+    dfUpload[["created_at"]] = as.vector(dfTest[1,"created_at"])
+    ## Delete original row ##
+    dbDB <- DBI::dbConnect(
+        drv = RMySQL::MySQL(), 
+        user = Obio@dbDetailList$db.user, 
+        password = db.pwd, 
+        host = Obio@dbDetailList$host, 
+        dbname = "operational"
+    )
+    query <- paste0("DELETE FROM settings WHERE experiment_code = '",Obio@parameterList$project_id,"';")
+    res <- DBI::dbGetQuery(dbDB, query)
+    DBI::dbDisconnect(dbDB)
+    
+    
+} else {
+    dfUpload[["created_at"]] = timeStamp
+}
+dfUpload[["updated_at"]] <- timeStamp
+##                                                                           ##
+###############################################################################
+biologicSeqTools2::upload.datatable.to.database(
+    host = Obio@dbDetailList$host,
+    user = Obio@dbDetailList$db.user,
+    password = db.pwd,
+    prim.data.db = "operational",
+    dbTableName = "settings",
+    df.data = dfUpload,
+    db.col.parameter.list = list(
+        "INT(10) NULL DEFAULT NULL" = c("id"),
+        "LONGTEXT NULL DEFAULT NULL" = c("^experiment_settings$"),
+        "VARCHAR(255) CHARACTER SET latin1 COLLATE latin1_swedish_ci" = c("^experiment_code$"),
+        "TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP" = c("created_at", "updated_at")
+    ),
+    increment = 5000,
+    new.table = FALSE,
+    first.row.name.index = 1,
+    startOnlyWithConnectionCount1 = FALSE,
+    cols2Index = NULL,
+    indexName = NULL,
+    mode = "MySQL",
+    addRowNamesColumn = FALSE
+)
+## Done with uploading settings JSON                                         ##
+###############################################################################
+
 
 
 createHTMLoutput <- function(FvFN = NULL, Obio = NULL){

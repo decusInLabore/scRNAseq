@@ -103,8 +103,8 @@
       "RemoteUsername": "chris-mcginnis-ucsf",
       "RemoteRepo": "DoubletFinder",
       "RemoteRef": "master",
-      "RemoteSha": "d5a8e0dc9bdd16ef0a3991e4fe234081da3382d7",
-      "Hash": "0ea1ced823f2ce744ef860757745c28e"
+      "RemoteSha": "67fb8b5808eb16167ead5f9b439677cc24837554",
+      "Hash": "fa3f38d580db627b53cb86555f3aa872"
     },
     "FNN": {
       "Package": "FNN",
@@ -432,8 +432,8 @@
       "RemoteUsername": "decusInLabore",
       "RemoteRepo": "biologicSeqTools",
       "RemoteRef": "main",
-      "RemoteSha": "91ef20d342ba3b42f2c5a3acf7dddbc49b339f81",
-      "Hash": "da9b2eeba46363ca191cf1fd4f5b03b9"
+      "RemoteSha": "b662dd6b56729280864f9388b05977b5fcde6625",
+      "Hash": "74392ca88f0a6a8346844ec28091eb99"
     },
     "biologicToolsSC": {
       "Package": "biologicToolsSC",
@@ -1060,16 +1060,16 @@
     },
     "ggtree": {
       "Package": "ggtree",
-      "Version": "3.3.0.900",
+      "Version": "3.3.1",
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
       "RemoteUsername": "YuLab-SMU",
       "RemoteRepo": "ggtree",
       "RemoteRef": "master",
-      "RemoteSha": "c4d964cc0caa3d8da8ab8afdb9b66a088b016963",
+      "RemoteSha": "453d8d02a537e07747a3a26048e24fa6da66646c",
       "Remotes": "GuangchuangYu/treeio",
-      "Hash": "ecca7d7c292766265de222b316dba992"
+      "Hash": "17310c4cf28627116067ee81090e4553"
     },
     "gh": {
       "Package": "gh",
@@ -2166,10 +2166,10 @@
     },
     "tidytree": {
       "Package": "tidytree",
-      "Version": "0.3.6",
+      "Version": "0.3.9",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "eee60ec6cf6fbab1189409a345e5405d"
+      "Hash": "bf9d994b6c4a8e448618feac4bbff2d4"
     },
     "tidyverse": {
       "Package": "tidyverse",
