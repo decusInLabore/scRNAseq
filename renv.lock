@@ -435,6 +435,18 @@
       "RemoteSha": "b662dd6b56729280864f9388b05977b5fcde6625",
       "Hash": "74392ca88f0a6a8346844ec28091eb99"
     },
+    "biologicSeqTools2": {
+      "Package": "biologicSeqTools2",
+      "Version": "0.0.0.9000",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteUsername": "decusInLabore",
+      "RemoteRepo": "biologicSeqTools2",
+      "RemoteRef": "main",
+      "RemoteSha": "3bac1ed0a2faeb2d0026a82e421ed1a3c30aaf27",
+      "Hash": "8daf90fc1f14b3ae49d3dee9affcd0a4"
+    },
     "biologicToolsSC": {
       "Package": "biologicToolsSC",
       "Version": "0.0.0.9000",
@@ -456,8 +468,8 @@
       "RemoteUsername": "decusinlabore",
       "RemoteRepo": "biologicViewerSC",
       "RemoteRef": "main",
-      "RemoteSha": "e9f0928579ff260ea398838aaed04340ef8fa1c7",
-      "Hash": "24fc9624a4e6919d2a682a014dffc686"
+      "RemoteSha": "d3e057a7098ed1607b7f252b798cc1293b4ebf32",
+      "Hash": "b7714f862ac4d24befa4e5515470ab0d"
     },
     "bit": {
       "Package": "bit",
@@ -1757,15 +1769,15 @@
     },
     "renv": {
       "Package": "renv",
-      "Version": "0.14.0-59",
+      "Version": "0.15.4-11",
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
-      "RemoteRepo": "renv",
       "RemoteUsername": "rstudio",
-      "RemoteRef": "HEAD",
-      "RemoteSha": "a614122a1daf1ffb0a96c8d393eb58f88c1a84fb",
-      "Hash": "6a4257c12c1a87b15e4baac1fdd6ab6b"
+      "RemoteRepo": "renv",
+      "RemoteRef": "main",
+      "RemoteSha": "203d222e8d540f0ab29f251986fd47a3363907d7",
+      "Hash": "61924ab4917639e4b68f6cacaab61d0f"
     },
     "reprex": {
       "Package": "reprex",
