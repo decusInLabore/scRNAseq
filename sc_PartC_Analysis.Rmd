@@ -80,7 +80,7 @@ if (!requireNamespace("remotes")){
     install.packages("remotes")
 }
 
-remotes::install_github("rstudio/renv")
+
 
 if (file.exists("renv.lock")){
     renv::restore(prompt = FALSE)
@@ -88,6 +88,8 @@ if (file.exists("renv.lock")){
     renv::init()
 }
 
+# remotes::install_github("rstudio/renv")
+renv::install("rstudio/renv")
 ## Done                                                                      ##
 ###############################################################################
 
@@ -98,7 +100,7 @@ renv::install("decusinlabore/biologicViewerSC")
 
 library(Seurat)
 library(tidyverse)
-library(biologicSeqTools)
+library(biologicSeqTools2)
 library(biologicToolsSC)
 
 
@@ -150,6 +152,8 @@ if (Obio@parameterList$scIntegrationMethod == "SCT"){
     resultSlot = "RNA"
 }
 
+
+print("End chunk 1. Objects loaded.")
 ```
 
 ```{r old_res, eval=TRUE, echo=F, results=F}
@@ -409,7 +413,28 @@ library(biologicSeqTools2)
 
 DefaultAssay(OsC) <- "RNA"
 my_genes <- rownames(x = OsC@assays$RNA)
-exp <- FetchData(OsC, my_genes)
+
+
+## Based on https://github.com/satijalab/seurat/issues/3560 the next two lines were 
+# added/altered:
+# in large datasets fetch data produces errors. After some trial and error, 
+# breaking down the problem into chunks seems to solve the problem. 
+cells <- row.names(OsC@meta.data)
+cellList <- split(cells, ceiling(seq_along(cells)/10000))
+
+for (i in 1:length(cellList)){
+    expTemp <- Seurat::FetchData(OsC, vars = my_genes, cells = cellList[[i]] )
+    if (i == 1){
+        exp <- expTemp
+    } else {
+        exp <- rbind(exp, expTemp[,colnames(exp)])
+    }
+    print(i)
+}
+
+#exp <- FetchData(OsC, vars = my_genes, cells = cells )
+## End change 2022 03 21
+
 ExprMatrix <- round(as.matrix(colMeans(exp  > 0)) *100,1)
 colnames(ExprMatrix)[1] <- "count_cut_off"
 dfExprMatrix <- data.frame(ExprMatrix)
@@ -552,15 +577,35 @@ if (length(params$catColorList$clusterName) == length(colVec)){
 #dfIDTable <- Obio@dataTableList$dfExpr
 DefaultAssay(OsC) <- "RNA"
 
-dfExpr <- data.frame(OsC[[resultSlot]]@data)
-dfExpr[["gene"]] <- row.names(dfExpr)
-dfExpr <- gather(
-    dfExpr, 
-    condition, 
-    expr, 1:(ncol(dfExpr)-1), 
-    factor_key=TRUE
-)
-dfExpr <- dfExpr[dfExpr$expr != 0,]
+
+## Breakdown into chunks to make it more memory friendly ##
+## 2022 03 21
+cells <- row.names(OsC@meta.data)
+cellList <- split(cells, ceiling(seq_along(cells)/10000))
+
+for (i in 1:length(cellList)){
+    tempOsC <- subset(OsC, subset = cellID %in% cellList[[i]])
+    dfTempExpr <- data.frame(tempOsC[[resultSlot]]@data)
+    dfTempExpr[["gene"]] <- row.names(dfTempExpr)
+    dfTempExpr <- gather(
+        dfTempExpr, 
+        condition, 
+        expr, 1:(ncol(dfTempExpr)-1), 
+        factor_key=TRUE
+    )
+    dfTempExpr <- dfTempExpr[dfTempExpr$expr != 0,]
+    
+    if (i == 1){
+        dfExpr <- dfTempExpr
+    } else {
+        dfExpr <- rbind(dfTempExpr, dfExpr)
+    }
+}
+
+## end of change 2022 03 21
+
+
+
 
 ###############################################################################
 ## Add Categories                                                            ##
@@ -622,15 +667,42 @@ upload.datatable.to.database(
 )
 
 
-dfExpr <- data.frame(OsC[["RNA"]]@data)
-dfExpr[["gene"]] <- row.names(dfExpr)
-dfExpr <- gather(
-    dfExpr,
-    condition,
-    expr, 1:(ncol(dfExpr)-1),
-    factor_key=TRUE
-)
-dfExpr <- dfExpr[dfExpr$expr != 0,]
+## Breakdown into chunks to make it more memory friendly ##
+## 2022 03 21
+cells <- row.names(OsC@meta.data)
+cellList <- split(cells, ceiling(seq_along(cells)/50000))
+
+for (i in 1:length(cellList)){
+    tempOsC <- subset(OsC, subset = cellID %in% cellList[[i]])
+    dfTempExpr <- data.frame(tempOsC[[resultSlot]]@data)
+    dfTempExpr[["gene"]] <- row.names(dfTempExpr)
+    dfTempExpr <- gather(
+        dfTempExpr, 
+        condition, 
+        expr, 1:(ncol(dfTempExpr)-1), 
+        factor_key=TRUE
+    )
+    dfTempExpr <- dfTempExpr[dfTempExpr$expr != 0,]
+    
+    if (i == 1){
+        dfExpr <- dfTempExpr
+    } else {
+        dfExpr <- rbind(dfTempExpr, dfExpr)
+    }
+}
+
+## end of change 2022 03 21
+
+# Switched out 2022 03 21
+# dfExpr <- data.frame(OsC[["RNA"]]@data)
+# dfExpr[["gene"]] <- row.names(dfExpr)
+# dfExpr <- gather(
+#     dfExpr,
+#     condition,
+#     expr, 1:(ncol(dfExpr)-1),
+#     factor_key=TRUE
+# )
+# dfExpr <- dfExpr[dfExpr$expr != 0,]
 
 ###############################################################################
 ## Add Categories                                                            ##
@@ -774,7 +846,27 @@ database.table[is.na(database.table)] <- 0
 ## Add percentage expressed genes                                            ##
 my_genes <- rownames(x = OsC@assays$RNA)
 
-exp <- FetchData(OsC, my_genes)
+## Based on https://github.com/satijalab/seurat/issues/3560 the next two lines were 
+# added/altered:
+# in large datasets fetch data produces errors. After some trial and error, 
+# breaking down the problem into chunks seems to solve the problem. 
+cells <- row.names(OsC@meta.data)
+cellList <- split(cells, ceiling(seq_along(cells)/10000))
+
+for (i in 1:length(cellList)){
+    expTemp <- FetchData(OsC, vars = my_genes, cells = cellList[[i]] )
+    if (i == 1){
+        exp <- expTemp
+    } else {
+        exp <- rbind(exp, expTemp[,colnames(exp)])
+    }
+    # print(i)
+}
+
+#exp <- FetchData(OsC, vars = my_genes, cells = cells )
+## End change 2022 03 21
+
+
 
 ExprMatrix <- round(as.matrix(colMeans(exp  > 0)) *100,1)
 colnames(ExprMatrix)[1] <- "count_cut_off"
