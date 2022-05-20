@@ -72,14 +72,18 @@ library(biologicToolsSC)
 
 ###############################################################################
 ## Set db access credentials                                                 ##
-FN <- paste0(hpc.mount, "Projects/reference_data/documentation/BC.parameters.txt")
+
+## Loading the BABS password ##
+FN <- paste0(hpc.mount, "Projects/reference_data/pwd_folder/babs.txt")
 dbTable <- read.delim(
-    FN, 
-    sep = "\t",
-    stringsAsFactors = F
+  FN,
+  header = F,
+  sep = "\t",
+  stringsAsFactors = F
 )
 
 db.pwd <- as.vector(dbTable[1,1])
+
 
 ## Done                                                                      ##
 ###############################################################################
