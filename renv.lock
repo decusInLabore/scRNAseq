@@ -50,6 +50,31 @@
         "S4Vectors"
       ]
     },
+    "AnnotationHub": {
+      "Package": "AnnotationHub",
+      "Version": "2.22.1",
+      "Source": "Bioconductor",
+      "git_url": "https://git.bioconductor.org/packages/AnnotationHub",
+      "git_branch": "RELEASE_3_12",
+      "git_last_commit": "73fe9c7",
+      "git_last_commit_date": "2021-04-16",
+      "Hash": "44f52c9c9fa7f6ac22c8a4334e2a5224",
+      "Requirements": [
+        "AnnotationDbi",
+        "BiocFileCache",
+        "BiocGenerics",
+        "BiocManager",
+        "BiocVersion",
+        "RSQLite",
+        "S4Vectors",
+        "curl",
+        "dplyr",
+        "httr",
+        "interactiveDisplayBase",
+        "rappdirs",
+        "yaml"
+      ]
+    },
     "BH": {
       "Package": "BH",
       "Version": "1.72.0-3",
@@ -69,6 +94,25 @@
       "Hash": "f49586e579b712b7e55253aba0c9bc21",
       "Requirements": [
         "BiocGenerics"
+      ]
+    },
+    "BiocFileCache": {
+      "Package": "BiocFileCache",
+      "Version": "1.14.0",
+      "Source": "Bioconductor",
+      "git_url": "https://git.bioconductor.org/packages/BiocFileCache",
+      "git_branch": "RELEASE_3_12",
+      "git_last_commit": "cdcde4b",
+      "git_last_commit_date": "2020-10-27",
+      "Hash": "1b129af4e6ee37b16d4d424aebed81f7",
+      "Requirements": [
+        "DBI",
+        "RSQLite",
+        "curl",
+        "dbplyr",
+        "dplyr",
+        "httr",
+        "rappdirs"
       ]
     },
     "BiocGenerics": {
@@ -104,6 +148,17 @@
         "futile.logger",
         "snow"
       ]
+    },
+    "BiocVersion": {
+      "Package": "BiocVersion",
+      "Version": "3.12.0",
+      "Source": "Bioconductor",
+      "git_url": "https://git.bioconductor.org/packages/BiocVersion",
+      "git_branch": "master",
+      "git_last_commit": "23b9719",
+      "git_last_commit_date": "2020-04-27",
+      "Hash": "ee4d027afb8f52fec1f46b9f0a8660e9",
+      "Requirements": []
     },
     "DBI": {
       "Package": "DBI",
@@ -214,6 +269,25 @@
         "KernSmooth",
         "ROCR",
         "fields"
+      ]
+    },
+    "ExperimentHub": {
+      "Package": "ExperimentHub",
+      "Version": "1.16.1",
+      "Source": "Bioconductor",
+      "git_url": "https://git.bioconductor.org/packages/ExperimentHub",
+      "git_branch": "RELEASE_3_12",
+      "git_last_commit": "61d51b7",
+      "git_last_commit_date": "2021-04-16",
+      "Hash": "67bd9bb371676927c2d3ae1bb7991090",
+      "Requirements": [
+        "AnnotationHub",
+        "BiocFileCache",
+        "BiocGenerics",
+        "BiocManager",
+        "S4Vectors",
+        "curl",
+        "rappdirs"
       ]
     },
     "FNN": {
@@ -623,6 +697,21 @@
         "Rcpp",
         "RcppEigen",
         "rlang"
+      ]
+    },
+    "SingleCellExperiment": {
+      "Package": "SingleCellExperiment",
+      "Version": "1.12.0",
+      "Source": "Bioconductor",
+      "git_url": "https://git.bioconductor.org/packages/SingleCellExperiment",
+      "git_branch": "RELEASE_3_12",
+      "git_last_commit": "66063b7",
+      "git_last_commit_date": "2020-10-27",
+      "Hash": "40badd4c5dcff81480c77a17b3b811bb",
+      "Requirements": [
+        "BiocGenerics",
+        "S4Vectors",
+        "SummarizedExperiment"
       ]
     },
     "SparseM": {
@@ -1094,6 +1183,36 @@
         "tidyr"
       ]
     },
+    "clustifyr": {
+      "Package": "clustifyr",
+      "Version": "1.2.0",
+      "Source": "Bioconductor",
+      "git_url": "https://git.bioconductor.org/packages/clustifyr",
+      "git_branch": "RELEASE_3_12",
+      "git_last_commit": "02cd411",
+      "git_last_commit_date": "2020-10-27",
+      "Hash": "6289d085f6a84e045b59b7df8c9205bd",
+      "Requirements": [
+        "Matrix",
+        "S4Vectors",
+        "SingleCellExperiment",
+        "SummarizedExperiment",
+        "cowplot",
+        "dplyr",
+        "entropy",
+        "fgsea",
+        "ggplot2",
+        "httr",
+        "matrixStats",
+        "proxy",
+        "readr",
+        "rlang",
+        "scales",
+        "stringr",
+        "tibble",
+        "tidyr"
+      ]
+    },
     "codetools": {
       "Package": "codetools",
       "Version": "0.2-18",
@@ -1446,6 +1565,14 @@
         "scatterpie",
         "shadowtext"
       ]
+    },
+    "entropy": {
+      "Package": "entropy",
+      "Version": "1.2.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "d24c26075b0cabde12c419424edc6242",
+      "Requirements": []
     },
     "evaluate": {
       "Package": "evaluate",
@@ -2259,6 +2386,21 @@
       "Hash": "6154ec2223172bce8162d4153cda21f7",
       "Requirements": []
     },
+    "interactiveDisplayBase": {
+      "Package": "interactiveDisplayBase",
+      "Version": "1.28.0",
+      "Source": "Bioconductor",
+      "git_url": "https://git.bioconductor.org/packages/interactiveDisplayBase",
+      "git_branch": "RELEASE_3_12",
+      "git_last_commit": "a74c02c",
+      "git_last_commit_date": "2020-10-27",
+      "Hash": "94d61fec87eb3c8263856357f14beefb",
+      "Requirements": [
+        "BiocGenerics",
+        "DT",
+        "shiny"
+      ]
+    },
     "irlba": {
       "Package": "irlba",
       "Version": "2.3.3",
@@ -2909,6 +3051,14 @@
         "magrittr",
         "rlang"
       ]
+    },
+    "proxy": {
+      "Package": "proxy",
+      "Version": "0.4-24",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "5967020649b83afda47a18198c0e02e2",
+      "Requirements": []
     },
     "ps": {
       "Package": "ps",

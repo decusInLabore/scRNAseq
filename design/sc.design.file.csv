@@ -37,7 +37,7 @@ limsID,A1A2MERGED,A3A4MERGED,RAG4782A5,RAG4782A6,RAG4782A7,RAG4782A8,,
 type,TenX,TenX,TenX,TenX,TenX,TenX,,"# type must be in c(""""TenX"""", """"matrixFiles"""", """"loomFiles"""", """"hdf5Files"""")"""
 gene.column,2,2,2,2,2,2,,
 path,/camp/stp/babs/working/boeings/Projects/bonfantip/roberta.ragazzini/484_scRNAseq_Characterisation_EpCAM_CD90_thymic_epithelial_cells_SC22096/FASTQ_files/A1A2MERGED/outs/count/filtered_feature_bc_matrix,/camp/stp/babs/working/boeings/Projects/bonfantip/roberta.ragazzini/484_scRNAseq_Characterisation_EpCAM_CD90_thymic_epithelial_cells_SC22096/FASTQ_files/A3A4MERGED/outs/count/filtered_feature_bc_matrix,/camp/stp/babs/working/boeings/Projects/bonfantip/roberta.ragazzini/484_scRNAseq_Characterisation_EpCAM_CD90_thymic_epithelial_cells_SC22096/FASTQ_files/RAG4782A5/outs/filtered_feature_bc_matrix,/camp/stp/babs/working/boeings/Projects/bonfantip/roberta.ragazzini/484_scRNAseq_Characterisation_EpCAM_CD90_thymic_epithelial_cells_SC22096/FASTQ_files/RAG4782A6/outs/filtered_feature_bc_matrix,/camp/stp/babs/working/boeings/Projects/bonfantip/roberta.ragazzini/484_scRNAseq_Characterisation_EpCAM_CD90_thymic_epithelial_cells_SC22096/FASTQ_files/RAG4782A7/outs/filtered_feature_bc_matrix,/camp/stp/babs/working/boeings/Projects/bonfantip/roberta.ragazzini/484_scRNAseq_Characterisation_EpCAM_CD90_thymic_epithelial_cells_SC22096/FASTQ_files/RAG4782A8/outs/filtered_feature_bc_matrix,,
-singleCellSeuratMtCutoff,30,30,30,30,30,30,,
+singleCellSeuratMtCutoff,20,20,15,15,15,15,,
 SeuratNrnaMaxFeatures,10000,10000,10000,10000,10000,10000,,
 SeuratNrnaMinFeatures,200,200,200,200,750,750,,
 ,,,,,,,,

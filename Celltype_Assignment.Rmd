@@ -1,0 +1,313 @@
+---
+output: 
+    html_document:
+        code_folding: hide
+        df_print: tibble
+        highlight: default
+        theme: paper
+        toc: true
+        toc_depth: 5
+        toc_float: true
+        css: src/assets/style/style.css
+
+always_allow_html: yes
+---
+
+# Cell Type Suggestion Module
+
+When reviewing the cell type *suggestions* below, keep in mind that a suggested cell type not necessarily is the true cell type represented in a given cluster. It merely is an indication. Please review cluster-marker genes to determine if a cell type suggestion for a given cluster appears sensible or not. 
+
+```{r setup, include=FALSE, warning=FALSE, message=FALSE}
+## R version for this analysis 
+# module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a
+
+knitr::opts_chunk$set(
+    tidy = F,
+    tidy.opts = list(width.cutoff = 120),
+    message = FALSE,
+    warning = FALSE,
+    #fig.width = 5.25, # default 7 
+    #fig.height =3.75, # default 5
+    #retina = 1,
+    #dpi=36,
+    message = FALSE,
+    warning = FALSE
+)
+
+chnkPrefix <- "Btest.assignCT."
+VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.Date()), ".pdf")
+```
+
+
+
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, results="asis", message=FALSE, include=FALSE}
+###############################################################################
+## Load Seurat & biologic object; optional                                   ## 
+## This part is to make this module autonomous. If it's run in the course
+## of a single-cell workflow, the biologic and seurat object will already be
+## loaded
+
+###############################################################################
+## Load Obio object from step A                                              ##
+loadProjectDataForThisModule <- TRUE
+
+## If you have your own Seurat object, just rename it to OsC
+
+if (loadProjectDataForThisModule){
+    if (!requireNamespace("remotes")){
+      install.packages("remotes")
+    }
+    
+    remotes::install_github("rstudio/renv")
+    
+    if (!file.exists("renv.lock")){
+        renv::init()
+    } else {
+        renv::restore(prompt=FALSE)
+    }
+    
+    library(biologicSeqTools2)
+    cwd <- paste0(here::here(),"/")
+    tempWorkDir <- paste0(cwd, "../")
+    #
+    # ## Biologic object
+    ObioFN <- paste0(
+        tempWorkDir, "/",
+        list.files(tempWorkDir)[grep(".bioLOGIC.Robj", list.files(tempWorkDir))]
+    )
+    
+    load(ObioFN)
+    
+    # ## Activate debug mode on subset of cells < 1
+    # # Obio@parameterList$debugReduce <- 1
+    #
+    # ## Set project specific parameters ##
+    Obio <- setMountingPoint(Obio)
+    Obio <- setAnalysisPaths(Obio)
+    Obio <- setCrickGenomeAndGeneNameTable(Obio)
+    Obio <- createAnalysisFolders(
+        Obio
+    )
+    Obio <- setDataBaseParameters(Obio)
+    Obio <- addGeneAnnotation(Obio)
+    
+    ## Seurat object
+    SeuratFN <- paste0(
+        tempWorkDir, "/",
+        list.files(tempWorkDir)[grep(".Seurat.Robj", list.files(tempWorkDir))]
+    )
+    
+    load(SeuratFN)
+}
+
+## Enter the variables below if you don't have a biologic object
+species <- Obio@parameterList$species
+
+## path to local html output dir. Make sure the last character is a "/".
+html_local <- Obio@parameterList$html_local
+
+## Set output dir reference
+if (Obio@parameterList$host == "10.27.241.234"){
+  urlString <- "biologic.thecrick.org"
+} else {
+  urlString <- ""
+}
+
+## Done                                                                      ##
+###############################################################################
+```
+
+
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, results="asis", message=FALSE, include=FALSE}
+###############################################################################
+## Create and attach DDS object                                              ##
+
+renv::install("bioc::clustifyr")
+renv::install("bioc::clustifyrdatahub")
+renv::install("bioc::ExperimentHub")
+
+## Get reference data sets ##
+eh <- ExperimentHub::ExperimentHub(ask=FALSE)
+## List reference datasets eh$title
+## Show species eh$species
+
+if (species == "mus_musculus"){
+    eh <- eh[eh$species=="Mus musculus"]
+} else if (species == "homo_sapiens"){
+    eh <- eh[eh$species=="Homo Sapiens"]
+} else {
+    stop("For species other than human or mouse the reference dataset needs to be manually curated.")
+}
+
+## eh2 <- eh[eh$species=="Mus musculus"]
+
+refs <- ExperimentHub::listResources(eh, "clustifyrdatahub")
+
+if (species == "mus_musculus"){
+    selVec <- c(
+        "ref_MCA",
+        "ref_hema_microarray",  
+        "ref_tabula_muris_drop", 
+        "ref_tabula_muris_facs", 
+        "ref_mouse.rnaseq",
+        "ref_moca_main",
+        "ref_immgen" #,
+         #"ref_mouse_atlas" This one does not work at present
+    )
+} else if (species == "homo_sapiens"){
+    selVec <- c(
+        "ref_hema_microarray",
+        "ref_cortex_dev",
+        "ref_pan_indrop",
+        "ref_pan_smartseq2"
+    )
+    
+} 
+
+for (i in 1:length(selVec)){
+    print(paste0("Processing ", selVec[i]))
+    ref_mat <- ExperimentHub::loadResources(
+        eh, 
+        "clustifyrdatahub",
+        selVec[i]
+    )[[1]]
+    
+    top2000 <- head(Seurat::VariableFeatures(OsC), 2000)
+    
+    ## Get count table ##
+    counts <- as.matrix(OsC@assays$RNA@counts)
+    
+    ## Create correlation matrix
+    res <- clustifyr::clustify(
+        input = counts , # matrix of normalized scRNA-seq counts (or SCE/Seurat object)
+        metadata = OsC@meta.data, # meta.data table containing cell clusters
+        cluster_col = "seurat_clusters", # name of column in meta.data containing cell clusters
+        ref_mat = ref_mat, # matrix of RNA-seq expression data for each cell type
+        query_genes = top2000 # list of highly varible genes identified with Seurat
+    )
+    
+    # Call cell types
+    res2 <- clustifyr::cor_to_call(
+      cor_mat = res,                  # matrix correlation coefficients
+      cluster_col = "seurat_clusters" # name of column in meta.data containing cell clusters
+    )
+    
+    res2 <- data.frame(res2)
+    res2[["reference"]] <- selVec[i]
+         
+    if (i==1){
+        dfRes <- res2
+    } else {
+        dfRes <- rbind(
+            dfRes, 
+            res2
+        )
+    }
+}
+
+## Remove low confidence hits
+dfRes <- dfRes[dfRes$r > 0.5,]
+dfRes <- dfRes[order(dfRes$seurat_clusters),]
+
+dfRes$r <- round(dfRes$r, 4)
+
+## Produce output table ##
+
+## Get Cluster Colors for table ##
+pos <- grep("^clusterColor$", names(OsC@meta.data))
+
+if (length(pos) ==1){
+    dfColor <- unique(OsC@meta.data[,c("seurat_clusters", "clusterColor")])
+} else {
+    seurat_clusters <- sort(as.numeric(unique(OsC@meta.data$seurat_clusters)))
+    clusterColor <- scales::hue_pal()(length(seurat_clusters))
+    dfColor <- data.frame(seurat_clusters, clusterColor)
+}
+
+dfDataTable <- dplyr::full_join(
+  dfRes,
+  dfColor,
+  by = "seurat_clusters"
+)
+
+dfExport <- dfDataTable
+dfExport$clusterColor <- NULL
+
+## Prepare Excel table for export ##
+ outPutFN <- gsub("//", "/", paste0(html_local, "/report_tables/"))
+ if (!dir.exists(outPutFN)){
+     dir.create(outPutFN)
+ }
+ 
+
+outPutFN <- gsub("//", "/", paste0(outPutFN, "/cluster.assignment.",Sys.Date(),".xlsx"))
+
+FNtabrel <- paste0("report_tables/cluster.assignment.",Sys.Date(),".xlsx")
+
+biologicSeqTools2::createExcelWorkbook(
+    excelList=list("Cluster_Assignments" = dfExport),
+    outPutFN = outPutFN
+)
+
+
+## Prepare report table ##
+dfDataTable[,"seurat_clusters"] <- paste0(
+        '<p style="background-color:',
+        dfDataTable$clusterColor,
+        ';text-align:center">',
+        dfDataTable[,"seurat_clusters"],'</p>'
+) 
+
+dfDataTable$clusterColor <- NULL
+
+
+
+dfDataTable <- dfDataTable[order(dfDataTable["seurat_clusters"], decreasing=F), ]
+
+tabLegend <- paste0('*Table:* Cluster cell type suggestions. Download a this table as an Excel file <a href="',FNtabrel,'" target="_blank">here</a>')
+chnkVec <- as.vector(NULL, mode="character")
+NewChnk <- paste0(
+        #"#### ", names(dtList),
+        "\n```{r ",
+        i,", results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",
+        tabLegend,"'}\n",
+        "\n",
+        "\n DT::datatable(
+                dfDataTable,
+                colnames = names(dfDataTable),
+                rownames = FALSE,
+                escape = FALSE
+            ) ",
+        "\n cat(  '\n')",
+        "\n\n\n```\n"   
+)
+    
+chnkVec <- c(
+    chnkVec,
+    NewChnk
+)
+
+```
+
+### Cell Type assignment 
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, results="asis"}
+cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = '\n'))
+```
+
+### Cell Type assignment references
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, results="asis"}
+## Review reference data
+## http://bioconductor.org/packages/release/data/experiment/vignettes/clustifyrdatahub/inst/doc/clustifyrdatahub.html
+
+## Table listing reference data 
+dTable <- dplyr::select(
+  read.csv(system.file("extdata", "metadata.csv", package = "clustifyrdatahub")),
+  c(1, 9, 2:7))
+
+knitr::kable(dplyr::select(
+  read.csv(system.file("extdata", "metadata.csv", package = "clustifyrdatahub")),
+  c(1, 9, 2:7)))
+
+## Done creating and attaching DDS objecs                                    ##
+###############################################################################
+```
