@@ -18,6 +18,8 @@ always_allow_html: yes
     
 ```{r setup, include=FALSE}
 
+# R to use
+# module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;R
 
 if (!requireNamespace("remotes")){
   install.packages("remotes")
@@ -70,14 +72,18 @@ library(biologicToolsSC)
 
 ###############################################################################
 ## Set db access credentials                                                 ##
-FN <- paste0(hpc.mount, "Projects/reference_data/documentation/BC.parameters.txt")
+
+## Loading the BABS password ##
+FN <- paste0(hpc.mount, "Projects/reference_data/pwd_folder/babs.txt")
 dbTable <- read.delim(
-    FN, 
-    sep = "\t",
-    stringsAsFactors = F
+  FN,
+  header = F,
+  sep = "\t",
+  stringsAsFactors = F
 )
 
 db.pwd <- as.vector(dbTable[1,1])
+
 
 ## Done                                                                      ##
 ###############################################################################

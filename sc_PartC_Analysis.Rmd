@@ -64,14 +64,16 @@ if (dir.exists("/Volumes/babs/working/boeings/")){
     hpc.mount <- ""
 }
 
-#Create the environment and load a suitable version of R, e.g. so:
-FN <- paste0(hpc.mount, "Projects/reference_data/documentation/BC.parameters.txt")
-dbTable <- read.delim(
-    FN, 
-    sep = "\t",
-    stringsAsFactors = F
-)
-
+## Loading the BABS password ##
+#if (upload.results.to.database){
+    FN <- paste0(hpc.mount, "Projects/reference_data/pwd_folder/babs.txt")
+    dbTable <- read.delim(
+      FN,
+      header = F,
+      sep = "\t",
+      stringsAsFactors = F
+    )
+#}
 db.pwd <- as.vector(dbTable[1,1])
 
 ###############################################################################
