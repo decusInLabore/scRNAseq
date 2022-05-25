@@ -124,7 +124,7 @@ db.pwd <- as.vector(dbTable[1,1])
 ```
 
 <!-- Optional 6: Perform three cell cycle regressions: none, G2M/S and full Chapter/Module -->
-```{r child = 'src/modules/qc/A.perform.cell.cycle.regression.Rmd', eval=TRUE}
+```{r child = 'src/modules/qc/A.perform.cell.cycle.regression.Rmd', eval=FALSE}
 ```
 
 <!-- Optional 7: Create category feature plots -->

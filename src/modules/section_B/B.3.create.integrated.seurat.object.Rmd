@@ -92,7 +92,8 @@ if (length(SampleList) > 1){
         OsC <- Seurat::IntegrateData(
             anchorset = sampleAnchors, 
             normalization.method = "SCT", 
-            verbose = FALSE
+            verbose = FALSE,
+            k.weight = k.filter
         )
         detach("package:future", unload=TRUE)
         
@@ -108,7 +109,8 @@ if (length(SampleList) > 1){
         OsC <- Seurat::IntegrateData(
             #features.to.integrate = geneIntersectVec,
             anchorset = sampleAnchors, 
-            dims = 1:Obio@parameterList$singleCellSeuratNpcs4PCA
+            dims = 1:Obio@parameterList$singleCellSeuratNpcs4PCA,
+            k.weight = k.filter
         )
     }
     Obio@dataTableList$referenceList[["sampleAnchors"]] <- as.vector(sort(sampleAnchors@anchor.features))
