@@ -12,7 +12,7 @@ sleep 300
 done
 }
 
-project_id=479
+project_id=488
 
 project=rA_$project_id
 sbatch --time=48:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;Rscript runRmd.r sc_PartA_QC.Rmd" --job-name=$project -p hmem --mem=300G -o ../rA.$project.slurm >> ../commands.txt
@@ -24,6 +24,11 @@ sbatch --time=36:00:00 --wrap "module purge;source /camp/stp/babs/working/softwa
 wait_on_lsf
 project=rCF_$project_id
 sbatch --time=24:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;Rscript runRmd.r ClusterFinder.Rmd" --job-name=$project -p hmem --mem=300G -o ../rCF.$project.tslurm >> ../commands.txt
+
+wait_on_lsf
+project=rCTA_$project_id
+sbatch --time=24:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;Rscript runRmd.r Celltype_Assignment.Rmd" --job-name=$project -p hmem --mem=300G -o ../rCTA.$project.tslurm >> ../commands.txt
+
 
 wait_on_lsf
 project=rC_$project_id

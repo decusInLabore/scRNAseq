@@ -9,7 +9,7 @@ output:
         toc: true
         toc_depth: 3
         toc_float: true
-        css: /camp/stp/babs/working/boeings/Stefan/protocol_files/github/boeings/templates/style/style.css
+        css: src/assets/style/style.css
 
 ---
     
@@ -38,6 +38,8 @@ knitr::opts_chunk$set(
 
 # --mem-per-cpu=14G -p hmem --pty bash
 
+# module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a
+
 ```
 
 ```{r populate_meta_data_database_part1, eval=TRUE, echo=F, results=F}
@@ -49,21 +51,24 @@ if (!requireNamespace("remotes")){
 remotes::install_github("rstudio/renv")
 
 if (!file.exists("renv.lock")){
-    renv::init()
+    renv::init(prompt=F)
 } else {
-    renv::restore()
+    renv::restore(prompt=F)
 }
 
 #myPaths <- .libPaths()
 #myNewPaths <- c("/camp/stp/babs/working/boeings/Projects/pachnisv/song.chng/330_10xscRNAseq_DIV4_DIV11_DIV20_SC19069/basedata", myPaths)
 #.libPaths(myNewPaths)
-library(glmGamPoi)
+#library(glmGamPoi)
+renv::install("bioc::glmGamPoi")
+renv::install("decusinlabore/biologicSeqTools2")
+
 #.libPaths(myPaths)
 
-library(Seurat)
-library(ggplot2)
-library(tidyverse)
-library(knitr)
+# library(Seurat)
+# library(ggplot2)
+# library(tidyverse)
+# library(knitr::)
 
 VersionPdfExt <- paste0(".V", gsub("-", "", Sys.Date()), ".pdf")
 
@@ -78,18 +83,22 @@ if (dir.exists("/Volumes/babs/working/boeings/")){
 }
 
 
-FN <- paste0(hpc.mount, "Projects/reference_data/documentation/BC.parameters.txt")
-dbTable <- read.delim(
-    FN, 
-    sep = "\t",
-    stringsAsFactors = F
-)
-
+## Loading the BABS password ##
+#if (upload.results.to.database){
+    FN <- paste0(hpc.mount, "Projects/reference_data/pwd_folder/babs.txt")
+    dbTable <- read.delim(
+      FN,
+      header = F,
+      sep = "\t",
+      stringsAsFactors = F
+    )
+#}
 db.pwd <- as.vector(dbTable[1,1])
+
 
 figureCount <- 1
 
-library(biologicSeqTools)
+library(biologicSeqTools2)
 #source("assets/R/SBwebtools.pckg.r")
 
 # if (length(.libPaths()) > 2){
@@ -115,10 +124,7 @@ Obio <- createAnalysisFolders(
 )
 Obio <- setDataBaseParameters(Obio)
 
-## Upload metadata table > p315_PCA
-# Obio@parameterList$host <- "10.152.22.193"
-# Obio@parameterList$db.user <- "boeingS"
-# db.pwd <- "5+3f4nB040420"
+
 
 ## Create url string
 if (Obio@parameterList$host == "10.27.241.234"){
@@ -196,7 +202,7 @@ setGeneric(
     #myPaths <- .libPaths()
     #myNewPaths <- c("/camp/stp/babs/working/boeings/Projects/pachnisv/song.chng/330_10xscRNAseq_DIV4_DIV11_DIV20_SC19069/basedata", myPaths)
     #.libPaths(myNewPaths)
-    library(glmGamPoi)
+    #library(glmGamPoi)
     #.libPaths(myPaths)
 
     library(Seurat)
@@ -244,12 +250,12 @@ setGeneric(
     cell_type_lables <- group
     unique(group)
     
-    fit <- glm_gp(dfMatrix, design = group)
+    fit <- glmGamPoi::glm_gp(dfMatrix, design = group)
     comparison <- names(DGEsampleList)
     
     contrastString <- (paste0(comparison[1], " - ", comparison[2]))
     
-    res <- test_de(fit, contrast = contrastString,
+    res <- glmGamPoi::test_de(fit, contrast = contrastString,
             pseudobulk_by = sample_labels, 
             #subset_to = cell_type_labels == "T-cells",
             #n_max = 4, 
@@ -299,34 +305,38 @@ DGEtagVec <- as.vector(NULL, mode = "character")
 
 DGEinputList <- list(
   "comp_1" = list(
-      "name"    = "DGE_MatB52_vs_Control",
-      "DGEselCol" = "meta_Treatment",
+      "name"    = "DGE_T_Regeneron_vs_T_Ctrl",
+      "DGEselCol" = "sampleID",
       "DGEsampleList" = list(
-          "MatB52"   = c("MatB52"),
-          "Control" = c("Control")
+          "T_Regeneron"   = c("Regeneron_R1","Regeneron_2","Regeneron_3"),
+          "T_Ctrl"   = c("Control_R1","Control_R2","Control_R3")
       )
   ),
   "comp_2" = list(
-      "name"    = "DGE_Regeneron_vs_Control",
-      "DGEselCol" = "meta_Treatment",
+      "name"    = "DGE_T_MatB52_vs_T_Ctrl",
+      "DGEselCol" = "sampleID",
       "DGEsampleList" = list(
-          "Regeneron"   = c("Regeneron"),
-          "Control" = c("Control")
+          "T_MatB52"   = c("MatB52_R1","MatB52_R2" ,"MatB52_R3"),
+          "T_Ctrl"   = c("Control_R1","Control_R2","Control_R3")
       )
   ),
   "comp_3" = list(
-      "name"    = "DGE_Regeneron_vs_MatB52",
-      "DGEselCol" = "meta_Treatment",
+      "name"    = "DGE_T_Regeneron_vs_T_MatB52",
+      "DGEselCol" = "sampleID",
       "DGEsampleList" = list(
-          "Regeneron"   = c("Regeneron"),
-          "Control" = c("MatB52")
+          "T_Regeneron"   = c("Regeneron_R1","Regeneron_2","Regeneron_3"),
+          "T_MatB52"   = c("MatB52_R1","MatB52_R2" ,"MatB52_R3")
       )
   )
+  
+  
 )
 
 
-
-
+## Minify for testing
+# cells <- OsC@meta.data$cell_id
+# cells <- sample(size= 2000, cells)
+# OsC <- subset(x= OsC, subset = cellID %in% cells)
 
 
 
@@ -366,7 +376,7 @@ for (i in 1:length(DGEinputList)){
     
     Idents(OsC_DGE) <- "DGE_sel"
     
-    cluster.averages <- AverageExpression(
+    cluster.averages <- Seurat::AverageExpression(
         OsC_DGE, 
         return.seurat = TRUE
     )
@@ -486,27 +496,27 @@ for (i in 1:length(DGEinputList)){
       dotsize = 0.1
     }
 
-    plotList[[tag]] <- ggplot(
+    plotList[[tag]] <- ggplot2::ggplot(
         data=dfPlot[dfPlot$included == "+",], 
-        aes(UMAP_1, UMAP_2, color=Cluster)
-      ) + geom_point( shape=16, size = as.numeric(dotsize)
-      ) + xlab("UMAP1") + ylab("UMAP2"
-      ) + theme_bw(
-      )  +  theme(
-          axis.text.y   = element_text(size=8),
-          axis.text.x   = element_text(size=8),
-          axis.title.y  = element_text(size=8),
-          axis.title.x  = element_text(size=8),
-          axis.line = element_line(colour = "black"),
-          panel.border = element_rect(colour = "black", fill=NA, size=1),
-          plot.title = element_text(hjust = 0.5, size = 12),
-          legend.title = element_blank()
-      ) + guides(col = guide_legend(override.aes = list(shape = 16, size = legendDotSize))
-      ) + ggtitle(paste0("Cell Selection for ", gsub("_", " ", unlist(DGEinputList[[i]]["name"])))
-      ) + xlim(minX, maxX) + ylim(minY, maxY
-      ) + coord_fixed(ratio=1
-      ) + scale_colour_manual("DGE Groups" ,values = colVec
-      ) + guides(col = guide_legend(override.aes = list(shape = 16, size = legendDotSize))
+        ggplot2::aes(UMAP_1, UMAP_2, color=Cluster)
+      ) + ggplot2::geom_point( shape=16, size = as.numeric(dotsize)
+      ) + ggplot2::xlab("UMAP1") + ggplot2::ylab("UMAP2"
+      ) + ggplot2::theme_bw(
+      )  +  ggplot2::theme(
+          axis.text.y   = ggplot2::element_text(size=8),
+          axis.text.x   = ggplot2::element_text(size=8),
+          axis.title.y  = ggplot2::element_text(size=8),
+          axis.title.x  = ggplot2::element_text(size=8),
+          axis.line = ggplot2::element_line(colour = "black"),
+          panel.border = ggplot2::element_rect(colour = "black", fill=NA, size=1),
+          plot.title = ggplot2::element_text(hjust = 0.5, size = 12),
+          legend.title = ggplot2::element_blank()
+      ) + ggplot2::guides(col = ggplot2::guide_legend(override.aes = list(shape = 16, size = legendDotSize))
+      ) + ggplot2::ggtitle(paste0("Cell Selection for ", gsub("_", " ", unlist(DGEinputList[[i]]["name"])))
+      ) + ggplot2::xlim(minX, maxX) + ggplot2::ylim(minY, maxY
+      ) + ggplot2::coord_fixed(ratio=1
+      ) + ggplot2::scale_colour_manual("DGE Groups" ,values = colVec
+      ) + ggplot2::guides(col = ggplot2::guide_legend(override.aes = list(shape = 16, size = legendDotSize))
       )
 
 
@@ -581,7 +591,7 @@ In this section the cells that were used for the DGE comparisons are highlighted
 
 ```{r CellTypePlot, echo=TRUE, eval=TRUE, warning=FALSE, results="asis"} 
 
-cat(paste(knit(text = chnkVec, quiet = T), collapse = '\n'))
+cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = '\n'))
 
 ``` 
 
@@ -737,27 +747,27 @@ for (i in 1:length(DGEtagVec)){
 
     logFClims <- ceiling(max(abs(dfPlot$Y)))
     
-    plotList[[tag]] <- ggplot(
+    plotList[[tag]] <- ggplot2::ggplot(
         data=dfPlot[dfPlot$included == "+",], 
-        aes(X, Y, color=DGE_Status,)
-      ) + geom_hline(yintercept = c(logFCtwoSD, -1 * logFCtwoSD), col = "darkgrey", lty=2
-      ) + geom_point( shape=16, size = as.numeric(dotsize),alpha = 0.7
-      ) + xlab(paste0("log10 Avg Intensity ", gsub("_", " ",label))) + ylab(paste0("log2-Fold Change ", gsub("_", " ",label))
-      ) + theme_bw(
-      )  +  theme(
-          axis.text.y   = element_text(size=8),
-          axis.text.x   = element_text(size=8),
-          axis.title.y  = element_text(size=8),
-          axis.title.x  = element_text(size=8),
-          axis.line = element_line(colour = "black"),
-          panel.border = element_rect(colour = "black", fill=NA, size=1),
-          plot.title = element_text(hjust = 0.5, size = 12)
+        ggplot2::aes(X, Y, color=DGE_Status,)
+      ) + ggplot2::geom_hline(yintercept = c(logFCtwoSD, -1 * logFCtwoSD), col = "darkgrey", lty=2
+      ) + ggplot2::geom_point( shape=16, size = as.numeric(dotsize),alpha = 0.7
+      ) + ggplot2::xlab(paste0("log10 Avg Intensity ", gsub("_", " ",label))) + ggplot2::ylab(paste0("log2-Fold Change ", gsub("_", " ",label))
+      ) + ggplot2::theme_bw(
+      )  +  ggplot2::theme(
+          axis.text.y   = ggplot2::element_text(size=8),
+          axis.text.x   = ggplot2::element_text(size=8),
+          axis.title.y  = ggplot2::element_text(size=8),
+          axis.title.x  = ggplot2::element_text(size=8),
+          axis.line = ggplot2::element_line(colour = "black"),
+          panel.border = ggplot2::element_rect(colour = "black", fill=NA, size=1),
+          plot.title = ggplot2::element_text(hjust = 0.5, size = 12)
           #legend.title = element_blank()
-      ) + guides(col = guide_legend(override.aes = list(shape = 16, size = legendDotSize))
-      ) + ggtitle(paste0("MA-stype Plot for DGE Comparison ", gsub("_", " ", label))
-      ) + ylim(logFClims, -1 * logFClims
-      ) + scale_color_manual("DGE Status" ,values = colVec
-      ) + scale_y_continuous(breaks=c(seq(-20,20,2))
+      ) + ggplot2::guides(col = ggplot2::guide_legend(override.aes = list(shape = 16, size = legendDotSize))
+      ) + ggplot2::ggtitle(paste0("MA-stype Plot for DGE Comparison ", gsub("_", " ", label))
+      ) + ggplot2::ylim(logFClims, -1 * logFClims
+      ) + ggplot2::scale_color_manual("DGE Status" ,values = colVec
+      ) + ggplot2::scale_y_continuous(breaks=c(seq(-20,20,2))
       )
 
 
@@ -827,7 +837,7 @@ if (length(plotList) > 3){
 
 ```{r DGE_MA_plot, echo=TRUE, eval=TRUE, warning=FALSE, results="asis"} 
 
-cat(paste(knit(text = chnkVec, quiet = T), collapse = '\n'))
+cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = '\n'))
 
 ``` 
 
@@ -879,30 +889,30 @@ for (i in 1:length(DGEtagVec)){
 
     logFClims <- ceiling(max(abs(dfPlot$X)))
     
-    plotList[[tag]] <- ggplot(
+    plotList[[tag]] <- ggplot2::ggplot(
         data=dfPlot[dfPlot$included == "+",], 
-        aes(X, Y, color=DGE_Status,)
-      ) + geom_vline(xintercept = c(logFCtwoSD, -1 * logFCtwoSD), col = "darkgrey", lty=2
-      ) + geom_vline(xintercept = 0, col = "darkgrey"
-      ) + geom_hline(yintercept = 0, col = "darkgrey"
-      ) + geom_point( shape=16, size = as.numeric(dotsize),alpha = 0.7
-      ) + xlab(paste0("log2-Fold Change ", gsub("_", " ",label))) + ylab(paste0("-log10(adj p-value) ", gsub("_", " ",label))
-      ) + theme_bw(
-      )  +  theme(
-          axis.text.y   = element_text(size=8),
-          axis.text.x   = element_text(size=8),
-          axis.title.y  = element_text(size=8),
-          axis.title.x  = element_text(size=8),
-          axis.line = element_line(colour = "black"),
-          panel.border = element_rect(colour = "black", fill=NA, size=1),
-          plot.title = element_text(hjust = 0.5, size = 12)
+        ggplot2::aes(X, Y, color=DGE_Status,)
+      ) + ggplot2::geom_vline(xintercept = c(logFCtwoSD, -1 * logFCtwoSD), col = "darkgrey", lty=2
+      ) + ggplot2::geom_vline(xintercept = 0, col = "darkgrey"
+      ) + ggplot2::geom_hline(yintercept = 0, col = "darkgrey"
+      ) + ggplot2::geom_point( shape=16, size = as.numeric(dotsize),alpha = 0.7
+      ) + ggplot2::xlab(paste0("log2-Fold Change ", gsub("_", " ",label))) + ggplot2::ylab(paste0("-log10(adj p-value) ", gsub("_", " ",label))
+      ) + ggplot2::theme_bw(
+      )  +  ggplot2::theme(
+          axis.text.y   = ggplot2::element_text(size=8),
+          axis.text.x   = ggplot2::element_text(size=8),
+          axis.title.y  = ggplot2::element_text(size=8),
+          axis.title.x  = ggplot2::element_text(size=8),
+          axis.line = ggplot2::element_line(colour = "black"),
+          panel.border = ggplot2::element_rect(colour = "black", fill=NA, size=1),
+          plot.title = ggplot2::element_text(hjust = 0.5, size = 12)
           #legend.title = element_blank()
-      ) + guides(col = guide_legend(override.aes = list(shape = 16, size = legendDotSize))
-      ) + ggtitle(paste0("Volcano Plot for DGE Comparison ", gsub("_", " ", label))
-      ) + ylim(logFClims, -1 * logFClims
-      ) + scale_color_manual("DGE Status" ,values = colVec
-      ) + scale_y_continuous(breaks=c(seq(0,400,50))
-      ) + scale_x_continuous(breaks=c(seq(-400,400,2))
+      ) + ggplot2::guides(col = ggplot2::guide_legend(override.aes = list(shape = 16, size = legendDotSize))
+      ) + ggplot2::ggtitle(paste0("Volcano Plot for DGE Comparison ", gsub("_", " ", label))
+      ) + ggplot2::ylim(logFClims, -1 * logFClims
+      ) + ggplot2::scale_color_manual("DGE Status" ,values = colVec
+      ) + ggplot2::scale_y_continuous(breaks=c(seq(0,400,50))
+      ) + ggplot2::scale_x_continuous(breaks=c(seq(-400,400,2))
       )
 
 
@@ -972,13 +982,13 @@ if (length(plotList) > 3){
 
 ```{r DGE_volcano_plot, echo=TRUE, eval=TRUE, warning=FALSE, results="asis"} 
 
-cat(paste(knit(text = chnkVec, quiet = T), collapse = '\n'))
+cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = '\n'))
 
 ``` 
 
 
-```{r create-pca-enrichment-data, echo=T, eval=TRUE, warning=FALSE, results=F}
-
+```{r create-pca-enrichment-data, echo=T, eval=TRUE, warning=FALSE, results=F, error=F}
+Obio@dbDetailList$db.user <- "babs"
 ## Create enriched genes list ##
 EnrichedGenesList <- list()
 dfAllPlots <- Obio@dataTableList[["DGE_table"]] 
@@ -1015,11 +1025,11 @@ for (i in 1:length(DGEtagVec)){
     EnrichedGenesList[[tagGLneg]] <- unique(dfPlot[dfPlot$DGE_Status == "Down", "gene"])
 } 
 
-library(knitr)
-library(ggplot2)
+#library(knitr::)
+#library(ggplot2)
 
 #save.image("temp.RData")
-library(clusterProfiler)
+#library(clusterProfiler)
 
     gmtList <- list()
     pos <- grep("clusterSigEnrichmentList", slotNames(Obio))
@@ -1086,7 +1096,7 @@ library(clusterProfiler)
             quote = F
         )
         
-        CPgmt <- read.gmt("temp.gmt.txt")
+        CPgmt <- clusterProfiler::read.gmt("temp.gmt.txt")
         unlink("temp.gmt.txt")
         CPgmt <- unique(CPgmt[CPgmt$gene != "", ])
         
@@ -1104,8 +1114,8 @@ library(clusterProfiler)
     ###########################
     
     ## Select colors ##
-    library(scales)
-    enrCols <- hue_pal()(length(gmtList))
+    #library(scales)
+    enrCols <- scales::hue_pal()(length(gmtList))
     names(enrCols) <- substr(names(gmtList),1,10)
 
 
@@ -1144,9 +1154,9 @@ for (j in 1:length(DGEtagVec)){
     ## Done                                                                  ##
     ###########################################################################
      
-    library(clusterProfiler)
-    library(ggplot2)
-    library(tidyr)
+    #library(clusterProfiler)
+    #library(ggplot2)
+    #library(tidyr)
         
         if (Obio@parameterList$geneIDcolumn != "mgi_symbol" & Obio@parameterList$geneIDcolumn != "hgnc_symbol") {
             queryGS <- "hgnc_symbol" 
@@ -1172,7 +1182,7 @@ for (j in 1:length(DGEtagVec)){
         if (length(posTestGeneSet) >= 3){
             for (k in 1:length(gmtList)){
                     egmt <- data.frame(
-                        enricher(
+                        clusterProfiler::enricher(
                             negTestGeneSet, 
                             TERM2GENE=gmtList[[k]],
                             pvalueCutoff = pvalueCutoff
@@ -1194,7 +1204,8 @@ for (j in 1:length(DGEtagVec)){
                         
                     }
             }
-            if (nrow(dfTempEnriched) > 0){
+           
+            if (exists("dfTempEnriched") && nrow(dfTempEnriched) > 0){
                 dfTempEnriched[["direction"]] <- "positive"
                 dfTempEnriched[["log10FDR"]] <- log10(dfTempEnriched$p.adjust)
                 dfTempEnriched <- dfTempEnriched[order(dfTempEnriched$log10FDR, decreasing = F),]
@@ -1213,7 +1224,7 @@ for (j in 1:length(DGEtagVec)){
             first <- TRUE
             for (k in 1:length(gmtList)){
                     egmt <- data.frame(
-                        enricher(
+                        clusterProfiler::enricher(
                             posTestGeneSet, 
                             TERM2GENE=gmtList[[k]],
                             pvalueCutoff = pvalueCutoff
@@ -1235,7 +1246,7 @@ for (j in 1:length(DGEtagVec)){
                         
                     } 
             }
-            if (nrow(dfTempEnrichedNeg) > 0){
+            if (exists("dfTempEnrichedNeg") && nrow(dfTempEnrichedNeg) > 0){
                 dfTempEnrichedNeg[["direction"]] <- "negative"
                 dfTempEnrichedNeg[["log10FDR"]] <- -1*log10(dfTempEnrichedNeg$p.adjust)
                 dfTempEnrichedNeg <- dfTempEnrichedNeg[order(dfTempEnrichedNeg$log10FDR, decreasing = T),]
@@ -1284,22 +1295,22 @@ for (j in 1:length(DGEtagVec)){
             
             
             
-            plotList[[paste0("PCA_ENR_", j)]] <- ggplot(
-                data=dfSel, aes(x= ID, y=log10FDR, fill=Collection, order=log10FDR)
-            ) + geom_bar(stat="identity", colour="black"
-            ) + coord_flip() +scale_fill_manual(values=enrCols
-            ) + theme_bw(
-            )  +  theme(
-                axis.text.y   = element_text(size=8),
-                axis.text.x   = element_text(size=8),
-                axis.title.y  = element_text(size=8),
-                axis.title.x  = element_text(size=8),
-                axis.line = element_line(colour = "black"),
-                panel.border = element_rect(colour = "black", fill=NA, size=1),
-                plot.title = element_text(hjust = 0.5, size = 12)
-            )  + labs(title = paste0("Comparison ", DGEtagVec[j]," enriched genes") ,y = "-log10(FDR)", x = ""
-            ) + geom_hline(yintercept = c(-log10(0.05), log10(0.05)), color = "grey", size=0.5, lty=2
-            ) + geom_hline(yintercept = 0, color = "black", size=0.5
+            plotList[[paste0("PCA_ENR_", j)]] <- ggplot2::ggplot(
+                data=dfSel, ggplot2::aes(x= ID, y=log10FDR, fill=Collection, order=log10FDR)
+            ) + ggplot2::geom_bar(stat="identity", colour="black"
+            ) + ggplot2::coord_flip() + ggplot2::scale_fill_manual(values=enrCols
+            ) + ggplot2::theme_bw(
+            )  +  ggplot2::theme(
+                axis.text.y   = ggplot2::element_text(size=8),
+                axis.text.x   = ggplot2::element_text(size=8),
+                axis.title.y  = ggplot2::element_text(size=8),
+                axis.title.x  = ggplot2::element_text(size=8),
+                axis.line = ggplot2::element_line(colour = "black"),
+                panel.border = ggplot2::element_rect(colour = "black", fill=NA, size=1),
+                plot.title = ggplot2::element_text(hjust = 0.5, size = 12)
+            )  + ggplot2::labs(title = paste0("Comparison ", DGEtagVec[j]," enriched genes") ,y = "-log10(FDR)", x = ""
+            ) + ggplot2::geom_hline(yintercept = c(-log10(0.05), log10(0.05)), color = "grey", size=0.5, lty=2
+            ) + ggplot2::geom_hline(yintercept = 0, color = "black", size=0.5
             ) 
             cat("  \n")
             
@@ -1367,7 +1378,7 @@ if (length(plotList) > 3){
 ```{r create-cat-enrichment-plot, echo=T, eval=TRUE, warning=FALSE, results='asis'}
 ###############################################################################
 ## Do category enrichment on clusters                                        ##
-cat(paste(knit(text = chnkVec, quiet = T), collapse = '\n'))
+cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = '\n'))
 ## Done doing enrichment on clusters                                         ##
 ###############################################################################
 
@@ -1376,12 +1387,12 @@ cat(paste(knit(text = chnkVec, quiet = T), collapse = '\n'))
 
 
 <!-- Essential N: Upload meta data table -->
-```{r child = 'src/modules/db_tools/upload.meta.data.table.to.DB.Rmd', eval=TRUE}
+```{r child = 'src/modules/db_tools/upload.meta.data.table.to.DB.Rmd', eval=FALSE, error = FALSE}
 
 ```
 
 
-```{r documentation_saving, echo=F, eval=TRUE, warning=FALSE, results=F} 
+```{r documentation_saving, echo=F, eval=TRUE, warning=FALSE, results=F, error = FALSE} 
 
 save(Obio, 
      file = paste0(
@@ -1400,6 +1411,9 @@ save(OsC,
         ".Seurat.Robj"
      )
 )
+
+###############################################################################
+## Rerunning of part C is required                                           ##
 
 ###############################################################################
 ## Create Excel output files                                                 ##
@@ -1462,312 +1476,6 @@ saveWorkbook(
 
 ## Done creating Excel output files                                          ##
 ###############################################################################
-
-
-############
-## Add to main dbTable
-database.table <- biologicSeqTools::import.db.table.from.db(
-    dbtable= Obio@parameterList$rnaseqdbTableName,   
-    dbname= Obio@dbDetailList$primDataDB,   
-    user= Obio@dbDetailList$db.user,     
-    password= db.pwd, 
-    host= Obio@parameterList$host
-)
-
-database.table$row_names <- NULL
-
-dfTemp <- Obio@dataTableList[["DGE_table"]]
-dfTemp$ref_gene <- NULL
-
-#names(dfTemp) <- gsub("logFC", "logFC_glmG", names(dfTemp))
-#names(dfTemp) <- gsub("padj", "padj_glmG", names(dfTemp))
-#names(dfTemp) <- gsub("lg10p", "lg10p_glmG", names(dfTemp))
-
-selVec <- !(names(database.table) %in% names(dfTemp))
-database.table <- database.table[!(names(database.table) %in% names(dfTemp))]
-
-
-database.table <- merge(
-    database.table, 
-    dfTemp,
-    by.x = Obio@parameterList$geneIDcolumn,
-    by.y = "gene",
-    all = TRUE
-)
-
-database.table[is.na(database.table)] <- 0
-
-Obio@databaseTable <- data.frame(NULL)
-Obio@databaseTable <- database.table
-
-Obio@databaseTable$Gene_description <- NULL
-
-
-cmd.vec <- upload.datatable.to.database(
-    host = Obio@dbDetailList$host, 
-    user = Obio@dbDetailList$db.user,
-    password = db.pwd,
-    prim.data.db = Obio@dbDetailList$primDataDB,
-    dbTableName = Obio@parameterList$rnaseqdbTableName,
-    df.data = Obio@databaseTable, #[Obio@databaseTable$count_cut_off > 1, ],
-    db.col.parameter.list = biologicSeqTools::inferDBcategories(Obio@databaseTable),
-    new.table = TRUE,
-    cols2Index = c(Obio@parameterList$geneIDcolumn)
-)
-
-killDbConnections()
-
-###############################################################################
-# Create microwebsite                                                         #
-###############################################################################
-
-## Color samples by sample group ##
-# Get sample order from database.table
-## oder samples according to PC1
-# df.pca <- df.pca[order(df.pca$pca1, decreasing = FALSE),]
-# sample.order <- paste0("norm_counts_", df.pca$sample_id)
-
-
-sample.order <- (names(Obio@databaseTable)[grep("norm_counts_", names(Obio@databaseTable))])
-
-
-lg2Avg.order <- sort(names(Obio@databaseTable)[grep("lg2_avg", names(Obio@databaseTable))])
-
-# sample.order <- c(
-#     'norm_counts_Avg_log10_Expr_All_Ctrl','norm_counts_Avg_log10_Expr_All_Prad','norm_counts_Avg_log10_Expr_Cl_0_C','norm_counts_Avg_log10_Expr_Cl_0_P','norm_counts_Avg_log10_Expr_Cl_10_C','norm_counts_Avg_log10_Expr_Cl_10_P','norm_counts_Avg_log10_Expr_Cl_1_C','norm_counts_Avg_log10_Expr_Cl_1_P','norm_counts_Avg_log10_Expr_Cl_2_C','norm_counts_Avg_log10_Expr_Cl_2_P','norm_counts_Avg_log10_Expr_Cl_3_C','norm_counts_Avg_log10_Expr_Cl_3_P','norm_counts_Avg_log10_Expr_Cl_4_C','norm_counts_Avg_log10_Expr_Cl_4_P','norm_counts_Avg_log10_Expr_Cl_5_C','norm_counts_Avg_log10_Expr_Cl_5_P','norm_counts_Avg_log10_Expr_Cl_6_C','norm_counts_Avg_log10_Expr_Cl_6_P','norm_counts_Avg_log10_Expr_Cl_7_C','norm_counts_Avg_log10_Expr_Cl_7_P','norm_counts_Avg_log10_Expr_Cl_8_C','norm_counts_Avg_log10_Expr_Cl_8_P','norm_counts_Avg_log10_Expr_Cl_9_C','norm_counts_Avg_log10_Expr_Cl_9_P'
-# )
-
-## Sort database.table ##
-
-#lg2Order <- gsub("norm_counts_", "lg2_avg_", sample.order)
-
-orderVec <- names(Obio@databaseTable)
-orderVec <- orderVec[!(orderVec %in% sample.order)]
-orderVec <- orderVec[!(orderVec %in% lg2Avg.order)]
-
-orderVec <- c(
-    orderVec,
-    sample.order,
-    lg2Avg.order
-)
-
-Obio@databaseTable <- Obio@databaseTable[,orderVec]
-
-## Get relevant colors ##
-sampleIDs <- paste0("_", unique(OsC@meta.data$sampleID))
-
-sample.colors <- sample.order
-for (i in 1:length(sampleIDs)){
-    sample.colors <- gsub(as.vector(sampleIDs[i]), "", sample.colors)    
-}
-
-
-library(scales)
-color.groups <- unique(sample.colors)
-#color.groups <- hue_pal()(length(color.groups))
-
-#dfDesign[["sample_color"]] <- "orange"
-nSampleGroups <- length(unique(color.groups))
-
-# library(RColorBrewer)
-# selcol <- colorRampPalette(brewer.pal(12,"Set3"))
-
-color.sel = scales::hue_pal()(length(color.groups))
-
-for (i in 1:length(color.groups)){
-    sample.colors[grep(color.groups[i], sample.colors)] <- color.sel[i]
-}
-
-
-
-if (!exists("gsea.cat.lines")){
-    gsea.cat.lines <- ""
-    downloadCatEnrichmentFNxlsx <- ""
-} else {
-    downloadCatEnrichmentFNxlsx <- paste0("outputs/", Obio@parameterList$project.code, ".enriched.categories.txt")
-}
-
-if (!exists("timecourse.cat.lines")){
-    timecourse.cat.lines <- NA
-}
-
-#library(SBwebtools)
-setwd(Obio@parameterList$localWorkDir)
-
-#library(SBwebtools)
-webSiteDir <- Obio@parameterList$localWorkDir
-
-project.code <- gsub(substr(Obio@parameterList$project_id, 1, 3), "p", Obio@parameterList$project_id)
-
-
-###############################################################################
-## Set default X colum                                                       ##
-
-pos <- grep(
-  "^add_counts_Avg_log10_Expr_all$", 
-  names(Obio@databaseTable)
-)
-
-if (length(pos) == 1){
-  defaultX <- "add_counts_Avg_log10_Expr_all"
-} else {
-  defaultX <- "contrast_X_logFC_Expressed_in_N_Percent_Cells"
-}
-
-pos <- grep(
-  "^add_counts_Avg_log10_Expr_C_0$",
-  names(Obio@databaseTable)
-)
-
-if (length(pos) == 1){
-  defaultY <- "add_counts_Avg_log10_Expr_C_0"
-} else {
-  defaultY <- sample.order[1]
-}
-## d
-
-###############################################################################
-## Create default plot selection                                             ##
-
-plotSelection <- c(
-    names(Obio@databaseTable)[grep("_logFC_",names(Obio@databaseTable))],
-    
-    names(Obio@databaseTable)[grep("_lg10p_",names(Obio@databaseTable))],
-
-    names(Obio@databaseTable)[grep("lg2BaseMean",names(Obio@databaseTable))],
-    names(Obio@databaseTable)[grep("corCoef",names(Obio@databaseTable))],
-    names(Obio@databaseTable)[grep("add_counts",names(Obio@databaseTable))],
-    names(Obio@databaseTable)[grep("norm_counts",names(Obio@databaseTable))],
-    names(Obio@databaseTable)[grep("contrast_P_PCA_estimatePCA",names(Obio@databaseTable))],
-    names(Obio@databaseTable)[grep("add_MA_cts_MA",names(Obio@databaseTable))]
-)
-
-chunk1 <- plotSelection[grep("_logFC_", plotSelection)]
-chunkh2 <- plotSelection[grep("_lg10p_", plotSelection)]
-chunk2a <-chunkh2[grep("_lg10p_PCA", chunkh2)]
-chunk2b <- chunkh2[!(chunkh2  %in% chunk2a)]
-
-chnk2c <- plotSelection[grep("_corCoef", plotSelection)]
-
-chunk3 <- plotSelection[grep("_PCA_est", plotSelection)]
-chunk3a <- plotSelection[grep("add_MA_cts_MA", plotSelection)]
-chunk4 <- plotSelection[grep("_lg2BaseMean_", plotSelection)]
-
-chunk5 <- sort(plotSelection[grep("Avg_log10_Expr", plotSelection)])
-chunk6 <- sort(plotSelection[grep("add_counts_PCA", plotSelection)])
-
-# rmVec <- grep("_LRT_", chunk4)
-# if (length(rmVec) > 0){
-#     chunk4 <- chunk4[-rmVec]
-# }
-
-plotSelectionNew <- c(
-    chunk1,
-    chunk2b,
-    chnk2c,
-    chunk2a,
-    chunk4,
-    chunk5,
-    chunk6,
-    chunk3,
-    chunk3a,
-    chunk4
-)
-
-plotAdd <- plotSelection[!(plotSelection %in% plotSelectionNew)]
-
-plotSelection <- c(
-    defaultX,
-    defaultY,
-    plotSelectionNew,
-    plotAdd
-)
-
-
-## Done creating default plot selection                                      ##
-###############################################################################
-
-###############################################################################
-## Do default Venn selection                                                 ##
-defaultVennSel <- names(Obio@databaseTable)
-defaultVennSel <- c(
-    defaultVennSel[grep("contrast_", defaultVennSel)],
-    defaultVennSel[grep("add_venn_", defaultVennSel)],
-    defaultVennSel[grep("_TsCor_", defaultVennSel)],
-    defaultVennSel[grep("_Residuals", defaultVennSel)]
-
-)
-
-rmVec <- c(
-    grep("contrast_P_", defaultVennSel),
-    grep("_lg2BaseMean_", defaultVennSel),
-    grep("_padj_LRT_", defaultVennSel),
-    grep("_lg10p_", defaultVennSel),
-    grep("_stat_", defaultVennSel),
-    grep("pValueCor_", defaultVennSel)
-)
-
-if (length(rmVec) > 0){
-    defaultVennSel <- defaultVennSel[-rmVec]
-}
-
-## Add lrt
-defaultVennSel <- c(
-    defaultVennSel,
-    names(Obio@databaseTable)[grep("contrast_L_lg10p", names(Obio@databaseTable))]
-)
-
-## Done with LRT selection                                                   ##
-###############################################################################
-
-
-###############################################################################
-## Deploy next generation website                                            ##
-biologicSeqTools::createSettingsFile(
-    obj = Obio,
-    df.data = Obio@databaseTable,
-    defaultXcolName = defaultX,
-    defaultYcolName = defaultY,
-    primDataTable = Obio@parameterList$rnaseqdbTableName,
-    pcaDbTable = Obio@parameterList$PCAdbTableName, 
-    sample.order = sample.order, #set to "" to go with default sorting
-    heatmapSampleOrder = "",
-    sample.names = "", # default is sample.order
-    count.sample.colors = sample.colors,
-    ptm.colum = "",
-    count.table.headline = Obio@parameterList$count.table.headline,
-    count.table.sidelabel = Obio@parameterList$count.table.sidelabel,
-    venn.slider.selector.strings = defaultVennSel,
-    plot.selection.strings = plotSelection,
-    webSiteDir = paste0(hpc.mount, "Stefan/protocol_files/github/biologic/src/experiments/"),
-    upper_heatmap_limit = 3, 
-    lower_heatmap_limit = -3,
-    heamap.headline.text = Obio@parameterList$heamap.headline.text,
-    project_id = Obio@parameterList$project_id
-)
-
-setwd(Obio@parameterList$localWorkDir)
-## Done deploying next generation website                                    ##
-###############################################################################
-
-save(Obio, 
-     file = paste0(
-         Obio@parameterList$localWorkDir,
-         Obio@parameterList$project_id,
-         ".bioLOGIC.Robj"
-     )
-)
-
-print("Obio Object saved.")
-
-save(OsC,
-    file = paste0(
-         Obio@parameterList$localWorkDir,
-         Obio@parameterList$project_id,
-        ".Seurat.Robj"
-     )
-)
-
 ```
 
 

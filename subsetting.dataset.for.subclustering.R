@@ -22,7 +22,7 @@ if (!file.exists("renv.lock")){
 ## Prepare subset for sub-clustering                                         ##
 library(Seurat)
 ## load Seurat object with basedata
-FN <- "/camp/stp/babs/working/boeings/Projects/bonfantip/roberta.ragazzini/449E_subclustering_449C_SC20193_C1_2_3_4_5/workdir/pbl449EsubCluster.Seurat.Robj"
+FN <- "/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/470_scRNAseq_Inhba_SC21185/workdir/SC21185.Seurat.Robj"
 load(FN)
 
 ## Data selection for subsetting:
@@ -30,7 +30,7 @@ load(FN)
 
 
 # Select only cluster 1
-OsC_sel1 <- subset(x = OsC, subset = seurat_clusters %in% c(1))
+OsC_sel1 <- subset(x = OsC, subset = seurat_clusters %in% c(8,11,14,17))
 
 sampleIDs <- unique(OsC_sel1$sampleID)
 
@@ -39,10 +39,10 @@ sampleIDs <- unique(OsC_sel1$sampleID)
 
 for (i in 1:length(sampleIDs)){
     FNout <- paste0(
-      "/camp/stp/babs/working/boeings/Projects/bonfantip/roberta.ragazzini/449E_subclustering_449C_SC20193_C1_2_3_4_5/basedata/",
+      "/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/470_scRNAseq_Inhba_SC21185/basedata/",
       "input_",
       sampleIDs[i],
-      "_C1only.txt"
+      "_C8111417T.txt"
     )
     
     OsC_temp <- subset(x= OsC_sel1, subset = sampleID == sampleIDs[i])
@@ -54,8 +54,8 @@ for (i in 1:length(sampleIDs)){
     }
 }
 
-OsC@meta.data[["meta_Subclustering_C1only"]] <- "Rest"
-OsC@meta.data[OsC@meta.data$seurat_clusters %in% c(1), "meta_Subclustering_C1only"] <- "Selected"
+OsC@meta.data[["meta_Subclustering_T_cells"]] <- "Rest"
+OsC@meta.data[OsC@meta.data$seurat_clusters %in% c(1), "meta_Subclustering_T_cells"] <- "Selected"
 
 save(
   OsC, 
