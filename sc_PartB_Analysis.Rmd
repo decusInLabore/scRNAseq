@@ -50,19 +50,19 @@ tempWorkDir <- paste0(cwd, "../")
 #source("assets/R/scTools.r")
 #source("assets/R/SBwebtools.pckg.r")
 
-renv::install("decusInLabore/biologicSeqTools")
-renv::install("decusInLabore/biologicToolsSC")
+#renv::install("decusInLabore/biologicSeqTools")
+#renv::install("decusInLabore/biologicToolsSC")
 library(Seurat)
 library(biologicSeqTools)
 library(biologicToolsSC)
 
 ## Make sure the correct future version (> 1.2) is installed
-renv::install("https://cran.r-project.org/src/contrib/Archive/future/future_1.19.1.tar.gz")
+#renv::install("https://cran.r-project.org/src/contrib/Archive/future/future_1.19.1.tar.gz")
 ## Doublet Finder
-renv::install("chris-mcginnis-ucsf/DoubletFinder")
-renv::install("bioc::clusterProfiler")
-renv::install("bioc::AUCell")
-renv::install("YuLab-SMU/ggtree")
+#renv::install("chris-mcginnis-ucsf/DoubletFinder")
+#renv::install("bioc::clusterProfiler")
+#renv::install("bioc::AUCell")
+#renv::install("YuLab-SMU/ggtree")
 
 upload.results.to.database <- TRUE
 save.chunk.intermediates <- TRUE

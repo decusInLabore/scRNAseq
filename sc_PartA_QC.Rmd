@@ -25,7 +25,7 @@ if (!requireNamespace("remotes")){
   install.packages("remotes")
 }
 
-remotes::install_github("rstudio/renv")
+# remotes::install_github("rstudio/renv")
 
 if (!file.exists("renv.lock")){
     renv::init(prompt=F)
@@ -58,14 +58,14 @@ if (dir.exists("/Volumes/babs/working/boeings/")){
 ## Make sure the correct future version (> 1.2) is installed
 #renv::install("https://cran.r-project.org/src/contrib/Archive/future/future_1.19.1.tar.gz")
 ## Doublet Finder
-renv::install("chris-mcginnis-ucsf/DoubletFinder")
-renv::install("bioc::clusterProfiler")
-renv::install("bioc::AUCell")
-renv::install("YuLab-SMU/ggtree")
+# renv::install("chris-mcginnis-ucsf/DoubletFinder")
+# renv::install("bioc::clusterProfiler")
+# renv::install("bioc::AUCell")
+# renv::install("YuLab-SMU/ggtree")
 
 
-renv::install("decusInLabore/biologicSeqTools2")
-renv::install("decusInLabore/biologicToolsSC")
+# renv::install("decusInLabore/biologicSeqTools2")
+# renv::install("decusInLabore/biologicToolsSC")
 library(Seurat)
 library(biologicSeqTools2)
 library(biologicToolsSC)
@@ -104,7 +104,7 @@ db.pwd <- as.vector(dbTable[1,1])
 ```
 
 <!-- Optional 1B: Create 10X QC Table Chapter/Module -->
-```{r child = 'src/modules/qc/create.10X.QC.table.Rmd', eval=TRUE}
+```{r child = 'src/modules/qc/create.10X.QC.table.Rmd', eval=FALSE}
 ```
 
 <!-- Essential 2: (output required later): Create Seurat Sample List Chapter/Module -->
@@ -120,7 +120,7 @@ db.pwd <- as.vector(dbTable[1,1])
 ```
 
 <!-- Optional 5: Doublet finder module run.doublet.finder.Rmd -->
-```{r child = 'src/modules/qc/A.run.doublet.finder.Rmd', eval=TRUE}
+```{r child = 'src/modules/qc/A.run.doublet.finder.Rmd', eval=FALSE}
 ```
 
 <!-- Optional 6: Perform three cell cycle regressions: none, G2M/S and full Chapter/Module -->
