@@ -265,7 +265,8 @@ print("End chunk 1. Objects loaded.")
 ## Add additional UMAP annotations
 addFNvec <- c(
   "../temp/UMAP.regression.coordinates.txt",
-  "../temp/ClusterFinder.output.txt" 
+  "../temp/ClusterFinder.output.txt",
+  "../temp/species.inference.txt"
 )
 
 row.names(OsC@meta.data) <- OsC@meta.data$cellID

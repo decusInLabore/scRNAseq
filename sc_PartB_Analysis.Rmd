@@ -27,7 +27,7 @@ if (!requireNamespace("remotes")){
   install.packages("remotes")
 }
 
-remotes::install_github("rstudio/renv")
+#remotes::install_github("rstudio/renv")
 
 if (!file.exists("renv.lock")){
     renv::init()
