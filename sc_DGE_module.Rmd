@@ -44,24 +44,24 @@ knitr::opts_chunk$set(
 
 ```{r populate_meta_data_database_part1, eval=TRUE, echo=F, results=F}
 #Create the environment and load a suitable version of R, e.g. so:
-if (!requireNamespace("remotes")){
-  install.packages("remotes")
-}
-
-remotes::install_github("rstudio/renv")
-
-if (!file.exists("renv.lock")){
-    renv::init(prompt=F)
-} else {
-    renv::restore(prompt=F)
-}
+# if (!requireNamespace("remotes")){
+#   install.packages("remotes")
+# }
+# 
+# remotes::install_github("rstudio/renv")
+# 
+# if (!file.exists("renv.lock")){
+#     renv::init(prompt=F)
+# } else {
+#     renv::restore(prompt=F)
+# }
 
 #myPaths <- .libPaths()
 #myNewPaths <- c("/camp/stp/babs/working/boeings/Projects/pachnisv/song.chng/330_10xscRNAseq_DIV4_DIV11_DIV20_SC19069/basedata", myPaths)
 #.libPaths(myNewPaths)
 #library(glmGamPoi)
-renv::install("bioc::glmGamPoi")
-renv::install("decusinlabore/biologicSeqTools2")
+# renv::install("bioc::glmGamPoi")
+# renv::install("decusinlabore/biologicSeqTools2")
 
 #.libPaths(myPaths)
 
@@ -109,6 +109,7 @@ library(biologicSeqTools2)
 ObioFN <- paste0("../", list.files("..")[grep(".bioLOGIC.Robj", list.files(".."))])
 
 load(ObioFN)
+
 
 checkFile = paste0(
          Obio@parameterList$project_id,
@@ -175,7 +176,18 @@ load(paste0(
 )
 )
 
+###############################################################################
+## Create cluster sample                                                     ##
 
+OsC@meta.data[["cluster_sample"]] <- paste0(
+    "C",
+    OsC@meta.data$seurat_clusters,
+    "_",
+    OsC@meta.data$sampleID
+)
+
+## Done                                                                      ##
+###############################################################################
 
 
 
@@ -305,32 +317,39 @@ DGEtagVec <- as.vector(NULL, mode = "character")
 
 DGEinputList <- list(
   "comp_1" = list(
-      "name"    = "DGE_T_Regeneron_vs_T_Ctrl",
-      "DGEselCol" = "sampleID",
+      "name"    = "DGE_Fib_T_C4_vs_N_C4",
+      "DGEselCol" = "cluster_sample",
       "DGEsampleList" = list(
-          "T_Regeneron"   = c("Regeneron_R1","Regeneron_2","Regeneron_3"),
-          "T_Ctrl"   = c("Control_R1","Control_R2","Control_R3")
+          "Fib_T_C4"   = c("C4_T1","C4_T2","C4_T3","C4_T4","C4_T5","C4_T6","C4_T7","C4_T8","C4_T9","C4_T10","C4_T11","C4_T12","C4_T13","C4_T14","C4_T15","C4_T16","C4_T17","C4_T18","C4_T19","C4_T21","C4_T22","C4_T23","C4_T24"),
+          "Fib_N_C4" = c("C4_N1","C4_N2","C4_N3","C4_N4","C4_N5","C4_N6","C4_N7","C4_N8","C4_N9","C4_N10","C4_N11")
       )
   ),
   "comp_2" = list(
-      "name"    = "DGE_T_MatB52_vs_T_Ctrl",
-      "DGEselCol" = "sampleID",
+      "name"    = "DGE_Stellate_T_C5_vs_N_C5",
+      "DGEselCol" = "cluster_sample",
       "DGEsampleList" = list(
-          "T_MatB52"   = c("MatB52_R1","MatB52_R2" ,"MatB52_R3"),
-          "T_Ctrl"   = c("Control_R1","Control_R2","Control_R3")
+          "Stell_T_C5"   = c("C5_T1","C5_T2","C5_T3","C5_T4","C5_T5","C5_T6","C5_T7","C5_T8","C5_T9","C5_T10","C5_T11","C5_T12","C5_T13","C5_T14","C5_T15","C5_T16","C5_T17","C5_T18","C5_T19","C5_T20","C5_T21","C5_T22","C5_T23","C5_T24"),
+          "Stell_N_C5" = c("C5_N1","C5_N2","C5_N3","C5_N4","C5_N5","C5_N6","C5_N7","C5_N8","C5_N9","C5_N10","C5_N11")
       )
   ),
   "comp_3" = list(
-      "name"    = "DGE_T_Regeneron_vs_T_MatB52",
-      "DGEselCol" = "sampleID",
+      "name"    = "DGE_Tcell_T_C8_vs_N_C8",
+      "DGEselCol" = "cluster_sample",
       "DGEsampleList" = list(
-          "T_Regeneron"   = c("Regeneron_R1","Regeneron_2","Regeneron_3"),
-          "T_MatB52"   = c("MatB52_R1","MatB52_R2" ,"MatB52_R3")
+          "T_T_C8"   = c("C8_T1","C8_T2","C8_T3","C8_T4","C8_T5","C8_T6","C8_T7","C8_T8","C8_T9","C8_T10","C8_T11","C8_T12","C8_T13","C8_T14","C8_T15","C8_T16","C8_T17","C8_T18","C8_T19","C8_T20","C8_T21","C8_T22","C8_T23","C8_T24"),
+          "T_N_C8" = c("C8_N1","C8_N2","C8_N3","C8_N4","C8_N5","C8_N6","C8_N7","C8_N8","C8_N9","C8_N10","C8_N11")
+      )
+  ),
+  "comp_4" = list(
+      "name"    = "DGE_Mac_T_C6_vs_N_C6",
+      "DGEselCol" = "cluster_sample",
+      "DGEsampleList" = list(
+          "Mac_T_C6"   = c("C6_T1","C6_T2","C6_T3","C6_T4","C6_T5","C6_T6","C6_T7","C6_T8","C6_T9","C6_T10","C6_T11","C6_T12","C6_T13","C6_T14","C6_T15","C6_T16","C6_T17","C6_T18","C6_T19","C6_T20","C6_T21","C6_T22","C6_T23","C6_T24"),
+          "Mac_N_C6" = c(  "C6_N1","C6_N2","C6_N3","C6_N5","C6_N6","C6_N7","C6_N8","C6_N9","C6_N10","C6_N11")
       )
   )
-  
-  
 )
+
 
 
 ## Minify for testing
@@ -1394,23 +1413,23 @@ cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = '\n'))
 
 ```{r documentation_saving, echo=F, eval=TRUE, warning=FALSE, results=F, error = FALSE} 
 
-save(Obio, 
-     file = paste0(
-         Obio@parameterList$localWorkDir,
-         Obio@parameterList$project_id,
-         ".bioLOGIC.Robj"
-     )
-)
-
-print("Obio Object saved.")
-
-save(OsC,
-    file = paste0(
-         Obio@parameterList$localWorkDir,
-         Obio@parameterList$project_id,
-        ".Seurat.Robj"
-     )
-)
+# save(Obio, 
+#      file = paste0(
+#          Obio@parameterList$localWorkDir,
+#          Obio@parameterList$project_id,
+#          ".bioLOGIC.Robj"
+#      )
+# )
+# 
+# print("Obio Object saved.")
+# 
+# save(OsC,
+#     file = paste0(
+#          Obio@parameterList$localWorkDir,
+#          Obio@parameterList$project_id,
+#         ".Seurat.Robj"
+#      )
+# )
 
 ###############################################################################
 ## Rerunning of part C is required                                           ##
