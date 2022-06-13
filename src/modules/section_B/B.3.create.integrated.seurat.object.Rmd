@@ -50,6 +50,28 @@ if (length(pos) > 0){
 ###############################################################################
 
 ###############################################################################
+## Add scalde data and pca for rpca integration                              ##
+
+if (length(SampleList) >= 10){
+    iMethod <- "rpca"
+} else {
+    iMethod <- "cca"
+}
+
+if (iMethod == "rpca"){
+    
+    features <- Seurat::SelectIntegrationFeatures(object.list = SampleList)  
+  
+    for (i in 1:length(SampleList)){
+         SampleList[[i]] <- Seurat::ScaleData(SampleList[[i]], features = features, verbose = FALSE)
+         SampleList[[i]] <- Seurat::RunPCA(SampleList[[i]], features = features, verbose = FALSE)
+    }
+}
+
+## Done                                                                      ##
+###############################################################################
+
+###############################################################################
 ## Integrate Datasets                                                        ##
 
 ## Determine k-filter parameter ##
@@ -81,13 +103,30 @@ if (length(SampleList) > 1){
             verbose = FALSE
         )
         
-        sampleAnchors <- Seurat::FindIntegrationAnchors(
-            object.list = SampleList, 
-            normalization.method = "SCT", 
-            anchor.features = sample.features, 
-            verbose = FALSE,
-            k.filter = k.filter
-        )
+        if (length(SampleList) >= 10){
+            
+          sampleAnchors <- Seurat::FindIntegrationAnchors(
+                object.list = SampleList, 
+                reduction = "rpca",
+                normalization.method = "SCT", 
+                anchor.features = sample.features, 
+                verbose = FALSE,
+                k.filter = k.filter
+            )
+            
+        } else {
+            # standard cca
+            sampleAnchors <- Seurat::FindIntegrationAnchors(
+                object.list = SampleList, 
+                normalization.method = "SCT", 
+                anchor.features = sample.features, 
+                verbose = FALSE,
+                k.filter = k.filter
+            )
+            
+        }
+        
+        
         
         OsC <- Seurat::IntegrateData(
             anchorset = sampleAnchors, 
@@ -99,11 +138,21 @@ if (length(SampleList) > 1){
         
     } else {
     
-        sampleAnchors <- Seurat::FindIntegrationAnchors(
-            object.list = SampleList, 
-            dims = 1:Obio@parameterList$singleCellSeuratNpcs4PCA,
-            k.filter = k.filter
-        ) 
+        if (length(SampleList) >= 10){
+            sampleAnchors <- Seurat::FindIntegrationAnchors(
+                object.list = SampleList, 
+                reduction = "rpca",
+                dims = 1:Obio@parameterList$singleCellSeuratNpcs4PCA,
+                k.filter = k.filter
+            ) 
+        } else {
+              #standard cca
+              sampleAnchors <- Seurat::FindIntegrationAnchors(
+                  object.list = SampleList, 
+                  dims = 1:Obio@parameterList$singleCellSeuratNpcs4PCA,
+                  k.filter = k.filter
+             ) 
+        }
 
 
         OsC <- Seurat::IntegrateData(
@@ -176,6 +225,23 @@ if (file.exists(FN)){
     }
 }
 ## Done create cellRanger QC plots                                           ##
+###############################################################################
+
+
+###############################################################################
+## Save integrated object                                                    ##
+
+save(OsC,
+    file = paste0(
+         Obio@parameterList$localWorkDir,
+         Obio@parameterList$project_id,
+        ".Seurat.Robj"
+     )
+)
+
+print("OsC Object saved.")
+
+## Done                                                                      ##
 ###############################################################################
 
 
