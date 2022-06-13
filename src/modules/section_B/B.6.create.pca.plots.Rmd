@@ -664,6 +664,27 @@ if (length(unique(OsC@meta.data$sampleID)) > 2){
 ## Done by sample                                                            ##
 ###############################################################################
 
+###############################################################################
+## Save intermediate objects                                                 ##
+save(OsC,
+    file = paste0(
+         Obio@parameterList$localWorkDir,
+         Obio@parameterList$project_id,
+        ".Seurat.Robj"
+     )
+)
+
+save(Obio, 
+     file = paste0(
+         Obio@parameterList$localWorkDir,
+         Obio@parameterList$project_id,
+         ".bioLOGIC.Robj"
+     )
+)
+
+## Done                                                                      ##
+###############################################################################
+
 if (length(plotList) > 2){
     tabVar <- ".tabset .tabset-fade .tabset-dropdown"
 } else {

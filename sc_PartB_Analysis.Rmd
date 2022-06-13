@@ -192,7 +192,7 @@ DGE Marker gene upload Chapter/Module -->
 ```
 
 <!-- Optional 13: (Output only):Category Enrichments Chapter/Module -->
-```{r child = 'src/modules/section_B/B13.AUC.cat.enrichments.Rmd', eval=TRUE}
+```{r child = 'src/modules/section_B/B13.AUC.cat.enrichments.Rmd', eval=FALSE}
 ```
 
 <!-- Essential 14: (output required later):Category Linear Regression Marker Gene Data Prep Chapter/Module -->
@@ -204,11 +204,11 @@ DGE Marker gene upload Chapter/Module -->
 ```
 
 <!-- Essential 16: (output required later):Category Make cluster table Data Prep Chapter/Module -->
-```{r child = 'src/modules/section_B/B16.make.cluster.table.Rmd', eval=TRUE}
+```{r child = 'src/modules/section_B/B16.make.cluster.table.Rmd', eval=FALSE}
 ```
 
 <!-- Essential 17: (output required later):Category Make cluster table Data Prep Chapter/Module -->
-```{r child = 'src/modules/section_B/B17.cell.type.estimate.Rmd', eval=TRUE}
+```{r child = 'src/modules/section_B/B17.cell.type.estimate.Rmd', eval=FALSE}
 ```
 
 <!-- Essential 18: (output required later):Category Make cluster table Data Prep Chapter/Module -->
@@ -217,7 +217,7 @@ DGE Marker gene upload Chapter/Module -->
 
 
 <!-- Essential 19: (output required later):Category Make cluster table Data Prep Chapter/Module -->
-```{r child = 'src/modules/section_B/B19.example.feature.plots.Rmd', eval=TRUE}
+```{r child = 'src/modules/section_B/B19.example.feature.plots.Rmd', eval=FALSE}
 ```
 
 <!-- Essential 20: (output required later):Category Make cluster table Data Prep Chapter/Module -->
@@ -225,7 +225,7 @@ DGE Marker gene upload Chapter/Module -->
 ```
 
 <!-- Optional 21: (output required later):Category Make cluster table Data Prep Chapter/Module -->
-```{r child = 'src/modules/section_B/B21.pseudotime.Rmd', eval=TRUE}
+```{r child = 'src/modules/section_B/B21.pseudotime.Rmd', eval=FALSE}
 ```
 
 <!-- Optional 22: (output required later): Add extra tables Chapter/Module -->
