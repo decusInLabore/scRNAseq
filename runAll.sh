@@ -12,7 +12,7 @@ sleep 300
 done
 }
 
-project_id=488
+project_id=450A
 
 project=rA_$project_id
 sbatch --time=48:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;Rscript runRmd.r sc_PartA_QC.Rmd" --job-name=$project -p hmem --mem=300G -o ../rA.$project.slurm >> ../commands.txt
@@ -36,14 +36,15 @@ sbatch --time=12:00:00 --wrap "module purge;source /camp/stp/babs/working/softwa
 
 wait_on_lsf
 project=rDGE_$project_id
-sbatch --time=12:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;Rscript runRmd.r sc_DGE_module.Rmd " --job-name=$project -p hmem --mem=300G -o ../rDGE.$project.slurm >> commands.txt
+sbatch --time=12:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;Rscript runRmd.r sc_DGE_module.Rmd " --job-name=$project -p hmem --mem=600G -o ../rDGE.$project.slurm >> commands.txt
 
 wait_on_lsf
 project=rT_$project_id
 sbatch --time=24:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;Rscript runRmd.r sc_Trajectory_Analysis_Module.Rmd " --job-name=$project -p hmem --mem=300G -o ../rT.$project.slurm >> commands.txt
 
-
-sbatch --time=18:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/3.6.0-foss-2016b-BABS;Rscript runCM.r" --job-name=$project -p hmem --mem=300G -o rCN.slurm >> commands.txt
+## Create subclustering 
+project=subClustering_$project_id
+sbatch --time=18:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a; Rscript subsetting.dataset.for.subclustering.R" --job-name=$project --mem=200G -o ../rSubClust.slurm >> commands.txt
 
 project=rB446
 #sbatch --time=18:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/3.6.0-foss-2016b-BABS;Rscript runB.r" --job-name=$project -p hmem --mem=300G -o rB.slurm >> commands.txt

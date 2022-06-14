@@ -5,11 +5,11 @@
 ###############################################################################
 ## Initialise renv
 
-if (!requireNamespace("remotes")){
-  install.packages("remotes")
-}
+# if (!requireNamespace("remotes")){
+#   install.packages("remotes")
+# }
 
-remotes::install_github("rstudio/renv")
+# remotes::install_github("rstudio/renv")
 
 if (!file.exists("renv.lock")){
     renv::init()
@@ -22,27 +22,39 @@ if (!file.exists("renv.lock")){
 ## Prepare subset for sub-clustering                                         ##
 library(Seurat)
 ## load Seurat object with basedata
-FN <- "/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/470_scRNAseq_Inhba_SC21185/workdir/SC21185.Seurat.Robj"
+FN <- "/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/450_singleCell_scPDAC_PRJCA001063full/workdir/scPDAC_Wu_all.Seurat.Robj"
 load(FN)
+
+## Expected name of the Seurat object: OsC ##
 
 ## Data selection for subsetting:
 #sampleID: primaryTumor
 
+# selectClusters for subclustering
+selClust <- c(4,5)
+samplestring <- paste0("C", paste0(selClust , collapse = ""))
+subClusterID <- "Fib"
 
 # Select only cluster 1
-OsC_sel1 <- subset(x = OsC, subset = seurat_clusters %in% c(8,11,14,17))
+OsC_sel1 <- subset(x = OsC, subset = seurat_clusters %in% selClust)
 
 sampleIDs <- unique(OsC_sel1$sampleID)
 
 ## Remove skin sample ##
 #sampleIDs <- sampleIDs[sampleIDs != "Skin01sub"]
 
+## make samplestring
+
+
 for (i in 1:length(sampleIDs)){
     FNout <- paste0(
-      "/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/470_scRNAseq_Inhba_SC21185/basedata/",
+      "/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/450_singleCell_scPDAC_PRJCA001063full/basedata/",
       "input_",
       sampleIDs[i],
-      "_C8111417T.txt"
+      "_",
+      samplestring,
+      subClusterID,
+      ".txt"
     )
     
     OsC_temp <- subset(x= OsC_sel1, subset = sampleID == sampleIDs[i])
@@ -54,8 +66,8 @@ for (i in 1:length(sampleIDs)){
     }
 }
 
-OsC@meta.data[["meta_Subclustering_T_cells"]] <- "Rest"
-OsC@meta.data[OsC@meta.data$seurat_clusters %in% c(1), "meta_Subclustering_T_cells"] <- "Selected"
+OsC@meta.data[[paste0("meta_Subclustering_", subClusterID)]] <- "Rest"
+OsC@meta.data[OsC@meta.data$seurat_clusters %in% selClust, paste0("meta_Subclustering_",subClusterID)] <- "Selected"
 
 save(
   OsC, 
@@ -63,4 +75,4 @@ save(
 )
 
 
-renv::snapshot()
+#renv::snapshot()
