@@ -110,10 +110,10 @@ figureCount <- 1
 ```
 
 <!-- Essential 3: (output required later): Create Integrated Seurat Object Chapter/Module -->
-```{r child = 'src/modules/section_B/B.3.create.integrated.seurat.object.Rmd', eval=TRUE}
+```{r child = 'src/modules/section_B/B.3.create.integrated.seurat.object.Rmd', eval=FALSE}
 ```
 
-```{r, eval=TRUE, echo=T}
+```{r, eval=F, echo=F}
 
 ## The above step is the most time consuming. Saving the Obio and OsC object here allows 
 save(Obio, 
@@ -157,14 +157,51 @@ print("OsC Object saved.")
 ```
 
 <!-- Optional 4: (creates output only): Create variation plots Chapter/Module -->
-```{r child = 'src/modules/section_B/B.4.create.variation.plots.Rmd', eval=TRUE}
+```{r child = 'src/modules/section_B/B.4.create.variation.plots.Rmd', eval=FALSE}
 ```
 
 <!-- Essential 6: (output required later): 
 DGE Marker gene upload Chapter/Module -->
-```{r child = 'src/modules/section_B/B.6.create.pca.plots.Rmd', eval=TRUE}
+```{r child = 'src/modules/section_B/B.6.create.pca.plots.Rmd', eval=FALSE}
 ```
 
+```{r, eval=T, echo=T}
+
+## This will load the objects saved in B6. 
+load(paste0(
+         Obio@parameterList$localWorkDir,
+         Obio@parameterList$project_id,
+        ".Seurat.Robj"
+     )
+)
+
+load(paste0(
+         Obio@parameterList$localWorkDir,
+         Obio@parameterList$project_id,
+         ".bioLOGIC.Robj"
+     )
+)
+
+dotsize  = 1
+
+
+if (nrow(OsC@meta.data) > 1000){
+  dotsize  = 0.75
+} else if (nrow(OsC@meta.data) > 10000){
+  dotsize = 0.5
+} else if (nrow(OsC@meta.data) > 20000){
+  dotsize = 0.1
+} else if (nrow(OsC@meta.data) > 50000){
+  dotsize = 0.05
+}
+
+Obio@parameterList$dotsize <- dotsize
+
+legendDotSize <- 5
+Obio@parameterList$legendDotSize <- legendDotSize
+dendrofactor <- 5
+Obio@parameterList$dendrofactor <- dendrofactor
+```
 
 <!-- Essential 7: (output required later): Create variation plots Chapter/Module -->
 ```{r child = 'src/modules/section_B/B7.calculate.average.expression.Rmd', eval=TRUE}
@@ -217,7 +254,7 @@ DGE Marker gene upload Chapter/Module -->
 
 
 <!-- Essential 19: (output required later):Category Make cluster table Data Prep Chapter/Module -->
-```{r child = 'src/modules/section_B/B19.example.feature.plots.Rmd', eval=FALSE}
+```{r child = 'src/modules/section_B/B19.example.feature.plots.Rmd', eval=TRUE}
 ```
 
 <!-- Essential 20: (output required later):Category Make cluster table Data Prep Chapter/Module -->
