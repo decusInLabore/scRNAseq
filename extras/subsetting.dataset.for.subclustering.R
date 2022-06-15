@@ -5,11 +5,11 @@
 ###############################################################################
 ## Initialise renv
 
-if (!requireNamespace("remotes")){
-  install.packages("remotes")
-}
-
-remotes::install_github("rstudio/renv")
+# if (!requireNamespace("remotes")){
+#   install.packages("remotes")
+# }
+# 
+# remotes::install_github("rstudio/renv")
 
 if (!file.exists("renv.lock")){
     renv::init()
@@ -22,15 +22,23 @@ if (!file.exists("renv.lock")){
 ## Prepare subset for sub-clustering                                         ##
 library(Seurat)
 ## load Seurat object with basedata
-FN <- "/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/470_scRNAseq_Inhba_SC21185/workdir/SC21185.Seurat.Robj"
+FN <- "/camp/stp/babs/working/boeings/Projects/bonfantip/roberta.ragazzini/484_scRNAseq_Characterisation_EpCAM_CD90_thymic_epithelial_cells_SC22096/workdir/SC22096.Seurat.Robj"
 load(FN)
 
 ## Data selection for subsetting:
 #sampleID: primaryTumor
 
+## Assume that all unassigned cells are human
+OsC@meta.data[OsC@meta.data$meta_inferred_species == 0, "meta_inferred_species"] <- "human"
 
 # Select only cluster 1
-OsC_sel1 <- subset(x = OsC, subset = seurat_clusters %in% c(8,11,14,17))
+OsC_sel1 <- subset(x = OsC, subset = meta_inferred_species %in% c("human"))
+OsC_sel1@meta.data[["sampleID"]] <- paste0(OsC_sel1@meta.data$sampleID, "_", OsC_sel1@meta.data$meta_Hash)
+OsC_sel1@meta.data$sampleID <- gsub("_0", "", OsC_sel1@meta.data$sampleID)
+OsC_sel1@meta.data$sampleID <- gsub("EpCAMpos", "", OsC_sel1@meta.data$sampleID)
+OsC_sel1@meta.data$sampleID <- gsub("EpCAMneg", "", OsC_sel1@meta.data$sampleID)
+
+
 
 sampleIDs <- unique(OsC_sel1$sampleID)
 
@@ -39,10 +47,11 @@ sampleIDs <- unique(OsC_sel1$sampleID)
 
 for (i in 1:length(sampleIDs)){
     FNout <- paste0(
-      "/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/470_scRNAseq_Inhba_SC21185/basedata/",
+      "/camp/stp/babs/working/boeings/Projects/bonfantip/roberta.ragazzini/484_scRNAseq_Characterisation_EpCAM_CD90_thymic_epithelial_cells_SC22096/basedata/"
+      ,
       "input_",
       sampleIDs[i],
-      "_C8111417T.txt"
+      "_hs.txt"
     )
     
     OsC_temp <- subset(x= OsC_sel1, subset = sampleID == sampleIDs[i])
