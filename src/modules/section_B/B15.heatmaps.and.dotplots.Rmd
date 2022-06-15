@@ -346,6 +346,12 @@ Idents(OsC) <- "clusterName"
 #  )
 # 
 # levels(OsC) <- levels
+dfGeneralMarkersFilt <- Obio@dataTableList[["dfGeneralMarkersFilt"]]
+    
+dfTop1 <- data.frame(dfGeneralMarkers %>% group_by(cluster) %>% top_n(1, avg_diff))
+dfTop5 <- data.frame(dfGeneralMarkers %>% group_by(cluster) %>% top_n(5, avg_diff))
+
+dpGenes <- as.vector(unique(dfTop5$gene))
 
 
 dpGenes <- as.vector(unique(dfTop5$gene))
