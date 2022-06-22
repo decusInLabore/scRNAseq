@@ -32,21 +32,20 @@ knitr::opts_chunk$set(
 
 ```{r hpc_notes, include=FALSE}
 
-# module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/3.6.0-foss-2016b-BABS;R;
-
-## Get interactive session ##
-#  srun --time=08:00:00 --mem=40G -p int --pty bash
-
-# module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/3.6.0-foss-2016b-BABS;R;
-
-# sbatch --time=12:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/3.6.0-foss-2016b-BABS;Rscript runD.r" --job-name="rD" -p hmem --mem=300G -o rD.slurm >> commands.txt
-
-# --mem-per-cpu=14G -p hmem --pty bash
+# module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;R
 
 ```
 
 ```{r, eval=TRUE, echo=F, results=F}
 VersionPdfExt <- paste0(".V", gsub("-", "", Sys.Date()), ".pdf")
+
+
+#Create the environment and load a suitable version of R, e.g. so:
+library(dplyr)
+library(Seurat)
+library(tidyverse)
+library(biologicSeqTools)
+library(biologicToolsSC)
 
 if (dir.exists("/Volumes/babs/working/boeings/")){
     hpc.mount <- "/Volumes/babs/working/boeings/"
@@ -58,23 +57,18 @@ if (dir.exists("/Volumes/babs/working/boeings/")){
     hpc.mount <- ""
 }
 
-#Create the environment and load a suitable version of R, e.g. so:
-FN <- paste0(hpc.mount, "Projects/reference_data/documentation/BC.parameters.txt")
-dbTable <- read.delim(
-    FN, 
-    sep = "\t",
-    stringsAsFactors = F
-)
 
-db.pwd <- as.vector(dbTable[1,1])
+FN <- paste0(hpc.mount, "Projects/reference_data/pwd_folder/babs.txt")
+
+db.pwd <- FN %>% 
+    readr::read_delim(., delim = "\t", col_names = F) %>% 
+    dplyr::pull(., var = 1) %>% 
+    dplyr::first()
+
+
 
 ###############################################################################
 ##                                                                           ##
-if (!requireNamespace("remotes")){
-    install.packages("remotes")
-}
-
-remotes::install_github("rstudio/renv")
 
 if (file.exists("renv.lock")){
     renv::restore()
@@ -86,16 +80,9 @@ if (file.exists("renv.lock")){
 ###############################################################################
 
 #install.packages("remotes")
-renv::install("decusInLabore/biologicSeqTools")
-renv::install("decusInLabore/biologicToolsSC")
-renv::install("decusinlabore/biologicViewerSC")
-
-library(Seurat)
-library(tidyverse)
-library(biologicSeqTools)
-library(biologicToolsSC)
-
-
+# renv::install("decusInLabore/biologicSeqTools")
+# renv::install("decusInLabore/biologicToolsSC")
+# renv::install("decusinlabore/biologicViewerSC")
 # source("assets/R/scTools.r")
 # source("assets/R/SBwebtools.pckg.r")
 
@@ -114,19 +101,16 @@ if (file.exists(ObioFN)){
 }
 
 ## Reset paths to local environment
-Obio <- setMountingPoint(Obio)
-Obio <- setAnalysisPaths(Obio)
-Obio <- setCrickGenomeAndGeneNameTable(Obio)
-Obio <- createAnalysisFolders(
-    Obio
-)
-Obio <- setDataBaseParameters(Obio)
-
+Obio <- Obio %>% 
+    biologicSeqTools2::setMountingPoint()  %>% 
+    biologicSeqTools2::setAnalysisPaths() %>% 
+    biologicSeqTools2::setCrickGenomeAndGeneNameTable() %>% 
+    biologicSeqTools2::createAnalysisFolders() %>% 
+    biologicSeqTools2::setDataBaseParameters()
 
 
 ## Load Seurat object
 SeuratFN <- paste0(Obio@parameterList$localWorkDir,list.files(Obio@parameterList$localWorkDir)[grep(".Seurat.Robj", list.files(Obio@parameterList$localWorkDir))])
-
 
 if (file.exists(SeuratFN)){
     load(SeuratFN)
@@ -146,109 +130,91 @@ if (Obio@parameterList$scIntegrationMethod == "SCT"){
 
 ```
 
-```{r, eval=TRUE, echo=F, results=F}
-## Add extra metadata columns ##
-OsC@meta.data[["nFeaturesRNA_High_Low"]] <- "Below_1000"
-OsC@meta.data[OsC@meta.data$nFeaturesRNA >= 1000, "nFeaturesRNA_High_Low"] <- "Above_1000"
 
-```
 
 ```{r, eval=TRUE, echo=F, results=F}
 ###############################################################################
-## Otional add extra data set                                                ##
+## Optional add extra data set                                                ##
 
 ## Goal: create a table, that can be added via the 'gene' column to the main 
 ## database table
 
+
 FN <- "/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/437_fibroblast_GSE154778/auxiliarydata/WT_v_Inhba_Inbbb_null_combined.20210429.txt"
 
-dfAddCounts <- read.delim(
-    FN, 
-    header = T, 
-    sep = "\t",
-    stringsAsFactors = F
+dfAddCounts <- FN %>% 
+    readr::read_delim(., delim = "\t") 
+
+
+###############################################################################
+## Load reference file from database                                         ##
+
+dfAddCounts <- biologicSeqTools2::import.db.table.from.db(
+    dbname = "chl_data",
+    dbtable = "RN19081_rna_seq_table",
+    host = Obio@dbDetailList$host,
+    user = Obio@dbDetailList$db.user,
+    password = db.pwd
 )
 
-minC <- min(dfAddCounts$padj[dfAddCounts$padj != 0])
+selVec <- c(
+    #"ENSMUSG",
+    "hgnc_symbol",
+    #"mgi_symbol",
+    names(dfAddCounts)[grep("contrast_4", names(dfAddCounts))]
+)
 
-dfAddCounts$padj[dfAddCounts$padj == 0] <- minC
+dfAddCounts <- unique(dfAddCounts[,selVec])
+names(dfAddCounts) <- gsub("contrast_4_", "", names(dfAddCounts))
 
+dfAddCounts$stat_Activin_Nullcomb_vs_WT <- NULL
 
-padj  <- names(dfAddCounts)[grep("padj", names(dfAddCounts))]
-            lg10p <- gsub("padj", "lg10p", padj)
+## Use only those with a human homologue
+dfAddCounts <- dfAddCounts[dfAddCounts$hgnc_symbol != "",]
 
-            for (z in 1:length(padj)){
-                preprocess <- as.numeric(dfAddCounts[,padj[z]])
-
-                if (length(grep("padj", padj[z])) > 0){
-                    preprocess <- as.numeric(dfAddCounts[,padj[z]])
-                    minNum <- min(preprocess[preprocess != 0])
-                    preprocess[preprocess == 0] <- minNum
-                } else {
-                    preprocess <- as.numeric(dfAddCounts[,padj[z]])
-                }
-
-                temp <- -1*log10(preprocess)
-                #temp[temp >= 50] = 50
-                dfAddCounts[,lg10p[z]] <- temp
-            }
-
-names(dfAddCounts) <- gsub("gene_id", "ENSMUSG", names(dfAddCounts))
-names(dfAddCounts) <- gsub("log2FoldChange", "contrast_A_logFC_bulkRNA_Seq_SS_Inhba_Inhba_KO_vs_WT", names(dfAddCounts))
-names(dfAddCounts) <- gsub("padj", "contrast_A_padj_bulkRNA_Seq_SS_Inhba_Inhba_KO_vs_WT", names(dfAddCounts))
-names(dfAddCounts) <- gsub("lg10p", "contrast_A_lg10p_bulkRNA_Seq_SS_Inhba_Inhba_KO_vs_WT", names(dfAddCounts))
-
-## Add hgnc_symbol annotation
+## Done                                                                      ##
+###############################################################################
 
 
-# dfMM_Anno <- dfMM_Anno[dfMM_Anno$mgi_symbol %in% dfAddCounts$symbol, ]
-# 
-# 
-# 
-# dfAddCounts <- merge(
-#     dfAddCounts,
-#     dfMM_Anno, 
-#     by.x = "symbol",
-#     by.y = "mgi_symbol", 
-#     all =T
-# )
+dfAddCounts <- dfAddCounts %>% 
+    dplyr::rename(contrast_A_logFC_RN19081_logFC_Activin_Nullcomb_vs_WT = logFC_Activin_Nullcomb_vs_WT) %>% 
+    dplyr::rename(contrast_A_padj_RN19081_Activin_Nullcomb_vs_WT = padj_Activin_Nullcomb_vs_WT) %>% 
+    dplyr::rename(contrast_A_lg10p_RN19081_Activin_Nullcomb_vs_WT = lg10p_Activin_Nullcomb_vs_WT) %>% 
+    dplyr::rename(contrast_A_lg2BaseMean_RN19081_Activin_Nullcomb_vs_WT = lg2BaseMean_Activin_Nullcomb_vs_WT ) 
+
+
 
 dfAddCounts[is.na(dfAddCounts)] <- 0
 
-names(dfAddCounts) <- gsub("symbol", "mgi_symbol", names(dfAddCounts) )
-dfAddCounts <- dfAddCounts[dfAddCounts$mgi_symbol != "",]
 
-dfAddCounts$symbol <- NULL
-dfAddCounts$ENSG <- NULL
 
-## Add Inhba correlation ##
-FN <- "../html_local/report_tables/Inhba.correlation.table.txt"
-dfAdd <- read.delim(
-    FN, 
-    header = T, 
-    sep = "\t",
-    stringsAsFactors = F
+## Add Inhba correlation from experiment SC21185 ##
+
+dfAdd <- biologicSeqTools2::import.db.table.from.db(
+    dbname = "chl_data",
+    dbtable = "SC21185_sc_rna_seq_table ",
+    host = Obio@dbDetailList$host,
+    user = Obio@dbDetailList$db.user,
+    password = db.pwd
 )
 
-selVec <- c("gene", "corCoef") 
+
+selVec <- c("hgnc_symbol", "contrast_C_Inhba_Correlation_Coef") 
 dfAdd <- unique(dfAdd[,selVec])
+dfAdd <- dfAdd[dfAdd$hgnc_symbol != "", ]
+
+
 dfAddCounts <- merge(
     dfAddCounts, 
     dfAdd, 
-    by.x = "mgi_symbol",
-    by.y = "gene",
+    by.x = "hgnc_symbol",
+    by.y = "hgnc_symbol",
     all = TRUE
 )
 
 dfAddCounts[is.na(dfAddCounts)] <- 0
 
-names(dfAddCounts) <- gsub("corCoef", "contrast_C_Inhba_Correlation_Coef", names(dfAddCounts))
-
-
-
-#dfNormCounts <- spread(data = dfNormCounts, key=condition, value=measurement)
-#names(dfNormCounts) <- paste0("norm_counts_", names(dfNormCounts))
-#names(dfNormCounts) <- gsub("norm_counts_gene", "gene", names(dfNormCounts))
+names(dfAddCounts) <- gsub("corCoef_Inhba", "contrast_C_SC21185_Inhba_Cor_Coef", names(dfAddCounts))
 
 
 
