@@ -110,10 +110,10 @@ figureCount <- 1
 ```
 
 <!-- Essential 3: (output required later): Create Integrated Seurat Object Chapter/Module -->
-```{r child = 'src/modules/section_B/B.3.create.integrated.seurat.object.Rmd', eval=FALSE}
+```{r child = 'src/modules/section_B/B.3.create.integrated.seurat.object.Rmd', eval=TRUE}
 ```
 
-```{r, eval=F, echo=F}
+```{r, eval=T, echo=F}
 
 ## The above step is the most time consuming. Saving the Obio and OsC object here allows 
 save(Obio, 
@@ -157,15 +157,15 @@ print("OsC Object saved.")
 ```
 
 <!-- Optional 4: (creates output only): Create variation plots Chapter/Module -->
-```{r child = 'src/modules/section_B/B.4.create.variation.plots.Rmd', eval=FALSE}
+```{r child = 'src/modules/section_B/B.4.create.variation.plots.Rmd', eval=TRUE}
 ```
 
 <!-- Essential 6: (output required later): 
 DGE Marker gene upload Chapter/Module -->
-```{r child = 'src/modules/section_B/B.6.create.pca.plots.Rmd', eval=FALSE}
+```{r child = 'src/modules/section_B/B.6.create.pca.plots.Rmd', eval=TRUE}
 ```
 
-```{r, eval=T, echo=T}
+```{r, eval=F, echo=T}
 
 ## This will load the objects saved in B6. 
 load(paste0(

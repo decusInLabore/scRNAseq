@@ -896,8 +896,8 @@
       "RemoteUsername": "decusInLabore",
       "RemoteRepo": "biologicSeqTools2",
       "RemoteRef": "main",
-      "RemoteSha": "d7f9a8c8e68f0fd2b97ca0b82cfa63fd01b3a430",
-      "Hash": "6311862c0dfba7f02f78a0b388c2001a",
+      "RemoteSha": "5bb6ca3b660d02fcccded96fcc388bc59a898909",
+      "Hash": "f235f02007b7303ed66aef834a4858e3",
       "Requirements": [
         "DBI",
         "DESeq2",
@@ -3191,15 +3191,15 @@
     },
     "renv": {
       "Package": "renv",
-      "Version": "0.15.4-11",
+      "Version": "0.15.5-19",
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
       "RemoteUsername": "rstudio",
       "RemoteRepo": "renv",
       "RemoteRef": "main",
-      "RemoteSha": "203d222e8d540f0ab29f251986fd47a3363907d7",
-      "Hash": "61924ab4917639e4b68f6cacaab61d0f",
+      "RemoteSha": "98bd48cb0e24236e710f63da5e0c60fb1aafc064",
+      "Hash": "40a5d1c9f95721ec9df8bc9b4a212bc8",
       "Requirements": []
     },
     "reprex": {
