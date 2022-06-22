@@ -78,9 +78,9 @@ db.pwd <- as.vector(dbTable[1,1])
 
 ###############################################################################
 ##                                                                           ##
-if (!requireNamespace("remotes")){
-    install.packages("remotes")
-}
+# if (!requireNamespace("remotes")){
+#     install.packages("remotes")
+# }
 
 
 
@@ -91,14 +91,14 @@ if (file.exists("renv.lock")){
 }
 
 # remotes::install_github("rstudio/renv")
-renv::install("rstudio/renv")
+# renv::install("rstudio/renv")
 ## Done                                                                      ##
 ###############################################################################
 
 #install.packages("remotes")
-renv::install("decusInLabore/biologicSeqTools2")
-renv::install("decusInLabore/biologicToolsSC")
-renv::install("decusinlabore/biologicViewerSC")
+# renv::install("decusInLabore/biologicSeqTools2")
+# renv::install("decusInLabore/biologicToolsSC")
+# renv::install("decusinlabore/biologicViewerSC")
 
 library(Seurat)
 library(tidyverse)
@@ -138,6 +138,7 @@ Obio <- setDataBaseParameters(Obio)
 SeuratFN <- paste0(Obio@parameterList$localWorkDir,list.files(Obio@parameterList$localWorkDir)[grep(".Seurat.Robj", list.files(Obio@parameterList$localWorkDir))])
 
 
+
 if (file.exists(SeuratFN)){
     load(SeuratFN)
     print(paste0("Obio object ", Obio@parameterList$localWorkDir,SeuratFN, " exists and is loaded."))
@@ -147,6 +148,11 @@ if (file.exists(SeuratFN)){
 }
 
 row.names(OsC@meta.data) <- OsC@meta.data$cellID
+
+## For now: Downsample to 60k cells
+if (nrow(OsC) > 60000){
+    OsC <- OsC[, sample(colnames(OsC), size = 60000, replace=F)]
+}
 
 if (Obio@parameterList$scIntegrationMethod == "SCT"){
     resultSlot = "SCT"
@@ -753,20 +759,20 @@ dfExpr[["row_names"]] <- 1:nrow(dfExpr)
 
 ###############################################################################
 ##
-biologicViewerSC::seuratObjectToViewer(
-    params = params,
-    project_id = Obio@parameterList$project_id,
-    projectPath = shinyBasePath,
-    OsC = OsC,
-    dataMode = "MySQL",
-    host = Obio@dbDetailList$host,
-    dbname = Obio@dbDetailList$primDataDB,
-    db.pwd = db.pwd,
-    db.user = Obio@dbDetailList$db.user,
-    appDomains = c("shiny-bioinformatics.crick.ac.uk","10.%", "bioinformatics.crick.ac.uk"),
-    geneDefault = geneDefault,
-    dfExpr = dfExpr
-)
+# biologicViewerSC::seuratObjectToViewer(
+#     params = params,
+#     project_id = Obio@parameterList$project_id,
+#     projectPath = shinyBasePath,
+#     OsC = OsC,
+#     dataMode = "MySQL",
+#     host = Obio@dbDetailList$host,
+#     dbname = Obio@dbDetailList$primDataDB,
+#     db.pwd = db.pwd,
+#     db.user = Obio@dbDetailList$db.user,
+#     appDomains = c("shiny-bioinformatics.crick.ac.uk","10.%", "bioinformatics.crick.ac.uk"),
+#     geneDefault = geneDefault,
+#     dfExpr = dfExpr
+# )
 
 ##                                                                           ##
 ###############################################################################
@@ -787,9 +793,17 @@ library(Seurat)
 Obio <- addGeneAnnotation(Obio)
 dfAnno <- Obio@dfGeneAnnotation
 
+## Create cluster by Tumor_Normal
+
 if (length(unique(OsC@meta.data$sampleID)) > 1){
     dfNormCounts <- Obio@dataTableList$dfAvglg10ExprByClusterBySample
 } else {
+    dfNormCounts <- Obio@dataTableList$dfAvglg10ExprPerCluster
+}
+
+## Make switch to ExprPerCluster when clusterbysample is very large
+maxNormCountsCutOff <- 300
+if (ncol(dfNormCounts) > maxNormCountsCutOff){
     dfNormCounts <- Obio@dataTableList$dfAvglg10ExprPerCluster
 }
 
@@ -829,6 +843,11 @@ dflg2Avg <- Obio@dataTableList$dfAvglg10ExprByClusterBySampleScaled
 } else {
     dflg2Avg <- Obio@dataTableList$dfAvglg10ExprPerClusterScaled
 }
+
+if (ncol(dflg2Avg) > maxNormCountsCutOff){
+    dflg2Avg <- Obio@dataTableList$dfAvglg10ExprPerClusterScaled
+}
+
 names(dflg2Avg) <- paste0("Avg_log10_Expr_Sc_", names(dflg2Avg) )
 names(dflg2Avg) <- gsub( "Avg_log10_Expr_Sc_gene", "gene", names(dflg2Avg))
 
@@ -863,7 +882,7 @@ for (i in 1:length(cellList)){
     } else {
         exp <- rbind(exp, expTemp[,colnames(exp)])
     }
-    # print(i)
+    print(i)
 }
 
 #exp <- FetchData(OsC, vars = my_genes, cells = cells )
@@ -928,24 +947,24 @@ if (length(pos) > 0){
 
 ###############################################################################
 ## Add additonal columns for plotting                                        ##
-dfAddCounts <- Obio@dataTableList$dfAvglg10ExprBySample
-
-#dfNormCounts <- spread(data = dfNormCounts, key=condition, value=measurement)
-#names(dfNormCounts) <- paste0("norm_counts_", names(dfNormCounts))
-#names(dfNormCounts) <- gsub("norm_counts_gene", "gene", names(dfNormCounts))
-
-names(dfAddCounts) <- paste0("add_counts_Avg_log10_Expr_", names(dfAddCounts) )
-names(dfAddCounts) <- gsub( "add_counts_Avg_log10_Expr_gene", "gene", names(dfAddCounts))
-
-database.table <- merge(
-    database.table, 
-    dfAddCounts,
-    by.x = Obio@parameterList$geneIDcolumn,
-    by.y = "gene",
-    all = TRUE
-)
-
-database.table[is.na(database.table)] <- 0
+# dfAddCounts <- Obio@dataTableList$dfAvglg10ExprBySample
+# 
+# #dfNormCounts <- spread(data = dfNormCounts, key=condition, value=measurement)
+# #names(dfNormCounts) <- paste0("norm_counts_", names(dfNormCounts))
+# #names(dfNormCounts) <- gsub("norm_counts_gene", "gene", names(dfNormCounts))
+# 
+# names(dfAddCounts) <- paste0("add_counts_Avg_log10_Expr_", names(dfAddCounts) )
+# names(dfAddCounts) <- gsub( "add_counts_Avg_log10_Expr_gene", "gene", names(dfAddCounts))
+# 
+# database.table <- merge(
+#     database.table, 
+#     dfAddCounts,
+#     by.x = Obio@parameterList$geneIDcolumn,
+#     by.y = "gene",
+#     all = TRUE
+# )
+# 
+# database.table[is.na(database.table)] <- 0
 
 ## Done adding additional cols for plotting                                  ##
 ###############################################################################
@@ -953,27 +972,27 @@ database.table[is.na(database.table)] <- 0
 ###############################################################################
 ## Add additonal columns for plotting              
 ##
-if (length(unique(OsC@meta.data$sampleID)) > 1){
-    
-    dfAddCounts <- Obio@dataTableList$dfAvglg10ExprPerCluster
-    
-    #dfNormCounts <- spread(data = dfNormCounts, key=condition, value=measurement)
-    #names(dfNormCounts) <- paste0("norm_counts_", names(dfNormCounts))
-    #names(dfNormCounts) <- gsub("norm_counts_gene", "gene", names(dfNormCounts))
-    
-    names(dfAddCounts) <- paste0("add_counts_Avg_log10_Expr_", names(dfAddCounts) )
-    names(dfAddCounts) <- gsub( "add_counts_Avg_log10_Expr_gene", "gene", names(dfAddCounts))
-    
-    database.table <- merge(
-        database.table, 
-        dfAddCounts,
-        by.x = Obio@parameterList$geneIDcolumn,
-        by.y = "gene",
-        all = TRUE
-    )
-    
-    database.table[is.na(database.table)] <- 0
-}
+# if (length(unique(OsC@meta.data$sampleID)) > 1){
+#     
+#     dfAddCounts <- Obio@dataTableList$dfAvglg10ExprPerCluster
+#     
+#     #dfNormCounts <- spread(data = dfNormCounts, key=condition, value=measurement)
+#     #names(dfNormCounts) <- paste0("norm_counts_", names(dfNormCounts))
+#     #names(dfNormCounts) <- gsub("norm_counts_gene", "gene", names(dfNormCounts))
+#     
+#     names(dfAddCounts) <- paste0("add_counts_Avg_log10_Expr_", names(dfAddCounts) )
+#     names(dfAddCounts) <- gsub( "add_counts_Avg_log10_Expr_gene", "gene", names(dfAddCounts))
+#     
+#     database.table <- merge(
+#         database.table, 
+#         dfAddCounts,
+#         by.x = Obio@parameterList$geneIDcolumn,
+#         by.y = "gene",
+#         all = TRUE
+#     )
+#     
+#     database.table[is.na(database.table)] <- 0
+# }
 ## Done adding additional cols for plotting                                  ##
 ###############################################################################
 
@@ -1083,25 +1102,25 @@ if (!is.null(dfAdd)){
 ###############################################################################
 ## Add cluster residuals                                                     ##
 
-pos <- grep("dfClusterResiduals", names(Obio@dataTableList))
-
-if (length(pos) == 1){
-
-dfAdd <- Obio@dataTableList$dfClusterResiduals
-names(dfAdd)[names(dfAdd) != "gene"] <- paste0(names(dfAdd)[names(dfAdd) != "gene"], "_Residuals")
-
-names(dfAdd)[grep("Residuals", names(dfAdd))] <- paste0("add_counts_", names(dfAdd)[grep("Residuals", names(dfAdd))])
-
-database.table <- merge(
-    database.table, 
-    dfAdd,
-    by.x = Obio@parameterList$geneIDcolumn,
-    by.y = "gene",
-    all = TRUE
-)
-
-database.table[is.na(database.table)] <- 0
-}
+# pos <- grep("dfClusterResiduals", names(Obio@dataTableList))
+# 
+# if (length(pos) == 1){
+# 
+# dfAdd <- Obio@dataTableList$dfClusterResiduals
+# names(dfAdd)[names(dfAdd) != "gene"] <- paste0(names(dfAdd)[names(dfAdd) != "gene"], "_Residuals")
+# 
+# names(dfAdd)[grep("Residuals", names(dfAdd))] <- paste0("add_counts_", names(dfAdd)[grep("Residuals", names(dfAdd))])
+# 
+# database.table <- merge(
+#     database.table, 
+#     dfAdd,
+#     by.x = Obio@parameterList$geneIDcolumn,
+#     by.y = "gene",
+#     all = TRUE
+# )
+# 
+# database.table[is.na(database.table)] <- 0
+# }
 
 ## Done adding cluster residuals                                             ##
 ###############################################################################
@@ -1134,26 +1153,26 @@ if (length(pos) > 0){
 
 ###########################
 ## Variation
-pos <- grep("dfVariation", names(Obio@dataTableList))
-
-if (length(pos) > 0){
-    dfAdd <- Obio@dataTableList[[pos]]
-    #rmVec <- grep("_padj_", names(dfAdd))
-    #if (length(rmVec) > 0){
-    #    dfAdd <- unique(dfAdd[,-rmVec])
-    #}
-    
-    database.table <- merge(
-        database.table, 
-        dfAdd, 
-        by.x = Obio@parameterList$geneIDcolumn,
-        by.y = "gene",
-        all = TRUE
-    )
-    
-    database.table[is.na(database.table)] <- 0
-    
-}
+# pos <- grep("dfVariation", names(Obio@dataTableList))
+# 
+# if (length(pos) > 0){
+#     dfAdd <- Obio@dataTableList[[pos]]
+#     #rmVec <- grep("_padj_", names(dfAdd))
+#     #if (length(rmVec) > 0){
+#     #    dfAdd <- unique(dfAdd[,-rmVec])
+#     #}
+#     
+#     database.table <- merge(
+#         database.table, 
+#         dfAdd, 
+#         by.x = Obio@parameterList$geneIDcolumn,
+#         by.y = "gene",
+#         all = TRUE
+#     )
+#     
+#     database.table[is.na(database.table)] <- 0
+#     
+# }
 
 ## Done
 #############################
@@ -1180,7 +1199,7 @@ database.table[database.table[,Obio@parameterList$geneIDcolumn] %in% logCO, "log
 
 
 #setwd(Obio@parameterList$localWorkDir)
-Obio@databaseTable <- datatable.to.website.ptm(
+Obio@databaseTable <- biologicSeqTools2::datatable.to.website.ptm(
     df.data = database.table,
     gene.id.column = Obio@parameterList$geneIDcolumn,
     heatmap.genes = "",
@@ -1216,7 +1235,11 @@ rmVec <- grep("^Avg_log10_Expr_Sc_", names(Obio@databaseTable))
 Obio@databaseTable$Gene_description <- NULL
 
 
-cmd.vec <- upload.datatable.to.database(
+## Dealing with long big tables: ERNO139 can appear in large tables well before 
+## the 4096 column limit (...). To avoid this, the cluster-sample average columns 
+## will not be added to big datasets. 
+
+cmd.vec <- biologicSeqTools2::upload.datatable.to.database(
     host = Obio@dbDetailList$host, 
     user = Obio@dbDetailList$db.user,
     password = db.pwd,
@@ -1228,7 +1251,7 @@ cmd.vec <- upload.datatable.to.database(
     cols2Index = c(Obio@parameterList$geneIDcolumn)
 )
 
-killDbConnections()
+biologicSeqTools2::killDbConnections()
 
 ```
 
