@@ -10,7 +10,7 @@
 # Clusters Polykeratins (5) > cTecDiff (9) > cTECI (0) > cTECIII (6) > cTECII (3)
 # Clusters Polykeratins (5) > mTecDiff (12) > mTec MYO (8)
 branchSelectionCol <- "seurat_clusters"
-branchSelection <- c(5, 12, 1, 4, 2, 11)
+branchSelection <- c(2, 0, 1, 3)
 
 #branch1 <- c(5, 9, 0, 6,3)
 #branch1 <- c(5, 12, 1, 4, 2, 11)
@@ -35,7 +35,7 @@ VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.D
 
 invertMonoclePseudotime <- FALSE
 useCachedMonocleObject <- TRUE
-startClusterID <- 5
+startClusterID <- 2
 startClusterColName <- "seurat_clusters"
 plotTopNgenes <- 100
 nMonocleTimeBins <- 100
@@ -191,7 +191,7 @@ knitr::opts_chunk$set(
 
 
 
-```{r, eval=F, echo=T, results=F}
+```{r, eval=data.analysis.mode, echo=T, results=F}
 ## This part will only be run for the data analysis mode
 
 ## Tutorial from the Trapnell lab
@@ -327,8 +327,7 @@ root_pr_nodes <-
 
 cds_from_seurat <- order_cells(
     cds_from_seurat,
-    root_pr_nodes=root_pr_nodes,
-    #root_cells = root_cells
+    root_pr_nodes=root_pr_nodes
 )
 
 ###############################################################################

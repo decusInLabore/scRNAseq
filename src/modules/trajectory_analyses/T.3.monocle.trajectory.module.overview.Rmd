@@ -1,8 +1,9 @@
 <!-- Set Parameters Module -->
 <!-- Set the chnkPrefix to make all chunks unique in the overall folder -->
+
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE}
 chnkPrefix <- "T3.mc."
-VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.Date()), ".pdf")
+VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.Date()), ".pdf")
 
 #install.packages("V8")
 #renv::install("cole-trapnell-lab/leidenbase")
@@ -17,9 +18,11 @@ VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.D
 # R-version of the above: R 4.0.2
 
 
+# sbatch --time=24:00:00 --wrap "module purge;conda deactivate;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;ml cairo/1.16.0-GCCcore-10.3.0;ml rgdal/1.5-16-foss-2020a-R-4.0.0;load pandoc/2.2.3.2-foss-2016b;Rscript runRmd.r sc_Trajectory_Analysis.run.monocle.Rmd " --job-name=$project  --mem=200G -o ../rT.$project.slurm >> commands.txt
+
 invertMonoclePseudotime <- FALSE
 useCachedMonocleObject <- TRUE
-startClusterID <- 5
+startClusterID <- 2
 startClusterColName <- "seurat_clusters"
 plotTopNgenes <- 100
 nMonocleTimeBins <- 100
@@ -35,11 +38,18 @@ knitr::opts_chunk$set(
   message = FALSE,
   warning = FALSE
 )
+
+## Determine if the next section nexts to be executed:
+if (!exists("data.analysis.mode")){
+    data.analysis.mode <- FALSE
+}
+
+
 ```
 
 
 
-```{r, eval=F, echo=T, results=F}
+```{r, eval=data.analysis.mode, echo=T, results=F}
 ## This part will only be run for the data analysis mode
 
 ## Tutorial from the Trapnell lab
@@ -49,6 +59,7 @@ knitr::opts_chunk$set(
 library(Seurat)
 library(monocle3)
 library(htmlwidgets)
+library(dplyr)
 
 ## An old version of the matrix package is required
 # install.packages("https://cran.r-project.org/src/contrib/Archive/Matrix/Matrix_1.3-3.tar.gz")
@@ -56,12 +67,20 @@ library(htmlwidgets)
 seurat <- OsC
 
 ## remove cluster 5 ##
-gene_annotation <- as.data.frame(rownames(seurat@reductions[["pca"]]@feature.loadings), row.names = rownames(seurat@reductions[["pca"]]@feature.loadings))
+gene_annotation <- as.data.frame(
+    rownames(seurat@reductions[["pca"]]@feature.loadings), 
+    row.names = rownames(seurat@reductions[["pca"]]@feature.loadings)
+)
+
 colnames(gene_annotation) <- "gene_short_name"
 
 # part two, cell information
 
-cell_metadata <- as.data.frame(seurat@assays[["RNA"]]@counts@Dimnames[[2]], row.names = seurat@assays[["RNA"]]@counts@Dimnames[[2]])
+cell_metadata <- as.data.frame(
+    seurat@assays[["RNA"]]@counts@Dimnames[[2]], 
+    row.names = seurat@assays[["RNA"]]@counts@Dimnames[[2]]
+)
+
 colnames(cell_metadata) <- "barcode"
 
 # part three, counts sparse matrix
@@ -159,68 +178,20 @@ root_pr_nodes <-
 
 cds_from_seurat <- order_cells(
     cds_from_seurat,
-    root_pr_nodes=root_pr_nodes,
+    root_pr_nodes=root_pr_nodes #,
     #root_cells = root_cells
 )
 
-###############################################################################
-## Monocle DGE                                                               ##
-## Reference https://cole-trapnell-lab.github.io/monocle3/docs/differential/
-# time_models <- monocle3::fit_models(
-#     cds_from_seurat,
-#     model_formula_str = "~pseudotime",
-#     expression_family="negbinomial"
-# )
-# 
-# gene_fits <- monocle3::fit_models(cds_from_seurat, model_formula_str = "~embryo.time + batch")
-# fit_coefs <- coefficient_table(gene_fits)
-# fit_coefs %>% filter(term != "(Intercept)") %>%
-#       select(gene_short_name, term, q_value, estimate)
 
-## Correlation tests ##
-# pr_graph_test_res <- monocle3::graph_test(cds_from_seurat, neighbor_graph="knn", cores=8)
-# pr_deg_ids <- row.names(subset(pr_graph_test_res, q_value < 0.05))
-# 
-# ## Find gene modules ##
-# gene_module_df <- monocle3::find_gene_modules(cds_from_seurat[pr_deg_ids,], resolution=1e-2)
-# 
-# cell_group_df <- tibble::tibble(cell=row.names(colData(cds_from_seurat)), 
-#                                 cell_group=partitions(cds_from_seurat)[colnames(cds_from_seurat)])
-# agg_mat <- aggregate_gene_expression(cds_from_seurat, gene_module_df, cell_group_df)
-# row.names(agg_mat) <- stringr::str_c("Module ", row.names(agg_mat))
-# colnames(agg_mat) <- stringr::str_c("Partition ", colnames(agg_mat))
-# 
-# pheatmap::pheatmap(agg_mat, cluster_rows=TRUE, cluster_cols=TRUE,
-#                    scale="column", clustering_method="ward.D2",
-#                    fontsize=6)
-# 
-# 
-# ## Finding genes that change as a function of pseudotime ##
-# ## Requires old version of matrix (< 1.3)
-# cds_pr_test_res <- graph_test(cds_from_seurat, neighbor_graph="principal_graph", cores=4)
-# pr_deg_ids <- row.names(subset(cds_pr_test_res, q_value < 0.05))
-# 
-# ## plot genes in pseudotime ##
-# p1 <- plot_genes_in_pseudotime(cds_from_seurat,
-#                          color_cells_by="clusterName",
-#                          min_expr=0.5)
-# 
-# AFD_genes <- c("ATF3", "KRT19")
-# AFD_lineage_cds <- cds_from_seurat[rowData(cds_from_seurat)$gene_short_name %in% AFD_genes,
-#                        colData(cds_from_seurat)$cell.type %in% c("AFD")]
-# 
-# plot_genes_in_pseudotime(AFD_lineage_cds,
-#                          color_cells_by="pseudotime",
-#                          min_expr=0.5)
-
-## Save single cell object ##
 FN <- paste0(
     Obio@parameterList$localWorkDir,
     Obio@parameterList$project_id,
     ".monocle.SCE.rds"
 )
 
-saveRDS(cds_from_seurat, FN)
+
+saveRDS(object = cds_from_seurat, file = FN)
+
 ```
 
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE, results=F}
