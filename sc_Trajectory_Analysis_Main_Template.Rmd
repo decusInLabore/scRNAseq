@@ -17,9 +17,95 @@ always_allow_html: yes
 ```{r setup, include=FALSE}
 ###############################################################################
 ## Load conda environment                                                    ##
-# conda activate R-monocle3;R
+
+# To get started, we set up the environment for monocle3 - which is 
+# different from the analysis used in the previous analysis. 
+
+# The conda environment requires to source the .bashrc when run on the cluster. 
+
+## When running on the cluster, it's necessary to source the .bashrc to 
+## initiate the conda environment
+# !! Contents within this block are managed by 'conda init' !!
+# __conda_setup="$('/camp/apps/eb/software/Anaconda2/2019.03/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+# if [ $? -eq 0 ]; then
+#     eval "$__conda_setup"
+# else
+#     if [ -f "/camp/apps/eb/software/Anaconda2/2019.03/etc/profile.d/conda.sh" ]; then
+#         . "/camp/apps/eb/software/Anaconda2/2019.03/etc/profile.d/conda.sh"
+#     else
+#         export PATH="/camp/apps/eb/software/Anaconda2/2019.03/bin:$PATH"
+#     fi
+# fi
+# unset __conda_setup
+
+# The critical bit is to do an conda initiate
+
+# Make sure that no renv.lock file is present and make sure that 
+# the renv session is deactivated. 
+
+# module purge
+# conda deactivate
 # ml cairo/1.16.0-GCCcore-10.3.0;ml rgdal/1.5-16-foss-2020a-R-4.0.0
+# source .bashrc
+# conda activate R-monocle3;R
+
+# Check for presence of monocle3
+# library(monocle3)
+
+# renv::snapshot() - reinitialise with a new library
+# Activate renv session
+
+# check again for presence of monocle
+# library(monocle3)
+
 # R version 4.0.2
+
+# in the data analysis = false mode, the following R is used:
+# module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;R
+
+###############################################################################
+## alternative 20220630                                                      ##
+## start by deactivating renv renv::deactivate()
+## Quit R
+# conda deactivate
+# module purge
+# module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;
+# ml cairo/1.16.0-GCCcore-10.3.0;ml rgdal/1.5-16-foss-2020a-R-4.0.0
+# source ~/.bashrc
+# conda activate R-monocle3;R
+## Check - can monocle3 still be loaded? library(monocle3) - not present
+## renv::init() - option 2
+## Check - can monocle3 still be loaded? library(monocle3) 
+
+##
+###############################################################################
+
+###############################################################################
+## Note: 2022 06 30                                                          ##
+
+## For the time being, run monocle3 ALWAYS without renv. 
+
+## Make sure to do renv::deactivate before running monocle3 Rmds.
+
+## Done                                                                      ##
+###############################################################################
+
+###############################################################################
+## Running monocle3 envs                                                     ##
+## start by deactivating renv renv::deactivate()
+## Quit R
+# conda deactivate
+# module purge
+# module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;
+# ml cairo/1.16.0-GCCcore-10.3.0;ml rgdal/1.5-16-foss-2020a-R-4.0.0
+# source ~/.bashrc
+# conda activate R-monocle3;R
+## Check - can monocle3 still be loaded? library(monocle3) 
+
+## Run on the cluster:
+## Critical: source .bashrc
+##
+# sbatch --time=02:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;ml cairo/1.16.0-GCCcore-10.3.0;ml pandoc/2.2.3.2-foss-2016b;ml Anaconda3/2019.07;source ~/.bashrc;conda activate R-monocle3;Rscript runRmd.r sc_Trajectory_Analysis_Main_Template.Rmd " --job-name=$project  --mem=200G -o ../rT.$project.slurm >> commands.txt
 
 ##
 ###############################################################################
@@ -34,32 +120,42 @@ knitr::opts_chunk$set(
 
 ## If data analysis mode is used, no renv is used in order to prevent 
 ## interference with bespoke packages and environments
+## In the data analysis mode is false, we expect the monocle3 outputs to be pre-generated.
+
 data.analysis.mode <- TRUE
 
 
-if (!data.analysis.mode){
-    #Create the environment and load a suitable version of R, e.g. so:
-    if (!require("remotes")){
-      install.packages("remotes")
-    }
 
-    remotes::install_github("rstudio/renv")
+#Create the environment and load a suitable version of R, e.g. so:
+# if (!require("remotes")){
+#   install.packages("remotes")
+# }
 
-    if (!file.exists("renv.lock")){
-        renv::init()
-    } else {
-        renv::restore()
-    }
-    
-    # renv::install("bioc::ComplexHeatmap")
-    # devtools::install_github("decusInLabore/biologicSeqTools")
-    # devtools::install_github("decusInLabore/biologicToolsSC")
+#remotes::install_github("rstudio/renv")
+# if (!data.analysis.mode){
+#     if (!file.exists("renv.lock")){
+#       renv::init(prompt=F)
+#     } else {
+#       renv::restore()
+#     }
+# }
 
-    #remotes::install_github("decusInLabore/biologicSeqTools")
-    #remotes::install_github("decusInLabore/biologicToolsSC")
-    # install.packages("gam")
-    # install.packages('circlize')
-}
+
+# renv::update("vctrs")
+
+
+#devtools::install_github("decusInLabore/biologicSeqTools2")
+# skip updates - just enter on prompt
+
+
+#devtools::install_github("decusInLabore/biologicToolsSC")
+
+# renv::install("bioc::ComplexHeatmap")
+# renv::install("decusInLabore/biologicSeqTools2")
+# renv::install("decusInLabore/biologicToolsSC")
+# renv::install("gam")
+# renv::install('circlize')
+
 
 
 
@@ -68,11 +164,11 @@ source("src/modules/trajectory_analyses/trajectory.helper.functions.R")
 #remotes::install_github("decusInLabore/biologicSeqTools@main")
 
 library(Seurat)
-library(biologicSeqTools)
+library(biologicSeqTools2)
 library(SingleCellExperiment)
 library(dplyr)
 library(ggplot2)
-library(ouija)
+#library(ouija)
 # library(biologicToolsSC)
 
 # library(tidyverse)
@@ -134,44 +230,18 @@ figureCount <- 1
 ```
 
 <!-- Optional 5: monocle3 -->
-```{r child = 'src/modules/trajectory_analyses/T.3.monocle.trajectory.module.overview.Rmd', eval=FALSE}
+```{r child = 'src/modules/trajectory_analyses/T.3.monocle.trajectory.module.overview.Rmd', eval=TRUE}
 ```
 
 <!-- Optional 5: monocle3 Branch 1 Subtrajectory -->
-```{r child = 'src/modules/trajectory_analyses/T.3.monocle.trajectory.module.branch.1.Rmd', eval=FALSE}
+```{r child = 'src/modules/trajectory_analyses/T.3.monocle.trajectory.module.branch.1.Rmd', eval=TRUE}
 ```
 
-<!-- Optional 5: monocle3 Branch 2 Subtrajectory -->
-```{r child = 'src/modules/trajectory_analyses/T.3.monocle.trajectory.module.branch.2.Rmd', eval=FALSE}
-```
-
-<!-- Optional 5: monocle3 Branch 3 Subtrajectory -->
-```{r child = 'src/modules/trajectory_analyses/T.3.monocle.trajectory.module.branch.3.Rmd', eval=FALSE}
-```
-
-<!-- Optional 5: monocle3 Branch 4 Subtrajectory -->
-```{r child = 'src/modules/trajectory_analyses/T.3.monocle.trajectory.module.branch.4.Rmd', eval=FALSE}
-```
-
-<!-- Optional 5: monocle3 Branch 5 Subtrajectory -->
-```{r child = 'src/modules/trajectory_analyses/T.3.monocle.trajectory.module.branch.5.Rmd', eval=FALSE}
-```
-
-<!-- Optional 5: monocle3 Branch 6 Subtrajectory -->
-```{r child = 'src/modules/trajectory_analyses/T.3.monocle.trajectory.module.branch.6.Rmd', eval=FALSE}
-```
-
-<!-- Optional 5: monocle3 Branch 7 Subtrajectory -->
-```{r child = 'src/modules/trajectory_analyses/T.3.monocle.trajectory.module.branch.7.Rmd', eval=FALSE}
-```
 
 <!-- Optional 6: ouija -->
 ```{r child = 'src/modules/trajectory_analyses/T.4.ouija.trajectory.module.branch.1.Rmd', eval=FALSE}
 ```
 
-<!-- Optional 6: ouija -->
-```{r child = 'src/modules/trajectory_analyses/T.4.ouija.trajectory.module.branch.2.Rmd', eval=TRUE}
-```
 
 
 
@@ -270,9 +340,6 @@ projectParams <- lapply(
 
 ## Documentation
 ```{r documentation, eval=TRUE, echo=T, results=T}
-if (!data.analysis.mode){
-    renv::snapshot()
-}
 
 sessionInfo()
 ```
