@@ -1,7 +1,7 @@
 <!-- Set Parameters Module -->
 <!-- Set the chnkPrefix to make all chunks unique in the overall folder -->
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE}
-## Recommended R configuration 
+## Recommended (Crick) R configuration for this script:
 # module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;R;
 
 ## Set chapter variables ##
@@ -17,7 +17,7 @@ if (!exists("renderChapter")){
     renderChapter <- FALSE
 }
 
-renderChapter <- TRUE
+# renderChapter <- TRUE
 
 ## Load Obio biologic object and OsC single-cell object for renderByChapter mode
 if (renderChapter){
@@ -56,9 +56,9 @@ sampleIDorder <- names(Obio@sampleDetailList)
 
 ## Define cluster order
 ## Can be set manually. Make sure all clusters are present
-clusterOrder <- Obio@parameterList$clusterNameOrder
+clusterOrder <- rev(Obio@parameterList$clusterNameOrder)
 
-projectID <- Obio@parameterList$project_id
+project_id <- Obio@parameterList$project_id
 ## If you work outside of the biologic framework, set the projectID maually. 
 ## It can be any string
 
@@ -91,8 +91,6 @@ if (!exists("figureCount")){
 ## Create datatable for plotting                                             ##
 library(dplyr)
 
-## Organise sampleNames for the figure legends
-OsC@meta.data <- OsC@meta.data[order(OsC@meta.data$sampleName, decreasing=T), ]
 
 ## This plotting procedure requires three sets: the sets cellTypeIDs, clusterIDs, cellTypeIDs
 ## level1ID, level2ID, level3ID
