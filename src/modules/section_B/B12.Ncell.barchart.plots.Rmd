@@ -51,6 +51,14 @@ if (renderChapter){
 ## Set sampleIDorder
 ## Give the order in which sampleIDs should be displayed
 sampleIDorder <- names(Obio@sampleDetailList)
+
+dfOrder <- OsC@meta.data %>% 
+  dplyr::distinct(sampleName, sampleID)  %>% 
+  magrittr::set_rownames(.$sampleID)
+
+dfOrder <- dfOrder[sampleIDorder,]
+
+sampleNameOrder <- dfOrder$sampleName
 ## a way of generating this vector is
 # sampleIDorder <- unique(OsC@meta.data$sampleID)
 
@@ -408,7 +416,7 @@ resultList <- purrr::map(
         plotList = plotList,
         chnkVec = chnkVec,
         clusterNameOrder = clusterOrder,
-        sampleNameOrder = sort(unique(OsC@meta.data$sampleName)),
+        sampleNameOrder = sampleNameOrder,
         plotVertical = TRUE,
         plotMode = "N_cells",
         reportFigDir = reportFigDir,
@@ -430,7 +438,7 @@ resultList <- purrr::map(
         plotList = plotList,
         chnkVec = chnkVec,
         clusterNameOrder = NULL,
-        sampleNameOrder = sort(unique(OsC@meta.data$sampleName)),
+        sampleNameOrder = sampleNameOrder,
         plotVertical = TRUE,
         plotMode = "Perc_cells",
         reportFigDir = reportFigDir,
@@ -452,7 +460,7 @@ resultList <- purrr::map(
         plotList = plotList,
         chnkVec = chnkVec,
         clusterNameOrder = clusterOrder,
-        sampleNameOrder = sort(unique(OsC@meta.data$sampleName)),
+        sampleNameOrder = sampleNameOrder,
         plotVertical = TRUE,
         plotMode = "Perc_cells",
         reportFigDir = reportFigDir,
