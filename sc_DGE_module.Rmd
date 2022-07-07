@@ -25,50 +25,41 @@ knitr::opts_chunk$set(
 ```
 
 
-```{r hpc_notes, include=FALSE}
+```{r, include=FALSE}
 
-## Get interactive session ##
-#  srun --time=08:00:00 --mem=40G -p int --pty bash
 
-# module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/3.6.0-foss-2016b-BABS;R;
-
-# sbatch --time=12:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/3.6.0-foss-2016b-BABS;Rscript runA.r" --job-name="rA"  --mem=100G -o rA.slurm >> commands.txt
-
-# sbatch --time=24:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/3.6.0-foss-2016b-BABS;Rscript runDGE.r" --job-name="rDGE" -p hmem --mem=300G -o rDGE.slurm >> commands.txt
-
-# --mem-per-cpu=14G -p hmem --pty bash
-
+## Recommended (Crick) R-setup: 
 # module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a
 
 ```
 
-```{r populate_meta_data_database_part1, eval=TRUE, echo=F, results=F}
-#Create the environment and load a suitable version of R, e.g. so:
+```{r, eval=TRUE, echo=F, results=F}
+###############################################################################
+##                                                                           ##
 # if (!requireNamespace("remotes")){
-#   install.packages("remotes")
+#     install.packages("remotes")
 # }
 # 
 # remotes::install_github("rstudio/renv")
-# 
-# if (!file.exists("renv.lock")){
-#     renv::init(prompt=F)
-# } else {
-#     renv::restore(prompt=F)
-# }
 
-#myPaths <- .libPaths()
-#myNewPaths <- c("/camp/stp/babs/working/boeings/Projects/pachnisv/song.chng/330_10xscRNAseq_DIV4_DIV11_DIV20_SC19069/basedata", myPaths)
-#.libPaths(myNewPaths)
-#library(glmGamPoi)
-# renv::install("bioc::glmGamPoi")
-# renv::install("decusinlabore/biologicSeqTools2")
+if (file.exists("renv.lock")){
+    renv::restore(prompt = FALSE)
+} else {
+    renv::init()
+}
 
-#.libPaths(myPaths)
+## Done                                                                      ##
+###############################################################################
 
-# library(Seurat)
-# library(ggplot2)
-# library(tidyverse)
-# library(knitr::)
+
+```
+
+```{r, eval=TRUE, echo=T, results=F}
+###############################################################################
+##  Load packages                                                            ##
+library(Seurat)
+library(biologicSeqTools2)
+library(dplyr)
 
 VersionPdfExt <- paste0(".V", gsub("-", "", Sys.Date()), ".pdf")
 
@@ -82,10 +73,30 @@ if (dir.exists("/Volumes/babs/working/boeings/")){
     hpc.mount <- ""
 }
 
+## Load bioLOGIC object
+ObioFN <- paste0("../", list.files("..")[grep(".bioLOGIC.Robj", list.files(".."))])
+load(ObioFN)
 
-## Loading the BABS password ##
-#if (upload.results.to.database){
-    FN <- paste0(hpc.mount, "Projects/reference_data/pwd_folder/babs.txt")
+## Make sure paths are set correctly in the Obio object
+Obio <- Obio %>% 
+    biologicSeqTools2::setMountingPoint()  %>% 
+    biologicSeqTools2::setAnalysisPaths() %>% 
+    biologicSeqTools2::setCrickGenomeAndGeneNameTable() %>% 
+    biologicSeqTools2::createAnalysisFolders() %>% 
+    biologicSeqTools2::setDataBaseParameters()
+
+## Load Seurat object ##
+SeuratFN <- paste0("../", list.files("..")[grep(".Seurat.Robj", list.files(".."))])
+
+load(SeuratFN)
+
+##                                                                           ##
+###############################################################################
+
+###############################################################################
+## Retrieve database password                                                ##
+
+FN <- paste0(hpc.mount, "Projects/reference_data/pwd_folder/babs.txt")
     dbTable <- read.delim(
       FN,
       header = F,
@@ -95,37 +106,24 @@ if (dir.exists("/Volumes/babs/working/boeings/")){
 #}
 db.pwd <- as.vector(dbTable[1,1])
 
+## Done                                                                      ##
+###############################################################################
 
+###############################################################################
+##  Set variables                                                            ##
+
+# Plotting parameters
 figureCount <- 1
+legendDotSize <- 5
 
-library(biologicSeqTools2)
-#source("assets/R/SBwebtools.pckg.r")
+## Define project ID ##
+project_id <- Obio@parameterList$project_id
 
-# if (length(.libPaths()) > 2){
-#     .libPaths(.libPaths()[2:3])
-# }
-## Create biologic Object for visualization ##
+## Set directory for report tables
+reportTableDir <- Obio@parameterList$reportTableDir
+reportFigDir <- Obio@parameterList$reportFigDir
 
-ObioFN <- paste0("../", list.files("..")[grep(".bioLOGIC.Robj", list.files(".."))])
-
-load(ObioFN)
-
-
-checkFile = paste0(
-         Obio@parameterList$project_id,
-         ".bioLOGIC.Robj"
-)
-
-
-Obio <- setMountingPoint(Obio)
-Obio <- setAnalysisPaths(Obio)
-Obio <- setCrickGenomeAndGeneNameTable(Obio)
-Obio <- createAnalysisFolders(
-    Obio
-)
-Obio <- setDataBaseParameters(Obio)
-
-
+localWorkDir <- Obio@parameterList$localWorkDir
 
 ## Create url string
 if (Obio@parameterList$host == "10.27.241.234"){
@@ -134,127 +132,114 @@ if (Obio@parameterList$host == "10.27.241.234"){
     urlString <- "biologic.crick.ac.uk"
 }
 
-legendDotSize <- 5
-
+shinyBaseUrl <- "https://bioinformatics.crick.ac.uk/shiny/users/boeings/"
 
 shinyURL <- paste0(
-    "https://shiny-bioinformatics.crick.ac.uk/shiny/boeings/",
-    Obio@parameterList$project_id,
+    shinyBaseUrl,
+    project_id,
     "_app/"
 )            
-    
-
+   
 ## Set file paths ##
 baseFN <- paste0(
-   Obio@parameterList$project_id, 
+   project_id, 
    ".DGE.table.xlsx"
 )
 
+FNrel <- paste0("report_tables/", baseFN)
 
 outPutFN <- paste0(
-     Obio@parameterList$reportTableDir,
+     reportTableDir,
      baseFN
 )
+
+tableLink <- paste0(
+    '<a href="https://',
+    urlString,
+    '/mdata/',project_id, '/html/', 
+    FNrel,' target="_blank">here</a>.'
+)
+
+tableString <- paste0(
+    'An Excel table with the DGE results can be downloaded ',
+    tableLink
+)
   
- 
-FNrel <- paste0("report_tables/", baseFN)
- 
 
-## Create table link string ##
-
-tableLink <- paste0(' <a href="https://',urlString,'/mdata/',Obio@parameterList$project_id, '/html/', FNrel,' target="_blank">here</a> ')
-
-tableString <- paste0('An Excel table with the DGE results can be downloaded ',
-                      tableLink
-)
-
-
-load(paste0(
-    Obio@parameterList$localWorkDir,
-    Obio@parameterList$project_id,
-    ".Seurat.Robj"
-)
-)
-
-###############################################################################
-## Create cluster sample                                                     ##
-
-OsC@meta.data[["cluster_sample"]] <- paste0(
-    "C",
-    OsC@meta.data$seurat_clusters,
-    "_",
-    OsC@meta.data$sampleID
-)
-
-## Done                                                                      ##
+##  Set variables                                                            ##
 ###############################################################################
 
 
 
-
 ###############################################################################
-## Do DGEsc                                                                  ##
+## Function doDGEsc                                                          ##
+
+#' @title doDGEsc
+#' @description Function to do glmgampoi differential gene expression. When using this function, make sure the glmGamPoi R-package is installed on your system: renv::install("renv::install("bioc::glmGamPoi") 
+#' @param obj Seurat object for the DGE analysis
+#' @param countSlot Seurat object assay to use to retrieve count data.
+#' @param DGEselCol Meta data column in the above Seurat object to use for DGE sample group definitions. 
+#' @param colName Name for the DGE comparison in the meta data
+#' @param contrastTag contrastTag
+#' @param DGEsampleList List specifying the DGE comparisons. 
+#' @import Seurat
+#' @export
+
+
 setGeneric(
-  name="doDGEsc",
-  def=function(
-    obj,
-    DGEselCol = "sub_clusters_ExNeurons",
-    colName = "DGE_name",
-    contrastTag = "contrast_1_",
-    DGEsampleList = list(
-      "M1" = c(5),
-      "M2" = c(1)
-    )
-    
+    name="doDGEsc",
+    def=function(
+        obj,
+        countSlot = "RNA",
+        DGEselCol = "sub_clusters_ExNeurons",
+        colName = "DGE_name",
+        contrastTag = "contrast_1_",
+        DGEsampleList = list(
+            "M1" = c(5),
+            "M2" = c(1)
+        )
     ) {
     
+    ############################################################################
+    ## Add DGE cell selection to meta-data                                    ##
     colName <- unlist(colName)
     DGEselCol <- unlist(DGEselCol)
 
-    #myPaths <- .libPaths()
-    #myNewPaths <- c("/camp/stp/babs/working/boeings/Projects/pachnisv/song.chng/330_10xscRNAseq_DIV4_DIV11_DIV20_SC19069/basedata", myPaths)
-    #.libPaths(myNewPaths)
-    #library(glmGamPoi)
-    #.libPaths(myPaths)
-
-    library(Seurat)
     pos <- grep(colName, names(obj@meta.data))
     if (length(pos) > 0){
-      obj@meta.data <- obj@meta.data[,-pos]
+        obj@meta.data <- obj@meta.data[,-pos]
     }
 
-    mColName <- paste0("meta_", colName)
+    mColName <- substr(paste0("meta_", colName), 1, 63)
     obj@meta.data[[mColName]] <- "Rest" 
-    ## Add DGEsamples to meta.data
+    
     for (i in 1:length(DGEsampleList)){
         obj@meta.data[obj@meta.data[,DGEselCol] %in% DGEsampleList[[i]], mColName] <- names(DGEsampleList)[i]
     }
     
     dfMeta <- obj@meta.data
     dfMeta <- dfMeta[dfMeta[,mColName] != "Rest",]
-    #dfMeta$cellID <- row.names(dfMeta)
-
-
+    
+    ##                                                                        ##
+    ############################################################################
+    
+    ############################################################################
+    ## Get counts for DGE                                                     ##
     cellVec <- dfMeta$cellID
     group <-  as.vector(dfMeta[,mColName])
     
-    dfMatrix <- OsC[["RNA"]]@counts
+    dfMatrix <- obj[[countSlot]]@counts
     dfMatrix <- data.matrix(dfMatrix[,cellVec])
     dfMatrix <- dfMatrix[rowSums(dfMatrix) != 0, ]
-
-
-
+    
+    ## Pseudobulk DGE
+    
     ## LRT ##
     # fit <- glm_gp(dfMatrix, design = group)
     # res <- test_de(fit, reduced_design = ~ 1)
     
-    ## Pseudobulk ##
-    #sample_labels <- rep(paste0("sample_", 1:6), length = ncol(pbmcs_subset))
-    #cell_type_labels <- sample(c("T-cells", "B-cells", "Macrophages"), ncol(pbmcs_subset), replace = TRUE)
-    
-    
-    #group <-  as.vector(dfMeta$Glia_vs_Neuro_all)
     sample_labels <- group
+    
     sample_labels[sample_labels == names(DGEsampleList)[1]] <- paste0(sample_labels[sample_labels == names(DGEsampleList[1])], "_", 1:length(sample_labels[sample_labels == names(DGEsampleList)[1]]))
     
     sample_labels[sample_labels == names(DGEsampleList)[2]] <- paste0(sample_labels[sample_labels == names(DGEsampleList[2])], "_", 1:length(sample_labels[sample_labels == names(DGEsampleList)[2]]))
@@ -262,7 +247,11 @@ setGeneric(
     cell_type_lables <- group
     unique(group)
     
-    fit <- glmGamPoi::glm_gp(dfMatrix, design = group)
+    fit <- glmGamPoi::glm_gp(
+        dfMatrix, 
+        design = group
+    )
+    
     comparison <- names(DGEsampleList)
     
     contrastString <- (paste0(comparison[1], " - ", comparison[2]))
@@ -276,6 +265,8 @@ setGeneric(
     )
     
     dfRes <- res[order(res$lfc),]
+    
+    ## Remove extreme outliers ##
     dfRes <- dfRes[dfRes$lfc > -100 & dfRes$lfc < 100, ]
     dfRes[["padj"]] <- dfRes$adj_pval
     minP <- min(dfRes$padj[dfRes$padj != 0])
@@ -297,7 +288,15 @@ setGeneric(
     
     comp_1 <- unique(comp_1[,selVec])
     
-    pos <- grep(paste0("DGE_", DGEselCol), names(Obio@dataTableList))
+    ## Cut all strings in comp_1 to a maximum of 63 charcters 
+    names(comp_1) <- sapply(names(comp_1), function(x) substr(x, 1, 63))
+    
+    
+    
+    ##                                                                        ##
+    ############################################################################
+    
+    
     
     returnList <- list(
       "OsC" = obj,
@@ -311,65 +310,199 @@ setGeneric(
 ## End doDGEsc Function                                                      ##
 ###############################################################################
 
+###############################################################################
+## Define differential gene expression comparisons in a list                 ##
+## One list entry per comparison                                             ##
+
 
 DGEtagVec <- as.vector(NULL, mode = "character")
 
-
 DGEinputList <- list(
   "comp_1" = list(
-      "name"    = "DGE_Fib_T_C4_vs_N_C4",
+      "name"    = "DGE_C8_Regeneron_vs_C8_Ctrl",
       "DGEselCol" = "cluster_sample",
       "DGEsampleList" = list(
-          "Fib_T_C4"   = c("C4_T1","C4_T2","C4_T3","C4_T4","C4_T5","C4_T6","C4_T7","C4_T8","C4_T9","C4_T10","C4_T11","C4_T12","C4_T13","C4_T14","C4_T15","C4_T16","C4_T17","C4_T18","C4_T19","C4_T21","C4_T22","C4_T23","C4_T24"),
-          "Fib_N_C4" = c("C4_N1","C4_N2","C4_N3","C4_N4","C4_N5","C4_N6","C4_N7","C4_N8","C4_N9","C4_N10","C4_N11")
+          "C8_Th_Regeneron"   = c("C8_Regeneron_R1","C8_Regeneron_R2","C8_Regeneron_R3"),
+          "C8_Th_Ctrl"   = c("C8_Control_R1","C8_Control_R2","C8_Control_R3")
       )
   ),
   "comp_2" = list(
-      "name"    = "DGE_Stellate_T_C5_vs_N_C5",
+      "name"    = "DGE_C8_MatB52_vs_C8_Ctrl",
       "DGEselCol" = "cluster_sample",
       "DGEsampleList" = list(
-          "Stell_T_C5"   = c("C5_T1","C5_T2","C5_T3","C5_T4","C5_T5","C5_T6","C5_T7","C5_T8","C5_T9","C5_T10","C5_T11","C5_T12","C5_T13","C5_T14","C5_T15","C5_T16","C5_T17","C5_T18","C5_T19","C5_T20","C5_T21","C5_T22","C5_T23","C5_T24"),
-          "Stell_N_C5" = c("C5_N1","C5_N2","C5_N3","C5_N4","C5_N5","C5_N6","C5_N7","C5_N8","C5_N9","C5_N10","C5_N11")
+          "C8_Th_MatB52"   = c("C8_MatB52_R1","C8_MatB52_R2","C8_MatB52_R3"),
+          "C8_Th_Ctrl"   = c("C8_Control_R1","C8_Control_R2","C8_Control_R3")
       )
   ),
   "comp_3" = list(
-      "name"    = "DGE_Tcell_T_C8_vs_N_C8",
+      "name"    = "DGE_C14_Regeneron_vs_C14_Ctrl",
       "DGEselCol" = "cluster_sample",
       "DGEsampleList" = list(
-          "T_T_C8"   = c("C8_T1","C8_T2","C8_T3","C8_T4","C8_T5","C8_T6","C8_T7","C8_T8","C8_T9","C8_T10","C8_T11","C8_T12","C8_T13","C8_T14","C8_T15","C8_T16","C8_T17","C8_T18","C8_T19","C8_T20","C8_T21","C8_T22","C8_T23","C8_T24"),
-          "T_N_C8" = c("C8_N1","C8_N2","C8_N3","C8_N4","C8_N5","C8_N6","C8_N7","C8_N8","C8_N9","C8_N10","C8_N11")
+          "C14_Treg_Regeneron"   = c("C14_Regeneron_R1","C14_Regeneron_R2","C14_Regeneron_R3"),
+          "C14_Treg_Ctrl"   = c("C14_Control_R1","C14_Control_R2","C14_Control_R3")
       )
   ),
   "comp_4" = list(
-      "name"    = "DGE_Mac_T_C6_vs_N_C6",
+      "name"    = "DGE_C14_MatB52_vs_C14_Ctrl",
       "DGEselCol" = "cluster_sample",
       "DGEsampleList" = list(
-          "Mac_T_C6"   = c("C6_T1","C6_T2","C6_T3","C6_T4","C6_T5","C6_T6","C6_T7","C6_T8","C6_T9","C6_T10","C6_T11","C6_T12","C6_T13","C6_T14","C6_T15","C6_T16","C6_T17","C6_T18","C6_T19","C6_T20","C6_T21","C6_T22","C6_T23","C6_T24"),
-          "Mac_N_C6" = c(  "C6_N1","C6_N2","C6_N3","C6_N5","C6_N6","C6_N7","C6_N8","C6_N9","C6_N10","C6_N11")
+          "C14_Treg_MatB52"   = c("C14_MatB52_R1","C14_MatB52_R2","C14_MatB52_R3"),
+          "C14_Treg_Ctrl"   = c("C14_Control_R1","C14_Control_R2","C14_Control_R3")
+      )
+  ),
+  "comp_5" = list(
+      "name"    = "DGE_C7_Regeneron_vs_C7_Ctrl",
+      "DGEselCol" = "cluster_sample",
+      "DGEsampleList" = list(
+          "C7_B_Regeneron"   = c("C7_Regeneron_R1","C7_Regeneron_R2","C7_Regeneron_R3"),
+          "C7_B_Ctrl"   = c("C7_Control_R1","C7_Control_R2","C7_Control_R3")
+      )
+  ),
+  "comp_6" = list(
+      "name"    = "DGE_C7_MatB52_vs_C7_Ctrl",
+      "DGEselCol" = "cluster_sample",
+      "DGEsampleList" = list(
+          "C7_B_MatB52"   = c("C7_MatB52_R1","C7_MatB52_R2","C7_MatB52_R3"),
+          "C7_B_Ctrl"   = c("C7_Control_R1","C7_Control_R2","C7_Control_R3")
+      )
+  ),
+  "comp_7" = list(
+      "name"    = "DGE_C17_Regeneron_vs_C17_Ctrl",
+      "DGEselCol" = "cluster_sample",
+      "DGEsampleList" = list(
+          "C17_NK_Regeneron"   = c("C17_Regeneron_R1","C17_Regeneron_R2","C17_Regeneron_R3"),
+          "C17_NK_Ctrl"   = c("C17_Control_R1","C17_Control_R2","C17_Control_R3")
+      )
+  ),
+  "comp_8" = list(
+      "name"    = "DGE_C17_MatB52_vs_C17_Ctrl",
+      "DGEselCol" = "cluster_sample",
+      "DGEsampleList" = list(
+          "C17_NK_MatB52"   = c("C17_MatB52_R1","C17_MatB52_R2","C17_MatB52_R3"),
+          "C17_NK_Ctrl"   = c("C17_Control_R1","C17_Control_R2","C17_Control_R3")
+      )
+  ),
+  "comp_9" = list(
+      "name"    = "DGE_C4_Regeneron_vs_C4_Ctrl",
+      "DGEselCol" = "cluster_sample",
+      "DGEsampleList" = list(
+          "C4_Mono_Regeneron"   = c("C4_Regeneron_R1","C4_Regeneron_R2","C4_Regeneron_R3"),
+          "C4_Mono_Ctrl"   = c("C4_Control_R1","C4_Control_R2","C4_Control_R3")
+      )
+  ),
+  "comp_10" = list(
+      "name"    = "DGE_C4_MatB52_vs_C4_Ctrl",
+      "DGEselCol" = "cluster_sample",
+      "DGEsampleList" = list(
+          "C4_Mono_MatB52"   = c("C4_MatB52_R1","C4_MatB52_R2","C4_MatB52_R3"),
+          "C4_Mono_Ctrl"   = c("C4_Control_R1","C4_Control_R2","C4_Control_R3")
+      )
+  ),
+  "comp_11" = list(
+      "name"    = "DGE_C5_Regeneron_vs_C5_Ctrl",
+      "DGEselCol" = "cluster_sample",
+      "DGEsampleList" = list(
+          "C5_Mac_Regeneron"   = c("C5_Regeneron_R1","C5_Regeneron_R2","C5_Regeneron_R3"),
+          "C5_Mac_Ctrl"   = c("C5_Control_R1","C5_Control_R2","C5_Control_R3")
+      )
+  ),
+  "comp_12" = list(
+      "name"    = "DGE_C5_MatB52_vs_C5_Ctrl",
+      "DGEselCol" = "cluster_sample",
+      "DGEsampleList" = list(
+          "C5_Mac_MatB52"   = c("C5_MatB52_R1","C5_MatB52_R2","C5_MatB52_R3"),
+          "C5_Mac_Ctrl"   = c("C5_Control_R1","C5_Control_R2","C5_Control_R3")
+      )
+  ),
+  "comp_13" = list(
+      "name"    = "DGE_C6_Regeneron_vs_C6_Ctrl",
+      "DGEselCol" = "cluster_sample",
+      "DGEsampleList" = list(
+          "C6_Neut_Regeneron"   = c("C6_Regeneron_R1","C6_Regeneron_R2","C6_Regeneron_R3"),
+          "C6_Neut_Ctrl"   = c("C6_Control_R1","C6_Control_R2","C6_Control_R3")
+      )
+  ),
+  "comp_14" = list(
+      "name"    = "DGE_C6_MatB52_vs_C6_Ctrl",
+      "DGEselCol" = "cluster_sample",
+      "DGEsampleList" = list(
+          "C6_Neut_MatB52"   = c("C6_MatB52_R1","C6_MatB52_R2","C6_MatB52_R3"),
+          "C6_Neut_Ctrl"   = c("C6_Control_R1","C6_Control_R2","C6_Control_R3")
+      )
+  ),
+  "comp_15" = list(
+      "name"    = "DGE_C21_Fib_MatB52_vs_Fib_Ctrl",
+      "DGEselCol" = "cluster_sample",
+      "DGEsampleList" = list(
+          "C21_Fib_MatB52"   = c("C21_MatB52_R1","C21_MatB52_R2","C21_MatB52_R3"),
+          "C21_Fib_Ctrl" = c("C21_Control_R1","C21_Control_R2","C21_Control_R3")
+      )
+  ),
+  "comp_16" = list(
+      "name"    = "DGE_Fib_C21_Regeneron_vs_Ctrl",
+      "DGEselCol" = "cluster_sample",
+      "DGEsampleList" = list(
+          "C21_Fib_Regeneron"   = c("C21_Regeneron_R1","C21_Regeneron_R2","C21_Regeneron_R3"),
+          "C21_Fib_Ctrl" = c("C21_Control_R1","C21_Control_R2","C21_Control_R3")
+      )
+  ),
+  "comp_17" = list(
+      "name"    = "DGE_Fib_C21_Regeneron_vs_MatB52",
+      "DGEselCol" = "cluster_sample",
+      "DGEsampleList" = list(
+          "C21_Fib_Regeneron"   = c("C21_Regeneron_R1","C21_Regeneron_R2","C21_Regeneron_R3"),
+          "C21_Fib_MatB52"   = c("C21_MatB52_R1","C21_MatB52_R2","C21_MatB52_R3")
+      )
+  ),
+  "comp_18" = list(
+      "name"    = "DGE_CancerCells_C3915_Regeneron_vs_Ctrl",
+      "DGEselCol" = "cluster_sample",
+      "DGEsampleList" = list(
+          "C3915_CC_Regeneron"   = c(
+              "C3_Regeneron_R1","C3_Regeneron_R2","C3_Regeneron_R3",
+              "C9_Regeneron_R1","C9_Regeneron_R2","C9_Regeneron_R3", 
+              "C15_Regeneron_R1","C15_Regeneron_R2","C15_Regeneron_R3"
+            ),
+          "C3915_CC_Ctrl"   = c(
+              "C3_Control_R1","C3_Control_R2","C15_Control_R3",
+              "C9_Control_R1","C9_Control_R2","C15_Control_R3",
+              "C15_Control_R1","C15_Control_R2","C15_Control_R3"
+            )
+      )
+  ),
+  "comp_19" = list(
+      "name"    = "DGE_CancerCells_C3915_MatB52_vs_Ctrl",
+      "DGEselCol" = "cluster_sample",
+      "DGEsampleList" = list(
+          "C3915_CC_Regeneron"   = c(
+              "C3_MatB52_R1","C3_MatB52_R2","C3_MatB52_R3",
+              "C9_MatB52_R1","C9_MatB52_R2","C9_MatB52_R3", 
+              "C15_MatB52_R1","C15_MatB52_R2","C15_MatB52_R3"
+            ),
+          "C3915_CC_Ctrl"   = c(
+              "C3_Control_R1","C3_Control_R2","C15_Control_R3",
+              "C9_Control_R1","C9_Control_R2","C15_Control_R3",
+              "C15_Control_R1","C15_Control_R2","C15_Control_R3"
+            )
       )
   )
+  
+  
 )
 
 
 
-## Minify for testing
-# cells <- OsC@meta.data$cell_id
-# cells <- sample(size= 2000, cells)
-# OsC <- subset(x= OsC, subset = cellID %in% cells)
-
-
 
 ###############################################################################
-## DGE Analysis                                                              ##
+## Function do scDGE                                                         ##
 
-plotList <- list()
-chnkVec <- as.vector(NULL, mode = "character")
-
-for (i in 1:length(DGEinputList)){
-    tag <- paste0(unlist(DGEinputList[[i]]["name"]))
+doScDGEonList <- function(
+    OsC,
+    tag,
+    DGEinputList,
+    DGEtagVec = as.vector(NULL, mode = "character")
     
-    
-    
+){
     resList <- doDGEsc(
         obj = OsC,
         DGEselCol = unlist(DGEinputList[[i]]["DGEselCol"]),
@@ -418,17 +551,48 @@ for (i in 1:length(DGEinputList)){
     )
     
     dfDataTable[is.na(dfDataTable)] <- 0
-    
-    ## Done adding avg intensity for MA-plot                                 ##
-    ###########################################################################
-    
-    Obio@dataTableList[[tag]] <- data.frame(NULL)
-    Obio@dataTableList[[tag]] <- dfDataTable
+    names(dfDataTable) <- sapply(names(dfDataTable), function(x) substr(x, 1, 63))
     
     DGEtagVec <- c(
       DGEtagVec,
       tag
     )
+    
+    resultList <- list(
+        "dfDataTable" = dfDataTable,
+        "DGEtagVec" = DGEtagVec
+    )
+    
+    return(resultList)
+    
+}
+
+## Done do scDGE                                                             ##
+###############################################################################
+
+###############################################################################
+## DGE Analysis                                                              ##
+
+DGEtagVec = as.vector(NULL, mode = "character")
+
+## This does the DGE and creates an overview UMAP figure ##
+for (i in 1:length(DGEinputList)){
+    
+    tag <- paste0(unlist(DGEinputList[[i]]["name"]))
+    
+    resList <- doScDGEonList(
+        OsC = OsC,
+        tag = tag,
+        DGEinputList = DGEinputList,
+        DGEtagVec = DGEtagVec
+    )
+  
+    dfDataTable <- resList[["dfDataTable"]]
+    DGEtagVec <- resList[["DGEtagVec"]]
+    
+    ## Add results to biologic object 
+    Obio@dataTableList[[tag]] <- data.frame(NULL)
+    Obio@dataTableList[[tag]] <- dfDataTable
     
     ## Done with DGE Analysis                                                ##
     ###########################################################################
@@ -436,7 +600,6 @@ for (i in 1:length(DGEinputList)){
     ###########################################################################
     ## Create DGE Selection plot                                             ##
     dfPlot <- OsC@meta.data
-    
     
     
     pos <- grep("included", names(dfPlot))
@@ -508,20 +671,22 @@ for (i in 1:length(DGEinputList)){
 
     dotsize  = 1
     if (nrow(dfPlot) > 10000){
-      dotsize  = 0.5
+        dotsize  = 0.5
     } else if (nrow(dfPlot) > 20000){
-      dotsize = 0.25
+        dotsize = 0.25
     } else if (nrow(dfPlot) > 50000){
-      dotsize = 0.1
+        dotsize = 0.1
     }
 
+    ## make plot ##
     plotList[[tag]] <- ggplot2::ggplot(
         data=dfPlot[dfPlot$included == "+",], 
-        ggplot2::aes(UMAP_1, UMAP_2, color=Cluster)
-      ) + ggplot2::geom_point( shape=16, size = as.numeric(dotsize)
-      ) + ggplot2::xlab("UMAP1") + ggplot2::ylab("UMAP2"
-      ) + ggplot2::theme_bw(
-      )  +  ggplot2::theme(
+        ggplot2::aes(UMAP_1, UMAP_2, color=Cluster)) + 
+        ggplot2::geom_point( shape=16, size = as.numeric(dotsize)) + 
+        ggplot2::xlab("UMAP1") + 
+        ggplot2::ylab("UMAP2") + 
+        ggplot2::theme_bw()  +  
+        ggplot2::theme(
           axis.text.y   = ggplot2::element_text(size=8),
           axis.text.x   = ggplot2::element_text(size=8),
           axis.title.y  = ggplot2::element_text(size=8),
@@ -530,29 +695,30 @@ for (i in 1:length(DGEinputList)){
           panel.border = ggplot2::element_rect(colour = "black", fill=NA, size=1),
           plot.title = ggplot2::element_text(hjust = 0.5, size = 12),
           legend.title = ggplot2::element_blank()
-      ) + ggplot2::guides(col = ggplot2::guide_legend(override.aes = list(shape = 16, size = legendDotSize))
-      ) + ggplot2::ggtitle(paste0("Cell Selection for ", gsub("_", " ", unlist(DGEinputList[[i]]["name"])))
-      ) + ggplot2::xlim(minX, maxX) + ggplot2::ylim(minY, maxY
-      ) + ggplot2::coord_fixed(ratio=1
-      ) + ggplot2::scale_colour_manual("DGE Groups" ,values = colVec
-      ) + ggplot2::guides(col = ggplot2::guide_legend(override.aes = list(shape = 16, size = legendDotSize))
-      )
+        ) + 
+        ggplot2::guides(col = ggplot2::guide_legend(override.aes = list(shape = 16, size = legendDotSize))) +     
+        ggplot2::ggtitle(paste0("Cell Selection for ", gsub("_", " ", unlist(DGEinputList[[i]]["name"])))) + 
+        ggplot2::xlim(minX, maxX) + 
+        ggplot2::ylim(minY, maxY) + 
+        ggplot2::coord_fixed(ratio=1) + 
+        ggplot2::scale_colour_manual("DGE Groups" ,values = colVec) + 
+        ggplot2::guides(col = ggplot2::guide_legend(override.aes = list(shape = 16, size = legendDotSize)))
 
 
       ## Add colors if specified ##
 
             
-
+      ## Make plot figure ##
       FNbase <- paste0(tag, VersionPdfExt)
-      FN <- paste0(Obio@parameterList$reportFigDir, FNbase)
+      FN <- paste0(reportFigDir, FNbase)
       FNrel <- paste0("report_figures/", FNbase)
-            
+              
       pdf(FN)
           print(plotList[[tag]])
       dev.off()
-            
-      # link <- paste0('<a href="https://',urlString,'/',Obio@parameterList$project_id,'/pca?x_axis=UMAP_1&y_axis=UMAP_2" target="_blank">here</a>')  
-      
+              
+        # link <- paste0('<a href="https://',urlString,'/',Obio@parameterList$project_id,'/pca?x_axis=UMAP_1&y_axis=UMAP_2" target="_blank">here</a>')  
+        
       if (exists("shinyURL") & !is.null(shinyURL)){
           link <- paste0(
                   'An interactive version of this figure with additional viewing options can be found <a href="',shinyURL,'?_inputs_&y_axis=%22UMAP_2%22&x_axis=%22UMAP_1%22&colorBy=%22',paste0("meta_", tag),'%22&splitByColumn=%22all%22" target="_blank">here</a>. '
@@ -561,7 +727,7 @@ for (i in 1:length(DGEinputList)){
       } else {
           link <- ""
       }
-            
+              
       figLegend <- paste0(
       '**Figure ', 
       figureCount, 
@@ -587,11 +753,11 @@ for (i in 1:length(DGEinputList)){
           chnkVec,
           NewChnk
       )
-
+  
       ## Done creating DGE selection plot                                      ##
       ###########################################################################
-    
-    
+      
+      
       print(paste0("Done with ", tag))
 }
 
@@ -621,24 +787,26 @@ cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = '\n'))
 ## Assemble DGE summary table                                                ##
 #dfTemp <- Obio@dataTableList[["DGE_table"]] 
 
-library(openxlsx)
-wb <- createWorkbook()
+wb <- openxlsx::createWorkbook()
 
-hs1 <- createStyle(
+hs1 <- openxlsx::createStyle(
     fontColour = "#ffffff",
     fgFill = "#000000",
     halign = "CENTER",
     textDecoration = "Bold"
 )
 
+###############################################################################
+## Add Create DGE result Excel Spreadsheet                                   ##
+
 for (i in 1:length(DGEtagVec)){
+  
   ## Add to Excel workbook ##
   dfOutput <-   Obio@dataTableList[[DGEtagVec[i]]]
   orderVec <- names(dfOutput)
   dfOutput[["gene_FeatureViewLink"]] <- paste0(
-      "https://shiny-bioinformatics.crick.ac.uk/shiny/boeings/",
-      Obio@parameterList$project_id,
-      "_app/?gene=",
+      shinyURL,
+      "?gene=",
       dfOutput$gene
   )
   orderVec <- orderVec[orderVec != "gene"]
@@ -657,39 +825,39 @@ for (i in 1:length(DGEtagVec)){
   freezePane(wb, sheetName ,  firstActiveRow = 2)
   writeData(wb, i, dfOutput, startRow = 1, startCol = 1, headerStyle = hs1)
   ## Done adding to Excel workbook ##
+  
   if (i ==1){
-    dfTemp <- Obio@dataTableList[[DGEtagVec[i]]]
-    
+      dfTemp <- Obio@dataTableList[[DGEtagVec[i]]]
   } else {
-    dfTemp <- merge(
-      dfTemp, 
-      Obio@dataTableList[[DGEtagVec[i]]],
-      by.x = "gene",
-      by.y = "gene",
-      all =TRUE
-    )
-    dfTemp[is.na(dfTemp)] <- 0
+      dfTemp <- merge(
+        dfTemp, 
+        Obio@dataTableList[[DGEtagVec[i]]],
+        by.x = "gene",
+        by.y = "gene",
+        all =TRUE
+      )
+      dfTemp[is.na(dfTemp)] <- 0
   
   }
 }
 
 ## Save workbook ##
 baseFN <- paste0(
-   Obio@parameterList$project_id, 
+   project_id, 
    ".DGE.table.xlsx"
 )
 
 
 outPutFN <- paste0(
-     Obio@parameterList$reportTableDir,
+     reportTableDir,
      baseFN
 )
 
-if (!dir.exists(Obio@parameterList$reportTableDir)){
-    dir.create(Obio@parameterList$reportTableDir, recursive=T)
+if (!dir.exists(reportTableDir)){
+    dir.create(reportTableDir, recursive=T)
 }
 
-saveWorkbook(
+openxlsx::saveWorkbook(
         wb,
         outPutFN ,
         overwrite = TRUE
@@ -698,30 +866,17 @@ saveWorkbook(
 Obio@dataTableList[["DGE_table"]] <- NULL
 Obio@dataTableList[["DGE_table"]] <- dfTemp
 
-## Save DGE table to file ##
-# tempDir <- paste0(Obio@parameterList$localWorkDir,"temp")
-#             if(!dir.exists(tempDir)){
-#                 dir.create(tempDir)
-#             }
-# 
-# FN <- paste0(Obio@parameterList$localWorkDir, "/temp/DGE.result.table.txt")
-# write.table(
-#     dfTemp,
-#     FN,
-#     row.names = F, 
-#     sep = "\t"
-# )
 
-## Done adding DGE table                                                     ##
+## Done creating xlsx spreadsheet                                            ##
 ###############################################################################
 ```
 
 
-```{r data_MA_plots, echo=F, eval=T, warning=FALSE, results="asis"}
+```{r, echo=F, eval=T, warning=FALSE, results="asis"}
 
 
 ###############################################################################
-## Make MA-plots                                                             ##
+## Make scDGE MA-plots                                                       ##
 plotList <- list()
 chnkVec <- as.vector(NULL, mode = "character")
 
@@ -766,9 +921,22 @@ for (i in 1:length(DGEtagVec)){
 
     logFClims <- ceiling(max(abs(dfPlot$Y)))
     
+    ## Add to-regulated gene names ##
+    topNgenes <- 10
+    dfPlot <- dfPlot[order(dfPlot$Y, decreasing = T), ]
+    topGenes <- as.vector(dfPlot[1:topNgenes,"gene"])
+    
+    dfPlot <- dfPlot[order(dfPlotData$Y, decreasing = F), ]
+    bottomGenes <- as.vector(dfPlot[1:topNgenes,"gene"])
+    
+    dfPlot[["label"]] <- ""
+    dfPlot[dfPlot[,"gene"] %in% c(topGenes, bottomGenes), "label"] <- dfPlot[dfPlot[,"gene"] %in% c(topGenes, bottomGenes), geneIDcolumn]
+    
+    
+    
     plotList[[tag]] <- ggplot2::ggplot(
         data=dfPlot[dfPlot$included == "+",], 
-        ggplot2::aes(X, Y, color=DGE_Status,)
+        ggplot2::aes(X, Y, color=DGE_Status, label = "label")
       ) + ggplot2::geom_hline(yintercept = c(logFCtwoSD, -1 * logFCtwoSD), col = "darkgrey", lty=2
       ) + ggplot2::geom_point( shape=16, size = as.numeric(dotsize),alpha = 0.7
       ) + ggplot2::xlab(paste0("log10 Avg Intensity ", gsub("_", " ",label))) + ggplot2::ylab(paste0("log2-Fold Change ", gsub("_", " ",label))
@@ -910,29 +1078,27 @@ for (i in 1:length(DGEtagVec)){
     
     plotList[[tag]] <- ggplot2::ggplot(
         data=dfPlot[dfPlot$included == "+",], 
-        ggplot2::aes(X, Y, color=DGE_Status,)
-      ) + ggplot2::geom_vline(xintercept = c(logFCtwoSD, -1 * logFCtwoSD), col = "darkgrey", lty=2
-      ) + ggplot2::geom_vline(xintercept = 0, col = "darkgrey"
-      ) + ggplot2::geom_hline(yintercept = 0, col = "darkgrey"
-      ) + ggplot2::geom_point( shape=16, size = as.numeric(dotsize),alpha = 0.7
-      ) + ggplot2::xlab(paste0("log2-Fold Change ", gsub("_", " ",label))) + ggplot2::ylab(paste0("-log10(adj p-value) ", gsub("_", " ",label))
-      ) + ggplot2::theme_bw(
-      )  +  ggplot2::theme(
+        ggplot2::aes(X, Y, color=DGE_Status, label = "label")) + 
+        ggplot2::geom_vline(xintercept = c(logFCtwoSD, -1 * logFCtwoSD), col = "darkgrey", lty=2) +   
+        ggplot2::geom_vline(xintercept = 0, col = "darkgrey") + 
+        ggplot2::geom_hline(yintercept = 0, col = "darkgrey") + 
+        ggplot2::geom_point( shape=16, size = as.numeric(dotsize),alpha = 0.7) + 
+        ggplot2::xlab(paste0("log2-Fold Change ", gsub("_", " ",label))) + 
+        ggplot2::ylab(paste0("-log10(adj p-value) ", gsub("_", " ",label))) + 
+        ggplot2::theme_bw()  +  ggplot2::theme(
           axis.text.y   = ggplot2::element_text(size=8),
           axis.text.x   = ggplot2::element_text(size=8),
           axis.title.y  = ggplot2::element_text(size=8),
           axis.title.x  = ggplot2::element_text(size=8),
           axis.line = ggplot2::element_line(colour = "black"),
           panel.border = ggplot2::element_rect(colour = "black", fill=NA, size=1),
-          plot.title = ggplot2::element_text(hjust = 0.5, size = 12)
-          #legend.title = element_blank()
-      ) + ggplot2::guides(col = ggplot2::guide_legend(override.aes = list(shape = 16, size = legendDotSize))
-      ) + ggplot2::ggtitle(paste0("Volcano Plot for DGE Comparison ", gsub("_", " ", label))
-      ) + ggplot2::ylim(logFClims, -1 * logFClims
-      ) + ggplot2::scale_color_manual("DGE Status" ,values = colVec
-      ) + ggplot2::scale_y_continuous(breaks=c(seq(0,400,50))
-      ) + ggplot2::scale_x_continuous(breaks=c(seq(-400,400,2))
-      )
+          plot.title = ggplot2::element_text(hjust = 0.5, size = 12)) + 
+      ggplot2::guides(col = ggplot2::guide_legend(override.aes = list(shape = 16, size = legendDotSize))) + 
+      ggplot2::ggtitle(paste0("Volcano Plot for DGE Comparison ", gsub("_", " ", label))) + 
+      ggplot2::ylim(logFClims, -1 * logFClims) + 
+      ggplot2::scale_color_manual("DGE Status" ,values = colVec) + 
+      ggplot2::scale_y_continuous(breaks=c(seq(0,400,50))) + 
+      ggplot2::scale_x_continuous(breaks=c(seq(-400,400,2)))
 
 
       ## Add colors if specified ##
@@ -951,6 +1117,8 @@ for (i in 1:length(DGEtagVec)){
       yLabel <- names(dfPlot[grep("_lg10p_", names(dfPlot))])  
       link <- paste0('<a href="https://',urlString,'/',Obio@parameterList$project_id,'/scatterplot?x_axis=',xLabel,'&y_axis=',yLabel,'" target="_blank">here</a>')  
             
+      
+      
       figLegend <- paste0(
       '**Figure ', 
       figureCount, 
