@@ -10,7 +10,7 @@ output:
         toc: true
         toc_depth: 3
         toc_float: true
-        css:
+        css: src/assets/style/style.css
     
 always_allow_html: yes
 
@@ -625,7 +625,7 @@ for (i in 1:length(cellTypeIDs)){
   ##
   #############################################################################
   
-}
+
 ## Done creating data table                                                  ##
 ###############################################################################
 if (length(plotList) > 3){

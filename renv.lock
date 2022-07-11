@@ -1186,6 +1186,16 @@
         "tibble"
       ]
     },
+    "checkmate": {
+      "Package": "checkmate",
+      "Version": "2.0.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "a667800d5f0350371bedeb8b8b950289",
+      "Requirements": [
+        "backports"
+      ]
+    },
     "circlize": {
       "Package": "circlize",
       "Version": "0.4.8",
@@ -1277,6 +1287,24 @@
         "stringr",
         "tibble",
         "tidyr"
+      ]
+    },
+    "clustree": {
+      "Package": "clustree",
+      "Version": "0.4.2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "195babf2aebaa9a24ceaaa29d78273c9",
+      "Requirements": [
+        "checkmate",
+        "dplyr",
+        "ggplot2",
+        "ggraph",
+        "ggrepel",
+        "igraph",
+        "rlang",
+        "tidygraph",
+        "viridis"
       ]
     },
     "codetools": {
@@ -1642,10 +1670,10 @@
     },
     "evaluate": {
       "Package": "evaluate",
-      "Version": "0.14",
+      "Version": "0.15",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "ec8ca05cffcc70569eaaad8469d2a3a7",
+      "Hash": "699a7a93d08c962d9f8950b2d7a227f1",
       "Requirements": []
     },
     "fansi": {
@@ -2557,10 +2585,10 @@
     },
     "knitr": {
       "Package": "knitr",
-      "Version": "1.36",
+      "Version": "1.39",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "46344b93f8854714cdf476433a59ed10",
+      "Hash": "029ab7c4badd3cf8af69016b2ba27493",
       "Requirements": [
         "evaluate",
         "highr",
