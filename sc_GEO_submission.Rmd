@@ -480,13 +480,13 @@ write.csv(
 ###############################################################################
 ## Upload to GEO
 
-ml purge
-ml ncftp/3.2.6-foss-2016b
-ncftpput -F -R -z -u geoftp -p "rebUzyi1" ftp-private.ncbi.nlm.nih.gov ./uploads/sjboulton_WFS5ymYo ./DRIPSeq_GEO
-
-ml purge
-ml ncftp/3.2.6-foss-2016b
-ncftpput -F -R -z -u geoftp -p "rebUzyi1" ftp-private.ncbi.nlm.nih.gov ./uploads/schaefer_lab_KPsRsW2K /camp/stp/babs/working/boeings/Projects/schaefera/tobias.ackels/319A_scRNAseq_mm_olfactory_bulb_proj_neuron_analysis_SC19135/GEO_submission
+# ml purge
+# ml ncftp/3.2.6-foss-2016b
+# ncftpput -F -R -z -u geoftp -p "rebUzyi1" ftp-private.ncbi.nlm.nih.gov ./uploads/sjboulton_WFS5ymYo ./DRIPSeq_GEO
+# 
+# ml purge
+# ml ncftp/3.2.6-foss-2016b
+# ncftpput -F -R -z -u geoftp -p "rebUzyi1" ftp-private.ncbi.nlm.nih.gov ./uploads/schaefer_lab_KPsRsW2K /camp/stp/babs/working/boeings/Projects/schaefera/tobias.ackels/319A_scRNAseq_mm_olfactory_bulb_proj_neuron_analysis_SC19135/GEO_submission
 
 
 

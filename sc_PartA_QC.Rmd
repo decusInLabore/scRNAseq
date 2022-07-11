@@ -21,9 +21,9 @@ always_allow_html: yes
 # R to use
 # module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;R
 
-if (!requireNamespace("remotes")){
-  install.packages("remotes")
-}
+# if (!requireNamespace("remotes")){
+#   install.packages("remotes")
+# }
 
 # remotes::install_github("rstudio/renv")
 
@@ -104,7 +104,7 @@ db.pwd <- as.vector(dbTable[1,1])
 ```
 
 <!-- Optional 1B: Create 10X QC Table Chapter/Module -->
-```{r child = 'src/modules/qc/create.10X.QC.table.Rmd', eval=FALSE}
+```{r child = 'src/modules/qc/create.10X.QC.table.Rmd', eval=TRUE}
 ```
 
 <!-- Essential 2: (output required later): Create Seurat Sample List Chapter/Module -->

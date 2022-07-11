@@ -32,16 +32,8 @@ knitr::opts_chunk$set(
 
 ```{r hpc_notes, include=FALSE}
 
-# module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/3.6.0-foss-2016b-BABS;R;
-
-## Get interactive session ##
-#  srun --time=08:00:00 --mem=40G -p int --pty bash
-
-# module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/3.6.0-foss-2016b-BABS;R;
-
-# sbatch --time=12:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/3.6.0-foss-2016b-BABS;Rscript runC.r" --job-name="rC" -p hmem --mem=300G -o rC.slurm >> commands.txt
-
-# --mem-per-cpu=14G -p hmem --pty bash
+## R version for this analysis 
+# module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a
 
 ```
 
@@ -463,15 +455,15 @@ if (is.na(geneDefault)){
 
 
 if (Obio@dbDetailList$host == "10.27.241.234"){
-    shinyBasePath <- "/camp/stp/babs/www/shiny/boeings/"
+    shinyBasePath <- "/camp/stp/babs/www/shiny/internal/users/boeings/"
     FvDir <- Obio@parameterList$html_local
     if (!dir.exists(FvDir)){
         dir.create(FvDir, recursive=T)
     }
 
 } else {
-    if (dir.exists("/camp/stp/babs/www/shiny/boeings/external/")){
-        shinyBasePath <- "/camp/stp/babs/www/shiny/boeings/external/"  
+    if (dir.exists("/camp/stp/babs/www/shiny/external/users/boeings/")){
+        shinyBasePath <- "/camp/stp/babs/www/shiny/external/users/boeings/"  
     } else {
         shinyBasePath <- "../"
     }
@@ -1741,7 +1733,7 @@ createHTMLoutput <- function(FvFN = NULL, Obio = NULL){
     cat('    </style>');cat("\n");
     cat('</head>');cat("\n");
     cat('<body>');cat("\n");
-    cat(paste0('<iframe src="https://shiny-bioinformatics.crick.ac.uk/shiny/boeings/',Obio@parameterList$project_id,'_app/" title="',Obio@parameterList$labname, ' Lab"></iframe>'));cat("\n");
+    cat(paste0('<iframe src="https://bioinformatics.crick.ac.uk/shiny/users/boeings/',Obio@parameterList$project_id,'_app/" title="',Obio@parameterList$labname, ' Lab"></iframe>'));cat("\n");
     cat('</body>');cat("\n");
     cat('</html>');cat("\n");
     sink()

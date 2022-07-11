@@ -225,7 +225,7 @@ if (upload.results.to.database){
         
         geneVec <- DGEmarkerGeneList[[i]]
         
-        catID <- add.category.to.lab.reference.table.hs(
+        catID <- biologicSeqTools2::add.category.to.lab.reference.table.hs(
             host = Obio@dbDetailList$host,
             pwd = db.pwd,
             user = Obio@dbDetailList$db.user,
