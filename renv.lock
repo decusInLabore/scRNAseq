@@ -999,8 +999,8 @@
       "RemoteUsername": "decusinlabore",
       "RemoteRepo": "biologicViewerSC",
       "RemoteRef": "main",
-      "RemoteSha": "af4743355aeebfedcd20397f8fe7766cf178e6a9",
-      "Hash": "193ac013a18beb2d21d3d6d67191bf57",
+      "RemoteSha": "7b04b792711e4b91152235e8c39014a85c5aee36",
+      "Hash": "3b1a6573fe09ba56f4678e08b91b7581",
       "Requirements": [
         "DBI",
         "DT",

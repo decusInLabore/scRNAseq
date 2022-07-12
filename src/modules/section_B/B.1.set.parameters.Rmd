@@ -72,7 +72,7 @@ if (Obio@parameterList$hpcMount != "/camp/stp/babs/working/boeings/"){
  
 ## Create shiny path for figure outputs ##           
 shinyURL <- paste0(
-    "https://shiny-bioinformatics.crick.ac.uk/shiny/boeings/",
+    "https://bioinformatics.crick.ac.uk/shiny/users/boeings/",
     Obio@parameterList$project_id,
     "_app/"
 )            

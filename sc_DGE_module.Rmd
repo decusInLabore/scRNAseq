@@ -155,15 +155,19 @@ outPutFN <- paste0(
 )
 
 tableLink <- paste0(
-    '<a href="https://',
+    'https://',
     urlString,
     '/mdata/',project_id, '/html/', 
-    FNrel,' target="_blank">here</a>.'
+    FNrel
 )
 
 tableString <- paste0(
     'An Excel table with the DGE results can be downloaded ',
     tableLink
+)
+
+tableString <- paste0(
+   ' An Excel table with the DGE results can be downloaded <a href="',tableString,'" target="_blank">here</a>. '
 )
   
 
@@ -1213,7 +1217,7 @@ for (j in 1:length(DGEtagVec)){
             urlString <- "biologic.crick.ac.uk"
         }
     
-    colVec <- c("red", "blue")
+    colVec <- c("#009900", "#000080")
     pvalueCutoff <- 0.5
     topMaxCat <- 10
     
@@ -1253,6 +1257,7 @@ for (j in 1:length(DGEtagVec)){
                 dfTempEnriched[["log10FDR"]] <- log10(dfTempEnriched$p.adjust)
                 dfTempEnriched <- dfTempEnriched[order(dfTempEnriched$log10FDR, decreasing = F),]
                 dfTempEnriched <- na.omit(dfTempEnriched)
+                dfEnriched <- dfTempEnriched
                 
                 if (nrow(dfTempEnriched) > topMaxCat){
                     dfTempEnriched <- dfTempEnriched[1:topMaxCat, ]
@@ -1294,6 +1299,7 @@ for (j in 1:length(DGEtagVec)){
                 dfTempEnrichedNeg[["log10FDR"]] <- -1*log10(dfTempEnrichedNeg$p.adjust)
                 dfTempEnrichedNeg <- dfTempEnrichedNeg[order(dfTempEnrichedNeg$log10FDR, decreasing = T),]
                 dfTempEnrichedNeg <- na.omit(dfTempEnrichedNeg)
+                dfEnrichedNeg <- dfTempEnrichedNeg
                 
                 if (nrow(dfTempEnrichedNeg) > topMaxCat){
                     dfTempEnrichedNeg <- dfTempEnrichedNeg[1:topMaxCat, ]
@@ -1400,6 +1406,27 @@ for (j in 1:length(DGEtagVec)){
                 chnkVec,
                 NewChnk
             )
+            
+            
+            ####################################################################
+            ## Create full output table                                       ##
+            dfResTemp <- rbind(
+                dfEnriched,
+                dfEnrichedNeg
+            )
+            
+            dfResTemp[["comparison"]] <- tag
+            
+            if (j==1){
+                dfResTable <- dfResTemp
+            } else {
+                dfResTable <- rbind(
+                    dfResTable, 
+                    dfResTemp
+                )
+            }
+            ## Done                                                           ##
+            ####################################################################
         }
             
             
@@ -1407,7 +1434,8 @@ for (j in 1:length(DGEtagVec)){
             
     } ## Done with per dimension loops
 }        
-      
+     
+ 
  
 
 if (length(plotList) > 3){
@@ -1519,6 +1547,69 @@ saveWorkbook(
 
 ## Done creating Excel output files                                          ##
 ###############################################################################
+
+###############################################################################
+## Create cat enrichment table                                               ##
+
+## Add ref-gene column ##
+#dfTemp[["ref_gene"]] <- ""
+#dfTemp[dfTemp$gene %in% refGenes, "ref_gene"] <- "+"
+
+library(openxlsx)
+
+## Enrichment result table is called dfResTable
+
+if (!dir.exists( paste0(
+   Obio@parameterList$html_local,
+   "report_tables/"))){
+  dir.create(paste0(
+   Obio@parameterList$html_local,
+   "report_tables/"))
+}
+
+baseFN <- paste0(
+   Obio@parameterList$project_id, 
+   ".DGE.cat.enrichment.table.xlsx"
+)
+
+
+outPutFN <- paste0(
+     Obio@parameterList$html_local,
+      "report_tables/",
+     baseFN
+)
+  
+ 
+FNrel <- paste0("report_table/", baseFN)
+    
+sheetName <- substr(paste0(Obio@parameterList$project_id, "_cat_enrichment_DGE"),1,30)
+
+wb <- openxlsx::createWorkbook()
+    openxlsx::addWorksheet(wb, sheetName)
+    openxlsx::freezePane(wb, sheetName ,  firstActiveRow = 2)
+    
+    ## Filter is inactivated, as it does not appear to be compatible with the current version of Excel
+    #addFilter(wb, 1, row = 1, cols = 1:ncol(dfOutput))
+    
+## Style headers ##
+hs1 <- openxlsx::createStyle(
+  fontColour = "#ffffff",
+  fgFill = "#000000", 
+  halign = "CENTER", 
+  textDecoration = "Bold"
+)
+    
+openxlsx::writeData(wb, 1,dfTemp, startRow = 1, startCol = 1, headerStyle = hs1)
+    
+saveWorkbook(
+  wb, 
+  outPutFN , 
+  overwrite = TRUE
+)
+
+## Done creating Excel output files                                          ##
+###############################################################################
+
 ```
 
 
