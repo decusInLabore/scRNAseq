@@ -416,6 +416,8 @@ doScDGEonList <- function(
 ## DGE Analysis                                                              ##
 
 DGEtagVec = as.vector(NULL, mode = "character")
+plotList <- list()
+chnkVec <- as.vector(NULL, mode = "character")
 
 ## This does the DGE and creates an overview UMAP figure ##
 for (i in 1:length(DGEinputList)){
