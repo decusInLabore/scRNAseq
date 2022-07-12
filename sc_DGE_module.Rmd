@@ -119,6 +119,7 @@ legendDotSize <- 5
 ## Define project ID ##
 project_id <- Obio@parameterList$project_id
 
+
 ## Set directory for report tables
 reportTableDir <- Obio@parameterList$reportTableDir
 reportFigDir <- Obio@parameterList$reportFigDir
@@ -319,171 +320,11 @@ DGEtagVec <- as.vector(NULL, mode = "character")
 
 DGEinputList <- list(
   "comp_1" = list(
-      "name"    = "DGE_C8_Regeneron_vs_C8_Ctrl",
-      "DGEselCol" = "cluster_sample",
+      "name"    = "DGE_C1_vs_C2",
+      "DGEselCol" = "seurat_clusters",
       "DGEsampleList" = list(
-          "C8_Th_Regeneron"   = c("C8_Regeneron_R1","C8_Regeneron_R2","C8_Regeneron_R3"),
-          "C8_Th_Ctrl"   = c("C8_Control_R1","C8_Control_R2","C8_Control_R3")
-      )
-  ),
-  "comp_2" = list(
-      "name"    = "DGE_C8_MatB52_vs_C8_Ctrl",
-      "DGEselCol" = "cluster_sample",
-      "DGEsampleList" = list(
-          "C8_Th_MatB52"   = c("C8_MatB52_R1","C8_MatB52_R2","C8_MatB52_R3"),
-          "C8_Th_Ctrl"   = c("C8_Control_R1","C8_Control_R2","C8_Control_R3")
-      )
-  ),
-  "comp_3" = list(
-      "name"    = "DGE_C14_Regeneron_vs_C14_Ctrl",
-      "DGEselCol" = "cluster_sample",
-      "DGEsampleList" = list(
-          "C14_Treg_Regeneron"   = c("C14_Regeneron_R1","C14_Regeneron_R2","C14_Regeneron_R3"),
-          "C14_Treg_Ctrl"   = c("C14_Control_R1","C14_Control_R2","C14_Control_R3")
-      )
-  ),
-  "comp_4" = list(
-      "name"    = "DGE_C14_MatB52_vs_C14_Ctrl",
-      "DGEselCol" = "cluster_sample",
-      "DGEsampleList" = list(
-          "C14_Treg_MatB52"   = c("C14_MatB52_R1","C14_MatB52_R2","C14_MatB52_R3"),
-          "C14_Treg_Ctrl"   = c("C14_Control_R1","C14_Control_R2","C14_Control_R3")
-      )
-  ),
-  "comp_5" = list(
-      "name"    = "DGE_C7_Regeneron_vs_C7_Ctrl",
-      "DGEselCol" = "cluster_sample",
-      "DGEsampleList" = list(
-          "C7_B_Regeneron"   = c("C7_Regeneron_R1","C7_Regeneron_R2","C7_Regeneron_R3"),
-          "C7_B_Ctrl"   = c("C7_Control_R1","C7_Control_R2","C7_Control_R3")
-      )
-  ),
-  "comp_6" = list(
-      "name"    = "DGE_C7_MatB52_vs_C7_Ctrl",
-      "DGEselCol" = "cluster_sample",
-      "DGEsampleList" = list(
-          "C7_B_MatB52"   = c("C7_MatB52_R1","C7_MatB52_R2","C7_MatB52_R3"),
-          "C7_B_Ctrl"   = c("C7_Control_R1","C7_Control_R2","C7_Control_R3")
-      )
-  ),
-  "comp_7" = list(
-      "name"    = "DGE_C17_Regeneron_vs_C17_Ctrl",
-      "DGEselCol" = "cluster_sample",
-      "DGEsampleList" = list(
-          "C17_NK_Regeneron"   = c("C17_Regeneron_R1","C17_Regeneron_R2","C17_Regeneron_R3"),
-          "C17_NK_Ctrl"   = c("C17_Control_R1","C17_Control_R2","C17_Control_R3")
-      )
-  ),
-  "comp_8" = list(
-      "name"    = "DGE_C17_MatB52_vs_C17_Ctrl",
-      "DGEselCol" = "cluster_sample",
-      "DGEsampleList" = list(
-          "C17_NK_MatB52"   = c("C17_MatB52_R1","C17_MatB52_R2","C17_MatB52_R3"),
-          "C17_NK_Ctrl"   = c("C17_Control_R1","C17_Control_R2","C17_Control_R3")
-      )
-  ),
-  "comp_9" = list(
-      "name"    = "DGE_C4_Regeneron_vs_C4_Ctrl",
-      "DGEselCol" = "cluster_sample",
-      "DGEsampleList" = list(
-          "C4_Mono_Regeneron"   = c("C4_Regeneron_R1","C4_Regeneron_R2","C4_Regeneron_R3"),
-          "C4_Mono_Ctrl"   = c("C4_Control_R1","C4_Control_R2","C4_Control_R3")
-      )
-  ),
-  "comp_10" = list(
-      "name"    = "DGE_C4_MatB52_vs_C4_Ctrl",
-      "DGEselCol" = "cluster_sample",
-      "DGEsampleList" = list(
-          "C4_Mono_MatB52"   = c("C4_MatB52_R1","C4_MatB52_R2","C4_MatB52_R3"),
-          "C4_Mono_Ctrl"   = c("C4_Control_R1","C4_Control_R2","C4_Control_R3")
-      )
-  ),
-  "comp_11" = list(
-      "name"    = "DGE_C5_Regeneron_vs_C5_Ctrl",
-      "DGEselCol" = "cluster_sample",
-      "DGEsampleList" = list(
-          "C5_Mac_Regeneron"   = c("C5_Regeneron_R1","C5_Regeneron_R2","C5_Regeneron_R3"),
-          "C5_Mac_Ctrl"   = c("C5_Control_R1","C5_Control_R2","C5_Control_R3")
-      )
-  ),
-  "comp_12" = list(
-      "name"    = "DGE_C5_MatB52_vs_C5_Ctrl",
-      "DGEselCol" = "cluster_sample",
-      "DGEsampleList" = list(
-          "C5_Mac_MatB52"   = c("C5_MatB52_R1","C5_MatB52_R2","C5_MatB52_R3"),
-          "C5_Mac_Ctrl"   = c("C5_Control_R1","C5_Control_R2","C5_Control_R3")
-      )
-  ),
-  "comp_13" = list(
-      "name"    = "DGE_C6_Regeneron_vs_C6_Ctrl",
-      "DGEselCol" = "cluster_sample",
-      "DGEsampleList" = list(
-          "C6_Neut_Regeneron"   = c("C6_Regeneron_R1","C6_Regeneron_R2","C6_Regeneron_R3"),
-          "C6_Neut_Ctrl"   = c("C6_Control_R1","C6_Control_R2","C6_Control_R3")
-      )
-  ),
-  "comp_14" = list(
-      "name"    = "DGE_C6_MatB52_vs_C6_Ctrl",
-      "DGEselCol" = "cluster_sample",
-      "DGEsampleList" = list(
-          "C6_Neut_MatB52"   = c("C6_MatB52_R1","C6_MatB52_R2","C6_MatB52_R3"),
-          "C6_Neut_Ctrl"   = c("C6_Control_R1","C6_Control_R2","C6_Control_R3")
-      )
-  ),
-  "comp_15" = list(
-      "name"    = "DGE_C21_Fib_MatB52_vs_Fib_Ctrl",
-      "DGEselCol" = "cluster_sample",
-      "DGEsampleList" = list(
-          "C21_Fib_MatB52"   = c("C21_MatB52_R1","C21_MatB52_R2","C21_MatB52_R3"),
-          "C21_Fib_Ctrl" = c("C21_Control_R1","C21_Control_R2","C21_Control_R3")
-      )
-  ),
-  "comp_16" = list(
-      "name"    = "DGE_Fib_C21_Regeneron_vs_Ctrl",
-      "DGEselCol" = "cluster_sample",
-      "DGEsampleList" = list(
-          "C21_Fib_Regeneron"   = c("C21_Regeneron_R1","C21_Regeneron_R2","C21_Regeneron_R3"),
-          "C21_Fib_Ctrl" = c("C21_Control_R1","C21_Control_R2","C21_Control_R3")
-      )
-  ),
-  "comp_17" = list(
-      "name"    = "DGE_Fib_C21_Regeneron_vs_MatB52",
-      "DGEselCol" = "cluster_sample",
-      "DGEsampleList" = list(
-          "C21_Fib_Regeneron"   = c("C21_Regeneron_R1","C21_Regeneron_R2","C21_Regeneron_R3"),
-          "C21_Fib_MatB52"   = c("C21_MatB52_R1","C21_MatB52_R2","C21_MatB52_R3")
-      )
-  ),
-  "comp_18" = list(
-      "name"    = "DGE_CancerCells_C3915_Regeneron_vs_Ctrl",
-      "DGEselCol" = "cluster_sample",
-      "DGEsampleList" = list(
-          "C3915_CC_Regeneron"   = c(
-              "C3_Regeneron_R1","C3_Regeneron_R2","C3_Regeneron_R3",
-              "C9_Regeneron_R1","C9_Regeneron_R2","C9_Regeneron_R3", 
-              "C15_Regeneron_R1","C15_Regeneron_R2","C15_Regeneron_R3"
-            ),
-          "C3915_CC_Ctrl"   = c(
-              "C3_Control_R1","C3_Control_R2","C15_Control_R3",
-              "C9_Control_R1","C9_Control_R2","C15_Control_R3",
-              "C15_Control_R1","C15_Control_R2","C15_Control_R3"
-            )
-      )
-  ),
-  "comp_19" = list(
-      "name"    = "DGE_CancerCells_C3915_MatB52_vs_Ctrl",
-      "DGEselCol" = "cluster_sample",
-      "DGEsampleList" = list(
-          "C3915_CC_Regeneron"   = c(
-              "C3_MatB52_R1","C3_MatB52_R2","C3_MatB52_R3",
-              "C9_MatB52_R1","C9_MatB52_R2","C9_MatB52_R3", 
-              "C15_MatB52_R1","C15_MatB52_R2","C15_MatB52_R3"
-            ),
-          "C3915_CC_Ctrl"   = c(
-              "C3_Control_R1","C3_Control_R2","C15_Control_R3",
-              "C9_Control_R1","C9_Control_R2","C15_Control_R3",
-              "C15_Control_R1","C15_Control_R2","C15_Control_R3"
-            )
+          "C1"   = c(1),
+          "C2"   = c(2)
       )
   )
   
@@ -560,7 +401,8 @@ doScDGEonList <- function(
     
     resultList <- list(
         "dfDataTable" = dfDataTable,
-        "DGEtagVec" = DGEtagVec
+        "DGEtagVec" = DGEtagVec,
+        "OsC" = OsC
     )
     
     return(resultList)
@@ -589,6 +431,7 @@ for (i in 1:length(DGEinputList)){
   
     dfDataTable <- resList[["dfDataTable"]]
     DGEtagVec <- resList[["DGEtagVec"]]
+    OsC <- resList[["OsC"]]
     
     ## Add results to biologic object 
     Obio@dataTableList[[tag]] <- data.frame(NULL)
@@ -816,14 +659,14 @@ for (i in 1:length(DGEtagVec)){
   
   sheetName <- substr(DGEtagVec[i],1,30)
   
-  addWorksheet(
+  openxlsx::addWorksheet(
       wb, 
       sheetName = sheetName
   )
   
   
-  freezePane(wb, sheetName ,  firstActiveRow = 2)
-  writeData(wb, i, dfOutput, startRow = 1, startCol = 1, headerStyle = hs1)
+  openxlsx::freezePane(wb, sheetName ,  firstActiveRow = 2)
+  openxlsx::writeData(wb, i, dfOutput, startRow = 1, startCol = 1, headerStyle = hs1)
   ## Done adding to Excel workbook ##
   
   if (i ==1){
@@ -926,39 +769,38 @@ for (i in 1:length(DGEtagVec)){
     dfPlot <- dfPlot[order(dfPlot$Y, decreasing = T), ]
     topGenes <- as.vector(dfPlot[1:topNgenes,"gene"])
     
-    dfPlot <- dfPlot[order(dfPlotData$Y, decreasing = F), ]
+    dfPlot <- dfPlot[order(dfPlot$Y, decreasing = F), ]
     bottomGenes <- as.vector(dfPlot[1:topNgenes,"gene"])
     
     dfPlot[["label"]] <- ""
-    dfPlot[dfPlot[,"gene"] %in% c(topGenes, bottomGenes), "label"] <- dfPlot[dfPlot[,"gene"] %in% c(topGenes, bottomGenes), geneIDcolumn]
+    dfPlot[dfPlot[,"gene"] %in% c(topGenes, bottomGenes), "label"] <- dfPlot[dfPlot[,"gene"] %in% c(topGenes, bottomGenes), "gene"]
     
     
     
-    plotList[[tag]] <- ggplot2::ggplot(
-        data=dfPlot[dfPlot$included == "+",], 
-        ggplot2::aes(X, Y, color=DGE_Status, label = "label")
-      ) + ggplot2::geom_hline(yintercept = c(logFCtwoSD, -1 * logFCtwoSD), col = "darkgrey", lty=2
-      ) + ggplot2::geom_point( shape=16, size = as.numeric(dotsize),alpha = 0.7
-      ) + ggplot2::xlab(paste0("log10 Avg Intensity ", gsub("_", " ",label))) + ggplot2::ylab(paste0("log2-Fold Change ", gsub("_", " ",label))
-      ) + ggplot2::theme_bw(
-      )  +  ggplot2::theme(
-          axis.text.y   = ggplot2::element_text(size=8),
-          axis.text.x   = ggplot2::element_text(size=8),
-          axis.title.y  = ggplot2::element_text(size=8),
-          axis.title.x  = ggplot2::element_text(size=8),
-          axis.line = ggplot2::element_line(colour = "black"),
-          panel.border = ggplot2::element_rect(colour = "black", fill=NA, size=1),
-          plot.title = ggplot2::element_text(hjust = 0.5, size = 12)
-          #legend.title = element_blank()
-      ) + ggplot2::guides(col = ggplot2::guide_legend(override.aes = list(shape = 16, size = legendDotSize))
-      ) + ggplot2::ggtitle(paste0("MA-stype Plot for DGE Comparison ", gsub("_", " ", label))
-      ) + ggplot2::ylim(logFClims, -1 * logFClims
-      ) + ggplot2::scale_color_manual("DGE Status" ,values = colVec
-      ) + ggplot2::scale_y_continuous(breaks=c(seq(-20,20,2))
-      )
+    plotList[[tag]] <- ggplot2::ggplot(data=dfPlot[dfPlot$included == "+",], 
+        ggplot2::aes(X, Y, color=DGE_Status, label = "label")) + 
+        ggplot2::geom_hline(yintercept = c(logFCtwoSD, -1 * logFCtwoSD), col = "darkgrey", lty=2) + 
+        ggplot2::geom_point( shape=16, size = as.numeric(dotsize),alpha = 0.7) + 
+        ggplot2::xlab(paste0("log10 Avg Intensity ", gsub("_", " ",label))) + 
+        ggplot2::ylab(paste0("log2-Fold Change ", gsub("_", " ",label))) + 
+        ggplot2::theme_bw()  +  
+        ggplot2::theme(
+            axis.text.y   = ggplot2::element_text(size=8),
+            axis.text.x   = ggplot2::element_text(size=8),
+            axis.title.y  = ggplot2::element_text(size=8),
+            axis.title.x  = ggplot2::element_text(size=8),
+            axis.line = ggplot2::element_line(colour = "black"),
+            panel.border = ggplot2::element_rect(colour = "black", fill=NA, size=1),
+            plot.title = ggplot2::element_text(hjust = 0.5, size = 12)) + 
+        ggplot2::guides(col = ggplot2::guide_legend(override.aes = list(shape = 16, size = legendDotSize))) + 
+        ggplot2::ggtitle(paste0("MA-stype Plot for DGE Comparison ", gsub("_", " ", label))) + 
+      ggplot2::ylim(logFClims, -1 * logFClims) + 
+      ggplot2::scale_color_manual("DGE Status" ,values = colVec) + 
+      ggplot2::scale_y_continuous(breaks=c(seq(-20,20,2)))
 
 
-      ## Add colors if specified ##
+      ## Add labels 
+      # plotList[[tag]] <- plotList[[tag]] + ggrepel::geom_text_repel(size = 3)
 
             
 
@@ -1076,6 +918,18 @@ for (i in 1:length(DGEtagVec)){
 
     logFClims <- ceiling(max(abs(dfPlot$X)))
     
+    ## Add to-regulated gene names ##
+    topNgenes <- 10
+    dfPlot <- dfPlot[order(dfPlot$Y, decreasing = T), ]
+    topGenes <- as.vector(dfPlot[1:topNgenes,"gene"])
+    
+    dfPlot <- dfPlot[order(dfPlot$Y, decreasing = F), ]
+    bottomGenes <- as.vector(dfPlot[1:topNgenes,"gene"])
+    
+    dfPlot[["label"]] <- ""
+    dfPlot[dfPlot[,"gene"] %in% c(topGenes, bottomGenes), "label"] <- dfPlot[dfPlot[,"gene"] %in% c(topGenes, bottomGenes), "gene"]
+    
+    
     plotList[[tag]] <- ggplot2::ggplot(
         data=dfPlot[dfPlot$included == "+",], 
         ggplot2::aes(X, Y, color=DGE_Status, label = "label")) + 
@@ -1101,8 +955,8 @@ for (i in 1:length(DGEtagVec)){
       ggplot2::scale_x_continuous(breaks=c(seq(-400,400,2)))
 
 
-      ## Add colors if specified ##
-
+      ## Add labels 
+      #plotList[[tag]] <- plotList[[tag]] + ggrepel::geom_text_repel(size = 3)
             
 
       FNbase <- paste0(tag, VersionPdfExt)
