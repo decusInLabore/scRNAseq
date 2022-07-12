@@ -1447,13 +1447,13 @@ cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = '\n'))
 # 
 # print("Obio Object saved.")
 # 
-# save(OsC,
-#     file = paste0(
-#          Obio@parameterList$localWorkDir,
-#          Obio@parameterList$project_id,
-#         ".Seurat.Robj"
-#      )
-# )
+save(OsC,
+    file = paste0(
+         Obio@parameterList$localWorkDir,
+         Obio@parameterList$project_id,
+        ".Seurat.Robj"
+     )
+)
 
 ###############################################################################
 ## Rerunning of part C is required                                           ##
