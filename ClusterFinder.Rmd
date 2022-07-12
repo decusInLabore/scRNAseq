@@ -29,14 +29,8 @@ knitr::opts_chunk$set(
 ```
 
 ```{bash init, eval=F, echo=T}
-## Get interactive session ##
-#  srun --time=08:00:00 --mem=40G -p int --pty bash
-
-# module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;R
-
-# sbatch --time=08:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/3.6.0-foss-2016b-BABS;Rscript runCM.r" --job-name="rCM" --mem=42G -o rCM.slurm >> commands.txt
-
-# sbatch --time=18:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/3.6.0-foss-2016b-BABS;Rscript runCM.r" --job-name="rCM" -p hmem --mem=300G -o rCN.slurm >> commands.txt
+## R version for this analysis 
+# module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a
 
 ```
 
@@ -46,38 +40,10 @@ knitr::opts_chunk$set(
 
 ```{r, eval=TRUE, echo=F, results=F}
 
-###############################################################################
-##                                                                           ##
-# if (!requireNamespace("remotes")){
-#     install.packages("remotes")
-# }
-# 
-# remotes::install_github("rstudio/renv")
-
-if (file.exists("renv.lock")){
-    renv::restore(prompt = FALSE)
-} else {
-    renv::init()
-}
-
-## Done                                                                      ##
-###############################################################################
-
-# renv::install("decusInLabore/biologicSeqTools")
-# renv::install("decusInLabore/biologicToolsSC")
-
 ## libraries ##
-library(tidyverse)
-library(Seurat)
-library(knitr)
-library(biologicSeqTools)
-library(biologicToolsSC)
+#library(tidyverse)
 
-figureCount <- 1
-
-#Create the environment and load a suitable version of R, e.g. so:
-
-
+#library(scales)
 
 VersionPdfExt <- paste0(".V", gsub("-", "", Sys.Date()), ".pdf")
 
@@ -91,43 +57,88 @@ if (dir.exists("/Volumes/babs/working/boeings/")){
     hpc.mount <- ""
 }
 
+## Loading the BABS password ##
+#if (upload.results.to.database){
+    FN <- paste0(hpc.mount, "Projects/reference_data/pwd_folder/babs.txt")
+    dbTable <- read.delim(
+      FN,
+      header = F,
+      sep = "\t",
+      stringsAsFactors = F
+    )
+#}
+db.pwd <- as.vector(dbTable[1,1])
+
+###############################################################################
+##                                                                           ##
+# if (!requireNamespace("remotes")){
+#     install.packages("remotes")
+# }
 
 
 
+if (file.exists("renv.lock")){
+    renv::restore(prompt = FALSE)
+} else {
+    renv::init()
+}
+
+# remotes::install_github("rstudio/renv")
+# renv::install("rstudio/renv")
+## Done                                                                      ##
+###############################################################################
+
+#install.packages("remotes")
+# renv::install("decusInLabore/biologicSeqTools2")
+# renv::install("decusInLabore/biologicToolsSC")
+# renv::install("decusinlabore/biologicViewerSC")
+
+library(Seurat)
+library(tidyverse)
+library(biologicSeqTools2)
+library(biologicToolsSC)
+
+
+# source("assets/R/scTools.r")
+# source("assets/R/SBwebtools.pckg.r")
 
 ObioFN <- paste0("../", list.files("..")[grep(".bioLOGIC.Robj", list.files(".."))])
 
-load(ObioFN)
+if (file.exists(ObioFN)){
+    load(paste0(ObioFN))
+    print(paste0("Obio object ", Obio@parameterList$localWorkDir, ObioFN, " exists and is loaded."))
+} else {
+    exit()
+}
 
 ## Reset paths to local environment
-Obio <- setMountingPoint(Obio)
-Obio <- setAnalysisPaths(Obio)
-Obio <- setCrickGenomeAndGeneNameTable(Obio)
-Obio <- createAnalysisFolders(
-    Obio
-)
-Obio <- setDataBaseParameters(Obio)
+Obio <- Obio %>% 
+    biologicSeqTools2::setMountingPoint()  %>% 
+    biologicSeqTools2::setAnalysisPaths() %>% 
+    biologicSeqTools2::setCrickGenomeAndGeneNameTable() %>% 
+    biologicSeqTools2::createAnalysisFolders() %>% 
+    biologicSeqTools2::setDataBaseParameters()
+
+
 
 
 ## Load Seurat object
-SeuratFN <- paste0("../", list.files("..")[grep(".Seurat.Robj", list.files(".."))])
+SeuratFN <- paste0(Obio@parameterList$localWorkDir,list.files(Obio@parameterList$localWorkDir)[grep(".Seurat.Robj", list.files(Obio@parameterList$localWorkDir))])
 
-load(SeuratFN)
+
+if (file.exists(SeuratFN)){
+    load(SeuratFN)
+    print(paste0("Obio object ", Obio@parameterList$localWorkDir,SeuratFN, " exists and is loaded."))
+    
+} else {
+    exit()
+}
 
 ## Rename Seurat object
 OsC_CF <- OsC
-# rm(OsC)
-
-## External database credentials ##
-#Obio@parameterList$host <- "10.27.241.82"
-#Obio@parameterList$db.user <- "boeingS"
-#db.pwd <- "5+3f4nB04042018"
-
 
 
 ```
-
-
 
 
 ## Do Dimensionality Reduction 
@@ -190,30 +201,33 @@ OsC_CF2 <- Seurat::FindClusters(object = OsC_CF2, resolution = clusterOptionVec)
 
 
 ## Make plot 
-library(clustree)
+
 
 tag <- "Clustertree"
 
 plotList <- list()
 chnkVec <- as.vector(NULL, mode = "character")
 
+## Calling the package is essental for the clustree function to work. 
+library(clustree)
+
 plotList[[tag]] <- clustree::clustree(
     OsC_CF2, 
     edge_width = 0.5,
     node_label_size  = 1.5,
-    node_size_range  = c(1, 8),
-) + theme_bw(
-)  +  theme(
-    axis.text.y   = element_blank(),
-    axis.text.x   = element_blank(),
-    axis.title.y  = element_blank(),
-    axis.title.x  = element_blank(),
-    axis.ticks.x=element_blank(),
-    axis.ticks.y=element_blank(),
-    axis.line = element_line(colour = "black"),
-    panel.border = element_rect(colour = "black", fill=NA, size=1),
-    plot.title = element_text(hjust = 0.5, size = 12),
-    legend.title = element_blank()
+    node_size_range  = c(1, 8)) + 
+  ggplot2::theme_bw()  +  
+  ggplot2::theme(
+    axis.text.y   = ggplot2::element_blank(),
+    axis.text.x   = ggplot2::element_blank(),
+    axis.title.y  = ggplot2::element_blank(),
+    axis.title.x  = ggplot2::element_blank(),
+    axis.ticks.x= ggplot2::element_blank(),
+    axis.ticks.y= ggplot2::element_blank(),
+    axis.line = ggplot2::element_line(colour = "black"),
+    panel.border = ggplot2::element_rect(colour = "black", fill=NA, size=1),
+    plot.title = ggplot2::element_text(hjust = 0.5, size = 12),
+    legend.title = ggplot2::element_blank()
 )
 
 ## Save to file ##
