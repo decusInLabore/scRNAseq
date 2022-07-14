@@ -110,6 +110,39 @@ db.pwd <- as.vector(dbTable[1,1])
 ###############################################################################
 
 ###############################################################################
+##                                                                           ##
+if (length(grep("sampleName", names(OsC@meta.data))) > 0){
+  
+    OsC@meta.data[["cluster_sample"]] <- paste0(
+        OsC@meta.data$clusterName, "_", OsC@meta.data$sampleName
+    )
+    
+    Idents(OsC) <- "cluster_sample"
+    Idents(OsC) <- factor(Idents(OsC), levels = c(unique(OsC@meta.data$cluster_sample)))
+    #OsC@meta.data$cluster_sample <- factor(OsC@meta.data$cluster_sample , levels = c(unique(OsC@meta.data$cluster_sample)))
+    
+    #Idents(OsC) <- "cluster_sample"
+    cluster.averages <- Seurat::AverageExpression(
+        OsC, 
+        return.seurat = TRUE,
+        slot = "counts"
+    )
+    
+    
+} else {
+    cluster.averages <- AverageExpression(
+        OsC, 
+        return.seurat = TRUE,
+        slot = "counts"
+    )
+}
+
+dfAvgExpr <- round(data.frame(cluster.averages[["RNA"]]@counts))
+
+##                                                                           ##
+###############################################################################
+
+###############################################################################
 ##  Set variables                                                            ##
 
 # Plotting parameters
