@@ -134,6 +134,8 @@ if (file.exists(SeuratFN)){
     exit()
 }
 
+figureCount <- 1
+
 ## Rename Seurat object
 OsC_CF <- OsC
 
@@ -280,7 +282,7 @@ if (length(plotList) > 3){
 
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE, results="asis"} 
 
-cat(paste(knit(text = chnkVec, quiet = T), collapse = '\n'))
+cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = '\n'))
 
 ```
 
