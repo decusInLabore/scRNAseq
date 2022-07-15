@@ -167,7 +167,7 @@ tableString <- paste0(
 )
 
 tableString <- paste0(
-   ' An Excel table with the DGE results can be downloaded <a href="',tableString,'" target="_blank">here</a>. '
+   ' An Excel table with the DGE results can be downloaded <a href="',tableLink,'" target="_blank">here</a>. '
 )
   
 
@@ -324,11 +324,19 @@ DGEtagVec <- as.vector(NULL, mode = "character")
 
 DGEinputList <- list(
   "comp_1" = list(
-      "name"    = "DGE_C1_vs_C2",
-      "DGEselCol" = "seurat_clusters",
+      "name"    = "DGE_in_vitro_vs_in_vivo",
+      "DGEselCol" = "meta_in_vitro_in_vivo",
       "DGEsampleList" = list(
-          "C1"   = c(1),
-          "C2"   = c(2)
+          "in_vitro"   = c("inVitro"),
+          "in_vivo"   = c("inVivo")
+      )
+  ),
+  "comp_2" = list(
+      "name"    = "DGE_in_vitro_C3_vs_in_vivo_C3",
+      "DGEselCol" = "cluster_sample",
+      "DGEsampleList" = list(
+          "in_vitro_C3"   = c("C3_HuTEC135",  "C3_HuTEC136"),
+          "in_vivo_C3"   = c("C3_Epip10sub", "C3_Epip14sub", "C3_Epip6sub",  "C3_Epip7sub")
       )
   )
   
