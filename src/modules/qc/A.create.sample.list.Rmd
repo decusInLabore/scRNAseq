@@ -60,7 +60,7 @@ if (!is.null(Obio@scDetailList$vars.to.regress)){
 }
 
 
-SampleList <- createSampleListQC(
+SampleList <- biologicToolsSC::createSampleListQC(
     obj = Obio,
     reduce = Obio@parameterList$debugReduce,    
     vars.to.regress = Obio@scDetailList$vars.to.regress,
