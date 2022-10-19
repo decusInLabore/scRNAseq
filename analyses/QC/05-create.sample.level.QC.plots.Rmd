@@ -9,7 +9,7 @@ VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.D
 ```{r percent_mt, echo=TRUE, eval=TRUE, warning=FALSE, results=F}
 ###############################################################################
 ## Do percent mt plots                                                       ##
-resList <- doPercMT_plotSL(
+resList <- biologicToolsSC::doPercMT_plotSL(
         SampleList = SampleList,
         obj = Obio,
         figureCount = figureCount,
@@ -33,7 +33,8 @@ if (length(plotListRF) > 3){
 
 ```
 
-### Create PercentMT Historgrams Plots {`r tabVar`}
+# QC Plots
+## Create PercentMT Historgrams Plots {`r tabVar`}
 ```{r Plot_percentMT_hist, echo=TRUE, eval=TRUE, warning=FALSE, results="asis"} 
 
 cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = '\n'))
@@ -43,12 +44,12 @@ cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = '\n'))
 ```{r nFeature_data, echo=TRUE, eval=TRUE, warning=FALSE, results=F}
 ###############################################################################
 ## Do percent mt plots                                                       ##
-resList <- doRNAfeat_plotSL(
+resList <- biologicToolsSC::doRNAfeat_plotSL(
         SampleList,
         obj = Obio,
         figureCount = figureCount,
         VersionPdfExt = ".pdf",
-        tocSubLevel = 4
+        tocSubLevel = 3
 )
 
 plotListRF <- resList$plotListRF
@@ -66,7 +67,7 @@ if (length(plotListRF) > 3){
 
 ```
 
-### Create RNA Feature Historgrams Plots {`r tabVar`}
+## Create RNA Feature Historgrams Plots {`r tabVar`}
 
 ```{r Plot_nFeatureRNA_hist, echo=TRUE, eval=TRUE, warning=FALSE, results="asis"} 
 
@@ -78,12 +79,12 @@ cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = '\n'))
 ```{r UMAP_data, echo=TRUE, eval=TRUE, warning=FALSE, results=F}
 ###############################################################################
 ## Do percent mt plots                                                       ##
-resList <- doUMAP_plotSL(
+resList <- biologicToolsSC::doUMAP_plotSL(
         SampleList,
         obj = Obio,
         figureCount = figureCount,
         VersionPdfExt = ".pdf",
-        tocSubLevel = 4,
+        tocSubLevel = 3,
         dotsize = 0.5
 )
 
@@ -102,7 +103,7 @@ if (length(plotListSQCUMAP) > 3){
 
 ```
 
-### Plot UMAP Per Sample {`r tabVar`}
+## Plot UMAP Per Sample {`r tabVar`}
 ```{r Plot_UMAP_SL, echo=TRUE, eval=TRUE, warning=FALSE, results="asis"} 
 
 cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = '\n'))

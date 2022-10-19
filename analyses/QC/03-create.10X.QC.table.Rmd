@@ -179,10 +179,10 @@ chnkVec <- resList$chnkVec
 figureCount <- resList$figureCount
     if (length(plotListQC1) > 3){
         
-        tabVar <- "### CellRanger QC {.tabset .tabset-fade .tabset-dropdown}"
+        tabVar <- "## CellRanger QC {.tabset .tabset-fade .tabset-dropdown}"
     } else {
         
-        tabVar <- "### CellRanger QC {.tabset .tabset-fade .tabset-pills}"
+        tabVar <- "## CellRanger QC {.tabset .tabset-fade .tabset-pills}"
     }
 
     

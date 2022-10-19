@@ -1,2 +1,0 @@
-"sampleID"	"sampleName"	"sampleColor"
-"BrainPericytes"	"BrainPericytes"	"#F8766D"
