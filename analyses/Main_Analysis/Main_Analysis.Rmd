@@ -8,13 +8,17 @@ output:
         toc: true
         toc_depth: 5
         toc_float: true
-        css: src/assets/style/style.css
+        css: src/style/style.css
 
 always_allow_html: yes
 ---
 
 
 ```{r setup, include=FALSE}
+# R to use
+# module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;R
+
+
 knitr::opts_chunk$set(
     tidy = F,
     tidy.opts = list(width.cutoff = 120),
@@ -27,7 +31,10 @@ if (!requireNamespace("remotes")){
   install.packages("remotes")
 }
 
-#remotes::install_github("rstudio/renv")
+
+if (!requireNamespace("renv")){
+  remotes::install_github("rstudio/renv")
+}
 
 if (!file.exists("renv.lock")){
     renv::init()
@@ -53,7 +60,7 @@ tempWorkDir <- paste0(cwd, "../")
 #renv::install("decusInLabore/biologicSeqTools")
 #renv::install("decusInLabore/biologicToolsSC")
 library(Seurat)
-library(biologicSeqTools)
+library(biologicSeqTools2)
 library(biologicToolsSC)
 
 ## Make sure the correct future version (> 1.2) is installed
@@ -70,27 +77,14 @@ save.chunk.intermediates <- TRUE
 
 ###############################################################################
 ##                                                                           ##
+projectDir <- gsub("scripts/scRNAseq/analyses/Main_Analysis", "", getwd())
+workdir <- paste0(projectDir, "workdir/")
+
+
 figureCount <- 1
-
-## Load R module load R/3.5.1-foss-2018b ##
-#setwd(Obio@parameterList$localWorkDir)
-
-
-
 
 ##                                                                           ##
 ###############################################################################
-
-###############################################################################
-## SB local libpaths                                                         ##
-## Set filename for temp pdf files ##
-
-# if (length(.libPaths()) > 2){
-#     .libPaths(.libPaths()[2:3])
-# }
-## Done                                                                      ##
-###############################################################################
-
 
 
 ```
@@ -101,28 +95,22 @@ figureCount <- 1
 
 
 <!-- Essential 1: Set Analysis Parameters Chapter/Module (output required later) -->
-```{r child = 'src/modules/section_B/B.1.set.parameters.Rmd', eval=TRUE}
+```{r child = '01-set.parameters.Rmd', eval=TRUE}
 
 ```
 
 <!-- Optional 2: Retrieve Reference Genes from Database or Gmt file -->
-```{r child = 'src/modules/section_B/B.2.retrieve.reference.gene.sets.Rmd', eval=TRUE}
+```{r child = '02-retrieve.reference.gene.sets.Rmd', eval=TRUE}
 ```
 
 <!-- Essential 3: (output required later): Create Integrated Seurat Object Chapter/Module -->
-```{r child = 'src/modules/section_B/B.3.create.integrated.seurat.object.Rmd', eval=TRUE}
+```{r child = '03-create.integrated.seurat.object.Rmd', eval=TRUE}
 ```
 
 ```{r, eval=T, echo=F}
 
 ## The above step is the most time consuming. Saving the Obio and OsC object here allows 
-save(Obio, 
-     file = paste0(
-         Obio@parameterList$localWorkDir,
-         Obio@parameterList$project_id,
-         ".bioLOGIC.Robj"
-     )
-)
+source("save.biologic.robj.R")
 
 print("Obio Object saved.")
 
@@ -136,33 +124,15 @@ save(OsC,
 
 print("OsC Object saved.")
 
-
-## Optional: load OsC, Obio instead of the previous three steps. 
-# load(
-#   file = paste0(
-#          Obio@parameterList$localWorkDir,
-#          Obio@parameterList$project_id,
-#         ".Seurat.Robj"
-#      )
-# )
-# 
-# load(
-#   file = paste0(
-#          Obio@parameterList$localWorkDir,
-#          Obio@parameterList$project_id,
-#          ".bioLOGIC.Robj"
-#      )
-# )
-
 ```
 
 <!-- Optional 4: (creates output only): Create variation plots Chapter/Module -->
-```{r child = 'src/modules/section_B/B.4.create.variation.plots.Rmd', eval=TRUE}
+```{r child = '04-create.variation.plots.Rmd', eval=TRUE}
 ```
 
 <!-- Essential 6: (output required later): 
 DGE Marker gene upload Chapter/Module -->
-```{r child = 'src/modules/section_B/B.6.create.pca.plots.Rmd', eval=TRUE}
+```{r child = '05-create.pca.plots.Rmd', eval=TRUE}
 ```
 
 ```{r, eval=F, echo=T}
@@ -175,15 +145,9 @@ load(paste0(
      )
 )
 
-load(paste0(
-         Obio@parameterList$localWorkDir,
-         Obio@parameterList$project_id,
-         ".bioLOGIC.Robj"
-     )
-)
+source("load.biologic.robj.R")
 
 dotsize  = 1
-
 
 if (nrow(OsC@meta.data) > 1000){
   dotsize  = 0.75
@@ -204,82 +168,69 @@ Obio@parameterList$dendrofactor <- dendrofactor
 ```
 
 <!-- Essential 7: (output required later): Create variation plots Chapter/Module -->
-```{r child = 'src/modules/section_B/B7.calculate.average.expression.Rmd', eval=TRUE}
+```{r child = '06-calculate.average.expression.Rmd', eval=TRUE}
 ```
 
 <!-- Optional 8: (Output only): Create pca plots Chapter/Module -->
-```{r child = 'src/modules/section_B/B8.plot.pca.and.tsne.results.Rmd', eval=TRUE}
+```{r child = '07-plot.pca.and.tsne.results.Rmd', eval=TRUE}
 ```
 
 <!-- Optional 9: (Output only): Create pca plots Chapter/Module -->
-```{r child = 'src/modules/section_B/B9.euclidian.distances.figure.Rmd', eval=TRUE}
+```{r child = '08-euclidian.distances.figure.Rmd', eval=TRUE}
 ```
 
 
 <!-- Optional 10: (Output only): Doublet Estimate Chapter/Module -->
-```{r child = 'src/modules/section_B/B10.doublet.estimation.plots.Rmd', eval=TRUE}
+```{r child = '09-doublet.estimation.plots.Rmd', eval=TRUE}
 ```
 
 <!-- Optional 11: (Output only): Doublet Estimate Chapter/Module -->
-```{r child = 'src/modules/section_B/B11.cell.cycle.phase.plots.Rmd', eval=TRUE}
+```{r child = '10-cell.cycle.phase.plots.Rmd', eval=TRUE}
 ```
 
 <!-- Optional 12: (Output only): Cell Distribution Barchart Chapter/Module -->
-```{r child = 'src/modules/section_B/B12.Ncell.barchart.plots.Rmd', eval=TRUE}
+```{r child = '11-Ncell.barchart.plots.Rmd', eval=TRUE}
 ```
 
 <!-- Optional 13: (Output only):Category Enrichments Chapter/Module -->
-```{r child = 'src/modules/section_B/B13.AUC.cat.enrichments.Rmd', eval=FALSE}
+```{r child = '12-AUC.cat.enrichments.Rmd', eval=FALSE}
 ```
 
 <!-- Essential 14: (output required later):Category Linear Regression Marker Gene Data Prep Chapter/Module -->
-```{r child = 'src/modules/section_B/B14.linear.regression.data.prep.Rmd', eval=TRUE}
+```{r child = '13-linear.regression.data.prep.Rmd', eval=TRUE}
 ```
 
 <!-- Essential 15: (output required later):Category Linear Regression Marker Gene Data Prep Chapter/Module -->
-```{r child = 'src/modules/section_B/B15.heatmaps.and.dotplots.Rmd', eval=TRUE}
+```{r child = '14-heatmaps.and.dotplots.Rmd', eval=TRUE}
 ```
 
 <!-- Essential 16: (output required later):Category Make cluster table Data Prep Chapter/Module -->
-```{r child = 'src/modules/section_B/B16.make.cluster.table.Rmd', eval=FALSE}
-```
-
-<!-- Essential 17: (output required later):Category Make cluster table Data Prep Chapter/Module -->
-```{r child = 'src/modules/section_B/B17.cell.type.estimate.Rmd', eval=FALSE}
+```{r child = '15-make.cluster.table.Rmd', eval=FALSE}
 ```
 
 <!-- Essential 18: (output required later):Category Make cluster table Data Prep Chapter/Module -->
-```{r child = 'src/modules/section_B/B18.gene.set.heatmaps.Rmd', eval=TRUE}
+```{r child = '16-gene.set.heatmaps.Rmd', eval=TRUE}
 ```
 
 
 <!-- Essential 19: (output required later):Category Make cluster table Data Prep Chapter/Module -->
-```{r child = 'src/modules/section_B/B19.example.feature.plots.Rmd', eval=TRUE}
+```{r child = '17-example.feature.plots.Rmd', eval=TRUE}
 ```
 
 <!-- Essential 20: (output required later):Category Make cluster table Data Prep Chapter/Module -->
-```{r child = 'src/modules/section_B/B20.pca.cell.and.loading.plots.Rmd', eval=FALSE}
+```{r child = '18-pca.cell.and.loading.plots.Rmd', eval=FALSE}
 ```
 
-<!-- Optional 21: (output required later):Category Make cluster table Data Prep Chapter/Module -->
-```{r child = 'src/modules/section_B/B21.pseudotime.Rmd', eval=FALSE}
-```
 
 <!-- Optional 22: (output required later): Add extra tables Chapter/Module -->
-```{r child = 'src/modules/section_B/B22.add.extra.tables.Rmd', eval=TRUE}
+```{r child = '19-add.extra.tables.Rmd', eval=TRUE}
 ```
 
 
 
 ```{r saveobject, eval=TRUE, echo=T, results=F}
 ### Will save Obio object here, so it can be re-used with different parameters
-save(Obio, 
-     file = paste0(
-         Obio@parameterList$localWorkDir,
-         Obio@parameterList$project_id,
-         ".bioLOGIC.Robj"
-     )
-)
+source("save.biologic.robj.R")
 
 print("Obio Object saved.")
 
@@ -291,7 +242,7 @@ save(OsC,
      )
 )
 
-renv::snapshot()
+renv::snapshot(prompt = FALSE)
 
 ```
 
@@ -373,6 +324,20 @@ projectParams <- lapply(
 
 ## Documentation
 ```{r documentation, eval=TRUE, echo=T, results=T}
+print(paste0("Analysisdirectory: ", getwd()))
+
+biologic_active_object_dir <- paste0(
+    Obio@parameterList$folder,
+    "data/biologic_active_object/"
+)
+
+bFN <- paste0(
+    biologic_active_object_dir,
+    Obio@parameterList$project_id,
+    ".bioLOGIC.Robj"
+)
+print(paste0("bioLOGIC data object: ", bFN))
+
 sessionInfo()
 ```
 

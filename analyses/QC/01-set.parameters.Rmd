@@ -399,14 +399,14 @@ if (!dir.exists(Obio@parameterList$html_local_dir)){
 
 
 ## Create outputfolders ##
-Obio@parameterList[["reportFigDir"]] <- paste0(Obio@parameterList$localWorkDir,"html_local", "/report_figures/")
+Obio@parameterList[["reportFigDir"]] <- paste0(Obio@parameterList$folder,"html_local", "/report_figures/")
 
 if (!dir.exists(Obio@parameterList$reportFigDir)){
     dir.create(Obio@parameterList$reportFigDir)
 }
 
 ## Create outputfolders II ##
-Obio@parameterList[["reportTableDir"]] <- paste0(Obio@parameterList$localWorkDir,"html_local", "/report_tables/")
+Obio@parameterList[["reportTableDir"]] <- paste0(Obio@parameterList$folder, "html_local", "/report_tables/")
 
 if (!dir.exists(Obio@parameterList$reportFigDir)){
     dir.create(Obio@parameterList$reportFigDir)

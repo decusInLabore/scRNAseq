@@ -5,7 +5,7 @@ scNintegrationFeatures,3000,,,
 primReduction,umap,,,
 singleCellSeuratNpcs4PCA,30,,,
 vars.to.regress,S_Score,G2M_Score,,# empty: no cell cycle regression; S_Score G2M_Score: full cell cycle regression; G2M_Score: minimal cell cycle
-folder,/camp/stp/babs/working/boeings/projects/guillemotf/alexis.cooper/dev_scRNAseq/,,,
+folder,/camp/stp/babs/working/boeings/projects/guillemotf/alexis.cooper/dev2_scRNAseq/,,,
 lab.categories.table,sc_lab_categories,,,
 project_id,GSE113036dev,,,
 labname,Treutlein,,,
