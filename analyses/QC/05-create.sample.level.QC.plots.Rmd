@@ -14,7 +14,7 @@ resList <- biologicToolsSC::doPercMT_plotSL(
         obj = Obio,
         figureCount = figureCount,
         VersionPdfExt = ".pdf",
-        tocSubLevel = 4
+        tocSubLevel = 3
 )
 
 

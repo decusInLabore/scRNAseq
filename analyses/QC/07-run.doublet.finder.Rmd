@@ -34,15 +34,15 @@ Obio@dataTableList[["DF_resultlist"]] <- resList$addList
 ###############################################################################
 
 if (length(plotListDF) > 3){
-    tabVar <- "## Plot Per Sample Doublet Estimate .tabset .tabset-fade .tabset-dropdown"
+    tabVar <- "## Plot Per Sample Doublet Estimate {.tabset .tabset-fade .tabset-dropdown}"
 } else {
-    tabVar <- "## Plot Per Sample Doublet Estimate .tabset .tabset-fade .tabset-pills"
+    tabVar <- "## Plot Per Sample Doublet Estimate {.tabset .tabset-fade .tabset-pills}"
 }
 
 
 ```
 
-{`r tabVar`}
+`r tabVar`
 
 ```{r Plot_DF, echo=runDoubletFinder, eval=runDoubletFinder, warning=FALSE, results="asis"} 
 

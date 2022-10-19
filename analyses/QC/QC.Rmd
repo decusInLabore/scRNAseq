@@ -107,11 +107,11 @@ db.pwd <- as.vector(dbTable[1,1])
 ```
 
 <!-- Optional 4: Create QC Cell Cycle Plots Chapter/Module -->
-```{r child = '06-create.sample.level.cell.cycle.QC.plots.Rmd', eval=FALSE}
+```{r child = '06-create.sample.level.cell.cycle.QC.plots.Rmd', eval=TRUE}
 ```
 
 <!-- Optional 5: Doublet finder module run.doublet.finder.Rmd -->
-```{r child = '07-run.doublet.finder.Rmd', eval=FALSE}
+```{r child = '07-run.doublet.finder.Rmd', eval=TRUE}
 ```
 
 <!-- Optional 6: Perform three cell cycle regressions: none, G2M/S and full Chapter/Module -->
@@ -129,9 +129,9 @@ print("R bioLOGIC single cell object initialized.")
 
 ```
 
-## Documentation
+# Documentation
 ```{r documentation, eval=TRUE, echo=T, results=T}
-sessionInfo()
+
 print(paste0("Analysisdirectory: ", getwd()))
 
 biologic_active_object_dir <- paste0(
@@ -145,6 +145,9 @@ bFN <- paste0(
     ".bioLOGIC.Robj"
 )
 print(paste0("bioLOGIC data object: ", bFN))
+
+sessionInfo()
+
 ```
 
 ```{r create_report_params, eval=T, results="asis"}
