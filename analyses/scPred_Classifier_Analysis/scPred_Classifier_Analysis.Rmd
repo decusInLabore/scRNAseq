@@ -9,7 +9,7 @@ output:
         toc: true
         toc_depth: 3
         toc_float: true
-        css: src/assets/style/style.css
+        css: src/style/style.css
 
 ---
     
@@ -27,6 +27,26 @@ knitr::opts_chunk$set(
 
 ```{r hpc_notes, include=FALSE}
 # module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a
+
+###############################################################################
+##                                                                           ##
+if (!requireNamespace("remotes")){
+  install.packages("remotes")
+}
+
+
+if (!requireNamespace("renv")){
+  remotes::install_github("rstudio/renv")
+}
+
+if (!file.exists("renv.lock")){
+    renv::init()
+} else {
+    renv::restore(prompt = FALSE)
+}
+
+## Done                                                                      ##
+###############################################################################
 
 ```
 
@@ -238,6 +258,8 @@ DimPlot(query, group.by = "clusterName", reduction = "umap")
 
 ## Documentation
 ```{r documentation, eval=TRUE, echo=T, results=T}
+print(paste0("Analysisdirectory: ", getwd()))
+
 sessionInfo()
 ```
 
