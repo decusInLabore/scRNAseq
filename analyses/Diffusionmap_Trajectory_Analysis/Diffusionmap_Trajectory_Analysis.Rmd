@@ -225,32 +225,7 @@ figureCount <- 1
 ##                                                                           ##
 ###############################################################################
 
-###############################################################################
-## Set db access credentials                                                 ##
-if (dir.exists("/Volumes/babs/working/boeings/")){
-    hpc.mount <- "/Volumes/babs/working/boeings/"
-} else if (dir.exists("Y:/working/boeings/")){
-    hpc.mount <- "Y:/working/boeings/"
-} else if (dir.exists("/camp/stp/babs/working/boeings/")){
-    hpc.mount <- "/camp/stp/babs/working/boeings/"
-} else {
-    hpc.mount <- ""
-}
 
-## Loading the BABS password ##
-FN <- paste0(hpc.mount, "Projects/reference_data/pwd_folder/babs.txt")
-dbTable <- read.delim(
-  FN,
-  header = F,
-  sep = "\t",
-  stringsAsFactors = F
-)
-
-db.pwd <- as.vector(dbTable[1,1])
-
-
-## Done                                                                      ##
-###############################################################################
 
 
 ```
@@ -261,23 +236,35 @@ db.pwd <- as.vector(dbTable[1,1])
 
 
 <!-- Essential 1: Load data (output required later) -->
-```{r child = '01-load.data.Rmd', eval=TRUE}
+```{r child = 'T.0.load.data.Rmd', eval=TRUE}
 
 ```
 
 <!-- Optional 2: Retrieve Reference Genes from Database or Gmt file -->
-```{r child = '02-retrieve.reference.gene.sets.Rmd', eval=TRUE}
+```{r child = 'src/modules/section_B/B.2.retrieve.reference.gene.sets.Rmd', eval=TRUE}
 ```
 
+<!-- Optional 3: Diffusion map -->
+```{r child = 'src/modules/trajectory_analyses/T.1.diffusion.map.Rmd', eval=FALSE}
+```
+
+<!-- Optional 4: slingshot -->
+```{r child = 'src/modules/trajectory_analyses/T.2.slingshot.Rmd', eval=FALSE}
+```
 
 <!-- Optional 5: monocle3 -->
-```{r child = '03-monocle.trajectory.module.overview.Rmd', eval=TRUE}
+```{r child = 'src/modules/trajectory_analyses/T.3.monocle.trajectory.module.overview.Rmd', eval=TRUE}
 ```
 
 <!-- Optional 5: monocle3 Branch 1 Subtrajectory -->
-<!-- Add as many sub-trajectory analyses as necessary as banch.1, branch.2, branch.3... -->
-```{r child = '04-monocle.trajectory.module.branch.1.Rmd', eval=TRUE}
+```{r child = 'src/modules/trajectory_analyses/T.3.monocle.trajectory.module.branch.1.Rmd', eval=TRUE}
 ```
+
+
+<!-- Optional 6: ouija -->
+```{r child = 'src/modules/trajectory_analyses/T.4.ouija.trajectory.module.branch.1.Rmd', eval=FALSE}
+```
+
 
 
 
@@ -376,19 +363,6 @@ projectParams <- lapply(
 
 ## Documentation
 ```{r documentation, eval=TRUE, echo=T, results=T}
-print(paste0("Analysisdirectory: ", getwd()))
-
-biologic_active_object_dir <- paste0(
-    Obio@parameterList$folder,
-    "data/biologic_active_object/"
-)
-
-bFN <- paste0(
-    biologic_active_object_dir,
-    Obio@parameterList$project_id,
-    ".bioLOGIC.Robj"
-)
-print(paste0("bioLOGIC data object: ", bFN))
 
 sessionInfo()
 ```

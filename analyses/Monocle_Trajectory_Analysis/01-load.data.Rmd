@@ -1,0 +1,148 @@
+<!-- Set Parameters Module -->
+<!-- Set the chnkPrefix to make all chunks unique in the overall folder -->
+```{r partT_create_integrated_Seurat_object_init, echo=TRUE, eval=TRUE, warning=FALSE}
+chnkPrefix <- "T0.load.data."
+VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.Date()), ".pdf")
+
+## Use conda activate R-monocle3;R
+
+## renv
+
+
+
+```
+
+
+# Load Data
+```{r B3_partB_create_sample_list, echo=TRUE, eval=TRUE, warning=FALSE, results=F}
+
+# devtools::install_github('rstudio/renv')
+
+VersionPdfExt <- paste0(".V", gsub("-", "", Sys.Date()), ".pdf")
+
+if (dir.exists("/Volumes/babs/working/boeings/")){
+  hpc.mount <- "/Volumes/babs/working/boeings/"
+} else if (dir.exists("Y:/working/boeings/")){
+  hpc.mount <- "Y:/working/boeings/"
+} else if (dir.exists("/camp/stp/babs/working/boeings/")){
+  hpc.mount <- "/camp/stp/babs/working/boeings/"
+} else {
+  hpc.mount <- ""
+}
+
+
+FN <- paste0(hpc.mount, "Projects/reference_data/documentation/BC.parameters.txt")
+dbTable <- read.delim(
+  FN, 
+  sep = "\t",
+  stringsAsFactors = F
+)
+
+db.pwd <- as.vector(dbTable[1,1])
+
+figureCount <- 1
+
+# Assess installed packages
+
+
+###############################################################################
+## Load Obio object from step A                                              ##
+
+source("load.biologic.robj.R")
+
+
+
+Obio <- biologicSeqTools2::setMountingPoint(Obio)
+Obio <- biologicSeqTools2::setAnalysisPaths(Obio)
+Obio <- biologicSeqTools2::setCrickGenomeAndGeneNameTable(Obio)
+Obio <- biologicSeqTools2::createAnalysisFolders(
+  Obio
+)
+Obio <- biologicSeqTools2::setDataBaseParameters(Obio)
+
+###############################################################################
+## SB local libpaths                                                         ##
+## Set filename for temp pdf files ##
+projectDir <- gsub("scripts/scRNAseq/analyses/QC", "", getwd())
+designDir <- gsub("scripts/scRNAseq/analyses/QC", "scripts/scRNAseq/design/", getwd())
+workdir <- paste0(projectDir, "workdir/")
+
+
+Obio@parameterList[["html_local_dir"]] <- paste0(Obio@parameterList$folder,"html_local", "/")
+if (!dir.exists(Obio@parameterList$html_local_dir)){
+    dir.create(Obio@parameterList$html_local_dir)
+}
+
+## Create outputfolders ##
+Obio@parameterList[["reportFigDir"]] <- paste0(Obio@parameterList$folder,"html_local", "/report_figures/")
+
+if (!dir.exists(Obio@parameterList$reportFigDir)){
+    dir.create(Obio@parameterList$reportFigDir)
+}
+
+## Create outputfolders II ##
+Obio@parameterList[["reportTableDir"]] <- paste0(Obio@parameterList$folder, "html_local", "/report_tables/")
+
+if (!dir.exists(Obio@parameterList$reportFigDir)){
+    dir.create(Obio@parameterList$reportFigDir)
+}
+
+Obio@parameterList[["reportFigDir"]] <- paste0(Obio@parameterList$html_local, "report_figures/")
+pdfTemp <- paste0(Obio@parameterList$reportFigDir, "temp.pdf")
+## Done                                                                      ##
+###############################################################################
+
+
+seuratFN <- paste0(
+         Obio@parameterList$localWorkDir,
+         Obio@parameterList$project_id,
+        ".Seurat.Robj"
+     )
+
+load(seuratFN)
+
+
+
+## Create url string
+if (Obio@parameterList$host == "10.27.241.234"){
+  urlString <- "biologic.thecrick.org"
+} else {
+  urlString <- "biologic.crick.ac.uk"
+}
+
+legendDotSize <- 5
+
+
+shinyURL <- paste0(
+  "https://shiny-bioinformatics.crick.ac.uk/shiny/boeings/",
+  Obio@parameterList$project_id,
+  "_app/"
+)            
+
+
+## Set file paths ##
+baseFN <- paste0(
+  Obio@parameterList$project_id, 
+  ".trajectory.table.xlsx"
+)
+
+
+outPutFN <- paste0(
+  Obio@parameterList$reportTableDir,
+  baseFN
+)
+
+
+FNrel <- paste0("report_tables/", baseFN)
+
+
+## Create table link string ##
+
+tableLink <- paste0('<a href="https://',urlString,'/mdata/',Obio@parameterList$project_id, '/html/', FNrel,' target="_blank">here</a>')  
+
+tableString <- paste0('An Excel table with the DGE results can be downloaded ',
+                      tableLink
+)
+
+
+```
