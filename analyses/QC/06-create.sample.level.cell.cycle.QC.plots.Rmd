@@ -1,0 +1,60 @@
+<!-- Set PArameters Module -->
+<!-- Set the chnkPrefix to make all chunks unique in the overall folder -->
+```{r sample_level_QC__CC_init, echo=TRUE, eval=TRUE, warning=FALSE}
+chnkPrefix <- "QC.A.create.sample.level.QC.cc.plots."
+VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.Date()), ".pdf")
+
+```
+
+
+# Cell Cycle QC Plots
+```{r UMAP_data_CC, echo=TRUE, eval=TRUE, warning=FALSE, results=F}
+##############################################################################
+# Do percent mt plots                                                       ##
+resList <- biologicToolsSC::doUMAP_cellCyle(
+        SampleList,
+        obj = Obio,
+        figureCount = figureCount,
+        VersionPdfExt = ".pdf",
+        tocSubLevel = 3,
+        dotsize = 0.5,
+        s.genes,
+        g2m.genes,
+        cellCycleRefFile = NULL
+)
+
+
+plotList <- resList$plotList
+chnkVec <- resList$chnkVec
+figureCount <- resList$figureCount
+
+## Done create cellRanger QC plots                                           ##
+###############################################################################
+
+
+if (length(plotList) > 3){
+    tabVar <- "## Plot Cell Cycle UMAP Per Sample {.tabset .tabset-fade .tabset-dropdown}"
+} else {
+    tabVar <- "## Plot Cell Cycle UMAP Per Sample {.tabset .tabset-fade .tabset-pills}"
+}
+
+
+
+```
+
+
+`r tabVar`
+```{r Plot_UMAP_CC, echo=TRUE, eval=TRUE, warning=FALSE, results="asis"} 
+
+cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = '\n'))
+
+tabVar <- ""
+
+print(chnkVec)
+```
+
+
+
+
+
+
