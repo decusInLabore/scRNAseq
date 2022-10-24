@@ -115,7 +115,7 @@ db.pwd <- as.vector(dbTable[1,1])
 ```
 
 <!-- Optional 6: Perform three cell cycle regressions: none, G2M/S and full Chapter/Module -->
-```{r child = '08-perform.cell.cycle.regression.Rmd', eval=FALSE}
+```{r child = '08-perform.cell.cycle.regression.Rmd', eval=TRUE}
 ```
 
 

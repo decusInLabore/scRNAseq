@@ -101,14 +101,16 @@ library(biologicToolsSC)
 # source("assets/R/scTools.r")
 # source("assets/R/SBwebtools.pckg.r")
 
-ObioFN <- paste0("../", list.files("..")[grep(".bioLOGIC.Robj", list.files(".."))])
+source("load.biologic.robj.R")
 
-if (file.exists(ObioFN)){
-    load(paste0(ObioFN))
-    print(paste0("Obio object ", Obio@parameterList$localWorkDir, ObioFN, " exists and is loaded."))
-} else {
-    exit()
-}
+# ObioFN <- paste0("../", list.files("..")[grep(".bioLOGIC.Robj", list.files(".."))])
+# 
+# if (file.exists(ObioFN)){
+#     load(paste0(ObioFN))
+#     print(paste0("Obio object ", Obio@parameterList$localWorkDir, ObioFN, " exists and is loaded."))
+# } else {
+#     exit()
+# }
 
 ## Reset paths to local environment
 Obio <- Obio %>% 
@@ -251,9 +253,9 @@ print("End chunk 1. Objects loaded.")
 ###############################################################################
 ## Add additional UMAP annotations
 addFNvec <- c(
-  "../temp/UMAP.regression.coordinates.txt",
-  "../temp/ClusterFinder.output.txt",
-  "../temp/species.inference.txt"
+  paste0(Obio@parameterList$workdir, "temp/UMAP.regression.coordinates.txt"),
+  paste0(Obio@parameterList$workdir, "temp/ClusterFinder.output.txt"),
+  paste0(Obio@parameterList$workdir, "temp/species.inference.txt")
 )
 
 row.names(OsC@meta.data) <- OsC@meta.data$cellID

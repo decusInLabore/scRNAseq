@@ -193,7 +193,7 @@ Obio@parameterList$dendrofactor <- dendrofactor
 ```
 
 <!-- Optional 13: (Output only):Category Enrichments Chapter/Module -->
-```{r child = '12-AUC.cat.enrichments.Rmd', eval=FALSE}
+```{r child = '12-AUC.cat.enrichments.Rmd', eval=TRUE}
 ```
 
 <!-- Essential 14: (output required later):Category Linear Regression Marker Gene Data Prep Chapter/Module -->

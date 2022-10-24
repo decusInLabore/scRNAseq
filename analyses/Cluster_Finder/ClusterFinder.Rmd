@@ -101,15 +101,15 @@ library(biologicToolsSC)
 
 # source("assets/R/scTools.r")
 # source("assets/R/SBwebtools.pckg.r")
+source("load.biologic.robj.R")
+#ObioFN <- paste0("../", list.files("..")[grep(".bioLOGIC.Robj", list.files(".."))])
 
-ObioFN <- paste0("../", list.files("..")[grep(".bioLOGIC.Robj", list.files(".."))])
-
-if (file.exists(ObioFN)){
-    load(paste0(ObioFN))
-    print(paste0("Obio object ", Obio@parameterList$localWorkDir, ObioFN, " exists and is loaded."))
-} else {
-    exit()
-}
+# if (file.exists(ObioFN)){
+#     load(paste0(ObioFN))
+#     print(paste0("Obio object ", Obio@parameterList$localWorkDir, ObioFN, " exists and is loaded."))
+# } else {
+#     exit()
+# }
 
 ## Reset paths to local environment
 Obio <- Obio %>% 

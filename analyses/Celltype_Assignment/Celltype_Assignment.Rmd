@@ -1,4 +1,8 @@
 ---
+title: "Celltype Inference"
+author: "Stefan Boeing"
+date: 'Compiled: `r format(Sys.Date(), "%B %d, %Y")`'
+
 output: 
     html_document:
         code_folding: hide
@@ -8,7 +12,7 @@ output:
         toc: true
         toc_depth: 5
         toc_float: true
-        css: src/assets/style/style.css
+        css: src/style/style.css
 
 always_allow_html: yes
 ---
@@ -71,12 +75,13 @@ if (loadProjectDataForThisModule){
     tempWorkDir <- paste0(cwd, "../")
     #
     # ## Biologic object
-    ObioFN <- paste0(
-        tempWorkDir, "/",
-        list.files(tempWorkDir)[grep(".bioLOGIC.Robj", list.files(tempWorkDir))]
-    )
-    
-    load(ObioFN)
+    source("load.biologic.robj.R")
+    # ObioFN <- paste0(
+    #     tempWorkDir, "/",
+    #     list.files(tempWorkDir)[grep(".bioLOGIC.Robj", list.files(tempWorkDir))]
+    # )
+    # 
+    # load(ObioFN)
     
     # ## Activate debug mode on subset of cells < 1
     # # Obio@parameterList$debugReduce <- 1
@@ -92,10 +97,8 @@ if (loadProjectDataForThisModule){
     Obio <- addGeneAnnotation(Obio)
     
     ## Seurat object
-    SeuratFN <- paste0(
-        tempWorkDir, "/",
-        list.files(tempWorkDir)[grep(".Seurat.Robj", list.files(tempWorkDir))]
-    )
+    SeuratFN <- paste0(Obio@parameterList$localWorkDir,list.files(Obio@parameterList$localWorkDir)[grep(".Seurat.Robj", list.files(Obio@parameterList$localWorkDir))])
+
     
     load(SeuratFN)
 }
@@ -311,3 +314,22 @@ knitr::kable(dplyr::select(
 ## Done creating and attaching DDS objecs                                    ##
 ###############################################################################
 ```
+
+
+## Documentation
+```{r documentation, eval=TRUE, echo=T, results=T}
+print(paste0("Analysisdirectory: ", getwd()))
+
+biologic_active_object_dir <- paste0(
+    Obio@parameterList$folder,
+    "data/biologic_active_object/"
+)
+
+bFN <- paste0(
+    biologic_active_object_dir,
+    Obio@parameterList$project_id,
+    ".bioLOGIC.Robj"
+)
+print(paste0("bioLOGIC data object: ", bFN))
+
+sessionInfo()
