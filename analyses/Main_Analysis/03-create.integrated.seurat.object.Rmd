@@ -176,7 +176,7 @@ DefaultAssay(OsC) <- "RNA"
 
 ###############################################################################
 ## Add meta data                                                             ##
-FN <- paste0(Obio@parameterList$workdir, "scRNAseq/design/sc.design.file.csv")
+FN <- paste0(Obio@parameterList$folder, "scripts/scRNAseq/design/sc.design.file.csv")
 if (file.exists(FN)){
     if (file.exists(FN)){
         dfObio <- read.csv(FN, header = F, stringsAsFactors = F)

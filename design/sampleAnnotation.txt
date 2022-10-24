@@ -1,2 +1,4 @@
 "sampleID"	"sampleName"	"sampleColor"
-"BrainPericytes"	"BrainPericytes"	"#F8766D"
+"KO_1"	"KO_1"	"#F8766D"
+"KO_2"	"KO_2"	"#00BA38"
+"WT_1"	"WT_1"	"#619CFF"

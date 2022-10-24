@@ -1,4 +1,5 @@
 ###############################################################################
+# Move to ./scripts/scRNAseq/analyses/Main_Analysis
 # module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;
 ###############################################################################
 
@@ -22,21 +23,18 @@ if (!file.exists("renv.lock")){
 ## Prepare subset for sub-clustering                                         ##
 library(Seurat)
 ## load Seurat object with basedata
-FN <- "/camp/stp/babs/working/boeings/Projects/bonfantip/roberta.ragazzini/484_scRNAseq_Characterisation_EpCAM_CD90_thymic_epithelial_cells_SC22096/workdir/SC22096.Seurat.Robj"
+FN <- "/camp/stp/babs/working/boeings/Projects/liv/nikolaos.angelis/500_scRNAseq_role_of_Arid3a_intestinal_homeostasis_SC22150/workdir/SC22150.Seurat.Robj"
+
 load(FN)
 
 ## Data selection for subsetting:
 #sampleID: primaryTumor
 
 ## Assume that all unassigned cells are human
-OsC@meta.data[OsC@meta.data$meta_inferred_species == 0, "meta_inferred_species"] <- "human"
+#OsC@meta.data[OsC@meta.data$meta_inferred_species == 0, "meta_inferred_species"] <- "human"
 
 # Select only cluster 1
-OsC_sel1 <- subset(x = OsC, subset = meta_inferred_species %in% c("human"))
-OsC_sel1@meta.data[["sampleID"]] <- paste0(OsC_sel1@meta.data$sampleID, "_", OsC_sel1@meta.data$meta_Hash)
-OsC_sel1@meta.data$sampleID <- gsub("_0", "", OsC_sel1@meta.data$sampleID)
-OsC_sel1@meta.data$sampleID <- gsub("EpCAMpos", "", OsC_sel1@meta.data$sampleID)
-OsC_sel1@meta.data$sampleID <- gsub("EpCAMneg", "", OsC_sel1@meta.data$sampleID)
+OsC_sel1 <- subset(x = OsC, subset = clusterName %in% c("TA", "ISCs"))
 
 
 
@@ -47,11 +45,11 @@ sampleIDs <- unique(OsC_sel1$sampleID)
 
 for (i in 1:length(sampleIDs)){
     FNout <- paste0(
-      "/camp/stp/babs/working/boeings/Projects/bonfantip/roberta.ragazzini/484_scRNAseq_Characterisation_EpCAM_CD90_thymic_epithelial_cells_SC22096/basedata/"
+      "/camp/stp/babs/working/boeings/Projects/liv/nikolaos.angelis/500_scRNAseq_role_of_Arid3a_intestinal_homeostasis_SC22150/basedata/"
       ,
       "input_",
       sampleIDs[i],
-      "_hs.txt"
+      "_TA_ISCs.txt"
     )
     
     OsC_temp <- subset(x= OsC_sel1, subset = sampleID == sampleIDs[i])
@@ -63,8 +61,8 @@ for (i in 1:length(sampleIDs)){
     }
 }
 
-OsC@meta.data[["meta_Subclustering_T_cells"]] <- "Rest"
-OsC@meta.data[OsC@meta.data$seurat_clusters %in% c(1), "meta_Subclustering_T_cells"] <- "Selected"
+OsC@meta.data[["meta_TA_ISC_Subclustering"]] <- "Rest"
+OsC@meta.data[OsC@meta.data$seurat_clusters %in% c(1), "meta_TA_ISC_Subclustering"] <- "Selected"
 
 save(
   OsC, 
