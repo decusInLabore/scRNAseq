@@ -524,4 +524,144 @@ write.table(
 
 ```
 
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, results=F}
+
+tag <- paste0("Cell_Cycle_Cluster_Distributions")
+plotList <- list()
+chnkVec <- as.vector(NULL, mode = "character")
+
+
+selVec <- c(
+    "cellID", 
+    "ClusterName_No_Regression", 
+    "ClusterNames_G2M_S_Regression",  
+    "ClusterNames_CellCycle_Regression"
+)
+
+d <- dfRes[,selVec]
+
+# Step 1
+library(dplyr)
+
+df <- d %>%
+  ggsankey::make_long(ClusterName_No_Regression, ClusterNames_G2M_S_Regression, ClusterNames_CellCycle_Regression)
+
+
+# Step 2
+dagg <- df%>%
+  dplyr::group_by(node)%>%
+  dplyr::tally()
+
+
+# Step 3
+df2 <- merge(df, dagg, by.x = 'node', by.y = 'node', all.x = TRUE)
+
+
+pl <- ggplot2::ggplot(df2, ggplot2::aes(
+    x = x,
+    next_x = next_x,
+    node = node,
+    next_node = next_node,
+    fill = factor(node),
+    label = paste0(node," n=", n)
+)) 
+pl <- pl + ggsankey::geom_sankey(flow.alpha = 0.5,  color = "gray40", show.legend = TRUE)
+#pl <- pl +geom_sankey_label(size = 3, color = "white", fill= "gray40", hjust = -0.2)
+
+pl <- pl + ggplot2::theme_bw()
+pl <- pl + ggplot2::theme(legend.position = "none")
+pl <- pl + ggplot2::theme(
+    axis.title = ggplot2::element_blank(), 
+    axis.text.y = ggplot2::element_blank(), 
+    axis.ticks = ggplot2::element_blank(), 
+    panel.grid = ggplot2::element_blank(),
+    axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.5, hjust=1)
+)
+
+pl <- pl + ggplot2::theme(
+    panel.border = ggplot2::element_rect(colour = "black", fill=NA, size=1),
+    plot.title = ggplot2::element_text(hjust = 0.5, size = 12)
+)
+
+dfRes[["order"]] <- as.numeric(gsub("No_Regression_C", "", dfRes$ClusterName_No_Regression))
+dfRes <- dfRes[order(dfRes$order, decreasing = F),]
+cols1 <- scales::hue_pal()(length(unique(dfRes$ClusterName_No_Regression)))
+names(cols1) <- unique(dfRes$ClusterName_No_Regression)
+
+dfRes[["order"]] <- as.numeric(gsub("G2M_S_Reg_C", "", dfRes$ClusterNames_G2M_S_Regression))
+dfRes <- dfRes[order(dfRes$order, decreasing = F),]
+cols2 <- scales::hue_pal()(length(unique(dfRes$ClusterNames_G2M_S_Regression)))
+names(cols2) <- unique(dfRes$ClusterNames_G2M_S_Regression)
+
+dfRes[["order"]] <- as.numeric(gsub("Cell_Cycle_Reg_C", "", dfRes$ClusterNames_CellCycle_Regression))
+dfRes <- dfRes[order(dfRes$order, decreasing = F),]
+cols3 <- scales::hue_pal()(length(unique(dfRes$ClusterNames_CellCycle_Regression)))
+names(cols3) <- unique(dfRes$ClusterNames_CellCycle_Regression)
+
+cols <- c(
+  cols1, cols2, cols3
+)
+
+pl <- pl + ggplot2::scale_fill_manual(values = cols)
+
+pl <- pl + ggplot2::labs(title = "Sankey Diagram")
+# pl <- pl + ggplot2::labs(subtitle = "Subtitle")
+# pl <- pl + labs(caption = "Caption")
+pl <- pl + ggplot2::labs(fill = 'Nodes')
+
+
+plotList[[tag]] <- pl
+
+FNbase <- paste0(tag, VersionPdfExt)
+
+FN <- paste0(Obio@parameterList$reportFigDir, FNbase)
+FNrel <- paste0("report_figures/", FNbase)
+            
+pdf(FN)
+    print(plotList[[tag]])
+dev.off()
+            
+          
+            
+            figLegend <- paste0(
+                '**Figure ', 
+                figureCount, 
+                ':** ',
+                'Figure descripton will go here. Download a pdf of this figure <a href="',FNrel,'" target="_blank">here</a>.'
+            )
+            
+figureCount <- figureCount + 1
+
+NewChnk <- paste0(
+    "### ", tag,
+    "\n```{r Dist_UMAP_",
+    tag,", results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",
+    figLegend,"'}\n",
+    "\n",
+    "\n print(plotList[['",tag,"']])",
+    "\n cat(  '\n')",
+    "\n\n\n```\n"   
+)
+
+chnkVec <- c(
+    chnkVec,
+    NewChnk
+)
+
+            
+if (length(plotList) > 3){
+    tabVar <- ".tabset .tabset-fade .tabset-dropdown"
+} else {
+    tabVar <- ".tabset .tabset-fade .tabset-pills"
+}
+
+```
+
+## Distribution Plot {`r tabVar`}
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, results="asis"} 
+
+cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = '\n'))
+
+
+```
 
