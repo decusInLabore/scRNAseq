@@ -16,6 +16,7 @@ always_allow_html: yes
 
 ```{css setup_css, echo=FALSE}
 
+# module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a
 
 .table{
   width:auto;
@@ -33,6 +34,8 @@ knitr::opts_chunk$set(
     message = FALSE,
     warning = FALSE
 )
+
+
 ```
 
 
@@ -67,7 +70,8 @@ dbTable <- read.delim(
 
 db.pwd <- as.vector(dbTable[1,1])
 
-source("assets/SBwebtools.pckg.r")
+# source("assets/SBwebtools.pckg.r")
+library(biologicSeqTools2)
 
 
 if (length(.libPaths()) > 2){
@@ -162,10 +166,24 @@ if (dir.exists("/Volumes/")){
 
 
 
+
+
+
+
+
 fastqFolders <- c(
-  paste0(hpc.mount, "inputs/instruments/fastq/190723_K00102_0369_BH5N22BBXY/fastq/SC19135/"),
-  paste0(hpc.mount, "inputs/instruments/fastq/190719_K00102_0367_BH7VNFBBXY/fastq/SC19135/")
+  paste0("/camp/stp/sequencing/outputs/babs/data/bonfantip/roberta.ragazzini/SC22096/primary_data/220426_A01366_0185_BHCH3GDMXY/fastq/"),
+  paste0("/camp/stp/sequencing/outputs/babs/data/bonfantip/roberta.ragazzini/SC22096/primary_data/220505_A01366_0193_BHKC3MDSX3/fastq/")
 )
+
+## Ref from 484B_.../workdir/scRNAseq/design/sc.design.file.csv
+
+# HuTEC135 > RAG4782A1, RAG4782A2 | after cellranger aggregate: A1A2MERGED
+# HuTEC136 > RAG4782A3, RAG4782A4 | after cellranger aggregate:A3A4MERGED
+# NHBEA > RAG4782A5
+# HuOES20 > RAG4782A6
+# HuOES22	> RAG4782A7
+# HuSKIN01 > RAG4782A8
 
 cmdVec <- as.vector(NULL, mode="character")
 
@@ -174,10 +192,15 @@ for (i in 1:length(fastqFolders)){
   temp.files <- list.files(temp.dir)
   #temp.dir <- gsub(hpc.mount, "/camp/", temp.dir)
   temp.dest <- temp.files
-  temp.dest <- gsub("ACK419A1", "SNseqR1", temp.dest)
-  temp.dest <- gsub("ACK419A2", "SNseqR2", temp.dest)
-  temp.dest <- gsub("ACK419A3", "SNseqR3", temp.dest)
-  temp.dest <- paste0(GEOdir, "/", temp.dest)
+  temp.dest <- gsub("RAG4782A1", "HuTEC135P1", temp.dest)
+  temp.dest <- gsub("RAG4782A2", "HuTEC135P2", temp.dest)
+  temp.dest <- gsub("RAG4782A3", "HuTEC136P1", temp.dest)
+  temp.dest <- gsub("RAG4782A4", "HuTEC136P2", temp.dest)
+  temp.dest <- gsub("RAG4782A5", "NHBEA", temp.dest)
+  temp.dest <- gsub("RAG4782A6", "HuOES20", temp.dest)
+  temp.dest <- gsub("RAG4782A7", "HuOES22", temp.dest)
+  temp.dest <- gsub("RAG4782A8", "HuSKIN01", temp.dest)
+  temp.dest <- paste0(GEOdir, temp.dest)
   temp.cmd <- paste0("cp ", temp.dir, temp.files, " ", temp.dest)
   cmdVec <- c(
     cmdVec, 
@@ -216,8 +239,8 @@ for (i in 1:length(Obio@sampleDetailList)){
 ###############################################################################
 ## Transfer integrated data object                                           ##
 dfMeta <- import.db.table.from.db(
-        dbname = "asl_data",
-        dbtable = "asl319_PCA",
+        dbname = "pbl_data",
+        dbtable = "SC22096_PCA",
         user = "boeingS",
         password = db.pwd,
         host = Obio@parameterList$host
@@ -225,21 +248,21 @@ dfMeta <- import.db.table.from.db(
 
 selVec <- c(
   'cellID',
-  'sample_group',
+  names(dfMeta)[grep("meta_", names(dfMeta))],
   'orig_ident',
   'nCount_RNA',
   'nFeature_RNA',
-  'sampleID',
+  'meta_hs_nFeature_RNA',
+  'meta_mm_nFeature_RNA',
+  'meta_inferred_species',
+  'sampleName',
   'percent_mt',
-  'nCount_SCT',
-  'nFeature_SCT',
-  'seurat_clusters',
+  'clusterName',
   'UMAP_1',
-  'UMAP_2',
-  'sub_clusters_ExNeurons',
-  'UMAP_1_sub_clusters_ExNeurons',
-  'UMAP_2_sub_clusters_ExNeurons'
+  'UMAP_2'
 )
+
+selVec %in% names(dfMeta)
 
 dfMeta <- dfMeta[,selVec]
 ## Create Excel file ##
@@ -282,6 +305,7 @@ for (i in 1:length(cmdVec)){
 }
 sink()
 
+## Run GEO.transfer.sh ##
 
 
 ###############################################################################
@@ -293,14 +317,6 @@ system(md5CMD)
 ## Done                                                                      ##
 ###############################################################################
 
-###############################################################################
-## Create sections for meta data                                             ##
-
-md5CMD <- paste0("md5sum ",GEOdir,"* > ",GEOdir,"checklist.chk")
-system(md5CMD)
-
-## Done                                                                      ##
-###############################################################################
 
 ###############################################################################
 ## Create sections for meta data                                             ##
@@ -480,14 +496,56 @@ write.csv(
 ###############################################################################
 ## Upload to GEO
 
-# ml purge
-# ml ncftp/3.2.6-foss-2016b
-# ncftpput -F -R -z -u geoftp -p "rebUzyi1" ftp-private.ncbi.nlm.nih.gov ./uploads/sjboulton_WFS5ymYo ./DRIPSeq_GEO
-# 
-# ml purge
-# ml ncftp/3.2.6-foss-2016b
-# ncftpput -F -R -z -u geoftp -p "rebUzyi1" ftp-private.ncbi.nlm.nih.gov ./uploads/schaefer_lab_KPsRsW2K /camp/stp/babs/working/boeings/Projects/schaefera/tobias.ackels/319A_scRNAseq_mm_olfactory_bulb_proj_neuron_analysis_SC19135/GEO_submission
+ml purge
+ml ncftp/3.2.6-foss-2016b
+ncftpput -F -R -z -u geoftp -p "rebUzyi1" ftp-private.ncbi.nlm.nih.gov ./uploads/sjboulton_WFS5ymYo ./DRIPSeq_GEO
+
+ml purge
+ml ncftp/3.2.6-foss-2016b
+ncftpput -F -R -z -u geoftp -p "rebUzyi1" ftp-private.ncbi.nlm.nih.gov ./uploads/schaefer_lab_KPsRsW2K /camp/stp/babs/working/boeings/Projects/schaefera/tobias.ackels/319A_scRNAseq_mm_olfactory_bulb_proj_neuron_analysis_SC19135/GEO_submission
 
 
+## New version ##
+## new 
+# using: https://bioinformatics.thecrick.org/babs/using-camp/sharing-results/#uploading-data-to-geo
+
+## Part 1
+srun --partition int --time 0-04:00:00 --cpus-per-task 1 --nodelist int000 --job-name geo-upload --pty bash
+
+module load Anaconda3/2022.05
+source activate geo-upload
+
+UPLOAD_PATH=/camp/stp/babs/working/boeings/Projects/bonfantip/roberta.ragazzini/484_scRNAseq_Characterisation_EpCAM_CD90_thymic_epithelial_cells_SC22096/GEO_submission_thy_part/
+  
+DESTINATION_PATH=stefan.boeing@crick.ac.uk_cRAD2QaG/GEO_submission_No2_thy_part
+
+geo-upload -u ${UPLOAD_PATH} -d ${DESTINATION_PATH}
+
+## Part 2
+srun --partition int --time 0-04:00:00 --cpus-per-task 1 --nodelist int000 --job-name geo-upload --pty bash
+
+module load Anaconda3/2022.05
+source activate geo-upload
+
+UPLOAD_PATH=/camp/stp/babs/working/boeings/Projects/bonfantip/roberta.ragazzini/484_scRNAseq_Characterisation_EpCAM_CD90_thymic_epithelial_cells_SC22096/GEO_submission_NHBEA_Skin01/
+  
+DESTINATION_PATH=stefan.boeing@crick.ac.uk_cRAD2QaG/GEO_submission_No3_NHBEA_Skin01
+
+geo-upload -u ${UPLOAD_PATH} -d ${DESTINATION_PATH}
+
+## Part 3
+srun --partition int --time 0-04:00:00 --cpus-per-task 1 --nodelist int000 --job-name geo-upload --pty bash
+
+module load Anaconda3/2022.05
+source activate geo-upload
+
+UPLOAD_PATH=/camp/stp/babs/working/boeings/Projects/bonfantip/roberta.ragazzini/484_scRNAseq_Characterisation_EpCAM_CD90_thymic_epithelial_cells_SC22096/GEO_submission_OES20_OES22/
+  
+DESTINATION_PATH=stefan.boeing@crick.ac.uk_cRAD2QaG/GEO_submission_No4_OES20_OES22
+
+geo-upload -u ${UPLOAD_PATH} -d ${DESTINATION_PATH}
+
+
+GEO_submission_OES20_OES22
 
 ```

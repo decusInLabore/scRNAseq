@@ -1,7 +1,7 @@
 <!-- Set PArameters Module -->
 <!-- Set the chnkPrefix to make all chunks unique in the overall folder -->
 ```{r create_sankey_init, echo=TRUE, eval=TRUE, warning=FALSE}
-chnkPrefix <- "B132.Sankey."
+chnkPrefix <- "B132.Areaplot."
 VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.Date()), ".pdf")
 
 ```
