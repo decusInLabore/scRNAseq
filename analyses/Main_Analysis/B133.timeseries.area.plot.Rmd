@@ -1,7 +1,7 @@
 <!-- Set PArameters Module -->
 <!-- Set the chnkPrefix to make all chunks unique in the overall folder -->
 ```{r create_sankey_init, echo=TRUE, eval=TRUE, warning=FALSE}
-chnkPrefix <- "B132.Sankey."
+chnkPrefix <- "B132.Areaplot."
 VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.Date()), ".pdf")
 
 ```
@@ -83,7 +83,7 @@ for (i in 1:length(genotypes)){
         figureCount <- figureCount + 1
     
         NewChnk <- paste0(
-        "#### ", tag,
+        "### ", tag,
         "\n```{r area_",
         tag,", results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",
         figLegend,"'}\n",
@@ -108,7 +108,7 @@ if (length(plotList) > 3){
 
 ```
 
-### Area Distribution Plot {`r tabVar`}
+## Area Distribution Plot {`r tabVar`}
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE, results="asis"} 
 
 cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = '\n'))
