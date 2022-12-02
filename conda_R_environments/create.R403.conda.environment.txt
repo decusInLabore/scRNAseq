@@ -1,0 +1,16 @@
+###############################################################################
+## Create conda environment                                                  ##
+
+module load Anaconda3/2022.05
+
+## Create conda environment
+conda create -n R403
+conda activate R403
+
+## Installing R ##
+conda install -c conda-forge r-base=4.0.3  
+
+# in R then renv can be installed. 
+
+##                                                                           ##
+###############################################################################

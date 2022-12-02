@@ -83,7 +83,7 @@ for (i in 1:length(genotypes)){
         figureCount <- figureCount + 1
     
         NewChnk <- paste0(
-        "### ", tag,
+        "#### ", tag,
         "\n```{r area_",
         tag,", results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",
         figLegend,"'}\n",
@@ -108,7 +108,7 @@ if (length(plotList) > 3){
 
 ```
 
-## Area Distribution Plot {`r tabVar`}
+### Area Distribution Plot {`r tabVar`}
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE, results="asis"} 
 
 cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = '\n'))
