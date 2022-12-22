@@ -62,7 +62,9 @@ if (loadProjectDataForThisModule){
       install.packages("remotes")
     }
     
-    remotes::install_github("rstudio/renv")
+    if (!requireNamespace("renv")){
+      remotes::install_github("rstudio/renv")
+    }
     
     if (!file.exists("renv.lock")){
         renv::init()
@@ -103,6 +105,18 @@ if (loadProjectDataForThisModule){
     load(SeuratFN)
 }
 
+OsC_CTF <- OsC
+rm(OsC)
+
+#Subsetting
+
+if (length(OsC_CTF@meta.data$cellID) > 20000){
+    n.cells <- 20000
+    cells.use = sample(x = OsC_CTF@meta.data$cellID, size = n.cells)
+    OsC_CTF <- OsC_CTF[,colnames(OsC_CTF) %in% cells.use]
+
+}
+
 ## Enter the variables below if you don't have a biologic object
 species <- Obio@parameterList$species
 
@@ -124,10 +138,19 @@ if (Obio@parameterList$host == "10.27.241.234"){
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE, results="asis", message=FALSE, include=FALSE}
 ###############################################################################
 ## Create and attach DDS object                                              ##
+if (!require("clustifyr")){
+    renv::install("bioc::clustifyr")
+}
 
-renv::install("bioc::clustifyr")
-renv::install("bioc::clustifyrdatahub")
-renv::install("bioc::ExperimentHub")
+if (!require("clustifyr")){
+    renv::install("bioc::clustifyrdatahub")
+}
+
+if (!require("clustifyr")){
+    renv::install("bioc::ExperimentHub")
+}
+
+
 
 ## Get reference data sets ##
 eh <- ExperimentHub::ExperimentHub(ask=FALSE)
@@ -175,15 +198,15 @@ for (i in 1:length(selVec)){
         selVec[i]
     )[[1]]
     
-    top2000 <- head(Seurat::VariableFeatures(OsC), 2000)
+    top2000 <- head(Seurat::VariableFeatures(OsC_CTF), 2000)
     
     ## Get count table ##
-    counts <- as.matrix(OsC@assays$RNA@counts)
+    counts <- as.matrix(OsC_CTF@assays$RNA@counts)
     
     ## Create correlation matrix
     res <- clustifyr::clustify(
         input = counts , # matrix of normalized scRNA-seq counts (or SCE/Seurat object)
-        metadata = OsC@meta.data, # meta.data table containing cell clusters
+        metadata = OsC_CTF@meta.data, # meta.data table containing cell clusters
         cluster_col = "seurat_clusters", # name of column in meta.data containing cell clusters
         ref_mat = ref_mat, # matrix of RNA-seq expression data for each cell type
         query_genes = top2000 # list of highly varible genes identified with Seurat
@@ -217,12 +240,12 @@ dfRes$r <- round(dfRes$r, 4)
 ## Produce output table ##
 
 ## Get Cluster Colors for table ##
-pos <- grep("^clusterColor$", names(OsC@meta.data))
+pos <- grep("^clusterColor$", names(OsC_CTF@meta.data))
 
 if (length(pos) ==1){
-    dfColor <- unique(OsC@meta.data[,c("seurat_clusters", "clusterColor")])
+    dfColor <- unique(OsC_CTF@meta.data[,c("seurat_clusters", "clusterColor")])
 } else {
-    seurat_clusters <- sort(as.numeric(unique(OsC@meta.data$seurat_clusters)))
+    seurat_clusters <- sort(as.numeric(unique(OsC_CTF@meta.data$seurat_clusters)))
     clusterColor <- scales::hue_pal()(length(seurat_clusters))
     dfColor <- data.frame(seurat_clusters, clusterColor)
 }

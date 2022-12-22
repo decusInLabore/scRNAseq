@@ -61,6 +61,12 @@ clusterCols = scales::hue_pal()(length(clusterVec))
 #   dotsize = 0.25
 # }
 
+## Downsample to 70 000 dots 
+if (nrow(dfPlot) > 70000){
+      set.seed(42)
+      dfPlot <- dfPlot[sample(nrow(dfPlot), 70000), ]
+}
+
 plotList[[tag]] <- ggplot(data=dfPlot[dfPlot$included == "+",], aes(UMAP_1, UMAP_2, color=Cluster)
             ) + geom_point( shape=16, size = as.numeric(dotsize)
             ) + xlab("UMAP1") + ylab("UMAP2"
@@ -189,6 +195,13 @@ dfPlot$Cluster <- factor(dfPlot$Cluster, levels = clusterVec)
 #   dotsize = 0.25
 # }
 
+## Downsample to 70 000 dots 
+if (nrow(dfPlot) > 70000){
+      set.seed(42)
+      dfPlot <- dfPlot[sample(nrow(dfPlot), 70000), ]
+}
+
+
 dfPlot$clusterName <- factor(dfPlot$clusterName)
 plotList[[tag]] <- ggplot(data=dfPlot[dfPlot$included == "+",], aes(tSNE_1, tSNE_2, color=Cluster)
             ) + geom_point( shape=16, size = as.numeric(dotsize)
@@ -314,7 +327,11 @@ for (i in 1:length(sampleVec)){
     
     dfPlotSel <- dfPlot[dfPlot$sampleID == sampleVec[i], ]
             
-            
+    ## Downsample to 70 000 dots 
+    if (nrow(dfPlotSel) > 70000){
+          set.seed(42)
+          dfPlotSel <- dfPlotSel[sample(nrow(dfPlotSel), 70000), ]
+    }           
             
     plotList[[tag]] <- ggplot(data=dfPlotSel[dfPlotSel$included == "+",], aes(UMAP_1, UMAP_2, color=Cluster)
             ) + geom_point( shape=16, size = as.numeric(dotsize)
