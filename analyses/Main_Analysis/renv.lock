@@ -1543,6 +1543,26 @@
         "withr"
       ]
     },
+    "ggsankey": {
+      "Package": "ggsankey",
+      "Version": "0.0.99999",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteUsername": "davidsjoberg",
+      "RemoteRepo": "ggsankey",
+      "RemoteRef": "main",
+      "RemoteSha": "be08dd0f86eaee9f9ff9e7ff95d47930660a3c36",
+      "Hash": "8afce4634ae19f2ae9c7f7b7d82e1669",
+      "Requirements": [
+        "dplyr",
+        "ggplot2",
+        "magrittr",
+        "purrr",
+        "stringr",
+        "tidyr"
+      ]
+    },
     "ggsci": {
       "Package": "ggsci",
       "Version": "2.9",

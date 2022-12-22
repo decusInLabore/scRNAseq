@@ -104,10 +104,10 @@ figureCount <- 1
 ```
 
 <!-- Essential 3: (output required later): Create Integrated Seurat Object Chapter/Module -->
-```{r child = '03-create.integrated.seurat.object.Rmd', eval=TRUE}
+```{r child = '03-create.integrated.seurat.object.Rmd', eval=FALSE}
 ```
 
-```{r, eval=T, echo=F}
+```{r, eval=F, echo=F}
 
 ## The above step is the most time consuming. Saving the Obio and OsC object here allows 
 source("save.biologic.robj.R")
@@ -127,17 +127,19 @@ print("OsC Object saved.")
 ```
 
 <!-- Optional 4: (creates output only): Create variation plots Chapter/Module -->
-```{r child = '04-create.variation.plots.Rmd', eval=TRUE}
+```{r child = '04-create.variation.plots.Rmd', eval=FALSE}
 ```
 
 <!-- Essential 6: (output required later): 
 DGE Marker gene upload Chapter/Module -->
-```{r child = '05-create.pca.plots.Rmd', eval=TRUE}
+```{r child = '05-create.pca.plots.Rmd', eval=FALSE}
 ```
 
-```{r, eval=F, echo=T}
+```{r, eval=T, echo=T}
 
 ## This will load the objects saved in B6. 
+source("load.biologic.robj.R")
+
 load(paste0(
          Obio@parameterList$localWorkDir,
          Obio@parameterList$project_id,
@@ -145,7 +147,7 @@ load(paste0(
      )
 )
 
-source("load.biologic.robj.R")
+
 
 dotsize  = 1
 
@@ -193,7 +195,7 @@ Obio@parameterList$dendrofactor <- dendrofactor
 ```
 
 <!-- Optional 13: (Output only):Category Enrichments Chapter/Module -->
-```{r child = '12-AUC.cat.enrichments.Rmd', eval=TRUE}
+```{r child = '12-AUC.cat.enrichments.Rmd', eval=FALSE}
 ```
 
 <!-- Essential 14: (output required later):Category Linear Regression Marker Gene Data Prep Chapter/Module -->
@@ -201,7 +203,7 @@ Obio@parameterList$dendrofactor <- dendrofactor
 ```
 
 <!-- Essential 15: (output required later):Category Linear Regression Marker Gene Data Prep Chapter/Module -->
-```{r child = '14-heatmaps.and.dotplots.Rmd', eval=TRUE}
+```{r child = '14-heatmaps.and.dotplots.Rmd', eval=FALSE}
 ```
 
 <!-- Essential 16: (output required later):Category Make cluster table Data Prep Chapter/Module -->
@@ -223,7 +225,7 @@ Obio@parameterList$dendrofactor <- dendrofactor
 
 
 <!-- Optional 22: (output required later): Add extra tables Chapter/Module -->
-```{r child = '19-add.extra.tables.Rmd', eval=TRUE}
+```{r child = '19-add.extra.tables.Rmd', eval=FALSE}
 ```
 
 
@@ -337,6 +339,10 @@ bFN <- paste0(
     ".bioLOGIC.Robj"
 )
 print(paste0("bioLOGIC data object: ", bFN))
+
+print(paste0("Clusterresolution: ", Obio@parameterList$singleCellClusterParameter))
+
+print(paste0("Cell cycle regression mode: ", paste0(Obio@parameterList$vars.to.regress, collapse = ", ")))
 
 sessionInfo()
 ```
