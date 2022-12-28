@@ -1,0 +1,1787 @@
+---
+title: "Part C - Formerly - Part D WYSIG External"
+author: "Stefan Boeing"
+date: 'Compiled: `r format(Sys.Date(), "%B %d, %Y")`'
+
+output: 
+    html_document:
+        code_folding: hide
+        df_print: tibble
+        toc: true
+        toc_depth: 3
+        toc_float: true
+        css:
+
+always_allow_html: yes
+
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+    tidy = TRUE,
+    tidy.opts = list(width.cutoff = 120),
+    message = FALSE,
+    warning = FALSE
+)
+```
+
+
+## Part B Database
+
+
+```{r hpc_notes, include=FALSE}
+
+## R version for this analysis 
+# module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a
+
+```
+
+
+```{r populate_meta_data_database, eval=TRUE, echo=F, results=F}
+## libraries ##
+#library(tidyverse)
+
+#library(scales)
+
+projectDir <- gsub("scripts/scRNAseq/analyses/Main_Analysis", "", getwd())
+workdir <- gsub("scripts/scRNAseq/analyses/Main_Analysis","workdir/",getwd())
+
+
+VersionPdfExt <- paste0(".V", gsub("-", "", Sys.Date()), ".pdf")
+
+if (dir.exists("/Volumes/babs/working/boeings/")){
+    hpc.mount <- "/Volumes/babs/working/boeings/"
+} else if (dir.exists("Y:/working/boeings/")){
+    hpc.mount <- "Y:/working/boeings/"
+} else if (dir.exists("/camp/stp/babs/working/boeings/")){
+    hpc.mount <- "/camp/stp/babs/working/boeings/"
+} else {
+    hpc.mount <- ""
+}
+
+## Loading the BABS password ##
+#if (upload.results.to.database){
+    FN <- paste0(hpc.mount, "Projects/reference_data/pwd_folder/babs.txt")
+    dbTable <- read.delim(
+      FN,
+      header = F,
+      sep = "\t",
+      stringsAsFactors = F
+    )
+#}
+db.pwd <- as.vector(dbTable[1,1])
+
+###############################################################################
+##                                                                           ##
+# if (!requireNamespace("remotes")){
+#     install.packages("remotes")
+# }
+
+
+
+if (file.exists("renv.lock")){
+    renv::restore(prompt = FALSE)
+} else {
+    renv::init()
+}
+
+# remotes::install_github("rstudio/renv")
+# renv::install("rstudio/renv")
+## Done                                                                      ##
+###############################################################################
+
+#install.packages("remotes")
+# renv::install("decusInLabore/biologicSeqTools2")
+# renv::install("decusInLabore/biologicToolsSC")
+# renv::install("decusinlabore/biologicViewerSC")
+
+library(Seurat)
+library(tidyverse)
+library(biologicSeqTools2)
+library(biologicToolsSC)
+
+
+# source("assets/R/scTools.r")
+# source("assets/R/SBwebtools.pckg.r")
+source("load.biologic.robj.R")
+# ObioFN <- paste0("../", list.files("..")[grep(".bioLOGIC.Robj", list.files(".."))])
+# 
+# if (file.exists(ObioFN)){
+#     load(paste0(ObioFN))
+#     print(paste0("Obio object ", Obio@parameterList$localWorkDir, ObioFN, " exists and is loaded."))
+# } else {
+#     exit()
+# }
+
+## Reset paths to local environment
+# Obio <- Obio %>% 
+#     biologicSeqTools2::setMountingPoint()  %>% 
+#     biologicSeqTools2::setAnalysisPaths() %>% 
+#     biologicSeqTools2::setCrickGenomeAndGeneNameTable() %>% 
+#     biologicSeqTools2::createAnalysisFolders() %>% 
+#     biologicSeqTools2::setDataBaseParameters()
+
+
+
+
+## Load Seurat object
+SeuratFN <- paste0(Obio@parameterList$localWorkDir,list.files(Obio@parameterList$localWorkDir)[grep(".Seurat.Robj", list.files(Obio@parameterList$localWorkDir))])
+
+
+if (file.exists(SeuratFN)){
+    load(SeuratFN)
+    print(paste0("Obio object ", Obio@parameterList$localWorkDir,SeuratFN, " exists and is loaded."))
+    
+} else {
+    exit()
+}
+
+row.names(OsC@meta.data) <- OsC@meta.data$cellID
+
+if (Obio@parameterList$scIntegrationMethod == "SCT"){
+    resultSlot = "SCT"
+} else {
+    resultSlot = "RNA"
+}
+
+
+print("End chunk 1. Objects loaded.")
+```
+
+```{r old_res, eval=TRUE, echo=F, results=F}
+
+
+
+
+###############################################################################
+## Create PCA Table                                                          ##
+
+###############################################################################
+## Customization in this project                                             ##
+
+
+
+
+# ###############################################################################
+# ## Load extra annotation data                                                ##
+# FN <- "/camp/stp/babs/working/boeings/Projects/leys/joan.manils/383_SLL_JM_singleCellRNASeq_PatSkinDisease_EGAS00001002927/basedata/publication_celldata_extraCol_selection.txt"
+# 
+# dfExtra <- read.delim(
+#     FN,
+#     header = T,
+#     sep = "\t",
+#     stringsAsFactors = F
+# )
+# 
+# dfExtra[["newSampleID"]] <- dfExtra$sampleID
+# dfExtra$newSampleID <- gsub("fore8", "Foreskin5", dfExtra$newSampleID)
+# dfExtra$newSampleID <- gsub("fore9", "Foreskin6", dfExtra$newSampleID)
+# dfExtra$newSampleID <- gsub("fore12", "Foreskin4", dfExtra$newSampleID)
+# dfExtra$newSampleID <- gsub("abd4", "Trunk1", dfExtra$newSampleID)
+# dfExtra$newSampleID <- gsub("br41epi", "Trunk2", dfExtra$newSampleID)
+# dfExtra$newSampleID <- gsub("br53epi", "Trunk3", dfExtra$newSampleID)
+# dfExtra$newSampleID <- gsub("s11", "Scalp10", dfExtra$newSampleID)
+# dfExtra$newSampleID <- gsub("scalp26", "Scalp11", dfExtra$newSampleID)
+# dfExtra$newSampleID <- gsub("scalp32", "Scalp12", dfExtra$newSampleID)
+# dfExtra$newSampleID <- gsub("pso14", "_", dfExtra$newSampleID)
+# 
+# 
+# dfExtra$cellID <- gsub("-", "_", dfExtra$cellID)
+# 
+#              
+#  [8]   
+# 
+# dfExtra <- dfExtra[dfExtra$cell %in% row.names(OsC@meta.data),]
+# 
+# names(dfExtra) <- gsub("^cluster$", "Article_Cluster", names(dfExtra))
+# names(dfExtra) <- gsub("^CellType$", "Article_Cell_Type", names(dfExtra))
+# names(dfExtra) <- gsub("^CellType$", "Article_Cell_Type", names(dfExtra))
+# names(dfExtra) <- gsub("^CellType$", "Article_Cell_Type", names(dfExtra))
+# 
+# dfExtra[["Patient"]] <- sapply(dfExtra$Patient_piece, function(x) unlist(strsplit(x, "_"))[1])
+# dfExtra$Patient <- paste0("P", dfExtra$Patient)
+# dfExtra[["Region"]] <- sapply(dfExtra$Patient_piece, function(x) unlist(strsplit(x, "_"))[2])
+# dfExtra$CellFromTumor <- as.character(dfExtra$CellFromTumor)
+# dfExtra$CellFromTumor[dfExtra$CellFromTumor == "TRUE"] <- "Tumor"
+# dfExtra$CellFromTumor[dfExtra$CellFromTumor == "FALSE"] <- "Non-Tumor"
+# 
+# 
+# 
+# row.names(dfExtra) <- dfExtra$cell
+# 
+# selVec <- c("CellFromTumor", "Patient", "Region")
+# dfAdd <- dfExtra[,selVec]
+# 
+# OsC <- addDf2seuratMetaData(
+#             obj = OsC,
+#             dfAdd = dfAdd
+#         )
+# 
+# ## Done extra annotation                                                     ##
+# ###############################################################################
+
+
+
+
+
+#dfdbTable[["cellID"]] <- row.names(dfdbTable)  
+# if (is.null(dfdbTable)){
+#     dfdbTable <- OsC@meta.data
+# }
+
+
+# clusterIDs <- as.vector(sort(unique(dfdbTable[, "seurat_clusters"])))
+# 
+# 
+# 
+# for (i in 1:length(clusterIDs)){
+#     dfdbTable[dfdbTable[, "hmIdent"] == clusterIDs[i], "uniquecellID"] <- paste0(
+#         dfdbTable[dfdbTable[, "hmIdent"] == clusterIDs[i], "sampleID"],
+#         "_",
+#         "Cluster", 
+#         dfdbTable[dfdbTable[, "hmIdent"] == clusterIDs[i], Obio@parameterList$singleCellClusterString],
+#         "_", 
+#         1:nrow(dfdbTable[dfdbTable[, "hmIdent"] == clusterIDs[i], ] )
+#     )
+# }
+
+#dfdbTable[["cellID"]] <- paste0(dfdbTable$sampleID, "_Cluster", dfdbTable[, Obio@parameterList$singleCellClusterString]) #row.names(dfdbTable)
+#dfdbTable[["meta_Mouse"]] <- substr(dfdbTable$cellID, 1, 2)
+
+## Assign colors ##
+
+
+###############################################################################
+## Add additional UMAP annotations
+addFNvec <- c(
+  paste0(workdir, "temp/UMAP.regression.coordinates.txt"),
+  paste0(workdir, "temp/ClusterFinder.output.txt"),
+  paste0(workdir, "temp/species.inference.txt)")
+)
+
+row.names(OsC@meta.data) <- OsC@meta.data$cellID
+
+OsC@meta.data$S_Score.1 <- NULL
+OsC@meta.data$G2M_Score.1 <- NULL
+OsC@meta.data$old_ident.1 <- NULL
+OsC@meta.data$G2M.Score <- NULL
+OsC@meta.data$S.Score <- NULL
+OsC@meta.data$old_ident <- NULL
+OsC@meta.data$S_Score_1 <- NULL
+OsC@meta.data$G2M_Score_1 <- NULL
+OsC@meta.data$old_ident_1 <- NULL
+
+
+for (i in 1:length(addFNvec)){
+    if (file.exists(addFNvec[i])){
+        dfAdd <- read.delim(
+            addFNvec[i],
+            header = T, 
+            sep = "\t",
+            stringsAsFactors = F
+        )
+        
+        row.names(dfAdd) <- dfAdd$cellID
+        dfAdd$cellID <- NULL
+        dfAdd <- dfAdd[row.names(dfAdd) %in% OsC@meta.data$cellID,]
+        
+        OsC <- addDf2seuratMetaData(
+            obj = OsC,
+            dfAdd = dfAdd
+        )
+    }
+}
+
+
+
+
+
+
+dfdbTable <- OsC@meta.data  
+
+dfdbTable[["sample_group"]] <- dfdbTable$clusterName
+dfdbTable[["sample_group"]] <- dfdbTable$clusterName
+dfdbTable[["sample_group_colors"]] <- dfdbTable$clusterColor
+
+
+###############################################################################
+## Add Sample and G2M colors if available                                    ##
+# if (length(grep("sampleID", names(dfdbTable))) > 0){
+#     identities <- levels(factor(OsC@meta.data[,"sampleID"]))
+#     sample_group_colors <- hue_pal()(length(identities))
+#     
+#     dfdbTable[["sampleID_colors"]] <- dfdbTable[["sampleID"]]
+#     
+#     for (i in 1:length(identities)){
+#         dfdbTable$sampleID_colors <- gsub(identities[i], sample_group_colors[i], dfdbTable$sampleID_colors)
+#     }
+# }
+# 
+# ## G2M colors ##
+# if (length(grep("Phase", names(dfdbTable))) > 0){
+#     identities <- levels(factor(OsC@meta.data[,"Phase"]))
+#     sample_group_colors <- hue_pal()(length(identities))
+#     
+#     dfdbTable[["Phase_colors"]] <- dfdbTable[["Phase"]]
+#     
+#      for (i in 1:length(identities)){
+#         dfdbTable$Phase_colors <- gsub(identities[i], sample_group_colors[i], dfdbTable$Phase_colors)
+#     }
+# }
+
+if (length(grep("DF_Classification", names(dfdbTable)) > 0)){
+    #######################
+    ## Edit singlet and doublet
+    dfdbTable$DF_Classification <- gsub(
+        "Singlet", 1, dfdbTable$DF_Classification)
+    
+    dfdbTable$DF_Classification <- gsub(
+        "Doublet", 2, dfdbTable$DF_Classification)
+    
+    dfdbTable$DF_Classification <- as.numeric(dfdbTable$DF_Classification)
+    ## done
+    ########################
+}
+
+##
+###############################################################################  
+  
+###############################################################################
+## Add additonal classifications                                             ##
+
+# dfdbTable[["Sample_Group"]] <- ""
+# groupLength <- nchar(dfdbTable$Sample_Group)
+# groupLength <- groupLength -1
+# dfdbTable[["Sample_Group"]] <- substr(dfdbTable$sampleID, 1, groupLength)
+
+##
+###############################################################################
+
+pos <- grep("integrated_", names(dfdbTable))
+if (length(pos) > 0){
+    dfdbTable <- dfdbTable[,-pos]
+}
+
+
+pos <- grep("snn_", names(dfdbTable))
+if (length(pos) > 0){
+    dfdbTable <- dfdbTable[,-pos]
+}
+
+
+names(dfdbTable) <- gsub("\\.", "_", names(dfdbTable))
+
+biologicSeqTools2::upload.datatable.to.database(
+    host = Obio@dbDetailList$host,
+    user = Obio@dbDetailList$db.user,
+    password = db.pwd,
+    prim.data.db = Obio@dbDetailList$primDataDB,
+    dbTableName = Obio@parameterList$PCAdbTableName,
+    df.data = dfdbTable,
+    db.col.parameter.list = biologicSeqTools2::inferDBcategories(dfdbTable),
+    new.table = TRUE
+)
+
+killDbConnections()
+
+```
+
+```{r create_app_upload_tables, eval=TRUE, echo=F, results=F}
+
+
+
+#remotes::install_github("decusInLabore/biologicSeqTools")
+#remotes::install_github("decusinlabore/biologicViewerSC")
+
+###############################################################################
+## Step 1: Load Exampe Seurat object                                         ##
+
+library(Seurat)
+library(dplyr)
+library(biologicViewerSC)
+library(biologicSeqTools2)
+
+###############################################################################
+## Determine default gene                                                    ##
+
+DefaultAssay(OsC) <- "RNA"
+my_genes <- rownames(x = OsC@assays$RNA)
+
+
+## Based on https://github.com/satijalab/seurat/issues/3560 the next two lines were 
+# added/altered:
+# in large datasets fetch data produces errors. After some trial and error, 
+# breaking down the problem into chunks seems to solve the problem. 
+cells <- row.names(OsC@meta.data)
+cellList <- split(cells, ceiling(seq_along(cells)/10000))
+
+## Define helper function ##
+subset_fun <- function(obj, cellIDs, assay = "RNA") {
+  z <- subset(obj, subset = cellID %in% cellIDs)[[assay]]@data %>%
+    data.frame() %>%
+    tibble::rownames_to_column(var = "gene") %>%
+    tidyr::pivot_longer(
+      !gene,
+      names_to = "cellID",
+      values_to = "lg10Expr"
+    ) %>%
+    filter(lg10Expr > 0)
+    return(z)
+}
+## End of helper function
+
+## Add cellID column ##
+pos <- grep("cellID", names(OsC@meta.data))
+if (length(pos) == 0){
+    OsC@meta.data[["cellID"]] <- row.names(OsC@meta.data)
+}
+
+####################################################
+## Create long-format list with expression values ##
+dfExpr <- purrr::map(cellList, function(x) subset_fun(obj=OsC, cellIDs = x)) %>%
+    dplyr::bind_rows() %>%
+    data.frame()
+## Done                                           ##
+####################################################
+
+
+## Define helper function ##
+perc_fun <- function(obj, genes, assay = "RNA") {
+  z <- subset(obj, features = genes)[[assay]]@data
+  
+  z[z > 0] <- 1  
+  ExprMatrix <- round(( rowSums(z) / ncol(z) ) * 100, 1 )
+  dfExprMatrix <- data.frame(ExprMatrix)
+  dfExprMatrix[["gene"]] <- row.names(dfExprMatrix)
+  colnames( dfExprMatrix )[1] <- "count_cut_off"
+  return(dfExprMatrix)
+}
+
+#####################################################
+## Calculate perc expression for all genes         ##
+
+allGenes <- row.names(OsC)
+geneList <- split(allGenes, ceiling(seq_along(allGenes)/500))
+
+## To speed up calculations, large datasets 
+
+dfPercCellsExpr <- purrr::map(geneList, function(x) perc_fun(obj=OsC, genes = x)) %>%
+    dplyr::bind_rows() %>%
+    data.frame()
+
+## Done                                            ##
+#####################################################
+
+#dfPercCellsExpr <- dfExprMatrix
+dfPercCellsExpr <- dfPercCellsExpr[dfPercCellsExpr$gene %in% Obio@dataTableList$referenceList$integrated_top30var, ]
+dfPercCellsExpr <- dfPercCellsExpr[order(dfPercCellsExpr$count_cut_off, decreasing = T),]
+
+# for (i in 1:length(cellList)){
+#     expTemp <- Seurat::FetchData(OsC, vars = my_genes, cells = cellList[[i]] )
+#     if (i == 1){
+#         exp <- expTemp
+#     } else {
+#         exp <- rbind(exp, expTemp[,colnames(exp)])
+#     }
+#     print(i)
+# }
+
+#exp <- FetchData(OsC, vars = my_genes, cells = cells )
+## End change 2022 03 21
+
+
+
+geneDefault <- as.vector(dfPercCellsExpr[1,"gene"])
+
+if (is.na(geneDefault)){
+  if (Obio@parameterList$geneIDcolumn == "mgi_symbol"){
+    geneDefault = "GAPDH"  
+  } else {
+    geneDefault = "Gapdh"
+  }
+  
+}
+
+
+
+## Done                                                                      ##
+###############################################################################
+
+
+
+if (Obio@dbDetailList$host == "10.27.241.234"){
+    shinyBasePath <- "/camp/stp/babs/www/shiny/internal/users/boeings/"
+    FvDir <- Obio@parameterList$html_local
+    if (!dir.exists(FvDir)){
+        dir.create(FvDir, recursive=T)
+    }
+
+} else {
+    if (dir.exists("/camp/stp/babs/www/shiny/external/users/boeings/")){
+        shinyBasePath <- "/camp/stp/babs/www/shiny/external/users/boeings/"  
+    } else {
+        shinyBasePath <- "../"
+    }
+    
+  
+    FvDir <- Obio@parameterList$html_local
+
+}
+
+
+shinyProjectPath <-paste0(
+    shinyBasePath, 
+    Obio@parameterList$project_id, "_app"
+)
+
+names(OsC@meta.data) <- gsub("\\.", "_", names(OsC@meta.data))
+OsC@meta.data <- OsC@meta.data[,!duplicated(names(OsC@meta.data))]
+
+params <- biologicViewerSC::scanObjParams(OsC)
+
+
+###############################################################################
+## Add custom cluster annotation if specified                                ##
+cwd <- getwd()
+tableValid <- FALSE
+colVec <- as.vector(NULL, mode = "character")
+
+## Load cluster annotation
+FNcolCustom <- paste0(cwd, "/design/customClusterAnnotation.txt")
+FNcol <- paste0(cwd, "/design/clusterAnnotation.txt")
+
+
+
+
+if (file.exists(FNcol) | file.exists(FNcolCustom)){
+    if (file.exists(FNcolCustom)){
+        dfClusterAnnotation <- read.delim(
+          FNcolCustom, 
+          header = T, 
+          sep = "\t",
+          stringsAsFactors = F
+        )
+    } else if (file.exists(FNcol)){
+        dfClusterAnnotation <- read.delim(
+        FNcol, 
+        header = T, 
+        sep = "\t",
+        stringsAsFactors = F
+        )
+    }
+    
+    ## Check column names ##
+    pos1 <- grep("seurat_clusters", names(dfClusterAnnotation))
+    pos2 <- grep("clusterName", names(dfClusterAnnotation))
+    pos3 <- grep("clusterColor", names(dfClusterAnnotation))
+    
+    ## Check if clusters match ##
+    inClust <- unique(as.character(dfClusterAnnotation$seurat_clusters))
+    oClust <- unique(as.character(OsC@meta.data$seurat_clusters))
+    
+    
+    if (length(pos1) != 0 & length(pos2) != 0 & length(pos3) != 0 ){
+        ## Remove spaces ##
+        dfClusterAnnotation$clusterName <- gsub(" ", "_", dfClusterAnnotation$clusterName)
+        dfClusterAnnotation$clusterName <- gsub("\\.", "_", dfClusterAnnotation$clusterName)
+        dfClusterAnnotation$clusterName <- gsub("-", "_", dfClusterAnnotation$clusterName)
+        dfClusterAnnotation$clusterName <- gsub("__", "_", dfClusterAnnotation$clusterName)
+        dfClusterAnnotation$clusterName <- gsub("_$", "", dfClusterAnnotation$clusterName)
+        ## Check if clusters match ##
+        inClust <- unique(as.character(dfClusterAnnotation$seurat_clusters))
+        oClust <- unique(as.character(OsC@meta.data$seurat_clusters))
+        if (length(inClust) == length(intersect(inClust, oClust))){
+            tableValid <- TRUE
+            dfTemp <- unique(dfClusterAnnotation[,c("clusterName", "clusterColor")])
+            colVec <- dfClusterAnnotation$clusterColor
+            names(colVec) <- dfClusterAnnotation$clusterName
+        } else {
+            tableValid <- FALSE
+            colVec <- as.vector(NULL, mode = "character")
+        } 
+    }
+  } 
+
+
+if (length(params$catColorList$clusterName) == length(colVec)){
+    params$catColorList$clusterName <- colVec
+    params$catColorList$clusterColor <-  colVec
+}
+## Review the default app settings and colors:
+
+
+
+```
+
+
+
+
+```{r, eval=FALSE, echo=F, results=F}
+
+###############################################################################
+## Add Categories to dfExpr                                                  ##
+pos <- grep("dfResAUC", names(Obio@dataTableList))
+
+if (length(pos) > 0) {
+    dfCat <- Obio@dataTableList$dfResAUC
+    names(dfCat) <- gsub("cat", "gene", names(dfCat))
+    names(dfCat) <- gsub("mAUC", "expr", names(dfCat))
+    names(dfCat) <- gsub("cellID", "condition", names(dfCat))
+    dfCat <- dfCat[dfCat$expr != 0,]
+    dfCat <- dfCat[,names(dfExpr)]
+    dfExpr <- rbind(dfExpr, dfCat)
+}
+
+## Done                                                                      ##
+###############################################################################
+
+###############################################################################
+## Add ADT counts                                                            ##
+pos <- grep("dfResADT", names(Obio@dataTableList))
+
+if (length(pos) > 0) {
+    dfCat <- Obio@dataTableList$dfResADT
+ 
+    names(dfCat) <- gsub("cellID", "condition", names(dfCat))
+    dfCat <- dfCat[dfCat$expr != 0,]
+    dfCat <- dfCat[,names(dfExpr)]
+    dfExpr <- rbind(dfExpr, dfCat)
+}
+
+## Done adding ADT counts                                                    ##
+###############################################################################
+
+#Obio@dataTableList[["dfExpr"]] <- dfExpr
+dfIDTable <- dfExpr
+
+dfIDTable[["gene_id"]] <- 0
+
+dfIDTable <- unique(dfIDTable[,c("gene", "gene_id")])
+dfIDTable <- dfIDTable[order(dfIDTable$gene, decreasing = F), ]
+
+dfIDTable[["gene_id"]] <- 1:nrow(dfIDTable)
+
+upload.datatable.to.database(
+    host = Obio@dbDetailList$host,
+    user = Obio@dbDetailList$db.user,
+    password = db.pwd,
+    prim.data.db = Obio@dbDetailList$primDataDB,
+    dbTableName = paste0(Obio@parameterList$project_id, "_geneID_tb"),
+    df.data = dfIDTable,
+    db.col.parameter.list = list(
+        "BIGINT(8) NULL DEFAULT NULL" = c("row_names"),
+        "VARCHAR(100) CHARACTER SET utf8 COLLATE utf8_general_ci" = c("gene"),
+        "INT(8) NULL DEFAULT NULL" = c("gene_id")
+    ),
+    new.table = T,
+    cols2Index = c("gene")
+)
+
+
+## Breakdown into chunks to make it more memory friendly ##
+## 2022 03 21
+# cells <- row.names(OsC@meta.data)
+# cellList <- split(cells, ceiling(seq_along(cells)/50000))
+# 
+# for (i in 1:length(cellList)){
+#     tempOsC <- subset(OsC, subset = cellID %in% cellList[[i]])
+#     dfTempExpr <- data.frame(tempOsC[[resultSlot]]@data)
+#     dfTempExpr[["gene"]] <- row.names(dfTempExpr)
+#     dfTempExpr <- gather(
+#         dfTempExpr, 
+#         condition, 
+#         expr, 1:(ncol(dfTempExpr)-1), 
+#         factor_key=TRUE
+#     )
+#     dfTempExpr <- dfTempExpr[dfTempExpr$expr != 0,]
+#     
+#     if (i == 1){
+#         dfExpr <- dfTempExpr
+#     } else {
+#         dfExpr <- rbind(dfTempExpr, dfExpr)
+#     }
+# }
+
+## end of change 2022 03 21
+
+# Switched out 2022 03 21
+# dfExpr <- data.frame(OsC[["RNA"]]@data)
+# dfExpr[["gene"]] <- row.names(dfExpr)
+# dfExpr <- gather(
+#     dfExpr,
+#     condition,
+#     expr, 1:(ncol(dfExpr)-1),
+#     factor_key=TRUE
+# )
+# dfExpr <- dfExpr[dfExpr$expr != 0,]
+
+###############################################################################
+## Add Categories                                                            ##
+pos <- grep("dfResAUC", names(Obio@dataTableList))
+
+if (length(pos) > 0) {
+    dfCat <- Obio@dataTableList$dfResAUC
+    names(dfCat) <- gsub("cat", "gene", names(dfCat))
+    names(dfCat) <- gsub("mAUC", "expr", names(dfCat))
+    names(dfCat) <- gsub("cellID", "condition", names(dfCat))
+    dfCat <- dfCat[dfCat$expr != 0,]
+    dfCat <- dfCat[,names(dfExpr)]
+    dfExpr <- rbind(dfExpr, dfCat)
+}
+
+## Done                                                                      ##
+###############################################################################
+
+###############################################################################
+## Add ADT counts                                                            ##
+pos <- grep("dfResADT", names(Obio@dataTableList))
+
+if (length(pos) > 0) {
+    dfCat <- Obio@dataTableList$dfResADT
+ 
+    names(dfCat) <- gsub("cellID", "condition", names(dfCat))
+    dfCat <- dfCat[dfCat$expr != 0,]
+    dfCat <- dfCat[,names(dfExpr)]
+    dfExpr <- rbind(dfExpr, dfCat)
+}
+
+## Done adding ADT counts                                                    ##
+###############################################################################
+
+names(dfExpr) <- gsub("condition", "cellID", names(dfExpr))
+names(dfExpr) <- gsub("expr", "lg10Expr", names(dfExpr))
+dfExpr$lg10Expr <- round(dfExpr$lg10Expr, 3)
+
+## Order by gene_id
+dfExpr <- dfExpr[order(dfExpr$gene, decreasing = F),]
+dfExpr[["row_names"]] <- 1:nrow(dfExpr)
+#dfExpr.store <- dfExpr
+
+
+
+###############################################################################
+##
+print("Creating data viewer...")
+
+biologicViewerSC::seuratObjectToViewer(
+    params = params,
+    project_id = Obio@parameterList$project_id,
+    projectPath = shinyBasePath,
+    OsC = OsC,
+    dataMode = "MySQL",
+    host = Obio@dbDetailList$host,
+    dbname = Obio@dbDetailList$primDataDB,
+    db.pwd = db.pwd,
+    db.user = Obio@dbDetailList$db.user,
+    appDomains = c("shiny-bioinformatics.crick.ac.uk","10.%", "bioinformatics.crick.ac.uk"),
+    geneDefault = geneDefault,
+    dfExpr = dfExpr
+)
+
+print("...done.")
+##                                                                           ##
+###############################################################################
+
+
+```
+
+
+```{r populate_expr_database, eval=TRUE, echo=F, results=F}
+### Create main database table 
+
+## Part 1 get annotation ##
+library(tidyr)
+library(Seurat)
+
+
+
+Obio <- addGeneAnnotation(Obio)
+dfAnno <- Obio@dfGeneAnnotation
+
+if (length(unique(OsC@meta.data$sampleID)) > 1){
+    dfNormCounts <- Obio@dataTableList$dfAvglg10ExprByClusterBySample
+} else {
+    dfNormCounts <- Obio@dataTableList$dfAvglg10ExprPerCluster
+}
+
+###############################################################################
+## Calculate by Gene correlations
+
+## Done calculating correlations by gene
+############################################################
+
+#dfNormCounts <- spread(data = dfNormCounts, key=condition, value=measurement)
+#names(dfNormCounts) <- paste0("norm_counts_", names(dfNormCounts))
+#names(dfNormCounts) <- gsub("norm_counts_gene", "gene", names(dfNormCounts))
+
+names(dfNormCounts) <- paste0("norm_counts_Avg_log10_Expr_", names(dfNormCounts) )
+names(dfNormCounts) <- gsub( "norm_counts_Avg_log10_Expr_gene", "gene", names(dfNormCounts))
+
+
+## Assemble database table ##
+dfAnno  <- unique(dfAnno[dfAnno[, Obio@parameterList$geneIDcolumn] %in% unique(dfNormCounts$gene), ])
+database.table <- merge(
+    dfAnno, 
+    dfNormCounts,
+    by.x = Obio@parameterList$geneIDcolumn,
+    by.y = "gene",
+    all = TRUE
+)
+
+database.table[is.na(database.table)] <- 0
+
+nrow(database.table[database.table[,Obio@parameterList$geneIDcolumn] == 0,])
+
+###############################################################################
+## Add lg2 avg precorsour                                                    ##
+
+if (length(unique(OsC@meta.data$sampleID)) > 1){
+dflg2Avg <- Obio@dataTableList$dfAvglg10ExprByClusterBySampleScaled
+} else {
+    dflg2Avg <- Obio@dataTableList$dfAvglg10ExprPerClusterScaled
+}
+names(dflg2Avg) <- paste0("Avg_log10_Expr_Sc_", names(dflg2Avg) )
+names(dflg2Avg) <- gsub( "Avg_log10_Expr_Sc_gene", "gene", names(dflg2Avg))
+
+database.table <- merge(
+   database.table,
+   dflg2Avg,
+   by.x = Obio@parameterList$geneIDcolumn,
+   by.y = "gene",
+   all = TRUE
+)
+
+database.table[is.na(database.table)] <- 0
+
+## Done adding log2 average precursor                                        ##
+###############################################################################
+
+###############################################################################
+## Add percentage expressed genes                                            ##
+my_genes <- rownames(x = OsC@assays$RNA)
+
+## Based on https://github.com/satijalab/seurat/issues/3560 the next two lines were 
+# added/altered:
+# in large datasets fetch data produces errors. After some trial and error, 
+# breaking down the problem into chunks seems to solve the problem. 
+cells <- row.names(OsC@meta.data)
+cellList <- split(cells, ceiling(seq_along(cells)/10000))
+
+for (i in 1:length(cellList)){
+    expTemp <- FetchData(OsC, vars = my_genes, cells = cellList[[i]] )
+    if (i == 1){
+        exp <- expTemp
+    } else {
+        exp <- rbind(exp, expTemp[,colnames(exp)])
+    }
+    # print(i)
+}
+
+#exp <- FetchData(OsC, vars = my_genes, cells = cells )
+## End change 2022 03 21
+
+
+
+ExprMatrix <- round(as.matrix(colMeans(exp  > 0)) *100,1)
+colnames(ExprMatrix)[1] <- "count_cut_off"
+dfExprMatrix <- data.frame(ExprMatrix)
+dfExprMatrix[["gene"]] <- row.names(dfExprMatrix)
+
+database.table <- merge(
+    database.table, 
+    dfExprMatrix,
+    by.x = Obio@parameterList$geneIDcolumn,
+    by.y = "gene",
+    all = TRUE
+)
+
+## Done adding percentage expressed                                          ##
+###############################################################################
+
+###############################################################################
+## Add project cluster tables                                                ##
+addClusterMarkers2CatDisplay(
+  obj = Obio,
+  addCorCatsToLabDb = T
+)
+## Done adding project cluster table                                         ##
+###############################################################################
+
+
+###############################################################################
+## Add additonal columns for plotting                                        ##
+pos <- grep("^dfAvglg10ExprAll$", names(Obio@dataTableList))
+
+if (length(pos) > 0){
+    dfAddCounts <- Obio@dataTableList$dfAvglg10ExprAll
+    
+    #dfNormCounts <- spread(data = dfNormCounts, key=condition, value=measurement)
+    #names(dfNormCounts) <- paste0("norm_counts_", names(dfNormCounts))
+    #names(dfNormCounts) <- gsub("norm_counts_gene", "gene", names(dfNormCounts))
+    
+    names(dfAddCounts) <- paste0("add_counts_Avg_log10_Expr_", names(dfAddCounts) )
+    names(dfAddCounts) <- gsub( "add_counts_Avg_log10_Expr_gene", "gene", names(dfAddCounts))
+    
+    database.table <- merge(
+        database.table, 
+        dfAddCounts,
+        by.x = Obio@parameterList$geneIDcolumn,
+        by.y = "gene",
+        all = TRUE
+    )
+    
+    database.table[is.na(database.table)] <- 0
+
+}
+## Done adding additional cols for plotting                                  ##
+###############################################################################
+
+
+###############################################################################
+## Add additonal columns for plotting                                        ##
+dfAddCounts <- Obio@dataTableList$dfAvglg10ExprBySample
+
+#dfNormCounts <- spread(data = dfNormCounts, key=condition, value=measurement)
+#names(dfNormCounts) <- paste0("norm_counts_", names(dfNormCounts))
+#names(dfNormCounts) <- gsub("norm_counts_gene", "gene", names(dfNormCounts))
+
+names(dfAddCounts) <- paste0("add_counts_Avg_log10_Expr_", names(dfAddCounts) )
+names(dfAddCounts) <- gsub( "add_counts_Avg_log10_Expr_gene", "gene", names(dfAddCounts))
+
+database.table <- merge(
+    database.table, 
+    dfAddCounts,
+    by.x = Obio@parameterList$geneIDcolumn,
+    by.y = "gene",
+    all = TRUE
+)
+
+database.table[is.na(database.table)] <- 0
+
+## Done adding additional cols for plotting                                  ##
+###############################################################################
+
+###############################################################################
+## Add additonal columns for plotting              
+##
+if (length(unique(OsC@meta.data$sampleID)) > 1){
+    
+    dfAddCounts <- Obio@dataTableList$dfAvglg10ExprPerCluster
+    
+    #dfNormCounts <- spread(data = dfNormCounts, key=condition, value=measurement)
+    #names(dfNormCounts) <- paste0("norm_counts_", names(dfNormCounts))
+    #names(dfNormCounts) <- gsub("norm_counts_gene", "gene", names(dfNormCounts))
+    
+    names(dfAddCounts) <- paste0("add_counts_Avg_log10_Expr_", names(dfAddCounts) )
+    names(dfAddCounts) <- gsub( "add_counts_Avg_log10_Expr_gene", "gene", names(dfAddCounts))
+    
+    database.table <- merge(
+        database.table, 
+        dfAddCounts,
+        by.x = Obio@parameterList$geneIDcolumn,
+        by.y = "gene",
+        all = TRUE
+    )
+    
+    database.table[is.na(database.table)] <- 0
+}
+## Done adding additional cols for plotting                                  ##
+###############################################################################
+
+###############################################################################
+## Optional add extra data set                                                ##
+
+pos <- grep("^dfRefDatasets$", names(Obio@dataTableList))
+  
+if (length(pos) == 1){
+  dfAddCounts <- Obio@dataTableList[["dfRefDatasets"]]
+  checkGene <- grep(Obio@parameterList$geneIDcolumn, names(dfAddCounts))
+  if (length(checkGene) == 1){
+      ## Optional if only genes present in the primary dataset are to be added
+##dfAddCounts <- dfAddCounts[dfAddCounts$dr_symbol %in% database.table$dr_symbol, ]   
+      database.table <- merge(
+         database.table,
+         dfAddCounts,
+         by.x = Obio@parameterList$geneIDcolumn,
+         by.y = Obio@parameterList$geneIDcolumn,
+         all = TRUE
+      )
+      database.table[is.na(database.table)] <- 0
+  }
+  
+} ## Done adding reference table 
+
+
+
+
+## Done adding extra dataset                                                 ##
+###############################################################################
+
+###############################################################################
+## Add contrasts                                                             ##
+database.table[["contrast_X_logFC_Expressed_in_N_Percent_Cells"]] <- database.table$count_cut_off
+
+
+## Done adding contrasts                                                     ##
+###############################################################################
+
+###############################################################################
+## Add pca loadings for plotting                                             ##
+dfAdd <- Obio@dataTableList$dfPCAloadings
+
+if (!is.null(dfAdd)){
+    pcDims <- sort(unique(dfAdd$condition))
+    
+    if (length(pcDims) > 20){
+        pcDims <- pcDims[1:20]
+    }
+    
+    dfAdd <- dfAdd[dfAdd$condition %in% pcDims, ]
+    
+    dfAdd <- dfAdd %>% tidyr::spread(key=condition, value=measurement)
+    
+    names(dfAdd)[grep("PC_", names(dfAdd))] <- paste0("add_counts_", names(dfAdd)[grep("PC_", names(dfAdd))], "_Loadings")
+    names(dfAdd) <- gsub("PC_", "PCA_Dim_", names(dfAdd))
+    
+    database.table <- merge(
+        database.table, 
+        dfAdd,
+        by.x = Obio@parameterList$geneIDcolumn,
+        by.y = "gene",
+        all = TRUE
+    )
+    
+    database.table[is.na(database.table)] <- 0
+}
+
+## Done adding PCA loadings                                                  ##
+###############################################################################
+
+########################
+## Add differential genes
+
+# pos <- grep("^dfGeneralMarkers$", names((Obio@dataTableList)))
+# 
+# if (length(pos) > 0){
+#     if (nrow(Obio@dataTableList$dfGeneralMarkers) > 10){
+#         ## Add Cluster Markers ##
+#         dfDat <- Obio@dataTableList$dfGeneralMarkers
+#         clusterVec <- unique(as.vector(dfDat$cluster))
+#         for (i in 1:length(clusterVec)) {
+#             tag <- paste0("contrast_C", clusterVec[i], "_avg_diff_Cluster_", clusterVec[i])
+#             dfTemp <- dfDat[dfDat$cluster == clusterVec[i],]
+#             if (nrow(dfTemp) > 3){
+#                 dfTemp <- unique(dfTemp[,c("avg_diff", "gene")])
+#                 names(dfTemp) <- gsub("avg_diff", tag, names(dfTemp))
+#                 
+#                 database.table <- merge(
+#                     database.table, 
+#                     dfTemp, 
+#                     by.x = Obio@parameterList$geneID,
+#                     by.y = "gene",
+#                     all = TRUE
+#                 )
+#                 database.table[is.na(database.table)] <- 0
+#             }
+#         }
+#     }
+# }
+
+
+## Done
+###########################
+
+###############################################################################
+## Add cluster residuals                                                     ##
+
+pos <- grep("dfClusterResiduals", names(Obio@dataTableList))
+
+if (length(pos) == 1){
+
+dfAdd <- Obio@dataTableList$dfClusterResiduals
+names(dfAdd)[names(dfAdd) != "gene"] <- paste0(names(dfAdd)[names(dfAdd) != "gene"], "_Residuals")
+
+names(dfAdd)[grep("Residuals", names(dfAdd))] <- paste0("add_counts_", names(dfAdd)[grep("Residuals", names(dfAdd))])
+
+database.table <- merge(
+    database.table, 
+    dfAdd,
+    by.x = Obio@parameterList$geneIDcolumn,
+    by.y = "gene",
+    all = TRUE
+)
+
+database.table[is.na(database.table)] <- 0
+}
+
+## Done adding cluster residuals                                             ##
+###############################################################################
+
+###########################
+## Add differential gene expression
+pos <- grep("DGE_table", names(Obio@dataTableList))
+
+if (length(pos) > 0){
+    dfAdd <- Obio@dataTableList[[pos]]
+    rmVec <- grep("_padj_", names(dfAdd))
+    if (length(rmVec) > 0){
+        dfAdd <- unique(dfAdd[,-rmVec])
+    }
+    
+    database.table <- merge(
+        database.table, 
+        dfAdd, 
+        by.x = Obio@parameterList$geneID,
+        by.y = "gene",
+        all = TRUE
+    )
+    
+    database.table[is.na(database.table)] <- 0
+    
+}
+
+## Done
+#############################
+
+###########################
+## Variation
+pos <- grep("dfVariation", names(Obio@dataTableList))
+
+if (length(pos) > 0){
+    dfAdd <- Obio@dataTableList[[pos]]
+    #rmVec <- grep("_padj_", names(dfAdd))
+    #if (length(rmVec) > 0){
+    #    dfAdd <- unique(dfAdd[,-rmVec])
+    #}
+    
+    database.table <- merge(
+        database.table, 
+        dfAdd, 
+        by.x = Obio@parameterList$geneIDcolumn,
+        by.y = "gene",
+        all = TRUE
+    )
+    
+    database.table[is.na(database.table)] <- 0
+    
+}
+
+## Done
+#############################
+
+###############################################################################
+## Create main database table                                                ##
+## Select for heatmap ##
+# df.summary <- selectHeatmapGenes(
+#     dfData = df.summary,
+#     cutOff =0.0000001,
+#     zeroOneCol = "logFC_cut_off",
+#     selCol = "_logFC_",
+#     geneID = Obio@parameterList$geneIDcolumn
+# )
+
+database.table[["logFC_cut_off"]] <- 0
+
+logCO <- as.vector(Obio@dataTableList$referenceList$integrated_top2000var)
+
+
+logCO <- logCO[logCO %in% database.table[database.table$count_cut_off > Obio@parameterList$singleCellPercExpressedMinCutOff, Obio@parameterList$geneIDcolumn]]
+
+database.table[database.table[,Obio@parameterList$geneIDcolumn] %in% logCO, "logFC_cut_off"] <- 1
+
+
+#setwd(Obio@parameterList$localWorkDir)
+Obio@databaseTable <- datatable.to.website.ptm(
+    df.data = database.table,
+    gene.id.column = Obio@parameterList$geneIDcolumn,
+    heatmap.genes = "",
+    n.cluster.genes = 2000,
+    count.data = F,
+    logFC.cut.off = 1,
+    #use.logFC.columns.for.heatmap = FALSE,
+    selector4heatmap.cols = "Avg_log10_Expr_Sc_",
+    heatmap.preprocessing = "none", # possible: "lg2", "lg2.row.avg", "none"
+    hm.cut.off = 3,
+    n.hm.cluster = 10,
+    count.cut.off.filter = 0
+)
+
+rmVec <- grep("^Avg_log10_Expr_Sc_", names(Obio@databaseTable))
+ if (length(rmVec) > 0){
+     Obio@databaseTable <- Obio@databaseTable[, -rmVec]
+ }
+
+## Clean up ##
+
+
+## Done creating main database table                                         ##
+###############################################################################
+
+
+
+
+
+###############################################################################
+# Upload to database                                                          #
+###############################################################################
+Obio@databaseTable$Gene_description <- NULL
+
+
+cmd.vec <- upload.datatable.to.database(
+    host = Obio@dbDetailList$host, 
+    user = Obio@dbDetailList$db.user,
+    password = db.pwd,
+    prim.data.db = Obio@dbDetailList$primDataDB,
+    dbTableName = Obio@parameterList$rnaseqdbTableName,
+    df.data = Obio@databaseTable, #[Obio@databaseTable$count_cut_off > 1, ],
+    db.col.parameter.list = biologicSeqTools2::inferDBcategories(Obio@databaseTable),
+    new.table = TRUE,
+    cols2Index = c(Obio@parameterList$geneIDcolumn)
+)
+
+killDbConnections()
+
+```
+
+```{r create_ref, eval=TRUE, echo=F, results=F}
+
+if (Obio@parameterList$geneIDcolumn != "mgi_symbol" & Obio@parameterList$geneIDcolumn != "hgnc_symbol") {
+    queryGS <- "hgnc_symbol" 
+} else {
+    queryGS <- Obio@parameterList$geneIDcolumn
+}
+
+labCatName <-  paste0(Obio@parameterList$labname, " Lab")
+
+if (is.null(Obio@referenceTableList)){
+Obio@referenceTableList <- list(
+    "Hallmark Signatures" = "mysigdb_h_hallmarks",
+    "Pathways" = "mysigdb_c2_1329_canonical_pathways",
+    "GO-BP" = "mysigdb_c5_BP",
+    "GO-BP" = "GO_Biological_Process_2017",
+    "GO-MF" = "mysigdb_c5_MF",
+    "TF Motifs" = "TRANSFAC_and_JASPAR_PWMs",
+    "Protein Complexes" = "networkcategories",
+    "Allen Brain Atlas" = "Allen_Brain_Atlas"
+)
+}
+
+if (!is.null(Obio@parameterList$lab.categories.table)){
+    Obio@referenceTableList[[labCatName]] <- Obio@parameterList$lab.categories.table
+}
+
+## Define relevant genes for selection ##
+relevant.genes <- as.vector(
+    unique(
+        Obio@databaseTable[Obio@databaseTable$cluster_order, queryGS]
+    )
+)
+
+length(relevant.genes)
+Obio@parameterList$ref.cat.db <- "reference_categories_db_new"
+
+for (i in 1:length(Obio@referenceTableList)) {
+    df.ref <- import.db.table.from.db(
+        dbname = Obio@parameterList$ref.cat.db,
+        dbtable = Obio@referenceTableList[[i]],
+        user = Obio@dbDetailList$db.user,
+        password = db.pwd,
+        host = Obio@dbDetailList$host
+    )
+    
+    ## Remove temp categories ##
+    temPos <- grep("temp_", df.ref$cat_type)
+    
+    if (length(temPos) > 0) {
+        df.ref <- df.ref[-temPos,]
+    }
+    
+    df.temp <- add2labCatSelectionDBtable(
+        df.ref = df.ref,
+        cat_group_name = names(Obio@referenceTableList)[i],
+        reference.gene.vector = relevant.genes,
+        ref.gene.vec.id =  queryGS,
+        cat_views = NA
+    )
+    
+    if (i == 1) {
+        df.db.table <- df.temp
+    } else {
+        df.db.table <- rbind(df.temp, df.db.table)
+    }
+}
+
+###############################################################################
+## Filter cat dataset                                                        ##
+###############################################################################
+## Remove all datasets with less than 5 proteins matched
+catIdGroupsExemptFromFiltering <- c(
+    Obio@parameterList$lab.categories.table,
+    "mysigdb_c5_BP",
+    "GO_Biological_Process_2017",
+    "mysigdb_sc_sig",
+    "cibersort_L22"
+)
+
+
+dfUnfiltered <- df.db.table[as.vector(unlist(sapply(catIdGroupsExemptFromFiltering, function(x) grep(x, df.db.table$cat_id)))),]    
+
+dim(df.db.table)
+#df.db.table <- df.db.table[df.db.table$cat_count >= 3,]
+dim(df.db.table)
+
+## Add unfiltered categories ##
+if (exists("dfUnfiltered") & (nrow(dfUnfiltered) > 0)){
+    df.db.table <- unique(
+        rbind(
+            dfUnfiltered,
+            df.db.table
+        )
+    )
+}
+
+dim(df.db.table)
+
+#df.db.table <- df.db.table[df.db.table$cat_weight > 0.3,]
+#dim(df.db.table)
+
+
+###############################################################################
+## Add full temp categories associated with this project                     ##
+## Lab categories ##
+df.ref <- import.db.table.from.db(
+    dbname = Obio@dbDetailList$ref.cat.db,
+    user = Obio@dbDetailList$db.user,
+    dbtable = Obio@parameterList$lab.categories.table,
+    password = db.pwd,
+    host = Obio@dbDetailList$host
+)
+
+## Remove all project temp categories from df.ref
+selVec <- c(
+  grep(paste0("temp_cluster_marker_", Obio@parameterList$project_id), df.ref$cat_type)
+)
+
+df.ref <- df.ref[selVec, ]
+
+if (exists("df.ref") & nrow(df.ref) > 0){
+    df.temp <- add2labCatSelectionDBtable(
+        df.ref = df.ref,
+        cat_group_name = "Cluster Marker Genes This project",
+        reference.gene.vector = reference.gene.vector,
+        ref.gene.vec.id = queryGS,
+        cat_views = NA
+    )
+    
+    df.db.table <- rbind(df.temp, df.db.table)
+}
+## Done adding temp categories associated with this project
+###############################################################################
+
+###############################################################################
+## Adding Cluster Categories                                                 ##
+
+
+
+## Done adding Cluster Categories                                            ##
+###############################################################################
+
+###############################################################################
+## Upload to database                                                        ##
+###############################################################################
+
+
+upload.datatable.to.database(
+    host = Obio@dbDetailList$host, 
+    user = Obio@dbDetailList$db.user,
+    password = db.pwd,
+    prim.data.db =  Obio@dbDetailList$primDataDB,
+    dbTableName = Obio@parameterList$cat.ref.db.table,
+    df.data = df.db.table,
+    db.col.parameter.list = biologicSeqTools2::inferDBcategories(df.db.table),
+    new.table = TRUE,
+    cols2Index = c("cat_id")
+)
+
+##  End creating reference category selection for this project               ##
+###############################################################################
+    
+```
+
+
+```{r create_microwebsite, eval=TRUE, echo=F, results=F}
+###############################################################################
+# Create microwebsite                                                         #
+###############################################################################
+
+## Color samples by sample group ##
+# Get sample order from database.table
+## oder samples according to PC1
+# df.pca <- df.pca[order(df.pca$pca1, decreasing = FALSE),]
+# sample.order <- paste0("norm_counts_", df.pca$sample_id)
+
+
+sample.order <- (names(Obio@databaseTable)[grep("norm_counts_", names(Obio@databaseTable))])
+
+
+lg2Avg.order <- sort(names(Obio@databaseTable)[grep("lg2_avg", names(Obio@databaseTable))])
+
+# sample.order <- c(
+#     'norm_counts_Avg_log10_Expr_All_Ctrl','norm_counts_Avg_log10_Expr_All_Prad','norm_counts_Avg_log10_Expr_Cl_0_C','norm_counts_Avg_log10_Expr_Cl_0_P','norm_counts_Avg_log10_Expr_Cl_10_C','norm_counts_Avg_log10_Expr_Cl_10_P','norm_counts_Avg_log10_Expr_Cl_1_C','norm_counts_Avg_log10_Expr_Cl_1_P','norm_counts_Avg_log10_Expr_Cl_2_C','norm_counts_Avg_log10_Expr_Cl_2_P','norm_counts_Avg_log10_Expr_Cl_3_C','norm_counts_Avg_log10_Expr_Cl_3_P','norm_counts_Avg_log10_Expr_Cl_4_C','norm_counts_Avg_log10_Expr_Cl_4_P','norm_counts_Avg_log10_Expr_Cl_5_C','norm_counts_Avg_log10_Expr_Cl_5_P','norm_counts_Avg_log10_Expr_Cl_6_C','norm_counts_Avg_log10_Expr_Cl_6_P','norm_counts_Avg_log10_Expr_Cl_7_C','norm_counts_Avg_log10_Expr_Cl_7_P','norm_counts_Avg_log10_Expr_Cl_8_C','norm_counts_Avg_log10_Expr_Cl_8_P','norm_counts_Avg_log10_Expr_Cl_9_C','norm_counts_Avg_log10_Expr_Cl_9_P'
+# )
+
+## Sort database.table ##
+
+#lg2Order <- gsub("norm_counts_", "lg2_avg_", sample.order)
+
+orderVec <- names(Obio@databaseTable)
+orderVec <- orderVec[!(orderVec %in% sample.order)]
+orderVec <- orderVec[!(orderVec %in% lg2Avg.order)]
+
+orderVec <- c(
+    orderVec,
+    sample.order,
+    lg2Avg.order
+)
+
+Obio@databaseTable <- Obio@databaseTable[,orderVec]
+
+## Get relevant colors ##
+sampleIDs <- paste0("_", unique(OsC@meta.data$sampleID))
+
+sample.colors <- sample.order
+for (i in 1:length(sampleIDs)){
+    sample.colors <- gsub(as.vector(sampleIDs[i]), "", sample.colors)    
+}
+
+
+library(scales)
+color.groups <- unique(sample.colors)
+#color.groups <- hue_pal()(length(color.groups))
+
+#dfDesign[["sample_color"]] <- "orange"
+nSampleGroups <- length(unique(color.groups))
+
+# library(RColorBrewer)
+# selcol <- colorRampPalette(brewer.pal(12,"Set3"))
+
+color.sel = hue_pal()(length(color.groups))
+
+for (i in 1:length(color.groups)){
+    sample.colors[grep(color.groups[i], sample.colors)] <- color.sel[i]
+}
+
+
+
+if (!exists("gsea.cat.lines")){
+    gsea.cat.lines <- ""
+    downloadCatEnrichmentFNxlsx <- ""
+} else {
+    downloadCatEnrichmentFNxlsx <- paste0("outputs/", Obio@parameterList$project.code, ".enriched.categories.txt")
+}
+
+if (!exists("timecourse.cat.lines")){
+    timecourse.cat.lines <- NA
+}
+
+#library(SBwebtools)
+setwd(Obio@parameterList$localWorkDir)
+
+#library(SBwebtools)
+webSiteDir <- Obio@parameterList$localWorkDir
+
+project.code <- gsub(substr(Obio@parameterList$project_id, 1, 3), "p", Obio@parameterList$project_id)
+
+
+###############################################################################
+## Set default X colum                                                       ##
+
+pos <- grep(
+  "^add_counts_Avg_log10_Expr_all$", 
+  names(Obio@databaseTable)
+)
+
+if (length(pos) == 1){
+  defaultX <- "add_counts_Avg_log10_Expr_all"
+} else {
+  defaultX <- "contrast_X_logFC_Expressed_in_N_Percent_Cells"
+}
+
+pos <- grep(
+  "^add_counts_Avg_log10_Expr_C_0$",
+  names(Obio@databaseTable)
+)
+
+if (length(pos) == 1){
+  defaultY <- "add_counts_Avg_log10_Expr_C_0"
+} else {
+  defaultY <- sample.order[1]
+}
+## d
+
+###############################################################################
+## Create default plot selection                                             ##
+
+plotSelection <- c(
+    names(Obio@databaseTable)[grep("_logFC_",names(Obio@databaseTable))],
+    names(Obio@databaseTable)[grep("contrast_P_PCA_estimatePCA",names(Obio@databaseTable))],
+
+    names(Obio@databaseTable)[grep("_lg10p_",names(Obio@databaseTable))],
+
+    names(Obio@databaseTable)[grep("lg2BaseMean",names(Obio@databaseTable))],
+    names(Obio@databaseTable)[grep("corCoef",names(Obio@databaseTable))],
+    names(Obio@databaseTable)[grep("Coef",names(Obio@databaseTable))],
+    names(Obio@databaseTable)[grep("add_counts",names(Obio@databaseTable))],
+    names(Obio@databaseTable)[grep("norm_counts",names(Obio@databaseTable))]
+)
+
+chunk1 <- plotSelection[grep("_logFC_", plotSelection)]
+chunkh2 <- plotSelection[grep("_lg10p_", plotSelection)]
+chunk2a <-chunkh2[grep("_lg10p_PCA", chunkh2)]
+chunk2b <- chunkh2[!(chunkh2  %in% chunk2a)]
+
+chnk2c <- plotSelection[grep("Coef", plotSelection)]
+
+chunk3 <- plotSelection[grep("_PCA_est", plotSelection)]
+
+chunk4 <- plotSelection[grep("_lg2BaseMean_", plotSelection)]
+
+chunk5 <- sort(plotSelection[grep("Avg_log10_Expr", plotSelection)])
+chunk6 <- sort(plotSelection[grep("add_counts_PCA", plotSelection)])
+
+# rmVec <- grep("_LRT_", chunk4)
+# if (length(rmVec) > 0){
+#     chunk4 <- chunk4[-rmVec]
+# }
+
+plotSelectionNew <- c(
+    chunk1,
+    chunk2b,
+    chnk2c,
+    chunk3,
+    chunk2a,
+    chunk4,
+    chunk5,
+    chunk6
+)
+
+plotAdd <- plotSelection[!(plotSelection %in% plotSelectionNew)]
+
+plotSelection <- c(
+    defaultX,
+    defaultY,
+    plotSelectionNew,
+    plotAdd
+)
+
+
+## Done creating default plot selection                                      ##
+###############################################################################
+
+###############################################################################
+## Do default Venn selection                                                 ##
+defaultVennSel <- names(Obio@databaseTable)
+defaultVennSel <- c(
+    defaultVennSel[grep("contrast_", defaultVennSel)],
+    defaultVennSel[grep("add_venn_", defaultVennSel)],
+    defaultVennSel[grep("_TsCor_", defaultVennSel)],
+    defaultVennSel[grep("_Residuals", defaultVennSel)]
+
+)
+
+rmVec <- c(
+    grep("contrast_P_", defaultVennSel),
+    grep("_lg2BaseMean_", defaultVennSel),
+    grep("_padj_LRT_", defaultVennSel),
+    grep("_lg10p_", defaultVennSel),
+    grep("_stat_", defaultVennSel),
+    grep("pValueCor_", defaultVennSel)
+)
+
+if (length(rmVec) > 0){
+    defaultVennSel <- defaultVennSel[-rmVec]
+}
+
+## Add lrt
+defaultVennSel <- c(
+    defaultVennSel,
+    names(Obio@databaseTable)[grep("contrast_L_lg10p", names(Obio@databaseTable))]
+)
+
+## Done with LRT selection                                                   ##
+###############################################################################
+
+
+###############################################################################
+## Deploy next generation website                                            ##
+biologicSeqTools2::createSettingsFile(
+    obj = Obio,
+    df.data = Obio@databaseTable,
+    defaultXcolName = defaultX,
+    defaultYcolName = defaultY,
+    primDataTable = Obio@parameterList$rnaseqdbTableName,
+    pcaDbTable = Obio@parameterList$PCAdbTableName, 
+    sample.order = sample.order, #set to "" to go with default sorting
+    heatmapSampleOrder = "",
+    sample.names = "", # default is sample.order
+    count.sample.colors = sample.colors,
+    ptm.colum = "",
+    count.table.headline = Obio@parameterList$count.table.headline,
+    count.table.sidelabel = Obio@parameterList$count.table.sidelabel,
+    venn.slider.selector.strings = defaultVennSel,
+    plot.selection.strings = plotSelection,
+    webSiteDir = paste0(hpc.mount, "Stefan/protocol_files/github/biologic/src/experiments/"),
+    upper_heatmap_limit = 3, 
+    lower_heatmap_limit = -3,
+    heamap.headline.text = Obio@parameterList$heamap.headline.text,
+    project_id = Obio@parameterList$project_id
+)
+
+setwd(Obio@parameterList$localWorkDir)
+
+###############################################################################
+## Create settings JSON                                                      ##
+#devtools::install_github("decusinlabore/biologicSeqTools2")
+projectJSON <- biologicSeqTools2::createSettingsJSON(
+    obj = Obio,
+    df.data = Obio@databaseTable,
+    defaultXcolName = defaultX,
+    defaultYcolName = defaultY,
+    #timepointName = timepoint,
+    primDataTable = Obio@parameterList$rnaseqdbTableName,
+    pcaDbTable = Obio@parameterList$PCAdbTableName,
+    sample.order = sample.order, #set to "" to go with default sorting
+    heatmapSampleOrder = "",
+    sample.names = "", # default is sample.order
+    count.sample.colors = sample.colors,
+    ptm.colum = "",
+    count.table.headline = Obio@parameterList$count.table.headline,
+    count.table.sidelabel = Obio@parameterList$count.table.sidelabel,
+    venn.slider.selector.strings = defaultVennSel,
+    plot.selection.strings = plotSelection,
+    webSiteDir = paste0(hpc.mount, "Stefan/protocol_files/github/biologic/src/experiments/"),
+    upper_heatmap_limit = 3,
+    lower_heatmap_limit = -3,
+    heamap.headline.text = Obio@parameterList$heamap.headline.text,
+    project_id = Obio@parameterList$project_id
+)
+## Done                                                                      ##
+###############################################################################
+projectJSONstring <- gsub("[\n]", "", toString(projectJSON))
+projectJSONstring <- gsub(" ", "", projectJSONstring)
+###############################################################################
+## Upload JSON
+dfUpload <- data.frame(
+    experiment_code = Obio@projectDetailList$project_id,
+    experiment_settings = projectJSONstring
+)
+###############################################################################
+## Check if an entry for this project exist already. If it does > update     ##
+dbDB <- DBI::dbConnect(
+    drv = RMySQL::MySQL(), 
+    user = Obio@dbDetailList$db.user, 
+    password = db.pwd, 
+    host = Obio@dbDetailList$host, 
+    dbname = "operational"
+)
+query <- paste0("SELECT id, experiment_code, created_at FROM settings WHERE experiment_code = '",Obio@parameterList$project_id,"';")
+dfTest <- DBI::dbGetQuery(dbDB, query)
+DBI::dbDisconnect(dbDB)
+timeStamp <- format(as.POSIXlt(Sys.time()),'%Y-%m-%d %H:%M:%S')
+if (nrow(dfTest) ==1){
+    dfUpload[["id"]] = as.vector(dfTest[1,"id"])
+    dfUpload[["created_at"]] = as.vector(dfTest[1,"created_at"])
+    ## Delete original row ##
+    dbDB <- DBI::dbConnect(
+        drv = RMySQL::MySQL(), 
+        user = Obio@dbDetailList$db.user, 
+        password = db.pwd, 
+        host = Obio@dbDetailList$host, 
+        dbname = "operational"
+    )
+    query <- paste0("DELETE FROM settings WHERE experiment_code = '",Obio@parameterList$project_id,"';")
+    res <- DBI::dbGetQuery(dbDB, query)
+    DBI::dbDisconnect(dbDB)
+    
+    
+} else {
+    dfUpload[["created_at"]] = timeStamp
+}
+dfUpload[["updated_at"]] <- timeStamp
+##                                                                           ##
+###############################################################################
+biologicSeqTools2::upload.datatable.to.database(
+    host = Obio@dbDetailList$host,
+    user = Obio@dbDetailList$db.user,
+    password = db.pwd,
+    prim.data.db = "operational",
+    dbTableName = "settings",
+    df.data = dfUpload,
+    db.col.parameter.list = list(
+        "INT(10) NULL DEFAULT NULL" = c("id"),
+        "LONGTEXT NULL DEFAULT NULL" = c("^experiment_settings$"),
+        "VARCHAR(255) CHARACTER SET latin1 COLLATE latin1_swedish_ci" = c("^experiment_code$"),
+        "TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP" = c("created_at", "updated_at")
+    ),
+    increment = 5000,
+    new.table = FALSE,
+    first.row.name.index = 1,
+    startOnlyWithConnectionCount1 = FALSE,
+    cols2Index = NULL,
+    indexName = NULL,
+    mode = "MySQL",
+    addRowNamesColumn = FALSE
+)
+## Done with uploading settings JSON                                         ##
+###############################################################################
+
+
+
+createHTMLoutput <- function(FvFN = NULL, Obio = NULL){
+    sink(FvFN)
+    cat('<!DOCTYPE html>');cat("\n");
+    cat('<html lang="en">');cat("\n");
+    cat('<head>');cat("\n");
+    cat('    <meta charset="UTF-8">');cat("\n");
+    cat(paste0('<title>',Obio@parameterList$labname,' Lab</title>    <style>'));cat("\n");
+    cat('        body {');cat("\n");
+    cat('             margin: 0;            /* Reset default margin */');cat("\n");
+    cat('         }');cat("\n");
+    cat('        iframe {');cat("\n");
+    cat('            display: block;       /* iframes are inline by default */');cat("\n");
+    cat('            background: #000;');cat("\n");
+    cat('            border: none;         /* Reset default border */');cat("\n");
+    cat('            height: 100vh;        /* Viewport-relative units */');cat("\n");
+    cat('            width: 100vw;');cat("\n");
+    cat('        }');cat("\n");
+    cat('    </style>');cat("\n");
+    cat('</head>');cat("\n");
+    cat('<body>');cat("\n");
+    cat(paste0('<iframe src="https://bioinformatics.crick.ac.uk/shiny/users/boeings/',Obio@parameterList$project_id,'_app/" title="',Obio@parameterList$labname, ' Lab"></iframe>'));cat("\n");
+    cat('</body>');cat("\n");
+    cat('</html>');cat("\n");
+    sink()
+  
+}
+
+createHTMLoutput(
+    FvFN = paste0(FvDir, "FeatureView.html"), 
+    Obio = Obio
+)
+
+
+
+
+## Done deploying next generation website                                    ##
+###############################################################################
+
+
+```
+
+
+## Documentation
+```{r documentation, eval=TRUE, echo=T, results=T}
+renv::snapshot()
+sessionInfo()
+```
