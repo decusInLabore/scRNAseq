@@ -1253,3 +1253,445 @@ Computing 2000 integration features
 Scaling features for provided objects
 Finding all pairwise anchors
 Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 2714 anchors
+Filtering anchors
+	Retained 2490 anchors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 2766 anchors
+Filtering anchors
+	Retained 2483 anchors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 1932 anchors
+Filtering anchors
+	Retained 1759 anchors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 7491 anchors
+Filtering anchors
+	Retained 5099 anchors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 2758 anchors
+Filtering anchors
+	Retained 1872 anchors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 2799 anchors
+Filtering anchors
+	Retained 1751 anchors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 6855 anchors
+Filtering anchors
+	Retained 4909 anchors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 2712 anchors
+Filtering anchors
+	Retained 1916 anchors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 2714 anchors
+Filtering anchors
+	Retained 1818 anchors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 7996 anchors
+Filtering anchors
+	Retained 5255 anchors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 6484 anchors
+Filtering anchors
+	Retained 4947 anchors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 2466 anchors
+Filtering anchors
+	Retained 1819 anchors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 2616 anchors
+Filtering anchors
+	Retained 1902 anchors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 6676 anchors
+Filtering anchors
+	Retained 4513 anchors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 5951 anchors
+Filtering anchors
+	Retained 4081 anchors
+Merging dataset 2 into 1
+Extracting anchors for merged samples
+Finding integration vectors
+Finding integration vector weights
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Integrating data
+Merging dataset 3 into 6
+Extracting anchors for merged samples
+Finding integration vectors
+Finding integration vector weights
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Integrating data
+Merging dataset 6 3 into 1 2
+Extracting anchors for merged samples
+Finding integration vectors
+Finding integration vector weights
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Integrating data
+Merging dataset 5 into 4
+Extracting anchors for merged samples
+Finding integration vectors
+Finding integration vector weights
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Integrating data
+Merging dataset 1 2 6 3 into 4 5
+Extracting anchors for merged samples
+Finding integration vectors
+Finding integration vector weights
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Integrating data
+Calculating gene variances
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Calculating feature variances of standardized and clipped values
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+10:52:54 UMAP embedding parameters a = 0.9922 b = 1.112
+Found more than one class "dist" in cache; using the first, from namespace 'BiocGenerics'
+Also defined by 'spam'
+10:52:54 Read 15319 rows and found 30 numeric columns
+10:52:54 Using Annoy for neighbor search, n_neighbors = 30
+Found more than one class "dist" in cache; using the first, from namespace 'BiocGenerics'
+Also defined by 'spam'
+10:52:54 Building Annoy index with metric = cosine, n_trees = 50
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+10:52:56 Writing NN index file to temp file /tmp/slurm_47112575/RtmpxgvIpe/file5cb372f9cc25
+10:52:56 Searching Annoy index using 1 thread, search_k = 3000
+10:53:01 Annoy recall = 100%
+10:53:03 Commencing smooth kNN distance calibration using 1 thread
+10:53:06 Initializing from normalized Laplacian + noise
+10:53:06 Commencing optimization for 200 epochs, with 701834 positive edges
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+10:53:30 Optimization finished
+Computing nearest neighbor graph
+Computing SNN
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Warning: The following features are not present in the object: Fam64a, Hn1, not searching for symbol synonyms
+Warning: The following features are not present in the object: Fam64a, Hn1, not searching for symbol synonyms
+Warning: The following features are not present in the object: Fam64a, Hn1, not searching for symbol synonyms
+Warning: The following features are not present in the object: Fam64a, Hn1, not searching for symbol synonyms
+Warning: The following features are not present in the object: Fam64a, Hn1, not searching for symbol synonyms
+Warning: The following features are not present in the object: Fam64a, Hn1, not searching for symbol synonyms
+Computing 2000 integration features
+Scaling features for provided objects
+Finding all pairwise anchors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 2714 anchors
+Filtering anchors
+	Retained 2490 anchors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 2766 anchors
+Filtering anchors
+	Retained 2483 anchors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 1932 anchors
+Filtering anchors
+	Retained 1759 anchors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 7491 anchors
+Filtering anchors
+	Retained 5099 anchors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 2758 anchors
+Filtering anchors
+	Retained 1872 anchors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 2799 anchors
+Filtering anchors
+	Retained 1751 anchors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 6855 anchors
+Filtering anchors
+	Retained 4909 anchors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 2712 anchors
+Filtering anchors
+	Retained 1916 anchors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 2714 anchors
+Filtering anchors
+	Retained 1818 anchors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 7996 anchors
+Filtering anchors
+	Retained 5255 anchors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 6484 anchors
+Filtering anchors
+	Retained 4947 anchors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 2466 anchors
+Filtering anchors
+	Retained 1819 anchors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 2616 anchors
+Filtering anchors
+	Retained 1902 anchors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 6676 anchors
+Filtering anchors
+	Retained 4513 anchors
+Running CCA
+Merging objects
+Finding neighborhoods
+Finding anchors
+	Found 5951 anchors
+Filtering anchors
+	Retained 4081 anchors
+Merging dataset 2 into 1
+Extracting anchors for merged samples
+Finding integration vectors
+Finding integration vector weights
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Integrating data
+Merging dataset 3 into 6
+Extracting anchors for merged samples
+Finding integration vectors
+Finding integration vector weights
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Integrating data
+Merging dataset 6 3 into 1 2
+Extracting anchors for merged samples
+Finding integration vectors
+Finding integration vector weights
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Integrating data
+Merging dataset 5 into 4
+Extracting anchors for merged samples
+Finding integration vectors
+Finding integration vector weights
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Integrating data
+Merging dataset 1 2 6 3 into 4 5
+Extracting anchors for merged samples
+Finding integration vectors
+Finding integration vector weights
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Integrating data
+Calculating gene variances
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Calculating feature variances of standardized and clipped values
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+11:11:19 UMAP embedding parameters a = 0.9922 b = 1.112
+Found more than one class "dist" in cache; using the first, from namespace 'BiocGenerics'
+Also defined by 'spam'
+11:11:19 Read 15319 rows and found 30 numeric columns
+11:11:19 Using Annoy for neighbor search, n_neighbors = 30
+Found more than one class "dist" in cache; using the first, from namespace 'BiocGenerics'
+Also defined by 'spam'
+11:11:20 Building Annoy index with metric = cosine, n_trees = 50
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+11:11:22 Writing NN index file to temp file /tmp/slurm_47112575/RtmpxgvIpe/file5cb3f95cce0
+11:11:22 Searching Annoy index using 1 thread, search_k = 3000
+11:11:27 Annoy recall = 100%
+11:11:29 Commencing smooth kNN distance calibration using 1 thread
+11:11:32 Initializing from normalized Laplacian + noise
+11:11:33 Commencing optimization for 200 epochs, with 697768 positive edges
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+11:11:57 Optimization finished
+Computing nearest neighbor graph
+Computing SNN
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+  |                                                                              |.......................................                               |  56%
+  ordinary text without R code
+
+  |                                                                              |...............................................                       |  67%
+label: unnamed-chunk-9 (with options) 
+List of 4
+ $ echo   : logi TRUE
+ $ eval   : logi TRUE
+ $ warning: logi FALSE
+ $ results: logi FALSE
+
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+  |                                                                              |......................................................                |  78%
+   inline R code fragments
+
+  |                                                                              |..............................................................        |  89%
+label: unnamed-chunk-10 (with options) 
+List of 4
+ $ echo   : logi TRUE
+ $ eval   : logi TRUE
+ $ warning: logi FALSE
+ $ results: chr "asis"
+
+  |                                                                              |......................................................................| 100%
+  ordinary text without R code
+
+
+  |                                                                              |.....................................................                 |  76%
+  ordinary text without R code
+
+  |                                                                              |........................................................              |  80%
+label: saveobject (with options) 
+List of 3
+ $ eval   : logi TRUE
+ $ echo   : logi TRUE
+ $ results: logi FALSE
+
+  |                                                                              |...........................................................           |  84%
+  ordinary text without R code
+
+  |                                                                              |..............................................................        |  88%
+label: documentation (with options) 
+List of 3
+ $ eval   : logi TRUE
+ $ echo   : logi TRUE
+ $ results: logi TRUE
+
+  |                                                                              |................................................................      |  92%
+  ordinary text without R code
+
+  |                                                                              |...................................................................   |  96%
+label: create_report_params (with options) 
+List of 2
+ $ eval   : logi TRUE
+ $ results: chr "asis"
+
+  |                                                                              |......................................................................| 100%
+   inline R code fragments
+
+
+output file: QC.knit.md
+
+/camp/apps/eb/software/pandoc/2.2.3.2-foss-2016b/bin/pandoc +RTS -K512m -RTS QC.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output /camp/stp/babs/working/boeings/Projects/evang/roderik.kortlever/528_scRNAseq_subclustering_of_496_C7_C12_subset1/html_local/QC.html --lua-filter /camp/stp/babs/working/boeings/Projects/reference_data/renv/cache/v5/R-4.0/x86_64-pc-linux-gnu/rmarkdown/2.13/ac78f4d2e0289d4cba73b88af567b8b1/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /camp/stp/babs/working/boeings/Projects/reference_data/renv/cache/v5/R-4.0/x86_64-pc-linux-gnu/rmarkdown/2.13/ac78f4d2e0289d4cba73b88af567b8b1/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --standalone --section-divs --table-of-contents --toc-depth 5 --variable toc_float=1 --variable toc_selectors=h1,h2,h3,h4,h5 --variable toc_collapsed=1 --variable toc_smooth_scroll=1 --variable toc_print=1 --template /camp/stp/babs/working/boeings/Projects/reference_data/renv/cache/v5/R-4.0/x86_64-pc-linux-gnu/rmarkdown/2.13/ac78f4d2e0289d4cba73b88af567b8b1/rmarkdown/rmd/h/default.html --no-highlight --variable highlightjs=1 --variable theme=paper --css src/style/style.css --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /tmp/slurm_47112575/RtmpxgvIpe/rmarkdown-str5cb33f3f1299.html --variable code_folding=hide --variable code_menu=1 
+
+Output created: /camp/stp/babs/working/boeings/Projects/evang/roderik.kortlever/528_scRNAseq_subclustering_of_496_C7_C12_subset1/html_local/QC.html
+There were 50 or more warnings (use warnings() to see the first 50)

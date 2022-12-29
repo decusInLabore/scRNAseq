@@ -19,7 +19,7 @@ sbatch --time=72:00:00 --wrap "module purge;source /camp/stp/babs/working/softwa
 
 wait_on_lsf
 project=rB_$project_id
-sbatch --time=72:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;Rscript runRmd.r ./analyses/Main_Analysis/Main_Analysis.Rmd" --job-name=$project -p hmem --mem=1200G -o ../rB.$project.slurm >> ../commands.txt
+sbatch --time=72:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;Rscript runRmd.r ./analyses/Main_Analysis/Main_Analysis.Rmd" --job-name=$project -p hmem --mem=600G -o ../rB.$project.slurm >> ../commands.txt
 
 wait_on_lsf
 project=rCF_$project_id
