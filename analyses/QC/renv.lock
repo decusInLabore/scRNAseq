@@ -51,6 +51,25 @@
         "BiocGenerics"
       ]
     },
+    "BiocFileCache": {
+      "Package": "BiocFileCache",
+      "Version": "1.14.0",
+      "Source": "Bioconductor",
+      "git_url": "https://git.bioconductor.org/packages/BiocFileCache",
+      "git_branch": "RELEASE_3_12",
+      "git_last_commit": "cdcde4b",
+      "git_last_commit_date": "2020-10-27",
+      "Hash": "1b129af4e6ee37b16d4d424aebed81f7",
+      "Requirements": [
+        "DBI",
+        "RSQLite",
+        "curl",
+        "dbplyr",
+        "dplyr",
+        "httr",
+        "rappdirs"
+      ]
+    },
     "BiocGenerics": {
       "Package": "BiocGenerics",
       "Version": "0.36.1",
@@ -548,6 +567,14 @@
         "sys"
       ]
     },
+    "assertthat": {
+      "Package": "assertthat",
+      "Version": "0.2.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "50c838a310445e954bc13f26f26a6ecf",
+      "Requirements": []
+    },
     "base64enc": {
       "Package": "base64enc",
       "Version": "0.1-3",
@@ -562,17 +589,18 @@
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
-      "RemoteUsername": "decusinlabore",
+      "RemoteUsername": "decusInLabore",
       "RemoteRepo": "biologicSeqTools2",
       "RemoteRef": "main",
-      "RemoteSha": "5bb6ca3b660d02fcccded96fcc388bc59a898909",
-      "Hash": "aef6ed67a3dad12c23765851576039d5",
+      "RemoteSha": "eefbeed1069c5a282064aec38ca94691c37a8d5e",
+      "Hash": "2aa9c5c196e88755aa69fe5125bc08bc",
       "Requirements": [
         "DBI",
         "DESeq2",
         "RMySQL",
         "RSQLite",
         "Seurat",
+        "biomaRt",
         "dplyr",
         "jsonlite",
         "openxlsx"
@@ -591,6 +619,27 @@
       "Hash": "e26d84a78ebe98d4a7d3b7c9e866ff56",
       "Requirements": [
         "Matrix"
+      ]
+    },
+    "biomaRt": {
+      "Package": "biomaRt",
+      "Version": "2.46.3",
+      "Source": "Bioconductor",
+      "git_url": "https://git.bioconductor.org/packages/biomaRt",
+      "git_branch": "RELEASE_3_12",
+      "git_last_commit": "607b632",
+      "git_last_commit_date": "2021-02-08",
+      "Hash": "1dba821d9a19d3b70fa324cab2fb4d0b",
+      "Requirements": [
+        "AnnotationDbi",
+        "BiocFileCache",
+        "XML",
+        "httr",
+        "openssl",
+        "progress",
+        "rappdirs",
+        "stringr",
+        "xml2"
       ]
     },
     "bit": {
@@ -764,6 +813,25 @@
       "Repository": "CRAN",
       "Hash": "cd711af60c47207a776213a368626369",
       "Requirements": []
+    },
+    "dbplyr": {
+      "Package": "dbplyr",
+      "Version": "1.4.3",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "81ae261735c247d9551126462db5a4b5",
+      "Requirements": [
+        "DBI",
+        "R6",
+        "assertthat",
+        "dplyr",
+        "glue",
+        "lifecycle",
+        "purrr",
+        "rlang",
+        "tibble",
+        "tidyselect"
+      ]
     },
     "deldir": {
       "Package": "deldir",
@@ -1118,6 +1186,18 @@
       "Hash": "8eb36c8125038e648e5d111c0d7b2ed4",
       "Requirements": [
         "xfun"
+      ]
+    },
+    "hms": {
+      "Package": "hms",
+      "Version": "0.5.3",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "726671f634529d470545f9fd1a9d1869",
+      "Requirements": [
+        "pkgconfig",
+        "rlang",
+        "vctrs"
       ]
     },
     "htmltools": {
@@ -1561,6 +1641,27 @@
       "Repository": "CRAN",
       "Hash": "cb167f328b3ada4ec5cf67a7df4c900a",
       "Requirements": []
+    },
+    "prettyunits": {
+      "Package": "prettyunits",
+      "Version": "1.1.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "95ef9167b75dde9d2ccc3c7528393e7e",
+      "Requirements": []
+    },
+    "progress": {
+      "Package": "progress",
+      "Version": "1.2.2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "14dc9f7a3c91ebb14ec5bb9208a07061",
+      "Requirements": [
+        "R6",
+        "crayon",
+        "hms",
+        "prettyunits"
+      ]
     },
     "promises": {
       "Package": "promises",
@@ -2022,6 +2123,14 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "e83f48136b041845e50a6658feffb197",
+      "Requirements": []
+    },
+    "xml2": {
+      "Package": "xml2",
+      "Version": "1.3.2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "d4d71a75dd3ea9eb5fa28cc21f9585e2",
       "Requirements": []
     },
     "xtable": {

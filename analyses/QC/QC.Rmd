@@ -111,11 +111,11 @@ db.pwd <- as.vector(dbTable[1,1])
 ```
 
 <!-- Optional 5: Doublet finder module run.doublet.finder.Rmd -->
-```{r child = '07-run.doublet.finder.Rmd', eval=FALSE}
+```{r child = '07-run.doublet.finder.Rmd', eval=TRUE}
 ```
 
 <!-- Optional 6: Perform three cell cycle regressions: none, G2M/S and full Chapter/Module -->
-```{r child = '08-perform.cell.cycle.regression.Rmd', eval=FALSE}
+```{r child = '08-perform.cell.cycle.regression.Rmd', eval=TRUE}
 ```
 
 
