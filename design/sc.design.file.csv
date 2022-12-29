@@ -30,7 +30,7 @@ scIntegrationMethod,RNA,,,"# ""SCT"" or ""RNA""",,,
 ,,,,,,,
 Sample Parameters,,,,,,,
 meta_Timepoint,T0hrs,T2hrs,T4hrs,T8hrs,T12hrs,T24hrs,
-sampleName,Myc4W_A5,Myc4W_2hrsOff_C11,Myc4W_4hrsOff_F11,Myc4W_8hrsOff_C5,Myc4W_12hrsOff_E5,Myc4W_24hrsOff_G5,
+sampleName,Myc4W_C7C12All,Myc4W_2hrsOff_C7C12All,Myc4W_4hrsOff_C7C12All,Myc4W_8hrsOff_C7C12All,Myc4W_12hrsOff_C7C12All,Myc4W_24hrsOff_C7C12All,
 limsID,combinedT0,combinedT2,combinedT4,combinedT8,combinedT12,combinedT24,
 type,matrixFiles,matrixFiles,matrixFiles,matrixFiles,matrixFiles,matrixFiles,"# type must be in c(""""TenX"""", """"matrixFiles"""", """"loomFiles"""", """"hdf5Files"""")"""
 gene.column,2,2,2,2,2,2,
