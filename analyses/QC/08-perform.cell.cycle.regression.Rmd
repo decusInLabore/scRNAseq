@@ -634,7 +634,7 @@ figureCount <- figureCount + 1
 
 NewChnk <- paste0(
     "### ", tag,
-    "\n```{r Dist_UMAP_",
+    "\n```{r Distr_UMAP_",
     tag,", results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",
     figLegend,"'}\n",
     "\n",

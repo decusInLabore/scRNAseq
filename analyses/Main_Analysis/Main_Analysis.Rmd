@@ -18,6 +18,14 @@ always_allow_html: yes
 # R to use
 # module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;R
 
+## Option to resmume analysis after time-consuming integration. 
+resume <- TRUE
+
+if (resume){
+    createNew <- FALSE
+} else {
+    createNew <- TRUE
+}
 
 knitr::opts_chunk$set(
     tidy = F,
@@ -104,10 +112,10 @@ figureCount <- 1
 ```
 
 <!-- Essential 3: (output required later): Create Integrated Seurat Object Chapter/Module -->
-```{r child = '03-create.integrated.seurat.object.Rmd', eval=FALSE}
+```{r child = '03-create.integrated.seurat.object.Rmd', eval=createNew}
 ```
 
-```{r, eval=F, echo=F}
+```{r, eval=createNew, echo=createNew}
 
 ## The above step is the most time consuming. Saving the Obio and OsC object here allows 
 source("save.biologic.robj.R")
@@ -127,15 +135,15 @@ print("OsC Object saved.")
 ```
 
 <!-- Optional 4: (creates output only): Create variation plots Chapter/Module -->
-```{r child = '04-create.variation.plots.Rmd', eval=FALSE}
+```{r child = '04-create.variation.plots.Rmd', eval=createNew}
 ```
 
 <!-- Essential 6: (output required later): 
 DGE Marker gene upload Chapter/Module -->
-```{r child = '05-create.pca.plots.Rmd', eval=FALSE}
+```{r child = '05-create.pca.plots.Rmd', eval=createNew}
 ```
 
-```{r, eval=T, echo=T}
+```{r, eval=resume, echo=resume}
 
 ## This will load the objects saved in B6. 
 source("load.biologic.robj.R")
@@ -195,7 +203,7 @@ Obio@parameterList$dendrofactor <- dendrofactor
 ```
 
 <!-- Optional 13: (Output only):Category Enrichments Chapter/Module -->
-```{r child = '12-AUC.cat.enrichments.Rmd', eval=FALSE}
+```{r child = '12-AUC.cat.enrichments.Rmd', eval=TRUE}
 ```
 
 <!-- Essential 14: (output required later):Category Linear Regression Marker Gene Data Prep Chapter/Module -->
@@ -203,7 +211,7 @@ Obio@parameterList$dendrofactor <- dendrofactor
 ```
 
 <!-- Essential 15: (output required later):Category Linear Regression Marker Gene Data Prep Chapter/Module -->
-```{r child = '14-heatmaps.and.dotplots.Rmd', eval=FALSE}
+```{r child = '14-heatmaps.and.dotplots.Rmd', eval=TRUE}
 ```
 
 <!-- Essential 16: (output required later):Category Make cluster table Data Prep Chapter/Module -->
@@ -244,7 +252,7 @@ save(OsC,
      )
 )
 
-renv::snapshot(prompt = FALSE)
+# renv::snapshot(prompt = FALSE)
 
 ```
 

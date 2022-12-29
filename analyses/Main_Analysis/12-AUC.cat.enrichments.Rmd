@@ -28,6 +28,9 @@ VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.D
 #      )
 # )
 
+## General markers need to be precomputed
+dfGeneralMarkers <- Obio@dataTableList$dfGeneralMarkers
+
 library(AUCell)
 plotList <- list()
 chnkVec <- as.vector(NULL, mode = "character")
