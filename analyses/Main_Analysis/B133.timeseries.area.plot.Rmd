@@ -14,16 +14,18 @@ VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.D
 plotList <- list()
 chnkVec <- as.vector(NULL, mode = "character")
 
-genotypes <- unique(OsC@meta.data$meta_Genotype)
+genotypes <- "WT"
+i = 1
 
-for (i in 1:length(genotypes)){
+# for (i in 1:length(genotypes)){
  
     dfRes <- OsC@meta.data
     
     selVec <- c("cellID", "clusterName", "clusterColor", "meta_Timepoint")
     
-    dfRes <- dfRes[dfRes$meta_Genotype == genotypes[i], selVec]
-    dfRes[["timepoint"]] <- gsub("d", "", dfRes$meta_Timepoint)
+    # dfRes <- dfRes[dfRes$meta_Genotype == genotypes[i], selVec]
+    dfRes[["timepoint"]] <- gsub("^T", "", dfRes$meta_Timepoint)
+    dfRes[["timepoint"]] <- gsub("hrs", "", dfRes$timepoint)
     dfRes$timepoint <- as.numeric(dfRes$timepoint)
     
     
@@ -83,7 +85,7 @@ for (i in 1:length(genotypes)){
         figureCount <- figureCount + 1
     
         NewChnk <- paste0(
-        "### ", tag,
+        "#### ", tag,
         "\n```{r area_",
         tag,", results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",
         figLegend,"'}\n",
@@ -97,7 +99,7 @@ for (i in 1:length(genotypes)){
             chnkVec,
             NewChnk
         )
-}
+# }
 
             
 if (length(plotList) > 3){
@@ -108,7 +110,7 @@ if (length(plotList) > 3){
 
 ```
 
-## Area Distribution Plot {`r tabVar`}
+### Area Distribution Plot {`r tabVar`}
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE, results="asis"} 
 
 cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = '\n'))

@@ -1782,6 +1782,6 @@ createHTMLoutput(
 
 ## Documentation
 ```{r documentation, eval=TRUE, echo=T, results=T}
-renv::snapshot()
+#renv::snapshot()
 sessionInfo()
 ```

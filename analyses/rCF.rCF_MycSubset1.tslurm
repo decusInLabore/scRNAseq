@@ -1,0 +1,308 @@
+
+The following have been reloaded with a version change:
+  1) FFTW/3.3.4-gompi-2016b => FFTW/3.3.8-gompi-2020a
+  2) GCC/5.4.0-2.26 => GCC/9.3.0
+  3) GCCcore/5.4.0 => GCCcore/9.3.0
+  4) OpenBLAS/0.2.18-GCC-5.4.0-2.26-LAPACK-3.6.1 => OpenBLAS/0.3.9-GCC-9.3.0
+  5) OpenMPI/1.10.3-GCC-5.4.0-2.26 => OpenMPI/4.0.3-GCC-9.3.0
+  6) ScaLAPACK/2.0.2-gompi-2016b-OpenBLAS-0.2.18-LAPACK-3.6.1 => ScaLAPACK/2.1.0-gompi-2020a
+  7) binutils/2.26-GCCcore-5.4.0 => binutils/2.34-GCCcore-9.3.0
+  8) foss/2016b => foss/2020a
+  9) gompi/2016b => gompi/2020a
+ 10) hwloc/1.11.3-GCC-5.4.0-2.26 => hwloc/2.2.0-GCCcore-9.3.0
+ 11) numactl/2.0.11-GCC-5.4.0-2.26 => numactl/2.0.13-GCCcore-9.3.0
+
+
+
+processing file: ClusterFinder.Rmd
+  |                                                                              |                                                                      |   0%  |                                                                              |....                                                                  |   6%
+   inline R code fragments
+
+  |                                                                              |........                                                              |  11%
+label: setup (with options) 
+List of 1
+ $ include: logi FALSE
+
+  |                                                                              |............                                                          |  17%
+  ordinary text without R code
+
+  |                                                                              |................                                                      |  22%
+label: init (with options) 
+List of 3
+ $ eval  : logi FALSE
+ $ echo  : logi TRUE
+ $ engine: chr "bash"
+
+  |                                                                              |...................                                                   |  28%
+  ordinary text without R code
+
+  |                                                                              |.......................                                               |  33%
+label: unnamed-chunk-1 (with options) 
+List of 3
+ $ eval   : logi TRUE
+ $ echo   : logi FALSE
+ $ results: logi FALSE
+
+Collecting package metadata (current_repodata.json): ...working... done
+Solving environment: ...working... done
+
+## Package Plan ##
+
+  environment location: /camp/stp/babs/working/boeings/Projects/evang/roderik.kortlever/528_scRNAseq_subclustering_of_496_C7_C12_subset1/scripts/scRNAseq/analyses/Cluster_Finder/renv/python/r-reticulate
+
+  added / updated specs:
+    - numpy
+    - python=3.6
+
+
+The following NEW packages will be INSTALLED:
+
+  _libgcc_mutex      conda-forge/linux-64::_libgcc_mutex-0.1-conda_forge
+  _openmp_mutex      conda-forge/linux-64::_openmp_mutex-4.5-2_gnu
+  ca-certificates    conda-forge/linux-64::ca-certificates-2022.12.7-ha878542_0
+  certifi            conda-forge/linux-64::certifi-2016.9.26-py36_0
+  ld_impl_linux-64   conda-forge/linux-64::ld_impl_linux-64-2.39-hcc3a1bd_1
+  libblas            conda-forge/linux-64::libblas-3.9.0-16_linux64_openblas
+  libcblas           conda-forge/linux-64::libcblas-3.9.0-16_linux64_openblas
+  libffi             conda-forge/linux-64::libffi-3.4.2-h7f98852_5
+  libgcc-ng          conda-forge/linux-64::libgcc-ng-12.2.0-h65d4601_19
+  libgfortran-ng     conda-forge/linux-64::libgfortran-ng-12.2.0-h69a702a_19
+  libgfortran5       conda-forge/linux-64::libgfortran5-12.2.0-h337968e_19
+  libgomp            conda-forge/linux-64::libgomp-12.2.0-h65d4601_19
+  liblapack          conda-forge/linux-64::liblapack-3.9.0-16_linux64_openblas
+  libnsl             conda-forge/linux-64::libnsl-2.0.0-h7f98852_0
+  libopenblas        conda-forge/linux-64::libopenblas-0.3.21-pthreads_h78a6416_3
+  libsqlite          conda-forge/linux-64::libsqlite-3.40.0-h753d276_0
+  libstdcxx-ng       conda-forge/linux-64::libstdcxx-ng-12.2.0-h46fd767_19
+  libzlib            conda-forge/linux-64::libzlib-1.2.13-h166bdaf_4
+  ncurses            conda-forge/linux-64::ncurses-6.3-h27087fc_1
+  numpy              conda-forge/linux-64::numpy-1.19.5-py36hfc0c790_2
+  openssl            conda-forge/linux-64::openssl-1.1.1s-h0b41bf4_1
+  pip                conda-forge/linux-64::pip-20.0.2-py36_1
+  python             conda-forge/linux-64::python-3.6.15-hb7a2778_0_cpython
+  python_abi         conda-forge/linux-64::python_abi-3.6-2_cp36m
+  readline           conda-forge/linux-64::readline-8.1.2-h0f457ee_0
+  setuptools         conda-forge/linux-64::setuptools-49.6.0-py36h5fab9bb_3
+  sqlite             conda-forge/linux-64::sqlite-3.40.0-h4ff8645_0
+  tk                 conda-forge/linux-64::tk-8.6.12-h27826a3_0
+  wheel              conda-forge/linux-64::wheel-0.34.2-py36_0
+  xz                 conda-forge/linux-64::xz-5.2.6-h166bdaf_0
+
+
+Preparing transaction: ...working... done
+Verifying transaction: ...working... done
+Executing transaction: ...working... done
+
+
+==> WARNING: A newer version of conda exists. <==
+  current version: 4.8.3
+  latest version: 22.11.1
+
+Please update conda by running
+
+    $ conda update -n base conda
+
+
+#
+# To activate this environment, use
+#
+#     $ conda activate /camp/stp/babs/working/boeings/Projects/evang/roderik.kortlever/528_scRNAseq_subclustering_of_496_C7_C12_subset1/scripts/scRNAseq/analyses/Cluster_Finder/renv/python/r-reticulate
+#
+# To deactivate an active environment, use
+#
+#     $ conda deactivate
+
+Attaching SeuratObject
+Registered S3 method overwritten by 'cli':
+  method     from         
+  print.boxx spatstat.geom
+── Attaching packages ─────────────────────────────────────── tidyverse 1.3.0 ──
+✔ ggplot2 3.3.5     ✔ purrr   0.3.4
+✔ tibble  3.1.6     ✔ dplyr   1.0.7
+✔ tidyr   1.1.4     ✔ stringr 1.4.0
+✔ readr   1.3.1     ✔ forcats 0.5.0
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+Loading required namespace: remotes
+  |                                                                              |...........................                                           |  39%
+  ordinary text without R code
+
+  |                                                                              |...............................                                       |  44%
+label: unnamed-chunk-2 (with options) 
+List of 4
+ $ echo   : logi TRUE
+ $ eval   : logi TRUE
+ $ warning: logi FALSE
+ $ results: logi FALSE
+
+Calculating gene variances
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Calculating feature variances of standardized and clipped values
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Computing nearest neighbor graph
+Computing SNN
+  |                                                                              |...................................                                   |  50%
+  ordinary text without R code
+
+  |                                                                              |.......................................                               |  56%
+label: unnamed-chunk-3 (with options) 
+List of 4
+ $ echo   : logi TRUE
+ $ eval   : logi TRUE
+ $ warning: logi FALSE
+ $ results: logi FALSE
+
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Loading required package: ggraph
+  |                                                                              |...........................................                           |  61%
+   inline R code fragments
+
+  |                                                                              |...............................................                       |  67%
+label: unnamed-chunk-4 (with options) 
+List of 4
+ $ echo   : logi TRUE
+ $ eval   : logi TRUE
+ $ warning: logi FALSE
+ $ results: chr "asis"
+
+  |                                                                              |...................................................                   |  72%
+  ordinary text without R code
+
+  |                                                                              |......................................................                |  78%
+label: populate_expr_database_1 (with options) 
+List of 3
+ $ eval   : logi TRUE
+ $ echo   : logi FALSE
+ $ results: logi FALSE
+
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+  |                                                                              |..........................................................            |  83%
+  ordinary text without R code
+
+  |                                                                              |..............................................................        |  89%
+label: Plot_tsne_data_plotting (with options) 
+List of 4
+ $ echo   : logi TRUE
+ $ eval   : logi TRUE
+ $ warning: logi FALSE
+ $ results: chr "asis"
+
+  |                                                                              |..................................................................    |  94%
+  ordinary text without R code
+
+  |                                                                              |......................................................................| 100%
+label: documentation (with options) 
+List of 3
+ $ eval   : logi TRUE
+ $ echo   : logi TRUE
+ $ results: logi TRUE
+
+
+output file: ClusterFinder.knit.md
+
+/camp/apps/eb/software/pandoc/2.2.3.2-foss-2016b/bin/pandoc +RTS -K512m -RTS ClusterFinder.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output /camp/stp/babs/working/boeings/Projects/evang/roderik.kortlever/528_scRNAseq_subclustering_of_496_C7_C12_subset1/html_local/ClusterFinder.html --lua-filter /camp/stp/babs/working/boeings/Projects/reference_data/renv/cache/v5/R-4.0/x86_64-pc-linux-gnu/rmarkdown/2.13/ac78f4d2e0289d4cba73b88af567b8b1/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /camp/stp/babs/working/boeings/Projects/reference_data/renv/cache/v5/R-4.0/x86_64-pc-linux-gnu/rmarkdown/2.13/ac78f4d2e0289d4cba73b88af567b8b1/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --standalone --section-divs --table-of-contents --toc-depth 5 --variable toc_float=1 --variable toc_selectors=h1,h2,h3,h4,h5 --variable toc_collapsed=1 --variable toc_smooth_scroll=1 --variable toc_print=1 --template /camp/stp/babs/working/boeings/Projects/reference_data/renv/cache/v5/R-4.0/x86_64-pc-linux-gnu/rmarkdown/2.13/ac78f4d2e0289d4cba73b88af567b8b1/rmarkdown/rmd/h/default.html --no-highlight --variable highlightjs=1 --variable theme=paper --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /tmp/slurm_47118619/RtmpMQrC8G/rmarkdown-strbe2711083294.html --variable code_folding=hide --variable code_menu=1 
+
+Output created: /camp/stp/babs/working/boeings/Projects/evang/roderik.kortlever/528_scRNAseq_subclustering_of_496_C7_C12_subset1/html_local/ClusterFinder.html
+Warning messages:
+1: In png(..., res = dpi, units = "in") :
+  unable to open connection to X11 display ''
+2: replacing previous import 'RMySQL::isIdCurrent' by 'RSQLite::isIdCurrent' when loading 'biologicSeqTools2' 
+3: In FindVariableFeatures.Assay(object = assay.data, selection.method = selection.method,  :
+  selection.method set to 'vst' but count slot is empty; will use data slot instead
+4: The `add` argument of `group_by()` is deprecated as of dplyr 1.0.0.
+Please use the `.add` argument instead.
+This warning is displayed once every 8 hours.
+Call `lifecycle::last_lifecycle_warnings()` to see where this warning was generated. 
