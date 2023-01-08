@@ -1,7 +1,0 @@
-"sampleID"	"sampleName"	"sampleColor"
-"Myc4W_12hrsOff_C7C12All"	"Myc4W_12hrsOff_C7C12All"	"#F8766D"
-"Myc4W_24hrsOff_C7C12All"	"Myc4W_24hrsOff_C7C12All"	"#B79F00"
-"Myc4W_2hrsOff_C7C12All"	"Myc4W_2hrsOff_C7C12All"	"#00BA38"
-"Myc4W_4hrsOff_C7C12All"	"Myc4W_4hrsOff_C7C12All"	"#00BFC4"
-"Myc4W_8hrsOff_C7C12All"	"Myc4W_8hrsOff_C7C12All"	"#619CFF"
-"Myc4W_C7C12All"	"Myc4W_C7C12All"	"#F564E3"

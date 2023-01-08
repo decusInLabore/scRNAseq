@@ -1,0 +1,636 @@
+<!-- Set PArameters Module -->
+<!-- Set the chnkPrefix to make all chunks unique in the overall folder -->
+```{r partB_create_integrated_Seurat_object_init, echo=TRUE, eval=TRUE, warning=FALSE}
+chnkPrefix <- "B31.benchmark.int."
+VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.Date()), ".pdf")
+
+```
+
+
+### Create Sample List
+```{r B3_partB_create_sample_list, echo=TRUE, eval=TRUE, warning=FALSE, results=F}
+###############################################################################
+## Do percent mt plots                                                       ##
+
+## A sample list will be required for most integration methods. It is prepared
+# either with or without cell cycle regression - as specified previously
+
+SampleList <- createNormSampleList(
+    obj = Obio,
+    reduce = Obio@parameterList$debugReduce, # Default is NULL
+    vars.to.regress = Obio@parameterList$vars.to.regress,
+    #vars.to.regress = vars.to.regress,
+    s.genes = Obio@dataTableList[["referenceList"]]$s.genes,
+    g2m.genes = Obio@dataTableList[["referenceList"]]$g2m.genes,
+    annotateCellCyclePhase = TRUE
+)
+
+print(paste0("Cell Recuction: ", Obio@parameterList$debugReduce))
+lapply(SampleList, dim)
+## Done                                                                      ##
+###############################################################################
+
+###############################################################################
+## Add doublet annotation, if present, to meta data                          ##
+
+pos <- grep("DF_resultlist", names(Obio@dataTableList))
+
+if (length(pos) > 0){
+    sampleNames <- names(SampleList)
+    for (i in 1:length(SampleList)){
+        dfAdd <- Obio@dataTableList[["DF_resultlist"]][[sampleNames[i]]]
+        row.names(dfAdd) <- gsub("-1", "",row.names(dfAdd))
+        dfAdd <- dfAdd[row.names(dfAdd) %in% row.names(SampleList[[i]]@meta.data),]
+        
+        SampleList[[i]] <- addDf2seuratMetaData(
+            obj = SampleList[[i]],
+            dfAdd = dfAdd
+        )
+    }
+}
+
+## Done                                                                      ##
+###############################################################################
+
+
+###############################################################################
+### Functions #################################################################
+###############################################################################
+
+###############################################################################
+## Create UMAP and cluster                                                   ##
+
+createUMAPandCluster <- function(
+    OsC,
+    singleCellClusterString,
+    singleCellClusterParameter,
+    singleCellSeuratNpcs4PCA,
+    vars.to.regress
+){
+  
+  library(dplyr)
+  
+  set.seed(42)
+  
+  OsC <- OsC %>% Seurat::ScaleData(
+      verbose = FALSE,
+      vars.to.regress = vars.to.regress
+  ) %>% Seurat::RunPCA(
+    npcs = singleCellSeuratNpcs4PCA, 
+    verbose = FALSE
+  ) %>% Seurat::RunUMAP(reduction = "pca", dims = 1:singleCellSeuratNpcs4PCA
+  ) %>% Seurat::RunTSNE(reduction = "pca", dims = 1:singleCellSeuratNpcs4PCA
+  ) %>% Seurat::FindNeighbors(reduction = "pca", dims = 1:singleCellSeuratNpcs4PCA
+  ) %>% Seurat::FindClusters(resolution = singleCellClusterParameter)
+  
+  ## Add UMAP coordinates to Metadata ##
+  dfAdd <- data.frame(OsC@reductions$umap@cell.embeddings)
+  OsC <- biologicToolsSC::addDf2seuratMetaData(
+      obj = OsC, 
+      dfAdd = dfAdd
+  )
+  
+  return(OsC)
+}
+
+
+## Done                                                                      ##
+###############################################################################
+
+
+###############################################################################
+## Function cca integration                                                   ##
+#standard cca
+doCCAintegration <- function(
+    SampleList,
+    k.filter = 200,
+    singleCellSeuratNpcs4PCA = 30
+){
+    set.seed(42)
+    ## Create sample anchors
+    sampleAnchors <- Seurat::FindIntegrationAnchors(
+          object.list = SampleList, 
+          dims = 1:singleCellSeuratNpcs4PCA,
+          k.filter = k.filter
+     ) 
+
+    OsC <- Seurat::IntegrateData(
+            #features.to.integrate = geneIntersectVec,
+            anchorset = sampleAnchors, 
+            dims = 1:singleCellSeuratNpcs4PCA,
+            k.weight = k.filter
+    )
+    returnList <- list(
+        "OsC" = OsC,
+        "sampleAnchors" = as.vector(sort(sampleAnchors@anchor.features))
+    )
+    return(returnList)
+}
+
+
+## Done                                                                      ##
+###############################################################################
+
+
+###############################################################################
+## Function rpca integration                                                  ##
+
+doRPCAintegration <- function(
+    SampleList,
+    k.filter = 200,
+    singleCellSeuratNpcs4PCA = 30,
+    vars.to.regress = NULL
+){
+    set.seed(42)
+    ## rpca requires RunPCA on all items in the smaple list
+    features <- Seurat::SelectIntegrationFeatures(object.list = SampleList)  
+  
+    for (i in 1:length(SampleList)){
+         SampleList[[i]] <- Seurat::ScaleData(
+            SampleList[[i]], 
+            features = features, 
+            vars.to.regress = vars.to.regress,
+            verbose = FALSE
+          )
+         SampleList[[i]] <- Seurat::RunPCA(
+            npcs = singleCellSeuratNpcs4PCA, 
+            SampleList[[i]], 
+            features = features, 
+            verbose = FALSE
+        )
+    }
+
+    sampleAnchors <- Seurat::FindIntegrationAnchors(
+          object.list = SampleList, 
+          reduction = "rpca",
+          dims = 1:singleCellSeuratNpcs4PCA,
+          k.filter = k.filter
+    ) 
+    
+    OsC <- Seurat::IntegrateData(
+            #features.to.integrate = geneIntersectVec,
+            anchorset = sampleAnchors, 
+            dims = 1:singleCellSeuratNpcs4PCA,
+            k.weight = k.filter
+        )
+    returnList <- list(
+        "OsC" = OsC,
+        "sampleAnchors" = as.vector(sort(sampleAnchors@anchor.features))
+    )
+    return(returnList)
+}
+
+
+## Done                                                                      ##
+###############################################################################
+
+###############################################################################
+## Functon harmony integration                                               ##
+
+## Harmony will run on the OsC_rpca object
+## renv::install("immunogenomics/harmony")
+## Probably needs to run after SCT normalization
+# OsC_harmony <- harmony::RunHarmony(OsC_rpca, "invivo_invitro", assay.use = "RNA", dims.use = 1:Obio@parameterList$singleCellSeuratNpcs4PCA)
+# 
+# RunUMAP(seuratObj, reduction = "harmony")
+## Done                                                                      ##
+###############################################################################
+
+
+###############################################################################
+## Functon SCT integration                                                   ##
+
+if (length(grep("scNintegrationFeatures", names(Obio@parameterList))) == 0){
+            Obio@parameterList$scNintegrationFeatures = 3000
+}
+
+scNintegrationFeatures <- Obio@parameterList$scNintegrationFeatures
+
+doSCTintegration <- function(
+    SampleList,
+    scNintegrationFeatures = scNintegrationFeatures,
+    k.filter = 200,
+    singleCellSeuratNpcs4PCA = 30,
+    vars.to.regress = NULL
+){
+    set.seed(42)
+  
+    ## Prepare sample list for rpca
+    features <- Seurat::SelectIntegrationFeatures(object.list = SampleList)  
+  
+    for (i in 1:length(SampleList)){
+          SampleList[[i]] <- SCTransform(
+              SampleList[[i]], 
+              method = "glmGamPoi", 
+              vars.to.regress = vars.to.regress, 
+              verbose = FALSE
+          )
+         SampleList[[i]] <- Seurat::ScaleData(
+            SampleList[[i]], 
+            features = features, 
+            vars.to.regress = vars.to.regress,
+            verbose = FALSE
+          )
+         SampleList[[i]] <- Seurat::RunPCA(
+            npcs = singleCellSeuratNpcs4PCA, 
+            SampleList[[i]], 
+            features = features, 
+            verbose = FALSE
+        )
+    }
+  
+    #library(future)
+    #options(future.globals.maxSize = 14000 * 1024^2)
+    #plan("multiprocess", workers = 30)
+        
+    sample.features <- Seurat::SelectIntegrationFeatures(
+        object.list = SampleList, 
+        nfeatures = scNintegrationFeatures
+    )
+    SampleList <- Seurat::PrepSCTIntegration(
+        object.list = SampleList, 
+        anchor.features = sample.features, 
+        verbose = FALSE
+    )
+    
+    #if (length(SampleList) >= 10){
+    ## make rpca default    
+      sampleAnchors <- Seurat::FindIntegrationAnchors(
+            object.list = SampleList, 
+            reduction = "rpca",
+            normalization.method = "SCT", 
+            anchor.features = sample.features, 
+            verbose = FALSE,
+            k.filter = k.filter
+        )
+            
+        # } else {
+        #     # standard cca
+        #     sampleAnchors <- Seurat::FindIntegrationAnchors(
+        #         object.list = SampleList, 
+        #         normalization.method = "SCT", 
+        #         anchor.features = sample.features, 
+        #         verbose = FALSE,
+        #         k.filter = k.filter
+        #     )
+        #     
+        # }
+        
+        
+        
+        OsC <- Seurat::IntegrateData(
+            anchorset = sampleAnchors, 
+            normalization.method = "SCT", 
+            verbose = FALSE,
+            k.weight = k.filter
+        )
+        detach("package:future", unload=TRUE)
+returnList <- list(
+        "OsC" = OsC,
+        "sampleAnchors" = as.vector(sort(sampleAnchors@anchor.features))
+    )
+    return(returnList)
+}
+
+
+
+## Done                                                                      ##
+###############################################################################
+
+
+
+###############################################################################
+## Functon STACAS integration                                               ##
+
+doSTACASintegration <- function(
+    SampleList,
+    k.filter = 200,
+    singleCellSeuratNpcs4PCA = 30,
+    vars.to.regress = NULL
+){
+    set.seed(42)
+    ## rpca requires RunPCA on all items in the smaple list
+    if (!require(STACAS)){
+        renv::install("carmonalab/STACAS")
+    }
+
+
+    hvg <- Seurat::SelectIntegrationFeatures(
+        object.list = SampleList,
+        nfeatures = 2000
+    )
+
+    OsC_STACAS <- STACAS::Run.STACAS(
+        SampleList, 
+        dims = 1:Obio@parameterList$singleCellSeuratNpcs4PCA, 
+        anchor.features = hvg
+    ) 
+    
+    
+returnList <- list(
+        "OsC" = OsC_STACAS
+    )
+    return(returnList)
+}
+
+
+
+
+## Done                                                                      ##
+###############################################################################
+
+
+###############################################################################
+## Integrate Datasets                                                        ##
+
+## Determine k-filter parameter ##
+k.test <- min(as.vector(unlist(lapply(SampleList, ncol))))
+if (k.test < 200){
+    k.filter <- k.test-1
+} else {
+    k.filter <- 200
+}
+
+# if (length(Obio@sampleDetailList) > 1){
+#         Seurat::DefaultAssay(OsC) <- "integrated"
+#         OsC <- SampleList[[1]]
+#     } else {
+#         Obio@parameterList$singleCellClusterString <- gsub("integrated", "RNA", Obio@parameterList$singleCellClusterString)
+#         Seurat::DefaultAssay(OsC) <- "RNA"
+#   }
+
+###############################################################################
+## Run integration tests                                                     ##
+
+
+## Run cca integration 
+print("Start cca section")
+
+rList <- doCCAintegration(
+    SampleList = SampleList,
+    k.filter = k.filter,
+    singleCellSeuratNpcs4PCA = Obio@parameterList$singleCellSeuratNpcs4PCA
+
+)
+
+
+OsC_test <- rList[["OsC"]]
+
+OsC_test <- createUMAPandCluster(
+    OsC = OsC_test,
+    singleCellClusterString = Obio@parameterList$singleCellClusterString,
+    singleCellClusterParameter =  Obio@parameterList$singleCellClusterParameter,
+    singleCellSeuratNpcs4PCA = Obio@parameterList$singleCellSeuratNpcs4PCA,
+    vars.to.regress = Obio@parameterList$vars.to.regress
+)
+
+sampleAnchorList <- list()
+
+
+## Prepare summary file
+tag <- "cca"
+
+sampleAnchors <- rList[["sampleAnchors"]]
+
+sampleAnchorList[[tag]] <- sampleAnchors
+
+## Create list with UMAP coordinates
+dfDat <- OsC_test@meta.data[,c("orig_ident","UMAP_1", "UMAP_2", "seurat_clusters")]  
+
+dfDat[["cellID"]] <- row.names(dfDat) 
+dfDat$cellID <- gsub('(.*)_\\w+', '\\1', dfDat$cellID)
+dfDat$cellID <- paste0(dfDat$cellID, "_",dfDat$orig_ident)
+dfDat[["integration_method"]] <- tag
+
+
+## Run rpca integration 
+
+print("Start rpca section")
+
+rList_rpca <- doRPCAintegration(
+    SampleList = SampleList,
+    k.filter = 200,
+    singleCellSeuratNpcs4PCA = 30,
+    vars.to.regress = Obio@parameterList$vars.to.regress
+)
+  
+
+
+OsC_rpca <- rList_rpca[["OsC"]]
+
+OsC_rpca <- createUMAPandCluster(
+    OsC = OsC_rpca,
+    singleCellClusterString = Obio@parameterList$singleCellClusterString,
+    singleCellClusterParameter =  Obio@parameterList$singleCellClusterParameter,
+    singleCellSeuratNpcs4PCA = Obio@parameterList$singleCellSeuratNpcs4PCA,
+    vars.to.regress = Obio@parameterList$vars.to.regress
+)
+
+
+## Prepare summary file
+tag <- "rpca"
+
+sampleAnchors_rpca <- rList_rpca[["sampleAnchors"]]
+
+sampleAnchorList[[tag]] <- sampleAnchors
+
+## Create list with UMAP coordinates
+dfTemp <- OsC_rpca@meta.data[,c("orig_ident","UMAP_1", "UMAP_2", "seurat_clusters")]  
+
+dfTemp[["cellID"]] <- row.names(dfTemp) 
+dfTemp$cellID <- gsub('(.*)_\\w+', '\\1', dfTemp$cellID)
+dfTemp$cellID <- paste0(dfTemp$cellID, "_",dfTemp$orig_ident)
+dfTemp[["integration_method"]] <- tag
+
+if (exists("dfDat")){
+    dfDat <- rbind(
+        dfTemp, 
+        dfDat
+    )
+} else {
+    dfDat <- dfTemp
+}
+
+
+## Run STACAS test
+
+print("Run stacas section")
+
+rList_stacas <- doSTACASintegration(
+    SampleList = SampleList,
+    k.filter = 200,
+    singleCellSeuratNpcs4PCA = Obio@parameterList$singleCellSeuratNpcs4PCA,
+    vars.to.regress = Obio@parameterList$vars.to.regress
+)
+  
+
+
+OsC_stacas <- rList_stacas[["OsC"]]
+
+# saveRDS(OsC_stacas, file = "../../../../workdir/OsC_stacas.rds")
+# OsC_stacas <- readRDS(file="../../../../workdir/OsC_stacas.rds")
+
+OsC_stacas <- createUMAPandCluster(
+    OsC = OsC_stacas,
+    singleCellClusterString = Obio@parameterList$singleCellClusterString,
+    singleCellClusterParameter =  Obio@parameterList$singleCellClusterParameter,
+    singleCellSeuratNpcs4PCA = Obio@parameterList$singleCellSeuratNpcs4PCA,
+    vars.to.regress = Obio@parameterList$vars.to.regress
+)
+
+
+## Prepare summary file
+tag <- "stacas"
+
+# sampleAnchors_rpca <- rList_rpca[["sampleAnchors"]]
+
+# sampleAnchorList[[tag]] <- sampleAnchors
+
+## Create list with UMAP coordinates
+dfTemp <- OsC_stacas@meta.data[,c("orig_ident","UMAP_1", "UMAP_2", "seurat_clusters")]  
+
+dfTemp[["cellID"]] <- row.names(dfTemp) 
+dfTemp$cellID <- gsub('(.*)_\\w+', '\\1', dfTemp$cellID)
+dfTemp$cellID <- paste0(dfTemp$cellID, "_",dfTemp$orig_ident)
+dfTemp[["integration_method"]] <- tag
+
+if (exists("dfDat")){
+    dfDat <- rbind(
+        dfTemp, 
+        dfDat
+    )
+} else {
+    dfDat <- dfTemp
+}
+
+## write output
+if (!dir.exists("../../../../workdir/temp")){
+    dir.create("../../../../workdir/temp")
+}
+
+FN <- "../../../../workdir/temp/integration.coordinates.txt"
+write.table(
+    dfDat,
+    FN, 
+    row.names = F,
+    sep = "\t"
+)
+
+## Run SCT test
+print("Run SCT section")
+
+rList_sct <- doSCTintegration(
+    SampleList = SampleList,
+    k.filter = 200,
+    singleCellSeuratNpcs4PCA = 30,
+    vars.to.regress = Obio@parameterList$vars.to.regress
+)
+  
+
+
+OsC_sct <- rList_sct[["OsC"]]
+
+OsC_sct <- createUMAPandCluster(
+    OsC = OsC_sct,
+    singleCellClusterString = Obio@parameterList$singleCellClusterString,
+    singleCellClusterParameter =  Obio@parameterList$singleCellClusterParameter,
+    singleCellSeuratNpcs4PCA = Obio@parameterList$singleCellSeuratNpcs4PCA,
+    vars.to.regress = Obio@parameterList$vars.to.regress
+)
+
+
+## Prepare summary file
+tag <- "sct"
+
+sampleAnchors_sct <- rList_rpca[["sampleAnchors"]]
+
+sampleAnchorList[[tag]] <- sampleAnchors
+
+## Create list with UMAP coordinates
+dfTemp <- OsC_sct@meta.data[,c("orig_ident","UMAP_1", "UMAP_2", "seurat_clusters")]  
+
+dfTemp[["cellID"]] <- row.names(dfTemp) 
+dfTemp$cellID <- gsub('(.*)_\\w+', '\\1', dfTemp$cellID)
+dfTemp$cellID <- paste0(dfTemp$cellID, "_",dfTemp$orig_ident)
+dfTemp[["integration_method"]] <- tag
+
+if (exists("dfDat")){
+    dfDat <- rbind(
+        dfTemp, 
+        dfDat
+    )
+} else {
+    dfDat <- dfTemp
+}
+
+
+## Done                                                                      ##
+###############################################################################
+
+    
+## write output
+if (!dir.exists("../../../../workdir/temp")){
+    dir.create("../../../../workdir/temp")
+}
+
+FN <- "../../../../workdir/temp/integration.coordinates.txt"
+write.table(
+    dfDat,
+    FN, 
+    row.names = F,
+    sep = "\t"
+)
+
+## Format for Feature View integration
+# Get cell IDs
+library(dplyr)
+
+dfID <- biologicSeqTools2::import.db.table.from.db(
+    dbtable = "integration01_PCA",
+    dbname = "pbl_data",
+    user     = "boeingS",
+    password = db.pwd,
+    host     = "10.27.241.82"
+) %>% select(cellID, sampleName) %>% distinct()
+
+dfID[["intID"]]  <- gsub('(.*)_\\w+', '\\1', dfID$cellID)
+dfID$intID <- paste0(dfID$intID, "_", dfID$sampleName)
+dfID$samplesampleName <- NULL
+
+names(dfDat) <- gsub("^cellID$", "intID", names(dfDat))
+dfDat <- merge(dfDat, dfID, by.x = "intID", by.y = "intID")
+
+assays <- sort(unique(dfDat$integration_method))
+
+for (i in 1:length(assays)){
+    dfTemp <- dfDat[dfDat$integration_method == assays[i], ]
+    selVec <- c("cellID", "UMAP_1", "UMAP_2", "seurat_clusters")
+    dfTemp <- dfTemp[,selVec]
+    names(dfTemp) <- gsub("UMAP_1", paste0("UMAP_1_",assays[i] ), names(dfTemp))
+    names(dfTemp) <- gsub("UMAP_2", paste0("UMAP_2_",assays[i] ), names(dfTemp))
+    dfTemp$seurat_clusters <- paste0(assays[i], "_C", dfTemp$seurat_clusters)
+    names(dfTemp) <- gsub("seurat_clusters", paste0(assays[i], "_clusters"), names(dfTemp))
+    if (i == 1){
+        dfRes <- dfTemp
+    } else {
+        dfRes <- merge(
+            dfRes,
+            dfTemp,
+            by.x = "cellID", 
+            by.y = "cellID", 
+            all = TRUE
+        )
+    }
+}
+
+FN <- "../../../../workdir/temp/integration.trials.txt"
+write.table(
+    dfRes,
+    FN, 
+    row.names = F,
+    sep = "\t"
+)
+
+```
+
+
