@@ -257,7 +257,8 @@ print("End chunk 1. Objects loaded.")
 addFNvec <- c(
   paste0(workdir, "temp/UMAP.regression.coordinates.txt"),
   paste0(workdir, "temp/ClusterFinder.output.txt"),
-  paste0(workdir, "temp/species.inference.txt)")
+  paste0(workdir, "temp/species.inference.txt"),
+  paste0(workdir, "temp/integration.trials.txt")
 )
 
 row.names(OsC@meta.data) <- OsC@meta.data$cellID
@@ -540,6 +541,43 @@ OsC@meta.data <- OsC@meta.data[,!duplicated(names(OsC@meta.data))]
 
 params <- biologicViewerSC::scanObjParams(OsC)
 
+## Change colors to previous project colors ##
+dfCol1 <- unique(biologicSeqTools2::import.db.table.from.db(
+    dbname = "pbl_data",
+    dbtable = "pbl359subCluster07_PCA",
+    host =  Obio@dbDetailList$host,
+    user =  Obio@dbDetailList$db.user,
+    password = db.pwd
+)[,c("clusterName", "clusterColor")] )
+
+dfCol1$clusterName <- paste0(
+    "org_cluster_",
+    dfCol1$clusterName
+)
+
+for (i in 1:nrow(dfCol1)){
+    params$catColorList$original_clusterName[dfCol1[i, "clusterName"]] <- dfCol1[i, "clusterColor"]
+}
+
+dfCol2 <- unique(biologicSeqTools2::import.db.table.from.db(
+    dbname = "pbl_data",
+    dbtable = "SC22096_PCA",
+    host =  Obio@dbDetailList$host,
+    user =  Obio@dbDetailList$db.user,
+    password = db.pwd
+)[,c("clusterName", "clusterColor")] )
+
+dfCol2$clusterName <- paste0(
+    "org_cluster_",
+    dfCol2$clusterName
+)
+
+for (i in 1:nrow(dfCol2)){
+    params$catColorList$original_clusterName[dfCol2[i, "clusterName"]] <- dfCol2[i, "clusterColor"]
+}
+
+#params$catColorList$original_clusterName
+
 
 ###############################################################################
 ## Add custom cluster annotation if specified                                ##
@@ -626,9 +664,9 @@ pos <- grep("dfResAUC", names(Obio@dataTableList))
 if (length(pos) > 0) {
     dfCat <- Obio@dataTableList$dfResAUC
     names(dfCat) <- gsub("cat", "gene", names(dfCat))
-    names(dfCat) <- gsub("mAUC", "expr", names(dfCat))
-    names(dfCat) <- gsub("cellID", "condition", names(dfCat))
-    dfCat <- dfCat[dfCat$expr != 0,]
+    names(dfCat) <- gsub("mAUC", "lg10Expr", names(dfCat))
+    #names(dfCat) <- gsub("cellID", "condition", names(dfCat))
+    dfCat <- dfCat[dfCat$lg10Expr != 0,]
     dfCat <- dfCat[,names(dfExpr)]
     dfExpr <- rbind(dfExpr, dfCat)
 }
@@ -723,9 +761,9 @@ pos <- grep("dfResAUC", names(Obio@dataTableList))
 if (length(pos) > 0) {
     dfCat <- Obio@dataTableList$dfResAUC
     names(dfCat) <- gsub("cat", "gene", names(dfCat))
-    names(dfCat) <- gsub("mAUC", "expr", names(dfCat))
-    names(dfCat) <- gsub("cellID", "condition", names(dfCat))
-    dfCat <- dfCat[dfCat$expr != 0,]
+    names(dfCat) <- gsub("mAUC", "lg10Expr", names(dfCat))
+    #names(dfCat) <- gsub("cellID", "condition", names(dfCat))
+    dfCat <- dfCat[dfCat$lg10Expr != 0,]
     dfCat <- dfCat[,names(dfExpr)]
     dfExpr <- rbind(dfExpr, dfCat)
 }

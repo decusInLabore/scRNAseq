@@ -21,11 +21,14 @@ i = 1
  
     dfRes <- OsC@meta.data
     
-    selVec <- c("cellID", "clusterName", "clusterColor", "meta_Timepoint")
+    selVec <- c("cellID", "clusterName", "clusterColor", "meta_Age_Group")
     
     # dfRes <- dfRes[dfRes$meta_Genotype == genotypes[i], selVec]
-    dfRes[["timepoint"]] <- gsub("^T", "", dfRes$meta_Timepoint)
-    dfRes[["timepoint"]] <- gsub("hrs", "", dfRes$timepoint)
+    dfRes[["timepoint"]] <- dfRes$meta_Age_Group
+    dfRes[["timepoint"]] <- gsub("Young", 1, dfRes$timepoint)
+    dfRes[["timepoint"]] <- gsub("Middle", 2, dfRes$timepoint)
+    dfRes[["timepoint"]] <- gsub("Old", 3, dfRes$timepoint)
+  
     dfRes$timepoint <- as.numeric(dfRes$timepoint)
     
     
@@ -60,7 +63,11 @@ i = 1
           legend.title = ggplot2::element_blank()
         ) + 
         ggplot2::ggtitle(paste0("Area plot for ", genotypes[i])) + 
-        ggplot2::scale_fill_manual("Clusters" ,values = colVec) 
+        ggplot2::scale_fill_manual("Clusters" ,values = colVec) +
+        ggplot2::scale_x_continuous(
+            breaks=c(1,2,3), 
+            labels=c("Young","Middle","Old")
+        )
 
 
 

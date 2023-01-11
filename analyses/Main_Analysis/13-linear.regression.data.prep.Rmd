@@ -180,6 +180,9 @@ Obio@dataTableList[["LRmarkerGeneList"]] <- LRmarkerGeneList
 ## upload LR and dge markers to db                                           ##
 ## First the DGE markers ##
 DGEmarkerGeneList <- Obio@dataTableList$DGEmarkerGeneList
+# Obio@dataTableList$dfGeneralMarkers
+
+
 updatedCatIDs <- as.vector(NULL, mode="character")
 updatedCatNames <- as.vector(NULL, mode="character")
 clusterName <- as.vector(NULL, mode="character")

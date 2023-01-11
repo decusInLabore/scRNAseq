@@ -17,6 +17,15 @@ cat(paste0(
 ))
 
 
+if (is.null(Obio@dataTableList$referenceList$integrated_top30var)){
+    label30 <- paste0("integrated", "_", "top30var")
+        Obio@dataTableList$referenceList[[ label30]]<- head(
+        x = Seurat::VariableFeatures(object = OsC), 
+        30
+    )
+
+}
+
 
 plotGenes <- c(
     Obio@dataTableList$referenceList$integrated_top30var[1:5]

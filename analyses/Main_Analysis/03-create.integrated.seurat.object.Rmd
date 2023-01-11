@@ -52,11 +52,13 @@ if (length(pos) > 0){
 ###############################################################################
 ## Add scalde data and pca for rpca integration                              ##
 
-if (length(SampleList) >= 10){
+if (length(SampleList) >= 30){
     iMethod <- "rpca"
 } else {
     iMethod <- "cca"
 }
+
+Obio
 
 if (iMethod == "rpca"){
     
@@ -103,7 +105,7 @@ if (length(SampleList) > 1){
             verbose = FALSE
         )
         
-        if (length(SampleList) >= 10){
+        if (length(SampleList) >= 30){
             
           sampleAnchors <- Seurat::FindIntegrationAnchors(
                 object.list = SampleList, 
@@ -138,7 +140,7 @@ if (length(SampleList) > 1){
         
     } else {
     
-        if (length(SampleList) >= 10){
+        if (length(SampleList) >= 30){
             sampleAnchors <- Seurat::FindIntegrationAnchors(
                 object.list = SampleList, 
                 reduction = "rpca",
