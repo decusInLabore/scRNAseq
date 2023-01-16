@@ -217,7 +217,14 @@ row.names(dfPair) <- dfPair$sampleID
 #colVec <- dfPair$sampleColor
 #names(colVec) <- dfPair$sampleName
 
-dfPlot$Cluster <- factor(dfPlot$Cluster, levels = dfPair$sampleName)
+#dfPlot$Cluster <- factor(dfPlot$Cluster, levels = dfPair$sampleName)
+
+dfPlot$sampleName <- factor(
+    dfPlot$sampleName, 
+    levels = Obio@parameterList$sampleNameOrder
+)
+
+dfPlot <- dfPlot[order(dfPlot$sampleName),]
 
 # dotsize  = 1
 # if (nrow(dfPlot) > 10000){
@@ -344,7 +351,8 @@ dfPlot <- dfPlot[dfPlot$tSNE_1 != 0 & dfPlot$tSNE_2 != 0,]
             
 ## Add cluster colors ##
 dfPlot[["Cluster"]] <- dfPlot$sampleName
-clusterVec <- as.vector(unique(sort(dfPlot$sampleName)))
+# clusterVec <- as.vector(unique(sort(dfPlot$sampleName)))
+clusterVec <- Obio@parameterList$sampleNameOrder 
 
 maxX <- 1.1*max(dfPlot$tSNE_1, na.rm = T)
 minX <- 1.1*min(dfPlot$tSNE_1, na.rm = T)
@@ -363,6 +371,13 @@ minY <- 1.1*min(dfPlot$tSNE_2, na.rm = T)
 # } else {
 #   dotsize = 0.25
 # }
+
+dfPlot$sampleName <- factor(
+    dfPlot$sampleName, 
+    levels = Obio@parameterList$sampleNameOrder
+)
+
+dfPlot <- dfPlot[order(dfPlot$sampleName),]
 
 plotList[[tag]] <- ggplot2::ggplot(data=dfPlot[dfPlot$included == "+",], ggplot2::aes(tSNE_1, tSNE_2, color=sampleName)
             ) + ggplot2::geom_point( shape=16, size = as.numeric(dotsize)
@@ -446,7 +461,8 @@ if (length(unique(dfPlot$Cluster)) > 15){
 ###############################################################################
 ## Make one UMAP plot per sample                                             ##
 
-sampleVec <- sort(unique(OsC@meta.data$sampleName))
+sampleVec <- Obio@parameterList$sampleNameOrder            
+            
 
 dfPlot <- OsC@meta.data
 pos <- grep("included", names(dfPlot))

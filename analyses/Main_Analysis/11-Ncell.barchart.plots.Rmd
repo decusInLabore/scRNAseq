@@ -51,7 +51,7 @@ if (renderChapter){
 
 ## Set sampleIDorder
 ## Give the order in which sampleIDs should be displayed
-sampleIDorder <- names(Obio@sampleDetailList)
+sampleIDorder <- Obio@parameterList$sampleNameOrder
 
 dfOrder <- OsC@meta.data %>% 
   dplyr::distinct(sampleName, sampleID)  %>% 
@@ -59,7 +59,7 @@ dfOrder <- OsC@meta.data %>%
 
 dfOrder <- dfOrder[sampleIDorder,]
 
-sampleNameOrder <- dfOrder$sampleName
+sampleNameOrder <- rev(Obio@parameterList$sampleNameOrder)
 ## a way of generating this vector is
 # sampleIDorder <- unique(OsC@meta.data$sampleID)
 
@@ -109,7 +109,10 @@ dfSample <- OsC@meta.data %>%
 
 dfSample <- dfSample[names(Obio@sampleDetailList),]
 
-sampleIDs <- dfSample$sampleName
+sampleIDs <- Obio@parameterList$sampleNameOrder
+
+dfSample <- dfSample[sampleIDs, ]
+
 colVec <- dfSample$sampleColor
 
 clusterIDs <- unique(OsC@meta.data[,"sampleName"])
@@ -220,6 +223,8 @@ plot_barchart <- function(
     
     ############################################################################
     ## Make the plot                                                          ##
+    dfResTemp <- dfResTemp[order(dfResTemp$sampleName), ]
+    
     
     plotList[[tag]] <- ggplot2::ggplot() + 
         ggplot2::geom_bar(ggplot2::aes_string(y = plotMode, x = "clusterName", fill = "sampleName"), data = dfResTemp, stat="identity") + 
@@ -395,7 +400,7 @@ resultList <- purrr::map(
         plotList = list(),
         chnkVec = as.vector(NULL, mode = "character"),
         clusterNameOrder = NULL,
-        sampleNameOrder = sort(unique(OsC@meta.data$sampleName)),
+        sampleNameOrder = sampleNameOrder,
         plotVertical = TRUE,
         plotMode = "N_cells",
         reportFigDir = reportFigDir,

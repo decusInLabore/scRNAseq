@@ -9,9 +9,12 @@ VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.D
 
 
 ```{r , echo=TRUE, eval=TRUE, warning=FALSE, results=F}
+
+projectDir <- gsub("scripts/scRNAseq/analyses/Main_Analysis", "", getwd())
+
 ###############################################################################
 ## Add custom cluster annotation if specified                                ##
-FNcol <- paste0(cwd, "/design/customClusterAnnotation.txt")
+FNcol <- paste0(projectDir, "scripts/scRNAseq/design/customClusterAnnotation.txt")
 tableValid <- FALSE
 if (file.exists(FNcol)){
   dfClusterAnnotation <- read.delim(
@@ -72,7 +75,7 @@ if (!file.exists(FNcol) | !tableValid){
   #dfClusterAnnotation$cellID <- NULL
   ## Add sample colors ##
   
-  annoDir <- paste0(cwd, "/design")
+  annoDir <- paste0(projectDir, "scripts/scRNAseq/design")
   
   if (!dir.exists(annoDir)){
     dir.create(annoDir)
@@ -136,7 +139,7 @@ dfAdd <- data.frame(dfAdd, stringsAsFactors = F)
 row.names(dfAdd) <- dfAdd$cellID
 dfAdd$cellID <- NULL
 dfAdd$seurat_clusters <- NULL
-OsC <- addDf2seuratMetaData(
+OsC <- biologicToolsSC::addDf2seuratMetaData(
   obj = OsC, 
   dfAdd = dfAdd
 )
@@ -147,7 +150,7 @@ Seurat::Idents(OsC) <- factor(Seurat::Idents(OsC), levels = Obio@parameterList[[
 ###############################################################################
 ###############################################################################
 ## Add custom sample annotation if specified                                 ##
-FNsample <- paste0(cwd, "/design/customSampleAnnotation.txt")
+FNsample <- paste0(projectDir, "scripts/scRNAseq/design/customSampleAnnotation.txt")
 tableValid <- FALSE
 if (file.exists(FNsample)){
   dfSampleAnnotation <- read.delim(
@@ -182,6 +185,8 @@ if (file.exists(FNsample)){
     tableValid <- FALSE
   }
 }
+
+
 if (!file.exists(FNsample) | !tableValid){
   dfSampleAnnotation <- OsC@meta.data[,c("cellID", "sampleID")]
   
@@ -199,7 +204,7 @@ if (!file.exists(FNsample) | !tableValid){
   #row.names(dfSampleAnnotation) <- dfSampleAnnotation$cellID
   #dfClusterAnnotation$cellID <- NULL
   ## Add sample colors ##
-  annoDir <- paste0(cwd, "/design")
+  annoDir <- paste0(projectDir, "scripts/scRNAseq/design")
   
   if (!dir.exists(annoDir)){
     dir.create(annoDir)
@@ -215,6 +220,21 @@ if (!file.exists(FNsample) | !tableValid){
     sep = "\t"
   ) 
 }
+
+
+
+
+pos <- grep("^sampleOrder$", names(dfSampleAnnotation))
+if (length(pos) ==1){
+  dfSampleAnnotation <- dfSampleAnnotation[order(dfSampleAnnotation$sampleOrder, decreasing = F),]
+  
+} else {
+  dfSampleAnnotation[["sampleOrder"]] <- 1:nrow(dfSampleAnnotation)
+}
+
+orderVec <- dfSampleAnnotation$sampleName
+  Obio@parameterList[["sampleNameOrder"]] <- orderVec
+
 ###############################################################################
 ## Merge into OsC@meta.data                                                  ##
 dfAdd <- OsC@meta.data[,c("cellID", "sampleID")]
@@ -228,10 +248,13 @@ dfAdd <- merge(
 row.names(dfAdd) <- dfAdd$cellID
 dfAdd$cellID <- NULL
 dfAdd$sampleID <- NULL
-OsC <- addDf2seuratMetaData(
+OsC <- biologicToolsSC::addDf2seuratMetaData(
   obj = OsC, 
   dfAdd = dfAdd
 )
+
+Seurat::Idents(OsC) <- "sampleName"
+Seurat::Idents(OsC) <- factor(Seurat::Idents(OsC), levels = Obio@parameterList[["sampleNameOrder"]])
 ## Done                                                                      ##
 ###############################################################################
 
