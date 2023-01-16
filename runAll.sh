@@ -12,31 +12,48 @@ sleep 300
 done
 }
 
-project_id=MycSubset1
+project_id=511
 
 project=rA_$project_id
-sbatch --time=72:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;Rscript runRmd.r ./analyses/QC/QC.Rmd" --job-name=$project -p hmem --mem=600G -o ../rA.$project.slurm >> ../commands.txt
+cd ./analyses/QC/
+sbatch --time=72:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;Rscript runRmd.r QC.Rmd" --job-name=$project -p hmem --mem=600G -o ../../../../workdir/rA.$project.slurm >> ../commands.txt
+cd -
 
 wait_on_lsf
 project=rB_$project_id
-sbatch --time=72:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;Rscript runRmd.r ./analyses/Main_Analysis/Main_Analysis.Rmd" --job-name=$project -p hmem --mem=600G -o ../rB.$project.slurm >> ../commands.txt
+cd ./analyses/Main_Analysis/
+sbatch --time=72:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;Rscript runRmd.r Main_Analysis.Rmd" --job-name=$project -p hmem --mem=600G -o ../../../../workdir/rB.$project.slurm >> ../commands.txt
+cd -
 
 wait_on_lsf
+cd ./analyses/Cluster_Finder/
 project=rCF_$project_id
-sbatch --time=24:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;Rscript runRmd.r ClusterFinder.Rmd" --job-name=$project -p hmem --mem=300G -o ../rCF.$project.tslurm >> ../commands.txt
+sbatch --time=24:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;Rscript runRmd.r ClusterFinder.Rmd" --job-name=$project -p hmem --mem=600G -o ../../../../workdir/rCF.$project.tslurm >> ../commands.txt
+cd -
 
 wait_on_lsf
 project=rCTA_$project_id
+cd ./analyses/Celltype_Assignment/
 sbatch --time=24:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;Rscript runRmd.r Celltype_Assignment.Rmd" --job-name=$project -p hmem --mem=300G -o ../rCTA.$project.tslurm >> ../commands.txt
-
+cd -
 
 wait_on_lsf
 project=rC_$project_id
-sbatch --time=12:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;Rscript runRmd.r sc_PartC_Analysis.Rmd " --job-name=$project -p hmem --mem=300G -o ../rC.$project.slurm >> commands.txt
+cd ./analyses/Main_Analysis/
+# sbatch --time=24:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;Rscript runRmd.r sc_PartC_Analysis.Rmd " --job-name=$project -p hmem --mem=600G -o ../rC.$project.slurm >> commands.txt
+sbatch --time=24:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;Rscript runRmd.r sc_PartC_Analysis.Rmd " --job-name=$project  --mem=200G -o ../rC.$project.slurm >> commands.txt
+cd -
+
+project=rIntTest_$project_id
+cd ./analyses/Integration_Benchmarking
+sbatch --time=24:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;Rscript runRmd.r Integration_Benchmarking.Rmd " --job-name=$project --mem=200G -o ../rC.$project.slurm >> commands.txt
+cd -
 
 wait_on_lsf
 project=rDGE_$project_id
-sbatch --time=12:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;Rscript runRmd.r sc_DGE_module.Rmd " --job-name=$project -p hmem --mem=300G -o ../rDGE.$project.slurm >> commands.txt
+cd ./analyses/DGE
+sbatch --time=12:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;Rscript runRmd.r DGE_Analysis.Rmd " --job-name=$project -p hmem --mem=600G -o ../rDGE.$project.slurm >> commands.txt
+cd -
 
 wait_on_lsf
 project=rT_$project_id

@@ -257,7 +257,8 @@ print("End chunk 1. Objects loaded.")
 addFNvec <- c(
   paste0(workdir, "temp/UMAP.regression.coordinates.txt"),
   paste0(workdir, "temp/ClusterFinder.output.txt"),
-  paste0(workdir, "temp/species.inference.txt)")
+  paste0(workdir, "temp/species.inference.txt"),
+  paste0(workdir, "temp/integration.trials.txt")
 )
 
 row.names(OsC@meta.data) <- OsC@meta.data$cellID
@@ -541,15 +542,23 @@ OsC@meta.data <- OsC@meta.data[,!duplicated(names(OsC@meta.data))]
 params <- biologicViewerSC::scanObjParams(OsC)
 
 
+
+#params$catColorList$original_clusterName
+
+
 ###############################################################################
 ## Add custom cluster annotation if specified                                ##
-cwd <- getwd()
+
 tableValid <- FALSE
 colVec <- as.vector(NULL, mode = "character")
 
 ## Load cluster annotation
-FNcolCustom <- paste0(cwd, "/design/customClusterAnnotation.txt")
-FNcol <- paste0(cwd, "/design/clusterAnnotation.txt")
+FNcolCustom <- paste0(
+    projectDir, 
+    "scripts/scRNAseq/design/customClusterAnnotation.txt"
+)
+
+FNcol <- paste0(projectDir, "scripts/scRNAseq/design/clusterAnnotation.txt")
 
 
 
@@ -626,9 +635,9 @@ pos <- grep("dfResAUC", names(Obio@dataTableList))
 if (length(pos) > 0) {
     dfCat <- Obio@dataTableList$dfResAUC
     names(dfCat) <- gsub("cat", "gene", names(dfCat))
-    names(dfCat) <- gsub("mAUC", "expr", names(dfCat))
-    names(dfCat) <- gsub("cellID", "condition", names(dfCat))
-    dfCat <- dfCat[dfCat$expr != 0,]
+    names(dfCat) <- gsub("mAUC", "lg10Expr", names(dfCat))
+    #names(dfCat) <- gsub("cellID", "condition", names(dfCat))
+    dfCat <- dfCat[dfCat$lg10Expr != 0,]
     dfCat <- dfCat[,names(dfExpr)]
     dfExpr <- rbind(dfExpr, dfCat)
 }
@@ -658,7 +667,7 @@ dfIDTable <- dfExpr
 dfIDTable[["gene_id"]] <- 0
 
 dfIDTable <- unique(dfIDTable[,c("gene", "gene_id")])
-dfIDTable <- dfIDTable[order(dfIDTable$gene, decreasing = F), ]
+# dfIDTable <- dfIDTable[order(dfIDTable$gene, decreasing = F), ]
 
 dfIDTable[["gene_id"]] <- 1:nrow(dfIDTable)
 
@@ -723,9 +732,9 @@ pos <- grep("dfResAUC", names(Obio@dataTableList))
 if (length(pos) > 0) {
     dfCat <- Obio@dataTableList$dfResAUC
     names(dfCat) <- gsub("cat", "gene", names(dfCat))
-    names(dfCat) <- gsub("mAUC", "expr", names(dfCat))
-    names(dfCat) <- gsub("cellID", "condition", names(dfCat))
-    dfCat <- dfCat[dfCat$expr != 0,]
+    names(dfCat) <- gsub("mAUC", "lg10Expr", names(dfCat))
+    #names(dfCat) <- gsub("cellID", "condition", names(dfCat))
+    dfCat <- dfCat[dfCat$lg10Expr != 0,]
     dfCat <- dfCat[,names(dfExpr)]
     dfExpr <- rbind(dfExpr, dfCat)
 }
@@ -754,7 +763,7 @@ names(dfExpr) <- gsub("expr", "lg10Expr", names(dfExpr))
 dfExpr$lg10Expr <- round(dfExpr$lg10Expr, 3)
 
 ## Order by gene_id
-dfExpr <- dfExpr[order(dfExpr$gene, decreasing = F),]
+# dfExpr <- dfExpr[order(dfExpr$gene, decreasing = F),]
 dfExpr[["row_names"]] <- 1:nrow(dfExpr)
 #dfExpr.store <- dfExpr
 

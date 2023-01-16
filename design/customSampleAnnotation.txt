@@ -1,0 +1,11 @@
+sampleID	sampleName	sampleColor
+YoungB4	YoungB4	#E6C229
+YoungB6	YoungB6	#DBB81A
+MiddleB4	MiddleB4	#ED1D58
+MiddleB6	MiddleB6	#D11149
+MiddleB8	MiddleB8	#AA0E3A
+MiddleB9	MiddleB9	#840B2D
+OldB4	OldB4	#48A6EA
+OldB6	OldB6	#1A8FE3
+OldB8	OldB8	#187FC9
+OldB9	OldB9	#1368A4

@@ -138,10 +138,6 @@ print("OsC Object saved.")
 ```{r child = '04-create.variation.plots.Rmd', eval=createNew}
 ```
 
-<!-- Essential 6: (output required later): 
-DGE Marker gene upload Chapter/Module -->
-```{r child = '05-create.pca.plots.Rmd', eval=createNew}
-```
 
 ```{r, eval=resume, echo=resume}
 
@@ -175,6 +171,16 @@ legendDotSize <- 5
 Obio@parameterList$legendDotSize <- legendDotSize
 dendrofactor <- 5
 Obio@parameterList$dendrofactor <- dendrofactor
+```
+
+<!-- Essential 6: (output required later): 
+DGE Marker gene upload Chapter/Module -->
+```{r child = '041-custom.sample.and.cluster.colors.Rmd', eval=TRUE}
+```
+
+<!-- Essential 6: (output required later): 
+DGE Marker gene upload Chapter/Module -->
+```{r child = '05-create.pca.plots.Rmd', eval=TRUE}
 ```
 
 <!-- Essential 7: (output required later): Create variation plots Chapter/Module -->
