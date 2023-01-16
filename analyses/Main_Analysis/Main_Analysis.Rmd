@@ -155,14 +155,14 @@ load(paste0(
 
 dotsize  = 1
 
-if (nrow(OsC@meta.data) > 1000){
-  dotsize  = 0.75
-} else if (nrow(OsC@meta.data) > 10000){
-  dotsize = 0.5
+if (nrow(OsC@meta.data) > 50000){
+  dotsize  = 0.05
 } else if (nrow(OsC@meta.data) > 20000){
   dotsize = 0.1
-} else if (nrow(OsC@meta.data) > 50000){
-  dotsize = 0.05
+} else if (nrow(OsC@meta.data) > 10000){
+  dotsize = 0.5
+} else if (nrow(OsC@meta.data) > 1000){
+  dotsize = 0.75
 }
 
 Obio@parameterList$dotsize <- dotsize
