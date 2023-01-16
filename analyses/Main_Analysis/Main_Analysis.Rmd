@@ -175,6 +175,11 @@ Obio@parameterList$dendrofactor <- dendrofactor
 
 <!-- Essential 6: (output required later): 
 DGE Marker gene upload Chapter/Module -->
+```{r child = '041-custom.sample.and.cluster.colors.Rmd', eval=TRUE}
+```
+
+<!-- Essential 6: (output required later): 
+DGE Marker gene upload Chapter/Module -->
 ```{r child = '05-create.pca.plots.Rmd', eval=TRUE}
 ```
 

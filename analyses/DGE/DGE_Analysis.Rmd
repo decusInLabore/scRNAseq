@@ -325,16 +325,178 @@ setGeneric(
 ## Define differential gene expression comparisons in a list                 ##
 ## One list entry per comparison                                             ##
 
+## Create custom column for this project:
+# samplegroup_seurat_clusters
+
+
+OsC@meta.data[["samplegroup_seurat_clusters"]] <- paste0(
+    OsC@meta.data$meta_Age_Group,
+    "_C",
+    OsC@meta.data$seurat_clusters
+)
 
 DGEtagVec <- as.vector(NULL, mode = "character")
 
 DGEinputList <- list(
   "comp_1" = list(
-      "name"    = "DGE_C1_vs_C2",
-      "DGEselCol" = "seurat_clusters",
+      "name"    = "DGE_Ex_C6_Old_vs_Young",
+      "DGEselCol" = "samplegroup_seurat_clusters",
       "DGEsampleList" = list(
-          "C1"   = c(1),
-          "C2"   = c(2)
+          "Ex_C6_Old"   = c("Old_C6"),
+          "Ex_C6_Young"   = c("Young_C6")
+      )
+  ),
+  "comp_2" = list(
+      "name"    = "DGE_Ex_C16_Old_vs_Young",
+      "DGEselCol" = "samplegroup_seurat_clusters",
+      "DGEsampleList" = list(
+          "Ex_C16_Old"   = c("Old_C16"),
+          "Ex_C16_Young"   = c("Young_C16")
+      )
+  ),
+  "comp_3" = list(
+      "name"    = "DGE_Ex_C11_Old_vs_Young",
+      "DGEselCol" = "samplegroup_seurat_clusters",
+      "DGEsampleList" = list(
+          "Ex_C11_Old"   = c("Old_C11"),
+          "Ex_C11_Young"   = c("Young_C11")
+      )
+  ),
+  "comp_4" = list(
+      "name"    = "DGE_Ex_C9_Old_vs_Young",
+      "DGEselCol" = "samplegroup_seurat_clusters",
+      "DGEsampleList" = list(
+          "Ex_C9_Old"   = c("Old_C9"),
+          "Ex_C9_Young"   = c("Young_C9")
+      )
+  ),
+  "comp_5" = list(
+      "name"    = "DGE_Ex_C7_Old_vs_Young",
+      "DGEselCol" = "samplegroup_seurat_clusters",
+      "DGEsampleList" = list(
+          "Ex_C7_Old"   = c("Old_C7"),
+          "Ex_C7_Young"   = c("Young_C7")
+      )
+  ),
+  "comp_6" = list(
+      "name"    = "DGE_Ex_C8_Old_vs_Young",
+      "DGEselCol" = "samplegroup_seurat_clusters",
+      "DGEsampleList" = list(
+          "Ex_C8_Old"   = c("Old_C8"),
+          "Ex_C8_Young"   = c("Young_C8")
+      )
+  ),
+  "comp_7" = list(
+      "name"    = "DGE_Astro_C13_Old_vs_Young",
+      "DGEselCol" = "samplegroup_seurat_clusters",
+      "DGEsampleList" = list(
+          "Astro_C13_Old"   = c("Old_C13"),
+          "Astro_C13_Young"   = c("Young_C13")
+      )
+  ),
+  "comp_8" = list(
+      "name"    = "DGE_Astro_C1_Old_vs_Young",
+      "DGEselCol" = "samplegroup_seurat_clusters",
+      "DGEsampleList" = list(
+          "Astro_C1_Old"   = c("Old_C1"),
+          "Astro_C1_Young"   = c("Young_C1")
+      )
+  ),
+  "comp_9" = list(
+      "name"    = "DGE_Astro_C2_Old_vs_Young",
+      "DGEselCol" = "samplegroup_seurat_clusters",
+      "DGEsampleList" = list(
+          "Astro_C2_Old"   = c("Old_C2"),
+          "Astro_C2_Young"   = c("Young_C2")
+      )
+  ),
+  "comp_10" = list(
+      "name"    = "DGE_Astro_C10_Old_vs_Young",
+      "DGEselCol" = "samplegroup_seurat_clusters",
+      "DGEsampleList" = list(
+          "Astro_C10_Old"   = c("Old_C10"),
+          "Astro_C10_Young"   = c("Young_C10")
+      )
+  ),
+  "comp_11" = list(
+      "name"    = "DGE_Vasc_C15_Old_vs_Young",
+      "DGEselCol" = "samplegroup_seurat_clusters",
+      "DGEsampleList" = list(
+          "Vasc_C15_Old"   = c("Old_C15"),
+          "Vasc_C15_Young"   = c("Young_C15")
+      )
+  ),
+  "comp_12" = list(
+      "name"    = "DGE_Vasc_C12_Old_vs_Young",
+      "DGEselCol" = "samplegroup_seurat_clusters",
+      "DGEsampleList" = list(
+          "Vasc_C12_Old"   = c("Old_C12"),
+          "Vasc_C12_Young"   = c("Young_C12")
+      )
+  ),
+  "comp_13" = list(
+      "name"    = "DGE_Vasc_C17_Old_vs_Young",
+      "DGEselCol" = "samplegroup_seurat_clusters",
+      "DGEsampleList" = list(
+          "Vasc_C17_Old"   = c("Old_C17"),
+          "Vasc_C17_Young"   = c("Young_C17")
+      )
+  ),
+  "comp_14" = list(
+      "name"    = "DGE_Mglia_C5_Old_vs_Young",
+      "DGEselCol" = "samplegroup_seurat_clusters",
+      "DGEsampleList" = list(
+          "Mglia_C5_Old"   = c("Old_C5"),
+          "Mglia_C5_Young"   = c("Young_C5")
+      )
+  ),
+  "comp_15" = list(
+      "name"    = "DGE_OD_C19_Old_vs_Young",
+      "DGEselCol" = "samplegroup_seurat_clusters",
+      "DGEsampleList" = list(
+          "OD_C19_Old"   = c("Old_C19"),
+          "OD_C19_Young"   = c("Young_C19")
+      )
+  ),
+  "comp_16" = list(
+      "name"    = "DGE_OD_C3_Old_vs_Young",
+      "DGEselCol" = "samplegroup_seurat_clusters",
+      "DGEsampleList" = list(
+          "OD_C3_Old"   = c("Old_C3"),
+          "OD_C3_Young"   = c("Young_C3")
+      )
+  ),
+  "comp_17" = list(
+      "name"    = "DGE_OD_C18_Old_vs_Young",
+      "DGEselCol" = "samplegroup_seurat_clusters",
+      "DGEsampleList" = list(
+          "OD_C18_Old"   = c("Old_C18"),
+          "OD_C18_Young"   = c("Young_C18")
+      )
+  ),
+  "comp_18" = list(
+      "name"    = "DGE_OD_C4_Old_vs_Young",
+      "DGEselCol" = "samplegroup_seurat_clusters",
+      "DGEsampleList" = list(
+          "OD_C4_Old"   = c("Old_C4"),
+          "OD_C4_Young"   = c("Young_C4")
+      )
+  ),
+  "comp_19" = list(
+      "name"    = "DGE_OD_C0_Old_vs_Young",
+      "DGEselCol" = "samplegroup_seurat_clusters",
+      "DGEsampleList" = list(
+          "OD_C0_Old"   = c("Old_C0"),
+          "OD_C0_Young"   = c("Young_C0")
+      )
+  ),
+  
+  "comp_20" = list(
+      "name"    = "DGE_Immune_C14_Old_vs_Young",
+      "DGEselCol" = "samplegroup_seurat_clusters",
+      "DGEsampleList" = list(
+          "Immune_C14_Old"   = c("Old_C14"),
+          "Immune_C14_Young"   = c("Young_C14")
       )
   )
 )

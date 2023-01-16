@@ -808,8 +808,8 @@
       "RemoteUsername": "decusInLabore",
       "RemoteRepo": "biologicViewerSC",
       "RemoteRef": "main",
-      "RemoteSha": "a16b3f5464e2b1716cb1fff9c904eeed41bb12a9",
-      "Hash": "e58757b7b974624613a4954daad7b61a",
+      "RemoteSha": "f9036ed00dc3c2983ee9b41d2dba99791d0bba53",
+      "Hash": "8df61a0cc2454aead8280d91c6e0817e",
       "Requirements": [
         "DBI",
         "DT",

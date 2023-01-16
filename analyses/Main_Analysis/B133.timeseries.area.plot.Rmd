@@ -48,6 +48,11 @@ i = 1
     
     tag <- paste0("Area_plot_", genotypes[i])
     
+    data$clusterName <- factor(
+        data$clusterName, 
+        levels = Obio@parameterList[["clusterNameOrder"]]
+    )
+    
     plotList[[tag]] <- ggplot2::ggplot(data, ggplot2::aes(x = timepoint, y = percentage,
                          fill = clusterName)) +
         ggplot2::geom_area() +

@@ -541,53 +541,24 @@ OsC@meta.data <- OsC@meta.data[,!duplicated(names(OsC@meta.data))]
 
 params <- biologicViewerSC::scanObjParams(OsC)
 
-## Change colors to previous project colors ##
-dfCol1 <- unique(biologicSeqTools2::import.db.table.from.db(
-    dbname = "pbl_data",
-    dbtable = "pbl359subCluster07_PCA",
-    host =  Obio@dbDetailList$host,
-    user =  Obio@dbDetailList$db.user,
-    password = db.pwd
-)[,c("clusterName", "clusterColor")] )
 
-dfCol1$clusterName <- paste0(
-    "org_cluster_",
-    dfCol1$clusterName
-)
-
-for (i in 1:nrow(dfCol1)){
-    params$catColorList$original_clusterName[dfCol1[i, "clusterName"]] <- dfCol1[i, "clusterColor"]
-}
-
-dfCol2 <- unique(biologicSeqTools2::import.db.table.from.db(
-    dbname = "pbl_data",
-    dbtable = "SC22096_PCA",
-    host =  Obio@dbDetailList$host,
-    user =  Obio@dbDetailList$db.user,
-    password = db.pwd
-)[,c("clusterName", "clusterColor")] )
-
-dfCol2$clusterName <- paste0(
-    "org_cluster_",
-    dfCol2$clusterName
-)
-
-for (i in 1:nrow(dfCol2)){
-    params$catColorList$original_clusterName[dfCol2[i, "clusterName"]] <- dfCol2[i, "clusterColor"]
-}
 
 #params$catColorList$original_clusterName
 
 
 ###############################################################################
 ## Add custom cluster annotation if specified                                ##
-cwd <- getwd()
+
 tableValid <- FALSE
 colVec <- as.vector(NULL, mode = "character")
 
 ## Load cluster annotation
-FNcolCustom <- paste0(cwd, "/design/customClusterAnnotation.txt")
-FNcol <- paste0(cwd, "/design/clusterAnnotation.txt")
+FNcolCustom <- paste0(
+    projectDir, 
+    "scripts/scRNAseq/design/customClusterAnnotation.txt"
+)
+
+FNcol <- paste0(projectDir, "scripts/scRNAseq/design/clusterAnnotation.txt")
 
 
 
@@ -696,7 +667,7 @@ dfIDTable <- dfExpr
 dfIDTable[["gene_id"]] <- 0
 
 dfIDTable <- unique(dfIDTable[,c("gene", "gene_id")])
-dfIDTable <- dfIDTable[order(dfIDTable$gene, decreasing = F), ]
+# dfIDTable <- dfIDTable[order(dfIDTable$gene, decreasing = F), ]
 
 dfIDTable[["gene_id"]] <- 1:nrow(dfIDTable)
 
@@ -792,7 +763,7 @@ names(dfExpr) <- gsub("expr", "lg10Expr", names(dfExpr))
 dfExpr$lg10Expr <- round(dfExpr$lg10Expr, 3)
 
 ## Order by gene_id
-dfExpr <- dfExpr[order(dfExpr$gene, decreasing = F),]
+# dfExpr <- dfExpr[order(dfExpr$gene, decreasing = F),]
 dfExpr[["row_names"]] <- 1:nrow(dfExpr)
 #dfExpr.store <- dfExpr
 

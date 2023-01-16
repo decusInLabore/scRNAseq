@@ -51,7 +51,9 @@ cd -
 
 wait_on_lsf
 project=rDGE_$project_id
-sbatch --time=12:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;Rscript runRmd.r sc_DGE_module.Rmd " --job-name=$project -p hmem --mem=300G -o ../rDGE.$project.slurm >> commands.txt
+cd ./analyses/DGE
+sbatch --time=12:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;Rscript runRmd.r DGE_Analysis.Rmd " --job-name=$project -p hmem --mem=600G -o ../rDGE.$project.slurm >> commands.txt
+cd -
 
 wait_on_lsf
 project=rT_$project_id
