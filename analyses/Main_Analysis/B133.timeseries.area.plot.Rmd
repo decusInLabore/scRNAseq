@@ -11,6 +11,31 @@ VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.D
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE, results=F}
 
 
+###############################################################################
+## This part will allow to just render this chapter                          ##
+
+## Set renderChapter = TRUE if you want individual chapters to be processed
+if (!exists("renderChapter")){
+    renderChapter <- FALSE
+}
+
+# renderChapter <- TRUE
+
+## Load Obio biologic object and OsC single-cell object for renderByChapter mode
+if (renderChapter){
+      
+      ## Load biologic object
+      source("load.biologic.robj.R")
+  
+      ## Load Seurat object
+      SeuratFN <- paste0(Obio@parameterList$localWorkDir,list.files(Obio@parameterList$localWorkDir)[grep(".Seurat.Robj", list.files(Obio@parameterList$localWorkDir))])
+      
+      load(SeuratFN)
+}
+
+## All data for this chapter loaded                                          ##
+###############################################################################
+
 plotList <- list()
 chnkVec <- as.vector(NULL, mode = "character")
 
@@ -33,6 +58,8 @@ i = 1
     
     
     dfCol <- unique(dfRes[,c("clusterName", "clusterColor")])
+    row.names(dfCol) <- dfCol$clusterName
+    dfCol <- dfCol[Obio@parameterList$clusterNameOrder, ]
     
     colVec <- dfCol$clusterColor
     names(colVec) <- dfCol$clusterName
@@ -52,6 +79,8 @@ i = 1
         data$clusterName, 
         levels = Obio@parameterList[["clusterNameOrder"]]
     )
+    
+    data$clusterName <- factor(data$clusterName, levels = Obio@parameterList$clusterNameOrder)
     
     plotList[[tag]] <- ggplot2::ggplot(data, ggplot2::aes(x = timepoint, y = percentage,
                          fill = clusterName)) +

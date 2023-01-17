@@ -13,6 +13,9 @@ library(Seurat)
 library(biologicSeqTools2)
 library(dplyr)
 
+###############################################################################
+## This part will allow to just render this chapter                          ##
+
 ## Set renderChapter = TRUE if you want individual chapters to be processed
 if (!exists("renderChapter")){
     renderChapter <- FALSE
@@ -24,34 +27,22 @@ if (!exists("renderChapter")){
 if (renderChapter){
       
       ## Load biologic object
-      ObioFN <- paste0("../", list.files("..")[grep(".bioLOGIC.Robj", list.files(".."))])
-      
-      ObioFN <- "/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/470_scRNAseq_Inhba_SC21185/workdir/SC21185.bioLOGIC.Robj"
-      
-      load(ObioFN)
-      
-      
-      
+      source("load.biologic.robj.R")
+  
       ## Load Seurat object
       SeuratFN <- paste0(Obio@parameterList$localWorkDir,list.files(Obio@parameterList$localWorkDir)[grep(".Seurat.Robj", list.files(Obio@parameterList$localWorkDir))])
-      
-      SeuratFN <- "/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/470_scRNAseq_Inhba_SC21185/workdir/SC21185.Seurat.Robj"
       
       load(SeuratFN)
 }
 
-## If you use the plotting routine outside of the biologic framework:
+## All data for this chapter loaded                                          ##
+###############################################################################
 
-# Rename your Seurat object to OsC
-# OsC <- yourSeuratObject
-# Make sure the OsC@meta.data has a sampleName, sampleColor and sampleID column
-# OsC@meta.data[["sampleName"]] <- OsC@meta.data$orig.ident
-# OsC@meta.data[["sampleID"]] <- OsC@meta.data$orig.ident
-# OsC@meta.data[["sampleColor"]] <- [choose your favourite color for each sample]
 
 ## Set sampleIDorder
 ## Give the order in which sampleIDs should be displayed
 sampleIDorder <- Obio@parameterList$sampleNameOrder
+sampleNameOrder <- rev(Obio@parameterList$sampleNameOrder)
 
 dfOrder <- OsC@meta.data %>% 
   dplyr::distinct(sampleName, sampleID)  %>% 
@@ -59,9 +50,7 @@ dfOrder <- OsC@meta.data %>%
 
 dfOrder <- dfOrder[sampleIDorder,]
 
-sampleNameOrder <- rev(Obio@parameterList$sampleNameOrder)
-## a way of generating this vector is
-# sampleIDorder <- unique(OsC@meta.data$sampleID)
+
 
 ## Define cluster order
 ## Can be set manually. Make sure all clusters are present
@@ -225,10 +214,16 @@ plot_barchart <- function(
     ## Make the plot                                                          ##
     dfResTemp <- dfResTemp[order(dfResTemp$sampleName), ]
     
+    if (plotMode == "N_cells"){
+        xString <- "Cell Count"
+    } else {
+        xString <- "Percent"
+    }
+    
     
     plotList[[tag]] <- ggplot2::ggplot() + 
         ggplot2::geom_bar(ggplot2::aes_string(y = plotMode, x = "clusterName", fill = "sampleName"), data = dfResTemp, stat="identity") + 
-        ggplot2::labs(title=paste0(plotMode, " per Cluster"), x="", y = "Cell Count") + 
+        ggplot2::labs(title=paste0(plotMode, " per Cluster"), x="", y = xString) + 
         ggplot2::theme_bw() +  
         ggplot2::theme(
             panel.border = ggplot2::element_rect(colour = "black", fill=NA, size=1),
@@ -240,15 +235,20 @@ plot_barchart <- function(
     }    
      
     plotList[[tag]] <- plotList[[tag]] + 
-        guides(fill=guide_legend(title="Samples"))
+      ggplot2::guides(fill= ggplot2::guide_legend(title="Samples"))
   
     h <- sum(c("sampleName", "sampleColor") %in% names(OsC@meta.data))
     if (h ==2){
         dfCol <- unique(OsC@meta.data[,c("sampleName", "sampleColor")])
+        row.names(dfCol) <- dfCol$sampleName
+        dfCol <- dfCol[sampleNameOrder, ]
+        
         dfCol <- dfCol[dfCol$sampleName %in% unique(dfResTemp$sampleName), ]
         colVec <- as.vector(dfCol$sampleColor)
         names(colVec) <- as.vector(dfCol$sampleName)
-        plotList[[tag]] <- plotList[[tag]] + scale_fill_manual("Samples" ,values = colVec
+        colVec <- rev(colVec)
+        
+        plotList[[tag]] <- plotList[[tag]] + ggplot2::scale_fill_manual("Samples" ,values = colVec
         ) 
     }
     
