@@ -12,103 +12,16 @@ output:
 
 always_allow_html: yes
 ---
+```{r, echo=FALSE, eval=TRUE, warning=FALSE}
+chnkPrefix <- "dm."
+VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.Date()), ".pdf")
 
+```
 
 ```{r setup, include=FALSE}
-###############################################################################
-## Load conda environment                                                    ##
 
-# To get started, we set up the environment for monocle3 - which is 
-# different from the analysis used in the previous analysis. 
+# R used: module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a
 
-# The conda environment requires to source the .bashrc when run on the cluster. 
-
-## When running on the cluster, it's necessary to source the .bashrc to 
-## initiate the conda environment
-# !! Contents within this block are managed by 'conda init' !!
-# __conda_setup="$('/camp/apps/eb/software/Anaconda2/2019.03/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
-# if [ $? -eq 0 ]; then
-#     eval "$__conda_setup"
-# else
-#     if [ -f "/camp/apps/eb/software/Anaconda2/2019.03/etc/profile.d/conda.sh" ]; then
-#         . "/camp/apps/eb/software/Anaconda2/2019.03/etc/profile.d/conda.sh"
-#     else
-#         export PATH="/camp/apps/eb/software/Anaconda2/2019.03/bin:$PATH"
-#     fi
-# fi
-# unset __conda_setup
-
-# The critical bit is to do an conda initiate
-
-# Make sure that no renv.lock file is present and make sure that 
-# the renv session is deactivated. 
-
-# module purge
-# conda deactivate
-# ml cairo/1.16.0-GCCcore-10.3.0;ml rgdal/1.5-16-foss-2020a-R-4.0.0
-# source .bashrc
-# conda activate R-monocle3;R
-
-# Check for presence of monocle3
-# library(monocle3)
-
-# renv::snapshot() - reinitialise with a new library
-# Activate renv session
-
-# check again for presence of monocle
-# library(monocle3)
-
-# R version 4.0.2
-
-# in the data analysis = false mode, the following R is used:
-# module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;R
-
-###############################################################################
-## alternative 20220630                                                      ##
-## start by deactivating renv renv::deactivate()
-## Quit R
-# conda deactivate
-# module purge
-# module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;
-# ml cairo/1.16.0-GCCcore-10.3.0;ml rgdal/1.5-16-foss-2020a-R-4.0.0
-# source ~/.bashrc
-# conda activate R-monocle3;R
-## Check - can monocle3 still be loaded? library(monocle3) - not present
-## renv::init() - option 2
-## Check - can monocle3 still be loaded? library(monocle3) 
-
-##
-###############################################################################
-
-###############################################################################
-## Note: 2022 06 30                                                          ##
-
-## For the time being, run monocle3 ALWAYS without renv. 
-
-## Make sure to do renv::deactivate before running monocle3 Rmds.
-
-## Done                                                                      ##
-###############################################################################
-
-###############################################################################
-## Running monocle3 envs                                                     ##
-## start by deactivating renv renv::deactivate()
-## Quit R
-# conda deactivate
-# module purge
-# module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;
-# ml cairo/1.16.0-GCCcore-10.3.0;ml rgdal/1.5-16-foss-2020a-R-4.0.0
-# source ~/.bashrc
-# conda activate R-monocle3;R
-## Check - can monocle3 still be loaded? library(monocle3) 
-
-## Run on the cluster:
-## Critical: source .bashrc
-##
-# sbatch --time=02:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;ml cairo/1.16.0-GCCcore-10.3.0;ml pandoc/2.2.3.2-foss-2016b;ml Anaconda3/2019.07;source ~/.bashrc;conda activate R-monocle3;Rscript runRmd.r sc_Trajectory_Analysis_Main_Template.Rmd " --job-name=$project  --mem=200G -o ../rT.$project.slurm >> commands.txt
-
-##
-###############################################################################
 
 
 knitr::opts_chunk$set(
@@ -128,13 +41,19 @@ if (!requireNamespace("renv")){
   remotes::install_github("rstudio/renv")
 }
 
+if(!requireNamespace("destiny")){
+    renv::install("bioc::destiny")
+}
+
+if(!requireNamespace("biologicToolsSC")){
+    renv::install("decusInLabore/biologicToolsSC")
+}
+
+
+
 if (!file.exists("renv.lock")){
-    #renv::init()
-    # Use renv snapshot to capture the R libraries already installed in the Conda 
-    # environment
-  
-    # !!!Don't activate before snapshot!!!
-    renv::snapshot()
+    renv::init()
+    
 } else {
     renv::restore(prompt = FALSE)
 }
@@ -142,143 +61,330 @@ if (!file.exists("renv.lock")){
 ## If data analysis mode is used, no renv is used in order to prevent 
 ## interference with bespoke packages and environments
 ## In the data analysis mode is false, we expect the monocle3 outputs to be pre-generated.
-
-data.analysis.mode <- TRUE
-
+```
 
 
-#Create the environment and load a suitable version of R, e.g. so:
-# if (!require("remotes")){
-#   install.packages("remotes")
-# }
+```{r, echo=T, eval=TRUE, warning=FALSE, results=FALSE}
 
-#remotes::install_github("rstudio/renv")
-# if (!data.analysis.mode){
-#     if (!file.exists("renv.lock")){
-#       renv::init(prompt=F)
-#     } else {
-#       renv::restore()
-#     }
-# }
-
-
-# renv::update("vctrs")
-
-
-#devtools::install_github("decusInLabore/biologicSeqTools2")
-# skip updates - just enter on prompt
-
-
-#devtools::install_github("decusInLabore/biologicToolsSC")
-
-# renv::install("bioc::ComplexHeatmap")
-# renv::install("decusInLabore/biologicSeqTools2")
-# renv::install("decusInLabore/biologicToolsSC")
-# renv::install("gam")
-# renv::install('circlize')
-
-
-
-
-source("trajectory.helper.functions.R")         
-
-#remotes::install_github("decusInLabore/biologicSeqTools@main")
-
-library(Seurat)
-library(biologicSeqTools2)
-library(SingleCellExperiment)
 library(dplyr)
-library(ggplot2)
-#library(ouija)
-# library(biologicToolsSC)
 
-# library(tidyverse)
-# library(dplyr)
-# library(Seurat)
-# library(ggplot2)
-# library(tidyr)
-# library(knitr)
+## Load biologic and Seurat object
+source("load.biologic.robj.R")
 
-cwd <- paste0(here::here(),"/")
-tempWorkDir <- paste0(cwd, "../")
-
-projectDir <- gsub("scripts/scRNAseq/analyses/Monocle_Trajectory_Analysis", "", getwd())
-workdir <- paste0(projectDir, "workdir/")
-
-
-#library(biologicToolsSC)
-
-upload.results.to.database <- TRUE
-save.chunk.intermediates <- TRUE
-
-
-###############################################################################
-##                                                                           ##
+## Reset paths to local environment
+Obio <- Obio %>% 
+    biologicSeqTools2::setMountingPoint()  %>% 
+    biologicSeqTools2::setAnalysisPaths() %>% 
+    biologicSeqTools2::setCrickGenomeAndGeneNameTable() %>% 
+    biologicSeqTools2::createAnalysisFolders() %>% 
+    biologicSeqTools2::setDataBaseParameters()
+## Load Seurat object
+SeuratFN <- paste0(Obio@parameterList$localWorkDir,list.files(Obio@parameterList$localWorkDir)[grep(".Seurat.Robj", list.files(Obio@parameterList$localWorkDir))])
+if (file.exists(SeuratFN)){
+    load(SeuratFN)
+    print(paste0("Obio object ", Obio@parameterList$localWorkDir,SeuratFN, " exists and is loaded."))
+    
+} else {
+    exit()
+}
 figureCount <- 1
 
-## Load R module load R/3.5.1-foss-2018b ##
-#setwd(Obio@parameterList$localWorkDir)
+## Select data for diffusion map pseudotime
+
+ptBranches <- c("Pseudotime_MC_branch1", "Pseudotime_MC_branch2", "Pseudotime_MC_branch2")
+dmBranches <- c("Pseudotime_DM_branch1", "Pseudotime_DM_branch2" , "Pseudotime_DM_branch2sub")
+branches <- c("Branch1", "Branch2", "Branch2sub")
+invertPTvec <- c(FALSE, TRUE, TRUE)
+
+filterList <- list(
+    "Branch1" = c(
+        'GTCACTCGTTTGGCTA_2',
+        'AAAGGGCCAATGGCAG_3',
+        'TTGATGGCAGAAGCGT_3',
+        'GTTACAGGTTGGTAGG_1',
+        'ACTGTGAGTCGTTTCC_1',
+        'CATCAAGTCCAAGAGG_1',
+        'TCAGTTTAGTTGAATG_1',
+        'GGGTATTAGGTAGCCA_1',
+        'TACAGGTGTTGCAAGG_1',
+        'GACAGCCTCGGTAGGA_1'
+    )
+)
+
+plotList <- list()
+chnkVec <- as.vector(NULL, mode = "character")
 
 
 
+for (i in 1:length(branches)){
+        if (branches[i] == "Branch2sub"){
+            cellSel <- OsC@meta.data[OsC@meta.data[,ptBranches[i]] != 0 & !(OsC@meta.data$clusterName %in% c("Tuft", "Paneth")), "cellID"]
+        } else {
+            cellSel <- OsC@meta.data[OsC@meta.data[,ptBranches[i]] != 0, "cellID"]
+        }
+        
+        
+        OsC_dMap <- OsC[,colnames(OsC) %in% cellSel]
+        
+        ## this case only
+        
+        
+        invertPT <- invertPTvec[i]
+        
+        
+        
+        
+        
+        #library(Seurat)
+        #library(destiny)
+        
+        dfPCA <- OsC_dMap@meta.data
+        dfPCA <- dfPCA[,grep("PC_", names(dfPCA))]
+        
+        ## cells to filter
+        
+        if (exists("filterList") & length(grep(branches[i], names(filterList))) > 0 ){
+            cellsToFilter <- filterList[[branches[i]]]
+        
+            dfPCA <- dfPCA[!(row.names(dfPCA) %in% cellsToFilter),]
+        }
+        
+        
+        dmPCA <- destiny::DiffusionMap(
+            dfPCA
+        )
+        
+        
+        
+        
+        #dpt <- DPT(dm, tips = 268)
+        #dpt <- DPT(dm)
+        dpt <- destiny::DPT(dmPCA)
+        #pseudotime <- dpt$dpt
+        
+        # Plot DC1 vs DC2 and color the cells by their inferred diffusion pseudotime.
+        # We can accesss diffusion pseudotime via dpt$dpt.
+        df <- data.frame(
+          DC1 = destiny::eigenvectors(dmPCA)[, 1], 
+          DC2 = destiny::eigenvectors(dmPCA)[, 2], 
+          "DM_Pseudotime" = dpt$dpt
+        )
+        
+        df$cellID <- row.names(dfPCA)
+        
+        ## For this project reverse pseudotime ##
+        if (invertPT){
+            PTmax <- max(df$DM_Pseudotime)
+            df$DM_Pseudotime <- -1* (df$DM_Pseudotime - PTmax)
+            ## Invert DC1, 2, 3
+            df$DC1 <- -1* df$DC1
+            df$DC2 <- -1* df$DC2
+        }
+        
+        ## For nicer display in this case, invert DC1/DC2
+        df$DC1 <- -1* df$DC1
+        df$DC2 <- -1* df$DC2
+        
+        ## Add to table ##
+        df$cellID <- row.names(dfPCA)
+        
+        names(df) <- gsub("^DC", paste0(branches[i], "_DC") ,names(df))
+        names(df) <- gsub("^DM_Pseudotime", paste0("DM_Pseudotime_", branches[i]) ,names(df))
+        
+        dfT <- data.frame(OsC@meta.data[,c("cellID", "clusterName")])
+        
+        df <- dplyr::full_join(
+            df, 
+            dfT, 
+            by = "cellID"
+        )
+        
+        df[is.na(df)] <- 0
+        
+        df$clusterName <- NULL
+        
+        row.names(df) <- df$cellID
+        df$cellID <- NULL
+        ## Rename columns
+        
+        ## add here ##
+        OsC <- biologicToolsSC::addDf2seuratMetaData(
+          obj = OsC, 
+          dfAdd = df
+        )
+        
+        ## Create Pseudotime plot ##
+        dfTemp <- OsC@meta.data
+        dfTemp <- dfTemp[!is.na(dfTemp[,paste0("DM_Pseudotime_", branches[i]) ]),]
+        dfTemp <- dfTemp[!(dfTemp[,paste0(branches[i], "_DC1")] == 0 & dfTemp[,paste0(branches[i], "_DC2")] == 0),]
+        
+        dotsize <- 0.75
+        dotcolor <- "darkblue"
+        tag <-  paste0(branches[i], "_DC1_DC2_colored_by_DM_Pseudotime")  
+        
+        if (branches[i] ==  "Branch2sub"){
+            selString <- "Branch2"
+        } else {
+            selString <- branches[i]
+        }
+        
+        
+        plotList[[tag]] <- ggplot2::ggplot(dfTemp, ggplot2::aes_string(paste0(branches[i], "_DC1"), paste0(branches[i], "_DC2"), color= paste0("DM_Pseudotime_", branches[i]) )
+            )+ ggplot2::geom_point( 
+                shape = 16,
+                size = as.numeric(dotsize)
+            ) + ggplot2::xlab(paste0(branches[i], "_DC1")) + ggplot2::ylab(paste0(branches[i], "_DC2")) + ggplot2::scale_color_gradient(
+                "Pseudotime",
+                low="#ff6600", 
+                high=dotcolor #, 
+                #limits=c(0,maxExpr)
+            ) + ggplot2::theme_bw(
+            ) +  ggplot2::theme(
+                axis.text.y   = ggplot2::element_text(size=8),
+                axis.text.x   = ggplot2::element_text(size=8),
+                axis.title.y  = ggplot2::element_text(size=8),
+                axis.title.x  = ggplot2::element_text(size=8),
+                axis.line = ggplot2::element_line(colour = "black"),
+                panel.border = ggplot2::element_rect(colour = "black", fill=NA, size=1),
+                plot.title = ggplot2::element_text(hjust = 0.5, size = 12)
+            ) + ggplot2::ggtitle(paste0("DC1, DC2 and DM Pseudotime for ", branches[i])
+            )  #+ xlim(minX, maxX) + ylim(minY, maxY)  
+        
+        
+        
+                ## Save to file ##
+                FNbase <- paste0("Pseudotime_overview", branches[i], VersionPdfExt)
+                FN <- paste0(Obio@parameterList$reportFigDir, FNbase)
+                FNrel <- paste0("report_figures/", FNbase)
+                
+               
+                pdf(FN)
+                print(plotList[[tag]])
+                dev.off()
+                
+                
+                
+                ## Create R markdown chunk ##
+                figLegend <- paste0(
+                    '**Figure ', 
+                    figureCount, 
+                    '**: Figure depicting diffusion map components 1 and 2 with the diffusion map pseudotime highlighted in color. Download a pdf of this figure <a href="',FNrel,'" target="_blank">here</a>. '
+                )
+                figureCount <- figureCount + 1 
+                
+                NewChnk <- paste0(
+                    "\n### ", gsub("_", " ", tag),
+                    "\n```{r ", tag, ", results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",
+                    figLegend,"'}\n",
+                    "\n",
+                    "\n print(plotList[['",tag,"']])",
+                    "\n cat(  '\n')",
+                    "\n\n\n```\n"   
+                )
+                
+                chnkVec <- c(
+                    chnkVec,
+                    NewChnk
+                )
+        
+        tag <-  paste0(branches[i], "_DC1_DC2_colored_by_Cluster")   
+                
+        dfCol <- unique(OsC_dMap@meta.data[,c("clusterName", "clusterColor")])
+        
+        colVec <- dfCol$clusterColor
+        names(colVec) <- dfCol$clusterName
+        
+        dfTemp <- dfTemp[!(dfTemp[,paste0(branches[i], "_DC1")] == 0 & dfTemp[,paste0(branches[i], "_DC2")] == 0),]
+        dfTemp$clusterName <- factor(dfTemp$clusterName)
+        
+        
+        plotList[[tag]] <- ggplot2::ggplot(dfTemp, ggplot2::aes_string(paste0(branches[i], "_DC1"), paste0(branches[i], "_DC2"), color= "clusterName" )
+            )+ ggplot2::geom_point( 
+                shape = 16,
+                size = as.numeric(dotsize)
+            ) + ggplot2::xlab(paste0(branches[i], "_DC1")) + ggplot2::ylab(paste0(branches[i], "_DC2"))  + ggplot2::theme_bw(
+            ) +  ggplot2::theme(
+                axis.text.y   = ggplot2::element_text(size=8),
+                axis.text.x   = ggplot2::element_text(size=8),
+                axis.title.y  = ggplot2::element_text(size=8),
+                axis.title.x  = ggplot2::element_text(size=8),
+                axis.line = ggplot2::element_line(colour = "black"),
+                panel.border = ggplot2::element_rect(colour = "black", fill=NA, size=1),
+                plot.title = ggplot2::element_text(hjust = 0.5, size = 12)
+            ) + ggplot2::ggtitle(paste0("DC1, DC2 and DM Pseudotime for ", branches[i])
+            ) + ggplot2::scale_color_manual(values = colVec)  
+        #+ xlim(minX, maxX) + ylim(minY, maxY)  
+        
+        
+        
+                ## Save to file ##
+                FNbase <- paste0("Pseudotime_overview", branches[i], VersionPdfExt)
+                FN <- paste0(Obio@parameterList$reportFigDir, FNbase)
+                FNrel <- paste0("report_figures/", FNbase)
+                
+               
+                pdf(FN)
+                print(plotList[[tag]])
+                dev.off()
+                
+                
+                
+                ## Create R markdown chunk ##
+                figLegend <- paste0(
+                    '**Figure ', 
+                    figureCount, 
+                    '**: Figure Diffusionmap DC1 and DC2 components. Download a pdf of this figure <a href="',FNrel,'" target="_blank">here</a>. '
+                )
+                figureCount <- figureCount + 1 
+                
+                NewChnk <- paste0(
+                    "\n### ", gsub("_", " ", tag),
+                    "\n```{r ", tag, ", results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",
+                    figLegend,"'}\n",
+                    "\n",
+                    "\n print(plotList[['",tag,"']])",
+                    "\n cat(  '\n')",
+                    "\n\n\n```\n"   
+                )
+                
+                chnkVec <- c(
+                    chnkVec,
+                    NewChnk
+                )
+}
+        
+if (length(plotList) > 3){
+    tabVar <- ".tabset .tabset-fade .tabset-dropdown"
+} else {
+    tabVar <- ".tabset .tabset-fade .tabset-pills"
+}
+```
 
-##                                                                           ##
+## Diffusionmap Plots {`r tabVar`} 
+
+```{r pseudotime-plot, echo=T, eval=TRUE, warning=FALSE, results='asis'}
 ###############################################################################
+## Do category enrichment on clusters                                        ##
 
+cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = '\n'))
 
-
-
+## Done doing enrichment on clusters                                         ##
+###############################################################################
 ```
-
-
-<!-- Running Individual Modules in R -->
-<!-- For example rmarkdown::render("src/modules/settings/partB.set.parameters.Rmd", output_dir = "..") -->
-
-
-<!-- Essential 1: Load data (output required later) -->
-```{r child = 'T.0.load.data.Rmd', eval=TRUE}
-
-```
-
-<!-- Optional 2: Retrieve Reference Genes from Database or Gmt file -->
-```{r child = 'src/modules/section_B/B.2.retrieve.reference.gene.sets.Rmd', eval=TRUE}
-```
-
-<!-- Optional 3: Diffusion map -->
-```{r child = 'src/modules/trajectory_analyses/T.1.diffusion.map.Rmd', eval=FALSE}
-```
-
-<!-- Optional 4: slingshot -->
-```{r child = 'src/modules/trajectory_analyses/T.2.slingshot.Rmd', eval=FALSE}
-```
-
-<!-- Optional 5: monocle3 -->
-```{r child = 'src/modules/trajectory_analyses/T.3.monocle.trajectory.module.overview.Rmd', eval=TRUE}
-```
-
-<!-- Optional 5: monocle3 Branch 1 Subtrajectory -->
-```{r child = 'src/modules/trajectory_analyses/T.3.monocle.trajectory.module.branch.1.Rmd', eval=TRUE}
-```
-
-
-<!-- Optional 6: ouija -->
-```{r child = 'src/modules/trajectory_analyses/T.4.ouija.trajectory.module.branch.1.Rmd', eval=FALSE}
-```
-
 
 
 
 ```{r saveobject, eval=TRUE, echo=T, results=F}
 ### Will save Obio object here, so it can be re-used with different parameters
-save(Obio, 
-     file = paste0(
-         Obio@parameterList$localWorkDir,
-         Obio@parameterList$project_id,
-         ".bioLOGIC.Robj"
-     )
-)
-
-print("Obio Object saved.")
+# save(Obio, 
+#      file = paste0(
+#          Obio@parameterList$localWorkDir,
+#          Obio@parameterList$project_id,
+#          ".bioLOGIC.Robj"
+#      )
+# )
+# 
+# print("Obio Object saved.")
 
 ## OsC saving occurs within the modules already
 # save(OsC,
@@ -288,6 +394,15 @@ print("Obio Object saved.")
 #         ".Seurat.Robj"
 #      )
 # )
+
+print("Obio Object saved.")
+save(OsC,
+    file = paste0(
+         Obio@parameterList$localWorkDir,
+         Obio@parameterList$project_id,
+        ".Seurat.Robj"
+     )
+)
 
 
 
@@ -369,13 +484,13 @@ sessionInfo()
 
 ---
 title: "`r projectParams$title`"
-subtitle:  "Trajectory Analysis Module"
+subtitle:  "Diffusionmap Module"
 author:
     - Bioinformatics: Stefan Boeing^[The Francis Crick Institute, stefan.boeing@crick.ac.uk]
 date: 'Compiled: `r format(Sys.Date(), "%B %d, %Y")`'
 
 abstract: |
-    "This is the trajectory analysis module"
+    "This module provides a diffusion map pseudotime analysis."
 
 
 ---
