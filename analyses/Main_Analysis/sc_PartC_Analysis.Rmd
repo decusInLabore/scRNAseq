@@ -452,7 +452,7 @@ perc_fun <- function(obj, genes, assay = "RNA") {
   z <- subset(obj, features = genes)[[assay]]@data
   
   z[z > 0] <- 1  
-  ExprMatrix <- round(( rowSums(z) / ncol(z) ) * 100, 1 )
+  ExprMatrix <- round(( rowSums(data.frame(z)) / ncol(z) ) * 100, 1 )
   dfExprMatrix <- data.frame(ExprMatrix)
   dfExprMatrix[["gene"]] <- row.names(dfExprMatrix)
   colnames( dfExprMatrix )[1] <- "count_cut_off"
