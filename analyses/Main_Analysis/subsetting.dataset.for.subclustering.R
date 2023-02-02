@@ -32,9 +32,10 @@ load(FN)
 ## Data selection for subsetting:
 #sampleID: primaryTumor
 
+selectedClusters <- c(5, 7, 12, 13, 16)
 
 # Select only cluster 1
-OsC_sel1 <- subset(x = OsC, subset = seurat_clusters %in% c(7,12))
+OsC_sel1 <- subset(x = OsC, subset = seurat_clusters %in% selectedClusters)
 
 
 allSampleIDs <- unique(OsC_sel1$sampleID)
@@ -54,7 +55,9 @@ for (i in 1:length(sampleIDs)){
       ,
       "input_",
       sampleIDs[i],
-      "_496V3C7C12.txt"
+      "_496V3C",
+      paste0(selectedClusters, collapse = "C"),
+      ".txt"
     )
     
     sampleGroup <- allSampleIDs[grep(paste0(sampleIDs[i], "_[A-Za-z]"), allSampleIDs)]
@@ -81,7 +84,9 @@ if (length(smallSubsets) > 0){
     "/camp/stp/babs/working/boeings/Projects/evang/roderik.kortlever/496_scRNAseq_myc_timecourse/basedata/",
     "input_combined_small_subsets_",
     paste0(smallSubsets, collapse = "_"),
-    "_496V3C7C12.txt"
+    "_496V3C",
+    paste0(selectedClusters, collapse = "C"),
+    ".txt"
   )
   
   OsC_temp <- subset(x= OsC_sel1, subset = sampleID %in% smallSubsets)
