@@ -626,7 +626,7 @@ if (length(params$catColorList$clusterName) == length(colVec)){
 
 
 
-```{r, eval=FALSE, echo=F, results=F}
+```{r, eval=TRUE, echo=F, results=F}
 
 ###############################################################################
 ## Add Categories to dfExpr                                                  ##
