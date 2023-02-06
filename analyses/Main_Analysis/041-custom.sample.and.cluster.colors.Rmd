@@ -1,6 +1,6 @@
 <!-- Set PArameters Module -->
 <!-- Set the chnkPrefix to make all chunks unique in the overall folder -->
-```{r partB_create_variation_plots, echo=TRUE, eval=TRUE, warning=FALSE}
+```{r, echo=TRUE, eval=TRUE, warning=FALSE}
 chnkPrefix <- "partB.integrated.seurat.object."
 VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.Date()), ".pdf")
 
