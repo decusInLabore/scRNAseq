@@ -1,0 +1,1481 @@
+---
+output: 
+    html_document:
+        code_folding: hide
+        df_print: tibble
+        highlight: default
+        theme: paper
+        toc: true
+        toc_depth: 5
+        toc_float: true
+        css: src/style/style.css
+
+always_allow_html: yes
+---
+```{r, echo=FALSE, eval=TRUE, warning=FALSE}
+chnkPrefix <- "tDGE."
+VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.Date()), ".pdf")
+
+```
+
+```{r setup, include=FALSE}
+
+###############################################################################
+## Running monocle3 envs                                                     ##
+## start by deactivating renv renv::deactivate()
+## Quit R
+# conda deactivate
+# module purge
+# module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;
+# ml cairo/1.16.0-GCCcore-10.3.0;ml rgdal/1.5-16-foss-2020a-R-4.0.0
+# source ~/.bashrc
+# conda activate R-monocle3;R
+## Check - can monocle3 still be loaded? library(monocle3) 
+
+## Run on the cluster:
+## Critical: source .bashrc
+##
+# sbatch --time=02:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;ml cairo/1.16.0-GCCcore-10.3.0;ml pandoc/2.2.3.2-foss-2016b;ml Anaconda3/2019.07;source ~/.bashrc;conda activate R-monocle3;Rscript runRmd.r sc_Trajectory_Analysis_Main_Template.Rmd " --job-name=$project  --mem=200G -o ../rT.$project.slurm >> commands.txt
+
+##
+###############################################################################
+
+
+
+
+
+
+knitr::opts_chunk$set(
+    tidy = F,
+    tidy.opts = list(width.cutoff = 120),
+    message = FALSE,
+    warning = FALSE
+)
+
+
+# if (!requireNamespace("remotes")){
+#   install.packages("remotes")
+# }
+# 
+# 
+# if (!requireNamespace("renv")){
+#   remotes::install_github("rstudio/renv")
+# }
+# 
+# 
+# 
+# if (!file.exists("renv.lock")){
+#     renv::init()
+#     
+# } else {
+#     renv::restore(prompt = FALSE)
+# }
+
+if (!require("BiocManager", quietly = TRUE)){
+    install.packages("BiocManager")
+}
+
+if(!requireNamespace("tradeSeq")){
+    devtools::install_github("statOmics/tradeSeq")
+}
+
+if(!requireNamespace("biologicToolsSC")){
+    devtools::install_github("decusInLabore/biologicToolsSC")
+}
+
+## If data analysis mode is used, no renv is used in order to prevent 
+## interference with bespoke packages and environments
+## In the data analysis mode is false, we expect the monocle3 outputs to be pre-generated.
+## Tradeseq requires monocle3 to be installed. 
+```
+
+
+```{r, echo=T, eval=TRUE, warning=FALSE, results=FALSE}
+
+library(dplyr)
+
+## Load biologic and Seurat object
+source("load.biologic.robj.R")
+
+## Reset paths to local environment
+Obio <- Obio %>% 
+    biologicSeqTools2::setMountingPoint()  %>% 
+    biologicSeqTools2::setAnalysisPaths() %>% 
+    biologicSeqTools2::setCrickGenomeAndGeneNameTable() %>% 
+    biologicSeqTools2::createAnalysisFolders() %>% 
+    biologicSeqTools2::setDataBaseParameters()
+## Load Seurat object
+SeuratFN <- paste0(Obio@parameterList$localWorkDir,list.files(Obio@parameterList$localWorkDir)[grep(".Seurat.Robj", list.files(Obio@parameterList$localWorkDir))])
+if (file.exists(SeuratFN)){
+    load(SeuratFN)
+    print(paste0("Obio object ", Obio@parameterList$localWorkDir,SeuratFN, " exists and is loaded."))
+    
+} else {
+    exit()
+}
+figureCount <- 1
+
+## Tradeseq can be run of a monocle object ##
+
+## monocle object for this project
+
+monocleObjectFN <- c(
+    "../../../../workdir/SC22150.branchTA1.monocle.SCE.rds",     
+    "../../../../workdir/SC22150.branchTA2.monocle.SCE.rds"
+)
+
+branches <- c(
+    "BranchTA1",
+    "BranchTA2"
+)
+
+i <- 1
+
+
+## From https://bioconductor.org/packages/release/bioc/vignettes/tradeSeq/inst/doc/Monocle.html
+set.seed(42)
+library(monocle3)
+
+# Load monocle object
+library(magrittr)
+
+cds <- readRDS(monocleObjectFN[1])
+
+## Add metadata for DGE
+dfMeta <- OsC@meta.data[colData(cds)$barcode, ]
+names(dfMeta) <- gsub("cellID", "barcode", names(dfMeta))
+
+colData <- data.frame(colData(cds))
+
+colData2 <- dplyr::inner_join(
+    colData, 
+    dfMeta, 
+    by = "barcode"
+)
+
+colDataNew <- DataFrame(colData2)
+row.names(colDataNew) <- colData2$barcode
+
+colData(cds) <- colDataNew
+
+library(magrittr)
+# Get the closest vertice for every cell
+y_to_cells <-  principal_graph_aux(cds)$UMAP$pr_graph_cell_proj_closest_vertex %>%
+  as.data.frame()
+y_to_cells$cells <- rownames(y_to_cells)
+y_to_cells$Y <- y_to_cells$V1
+
+# Get the root vertices
+# It is the same node as above
+root <- cds@principal_graph_aux$UMAP$root_pr_nodes
+
+mst <- principal_graph(cds)$UMAP
+
+# Get the other endpoints
+endpoints <- names(which(igraph::degree(mst) == 1))
+endpoints <- endpoints[!endpoints %in% root]
+
+## Find real endpoints:
+ dfMeta <- dfMeta[order(dfMeta$Pseudotime_MC_TA_branchTA1, decreasing=T),]
+ dfMeta[["cellID"]] <- row.names(dfMeta)
+ head(dfMeta[,c("cellID", "Pseudotime_MC_TA_branchTA1")])
+ endpointID <- dfMeta[1, "cellID"]
+ 
+ Yend <- y_to_cells[y_to_cells$cells == endpointID, "Y"]
+ endpoints <- Yend
+
+
+# For each endpoint
+cellWeights <- lapply(endpoints, function(endpoint) {
+  # We find the path between the endpoint and the root
+  path <- igraph::shortest_paths(mst, root, endpoint)$vpath[[1]]
+  path <- as.character(path)
+  # We find the cells that map along that path
+  df <- y_to_cells[y_to_cells$Y %in% path, ]
+  df <- data.frame(weights = as.numeric(colnames(cds) %in% df$cells))
+  colnames(df) <- endpoint
+  return(df)
+  }) %>% do.call(what = 'cbind', args = .) %>%
+    as.matrix()
+
+
+## Get rid of zeros as here only one trajectory is represented, no branches. 
+cellWeights[,1] <- 1
+
+rownames(cellWeights) <- colnames(cds)
+pseudotime <- matrix(pseudotime(cds), ncol = ncol(cellWeights),
+                     nrow = ncol(cds), byrow = FALSE)
+
+
+# requires latest github version of tradeseq
+
+sce <- tradeSeq::fitGAM(counts = as.matrix(assays(cds)$counts),
+              pseudotime = pseudotime,
+              cellWeights = cellWeights,
+              conditions = factor(colData(cds)$meta_Genotype)
+)
+
+# saveRDS(sce, file = "sce.Rds")
+
+rowData(sce)$assocRes <- tradeSeq::associationTest(
+    sce, 
+    lineages = TRUE, 
+    l2fc = log2(2)
+)
+
+assocRes <- rowData(sce)$assocRes
+diffGenes1 <-  rownames(assocRes)[
+  which(p.adjust(assocRes$pvalue_lineage1_conditionWT, "fdr") <= 0.05)
+]
+diffGenes2 <-  rownames(assocRes)[
+  which(p.adjust(assocRes$pvalue_lineage1_conditionKO, "fdr") <= 0.05)
+]
+
+pdf("../../../../html_local/report_figures/upset.r.pdf")
+UpSetR::upset(UpSetR::fromList(list(WT = diffGenes1, MT = diffGenes2)))
+dev.off()
+
+
+### based on mean smoother
+plotGenes <- c(
+    diffGenes1[!(diffGenes1 %in% diffGenes2)],
+    diffGenes2[!(diffGenes2 %in% diffGenes1)]
+)
+
+
+
+## WT Genes
+yhatSmooth <- tradeSeq::predictSmooth(sce, gene = diffGenes1, nPoints = 50, tidy = FALSE)
+yhatSmoothScaled <- t(apply(yhatSmooth,1, scales::rescale))
+
+pdf("../../../../html_local/report_figures/heatmap.WT.pdf")
+heatSmooth <- pheatmap::pheatmap(yhatSmoothScaled[, 51:100],
+                       cluster_cols = FALSE,
+                       show_rownames = TRUE, 
+                       show_colnames = TRUE)
+
+heatSmooth
+dev.off()
+
+
+## MT Genes
+
+yhatSmooth <- tradeSeq::predictSmooth(sce, gene = diffGenes2, nPoints = 50, tidy = FALSE)
+yhatSmoothScaled <- t(apply(yhatSmooth,1, scales::rescale))
+
+
+pdf("../../../../html_local/report_figures/heatmap.MT.pdf")
+heatSmooth <- pheatmap::pheatmap(yhatSmoothScaled[, 1:50],
+                       cluster_cols = FALSE,
+                       show_rownames = TRUE, 
+                       show_colnames = TRUE)
+heatSmooth
+dev.off()
+
+## Differential expression between conditions
+pdf("../../../../html_local/report_figures/Gapdh.pdf")
+tradeSeq::plotSmoothers(sce, assays(sce)$counts, gene = "Gapdh", alpha = 1, border = TRUE) + ggplot2::ggtitle("Gapdh")
+dev.off()
+
+## Differential expression analysis
+condRes <- tradeSeq::conditionTest(sce, l2fc = log2(2))
+condRes$padj <- p.adjust(condRes$pvalue, "fdr")
+mean(condRes$padj <= 0.05, na.rm = TRUE)
+
+sum(condRes$padj <= 0.05, na.rm = TRUE)
+
+conditionGenes <- rownames(condRes)[condRes$padj <= 0.05]
+conditionGenes <- conditionGenes[!is.na(conditionGenes)]
+
+## Heatmaps of genes DE between conditions
+### based on mean smoother
+yhatSmooth <- tradeSeq::predictSmooth(sce, gene = conditionGenes, nPoints = 50, tidy = FALSE) %>%
+  log1p()
+yhatSmoothScaled <- t(apply(yhatSmooth,1, scales::rescale))
+heatSmooth_KO <- pheatmap::pheatmap(yhatSmoothScaled[, 51:100],
+  cluster_cols = FALSE,
+  show_rownames = FALSE, show_colnames = FALSE, main = "KO", legend = FALSE,
+  silent = TRUE
+)
+
+matchingHeatmapWT <- pheatmap::pheatmap(yhatSmoothScaled[heatSmooth_KO$tree_row$order, 1:50],
+  cluster_cols = FALSE, cluster_rows = FALSE,
+  show_rownames = TRUE, show_colnames = FALSE, main = "WT",
+  legend = FALSE, silent = TRUE 
+)
+
+pdf("../../../../html_local/report_figures/WT.MT.heatmap.pdf")
+cowplot::plot_grid(heatSmooth_KO[[4]], matchingHeatmapWT[[4]], ncol = 2)
+dev.off()
+
+
+
+length(mockGenes)
+
+assocRes <- rowData(sce)$assocRes
+mockGenes <-  rownames(assocRes)[
+  which(p.adjust(assocRes$pvalue_lineage1_conditionMock, "fdr") <= 0.05)
+]
+tgfbGenes <-  rownames(assocRes)[
+  which(p.adjust(assocRes$pvalue_lineage1_conditionTGFB, "fdr") <= 0.05)
+]
+
+length(mockGenes)
+
+## Load Seurat object OsC_part with a DM_Pseudotime meta data column ##
+# load(sFN)
+cellSel <- OsC_part@meta.data[OsC_part@meta.data$Pseudotime_MC_TA_branchTA1 != 0, "cellID"]
+
+OsC_part_part <- OsC_part[, colnames(OsC_part) %in% cellSel]
+dfMeta <- OsC_part_part@meta.data
+
+newdata <- data.frame(
+    Pseudotime = seq(
+        min(dfMeta$Pseudotime_MC_TA_branchTA1), 
+        max(dfMeta$Pseudotime_MC_TA_branchTA1),
+        length.out = 100)
+)
+dfMeta[["PT_bins"]] <- 1
+for (i in 2:nrow(newdata)){
+    a = i - 1
+    dfMeta[dfMeta$Pseudotime_MC_TA_branchTA1 > newdata[a,1], "PT_bins"] <- i
+}
+dfMeta <- dfMeta[order(dfMeta$PT_bins, decreasing = F),]
+dfMeta[["PT_bins"]] <- paste0("B", dfMeta$PT_bins)
+dfMeta$PT_bins <- factor(x = dfMeta$PT_bins, levels = unique(dfMeta$PT_bins))
+row.names(dfMeta) <- dfMeta$cellID
+dfAdd <- data.frame(dfMeta[,"PT_bins"])
+names(dfAdd) <- "PT_bins"
+## Add PT bins column to Seurat meta data
+addVec <- as.vector(dfAdd[,"PT_bins"])
+names(addVec) <- row.names(dfAdd)
+colName <- "PT_bins"
+
+OsC_part_part <- Seurat::AddMetaData(
+    object = OsC_part_part, 
+    metadata = addVec, 
+    colName
+)
+
+## Set factor levels ##
+levels <- paste0("B", 1:100)
+OsC_part@meta.data$PT_bins <- factor(OsC_part@meta.data$PT_bins , levels = levels)
+Seurat::DefaultAssay(OsC_part) <- "RNA"
+allGenes <- rownames(x = OsC_part@assays$RNA)
+OsC_part <- Seurat::ScaleData(OsC_part, verbose = FALSE, features=allGenes, assay = "RNA")
+###############################################################################
+## Average by pseudotime                                                     ##
+Seurat::DefaultAssay(OsC_part) <- "RNA"
+
+
+## Create genotype bin column
+OsC_part@meta.data[["bin_genotype"]] <- paste0(OsC_part@meta.data$PT_bin, "_", OsC_part@meta.data$meta_Genotype)
+
+Seurat::Idents(OsC_part) <- "bin_genotype"
+## Get average expression for each pseudotime bin ##
+cluster.averages <- Seurat::AverageExpression(
+    OsC_part, 
+    assays = "RNA",
+    return.seurat = TRUE,
+    slot = "data"
+)
+## Retrieved Scaled data ##
+dfAvgExpr <- data.frame(cluster.averages[["RNA"]]@data)
+dfAvgExpr <- dfAvgExpr[,sort(names(dfAvgExpr))]
+dfAvgExpr[["gene"]] <- row.names(dfAvgExpr)
+dfAvgScaledData <- data.frame(cluster.averages[["RNA"]]@scale.data)
+dfAvgScaledData <- dfAvgScaledData[,sort(names(dfAvgScaledData))]
+dfAvgScaledData[["gene"]] <- row.names(dfAvgScaledData)
+###############################################################################
+## Create smoothed GAM lines                                                 ##
+dfGAM <- dfAvgExpr[,grep("_KO", names(dfAvgExpr))]
+selVec <- c(levels(OsC_part@meta.data$PT_bins), "gene")
+selVec <- selVec[selVec %in% names(dfGAM)]
+dfGAM <- dfGAM[,selVec]
+dfGAM$gene <- NULL
+dfPT <- data.frame(cellID = names(dfGAM), DM_Pseudotime = names(dfGAM))
+dfPT$DM_Pseudotime <- as.numeric(gsub("B", "",dfPT$DM_Pseudotime))
+row.names(dfPT) <- dfPT$cellID
+Y <- dfGAM
+t <- 1:ncol(dfGAM)
+gam.pval <- apply(Y, 1, function(z){
+    d <- data.frame(z=z, t=t)
+    tmp <- gam(z ~ lo(t), data=d)
+    p <- summary(tmp)[4][[1]][1,5]
+    p
+})
+dfGamSel <- data.frame(
+    gene = names(gam.pval), 
+    gam.pval
+)
+dfGamSel <- na.omit(dfGamSel)
+dfGamSel[["lg10p_GAM"]] <- -1*log10(dfGamSel$gam.pval)
+dfGamSel <- dfGamSel[order(dfGamSel$lg10p_GAM, decreasing = T), ]
+gamSelGenes <- as.vector(unique(dfGamSel[1:Obio@parameterList$NtopGenes, "gene"]))
+
+
+
+###############################################################################
+## Annotate transcription factors                                            ##
+refVec <- retrieve.gene.category.from.db(
+        cat_id = "ag_lab_categories__10",
+        password = db.pwd,
+        gene.symbol = Obio@parameterList$geneIDcolumn,
+        user = Obio@parameterList$db.user,
+        host = Obio@parameterList$host
+)
+dfGamSel[["TF"]] <- ""
+dfGamSel[dfGamSel$gene %in% refVec, "TF"] <- "TF"
+## Done annotating transcription factors                                     ##
+###############################################################################
+###############################################################################
+## Add percentage of expressed genes                                         ##
+## Calculate percentages of expressed genes                                  ##
+DefaultAssay(OsC_part) <- "RNA"
+my_genes <- rownames(x = OsC_part@assays$RNA)
+exp <- FetchData(OsC_part, my_genes)
+ExprMatrix <- round(as.matrix(colMeans(exp  > 0)) *100,1)
+colnames(ExprMatrix)[1] <- "PercCellsExpr"
+dfExprMatrix <- data.frame(ExprMatrix)
+dfExprMatrix[["gene"]] <- row.names(dfExprMatrix)
+dfGamSel <- merge(
+  dfGamSel, 
+  dfExprMatrix, 
+  by.x = "gene",
+  by.y = "gene",
+  all = TRUE
+)
+dfGamSel[is.na(dfGamSel)] <- 0
+dfGamSel <- dfGamSel[dfGamSel$lg10p_GAM > 0, ]
+dfGamSel <- dfGamSel[order(dfGamSel$lg10p_GAM, decreasing = T), ]
+##                                                                           ##
+###############################################################################
+###############################################################################
+## Cor Genes                                                                 ##
+corGenes <- c("Nos1", "Ascl1", "Sox10")
+corGenes <- corGenes[corGenes %in% row.names(dfGAM)]
+for (k in 1:length(corGenes)){
+  ###############################################################################
+  ## do correlation analysis                                                   ##
+        dfTPM <- dfGAM
+        pValueCor = rep(1, nrow(dfTPM))
+        corCoef = rep(0, nrow(dfTPM))
+        cor.method = "pearson"
+        
+        pattern <- as.numeric(dfTPM[corGenes[k], ])
+        
+        
+        for (i in 1:nrow(dfTPM)){
+            samplePattern <- as.numeric(t(dfTPM[i,]))
+            
+            if (sum(samplePattern) != 0){
+                cor.test.result = cor.test(samplePattern, pattern, method=cor.method)
+                pValueCor[i] = cor.test.result$p.value
+                corCoef[i] = cor.test.result$estimate
+            }
+            if (i%%1000 == 0){
+                print(i)
+            }
+        }
+        print("...done.")
+        
+        dfTPM[["pValueCor"]] <- pValueCor
+        dfTPM[["corCoef"]] <- corCoef
+        
+        dfTPM <- dfTPM[order(dfTPM$corCoef, decreasing = TRUE),]
+        dfTempRes <- dfTPM
+        dfTempRes[["gene"]] <- row.names(dfTempRes)
+        dfTempRes <- dfTempRes[,c("corCoef", "gene")]
+        names(dfTempRes) <- gsub("corCoef", paste0("Cor_", as.vector(corGenes[k])), names(dfTempRes))
+        
+        if (k==1){
+            dfTRes <- dfTempRes
+        } else {
+            dfTRes <- merge(
+                dfTRes, 
+                dfTempRes,
+                by.x = "gene",
+                by.y = "gene",
+                all =TRUE
+            )
+            dfTRes[is.na(dfTRes)] <- 0
+        }
+        
+        
+}
+dfTRes <- dfTRes[dfTRes$gene %in% dfGamSel$gene, ]
+    
+## Add correlation analysis to table    
+dfGamSel <- merge(
+  dfGamSel, 
+  dfTRes,
+  by.x = "gene",
+  by.y = "gene",
+  all = TRUE
+)   
+dfGamSel[is.na(dfGamSel)] <- 0
+## Done GAM                                                                  ##
+###############################################################################
+```
+
+### GAM Result Table
+```{r populate_meta_data_database, eval=TRUE, echo=F, results=F}
+library(DT)
+library(knitr)
+chnkVec <- as.vector(NULL, mode="character")
+    
+if (Obio@parameterList$host == "10.27.241.234"){
+      urlString <- "biologic.thecrick.org"
+} else {
+      urlString <- "biologic.crick.ac.uk"
+}
+    
+linkGeneView <- paste0("https://",urlString,"/",Obio@parameterList$project_id,"/gene-view")
+linkFeatureView <- paste0("https://",urlString,"/mdata/",Obio@parameterList$project_id,"/html/FeatureView.html")
+###############################################################################
+## Create Excel output files                                                 ##
+library(openxlsx)
+baseFN <- "gam.result.table.xlsx"
+outPutFN <- paste0(
+  gsub("working/boeings/","", hpc.mount),
+  "www/boeings/bioLOGIC_external/data/fgl371/outputs/gam.result.table.xlsx"
+)
+FNrel <- paste0("outputs/", baseFN)
+    
+wb <- createWorkbook()
+    addWorksheet(wb, paste0(Obio@parameterList$project_id, "_gam_res_list"))
+    freezePane(wb, paste0(Obio@parameterList$project_id, "_gam_res_list") ,  firstActiveRow = 2)
+    
+    ## Filter is inactivated, as it does not appear to be compatible with the current version of Excel
+    #addFilter(wb, 1, row = 1, cols = 1:ncol(dfOutput))
+    
+## Style headers ##
+hs1 <- createStyle(
+  fontColour = "#ffffff",
+  fgFill = "#000000", 
+  halign = "CENTER", 
+  textDecoration = "Bold"
+)
+    
+writeData(wb, 1,dfGamSel, startRow = 1, startCol = 1, headerStyle = hs1)
+    
+saveWorkbook(
+  wb, 
+  gsub(".txt", ".xlsx", outPutFN) , 
+  overwrite = TRUE
+)
+## Done creating Excel output files                                          ##
+###############################################################################
+tabDownload <- paste0("https://",urlString,"/mdata/",Obio@parameterList$project_id,"/outputs/gam.table.csv")
+#for (i in 1:length(tabClusters)){
+    #tabLegend = paste0("**Table: ** Positive and negative marker genes for ", tabClusters[i])
+    tabLegend = paste0("**Table: ** Table depicting the GAM p-value for genes in this experiment. A + sign in the TF column indicates a transcription factor. The PercCellsExpr column indicates the percentage of cells in the experiment that express a given gene.",
+    "Use the [GeneView](",linkGeneView,") or [FeatureView](",linkFeatureView,") functionalities to examine individual genes in more detail. Downlaod the table [here](",FNrel,")"                   
+    )
+    #dfTempDat <- dfDat[dfDat$cluster == tabClusters[i],]
+dfTable <- dfGamSel    
+dfTable$lg10p_GAM <- round(dfTable$lg10p_GAM,3)    
+dfTable$Cor_Ascl1 <- round(dfTable$Cor_Ascl1,3)
+dfTable$Cor_Nos1 <- round(dfTable$Cor_Nos1,3)
+dfTable$Cor_Sox10 <- round(dfTable$Cor_Sox10,3)
+    
+dfTable["gene"] <- paste0("<a href='https://",urlString,"/",Obio@parameterList$project_id,"/gene-view?query=",dfTable$gene,"&exact=TRUE' target='_blank'>", dfTable$gene, "</a>")
+    
+NewChnk <- paste0(
+  #"### ", 
+  "\n```{r datatable_GAM , results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",
+  tabLegend,
+  "'}\n",
+  "\n",
+  "\n datatable(dfTable,rownames = FALSE,  escape = FALSE, options = list(
+    initComplete = JS(
+        \"function(settings, json) {\",
+        \"$(this.api().table().header()).css({\'background-color\': \'#000\', \'color\': \'#fff\'});\",
+        \"}\")))",
+  "\n cat(  '\n')",
+  "\n\n\n```\n"   
+)
+    
+chnkVec <- c(
+  chnkVec,
+  NewChnk
+)
+## Done creating one table per cluster                                      ##
+##############################################################################
+```
+
+
+```{r render_GAMTable, echo=TRUE, eval=TRUE, warning=FALSE, results="asis"}
+cat(paste(knit(text = chnkVec, quiet = T), collapse = '\n'))
+```
+
+### Make GAM Heatmap manually {.tabset .tabset-fade .tabset-pills}
+For this procedure the Seurat object OsC_part needs to have a column "Pseudotime" in the Metadata table.
+
+
+```{r plotting_functions , eval=TRUE, echo=T, results=F}
+###############################################################################
+## Add gene to plotting frame                                                ##
+createPlotDf <- function(
+    dfMeta = "OsC_part@meata.data",
+    dfExpr = dfExpr,
+    geneNameVec = "geneNameVec"
+){
+    dfTemp1 <- dfMeta
+    row.names(dfTemp1) <- dfTemp1$cellID
+   
+    
+    ## Make sure all genes are present ##
+    availableGenes <- unique(dfExpr$gene)
+    geneNameVec <- geneNameVec[geneNameVec %in% availableGenes]
+    
+    for (i in 1:length(geneNameVec)){
+    	dfTemp2 <- dfExpr[dfExpr$gene == geneNameVec[i], ]
+    	dfTemp1[is.na(dfTemp1)] <- 0
+    	dfTemp2[is.na(dfTemp2)] <- 0
+    	dfTemp <- merge(
+    	       dfTemp1, 
+    	       dfTemp2, 
+    	       by.x = "cellID",
+    	       by.y = "cellID",
+    	       all =TRUE
+    	)
+    	dfTemp[is.na(dfTemp)] <- 0
+    	
+    	if (i ==1){
+        		dfGRes <- dfTemp
+    	} else {
+        		dfGRes <- rbind(dfGRes, dfTemp)
+    	}    
+    }
+	return(dfGRes)
+}
+## Add gene to plotting frame                                                ##
+###############################################################################
+###############################################################################
+## Function make HM plot                                                     ##
+makePT_hmPlot <- function(
+  mode = "relative",  # Must be relative or absolute
+  dfTempA = "dfTempA",
+  setMax = 2,
+  setMin = -2,
+  geneVec = "geneVec",
+  xAxis = "DM_Pseudotime",
+  yAxis = "lg10Expr"	 
+){
+for (i in 1:length(geneVec)){
+    dfTemp <- dfTempA[dfTempA$gene == geneVec[i],]
+    dfTemp <- dfTemp[order(dfTemp[,xAxis], decreasing = F),]
+    #plot(dfTemp$DM_Pseudotime, dfTemp$lg10Expr, type = "l")
+    dfTemp[["x_axis"]] <- dfTemp[,xAxis]
+    dfTemp[["y_axis"]] <- dfTemp[,yAxis]
+    fmla <- as.formula(paste0("y_axis ~ x_axis"))
+    smoothing <- 0.1
+    
+    loessMod <- loess(fmla, data=dfTemp, span=smoothing)
+    xl <- seq(min(dfTemp$x_axis),max(dfTemp$x_axis), (max(dfTemp$x_axis) - min(dfTemp$x_axis))/99)
+    yl <- predict(loessMod,xl)
+    
+    ## Deal with below zero values ##
+    lowpoint <- min(yl)
+    if (lowpoint < 0){
+      yl <- yl + (-1* lowpoint) 
+    }
+    
+    yl[is.na(yl)] <- 0
+    
+    row_mean <- mean(yl)
+    row_hm <- log2(yl/row_mean)
+    row_hm[row_hm > setMax] = setMax
+    row_hm[row_hm < setMin] = setMin
+    
+    rowNumber <- i
+    x <- rep(rowNumber - 1, 100)
+    xE <- rep(rowNumber, 100)
+    y <- 0:99
+    yE <- 0:99
+    
+    dfAdd <- data.frame(x, xE, y, yE, row_hm, yl)
+    dfAdd[["gene"]] <- geneVec[i]
+    
+    yMax <- grep(max(dfAdd$row_hm, na.rm=T), dfAdd$row_hm)
+    
+    dfAdd[["yMax"]] <- dfAdd[yMax, "y"]
+    
+    if (i ==1){
+        dfRes <- dfAdd
+    } else {
+        dfRes <- rbind(
+            dfRes, 
+            dfAdd
+        )
+    }
+    
+    
+}
+## Before plotting, pre-order according to max value from low x to high x ##
+###############################################################################
+## Order by highpoint                                                        ##
+dfTemp <- unique(dfRes[, c("gene", "yMax")])
+dfTemp <- dfTemp[order(dfTemp$yMax, decreasing = F),]
+levels <- unique(dfTemp$gene) 
+dfRes$gene <- factor(dfRes$gene, levels = levels)
+dfRes <- dfRes[order(dfRes$gene),]
+for (i in 1:length(levels)){
+  dfRes[dfRes$gene == levels[i], "x"] <- i-1
+  dfRes[dfRes$gene == levels[i], "xE"] <- i
+}
+## Done                                                                      ##
+###############################################################################
+###############################################################################
+## Plotting                                                                  ##
+p1 <- ggplot(data = dfRes, aes(x = x, xend = xE, y = y, yend = yE)) 
+lowCol <- "blue"
+midCol <- "yellow"
+upCol <- "red"
+if (mode == "absolute"){
+    setMin <- 0
+    setMax <- 1.1*max(dfRes$yl)
+    p1 <- p1 + geom_segment(aes(color = yl), size = 2) + scale_color_gradient2(
+        low = midCol,
+        high = upCol,
+        limits =c(setMin,setMax)
+    )   
+} else {
+ p1 <- p1 + geom_segment(aes(color = row_hm), size = 2) + scale_color_gradient2(
+        low = lowCol,
+        mid = midCol,
+        high = upCol,
+        midpoint = 0,
+        limits =c(setMin,setMax)
+    )
+} 
+size = 10
+if (length( geneNameVec) >= 20){
+  size <- 8
+}
+if (length( geneNameVec) >= 30){
+  size <- 6
+}
+if (length( geneNameVec) >= 40){
+  size <- 4
+}
+p1 <- p1 + coord_flip(
+    ) + geom_label(data=dfRes, aes(x=x+0.5, y=110,  label = gene), nudge_y = 10
+    ) +ylim(0,130
+    ) + theme(
+        plot.title = element_text(
+            hjust = 0.5, 
+            size = size
+        ),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.title.x=element_blank(),
+        #axis.text.x=element_blank(),
+        #axis.ticks.x=element_blank(), 
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank()) + ggtitle(paste0("x-Axis: ",xAxis, " in 100 bins (Mode: ", mode, ")")
+) 
+return(p1)
+}
+## End plotting function                                                     ##
+###############################################################################
+```
+
+
+```{r make_gam_plots, eval=TRUE, echo=T, results=F}
+###############################################################################
+## Prepare data                                                              ##
+library(ggplot2)
+library(RMySQL)
+library(gridExtra)
+library(tidyr)
+## Select the genes to appear in the pseudotime plot
+#geneNameVec <- c("Ret", "S100b", "Gapdh", "Klf4")
+## In this case - select the top 10 GAM transcription factors with at least 5% expression level across the experiment for the plot ##
+## Make gene selection for plotting ##
+## 10 Ret correlated
+## 10 Ascl1 correlated
+## 10 Sox100 correlated
+dfSel <- dfGamSel #[dfGamSel$TF == "TF",]
+dfSel <- dfSel[dfSel$PercCellsExpr >= 10, ]
+dfSel[["selection"]] <- ""
+dfSel <- dfSel[order(dfSel$Cor_Nos1, decreasing = T),]
+dfSel[1:10, "selection"] <- "+"
+dfSel <- dfSel[order(dfSel$Cor_Ascl1, decreasing = T),]
+dfSel[1:10, "selection"] <- "+"
+dfSel <- dfSel[order(dfSel$Cor_Sox10, decreasing = T),]
+dfSel[1:10, "selection"] <- "+"
+dfSel <- dfSel[dfSel$selection == "+",]
+geneNameVec <- as.vector(unique(dfSel$gene))
+## Load Seurat object OsC_part - this has to have a meta data column called DM_Pseudotime ##
+# load(sFN)
+## Get expression data for the above genes ##
+dfExpr <- data.frame(OsC_part[["RNA"]]@data)
+dfExpr[["gene"]] <- row.names(dfExpr)
+dfExpr <- dfExpr[dfExpr$gene %in% geneNameVec, ]
+dfExpr <- gather(
+    dfExpr,
+    condition,
+    expr, 1:(ncol(dfExpr)-1),
+    factor_key=TRUE
+)
+dfExpr <- dfExpr[dfExpr$expr != 0,]
+names(dfExpr) <- gsub("condition", "cellID", names(dfExpr))
+names(dfExpr) <- gsub("expr", "lg10Expr", names(dfExpr))
+#dfExpr$lg10Expr <- round(dfExpr$lg10Expr, 3)
+dfGRes <- createPlotDf(
+    dfMeta = OsC_part@meta.data,
+    dfExpr = dfExpr,
+    geneNameVec = geneNameVec
+)
+    
+dfTempA <- dfGRes[dfGRes$gene != 0,]
+## Done                                                                      ##
+###############################################################################
+###############################################################################
+## Make relative plot                                                        ##
+tag <- "relative"
+plotList <- list()
+chnkVec <- as.vector(NULL, mode="character")
+plotList[[tag]] <- makePT_hmPlot(
+  mode = "relative",  # Must be relative or absolute
+  dfTempA = dfTempA,
+  setMax = 2,
+  setMin = -2,
+  geneVec = geneNameVec,
+  xAxis = "DM_Pseudotime",
+  yAxis = "lg10Expr"	 
+)
+ ## Create R markdown chunk ##
+figureCount = 1
+figLegend <- paste0(
+  "**Figure ",
+  figureCount,
+  ":** Dotplot showing showing selected marker genes. "
+)
+figureCount <- figureCount + 1
+NewChnk <- paste0(
+  "#### Relative Expression",
+  "\n```{r Relative_", tag,
+  ", results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",
+  figLegend,"'}\n",
+  "\n",
+  "\n print(plotList[['",tag,"']])",
+  "\n cat(  '\n')",
+  "\n\n\n```\n"
+)
+chnkVec <- c(
+        chnkVec,
+        NewChnk
+)  
+## Done                                                                      ##
+###############################################################################
+###############################################################################
+## Make absolute plot                                                        ##
+tag <- "absolute"
+plotList[[tag]] <- makePT_hmPlot(
+  mode = "absolute",  # Must be relative or absolute
+  dfTempA = dfTempA,
+  setMax = 2,
+  setMin = -2,
+  geneVec = geneNameVec,
+  xAxis = "DM_Pseudotime",
+  yAxis = "lg10Expr"	 
+)
+ ## Create R markdown chunk ##
+figureCount = 1
+figLegend <- paste0(
+  "**Figure ",
+  figureCount,
+  ":** Dotplot showing showing selected marker genes. "
+)
+figureCount <- figureCount + 1
+NewChnk <- paste0(
+  "#### Relative Expression",
+  "\n```{r Relative_", tag,
+  ", results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",
+  figLegend,"'}\n",
+  "\n",
+  "\n print(plotList[['",tag,"']])",
+  "\n cat(  '\n')",
+  "\n\n\n```\n"
+)
+chnkVec <- c(
+        chnkVec,
+        NewChnk
+)  
+## Done                                                                      ##
+###############################################################################
+```
+
+```{r plot_list, echo=TRUE, eval=TRUE, warning=FALSE, results="asis"}
+cat(paste(knit(text = chnkVec, quiet = T), collapse = '\n'))
+```
+
+library(dplyr)
+
+## Load biologic and Seurat object
+source("load.biologic.robj.R")
+
+## Reset paths to local environment
+Obio <- Obio %>% 
+    biologicSeqTools2::setMountingPoint()  %>% 
+    biologicSeqTools2::setAnalysisPaths() %>% 
+    biologicSeqTools2::setCrickGenomeAndGeneNameTable() %>% 
+    biologicSeqTools2::createAnalysisFolders() %>% 
+    biologicSeqTools2::setDataBaseParameters()
+## Load Seurat object
+SeuratFN <- paste0(Obio@parameterList$localWorkDir,list.files(Obio@parameterList$localWorkDir)[grep(".Seurat.Robj", list.files(Obio@parameterList$localWorkDir))])
+if (file.exists(SeuratFN)){
+    load(SeuratFN)
+    print(paste0("Obio object ", Obio@parameterList$localWorkDir,SeuratFN, " exists and is loaded."))
+    
+} else {
+    exit()
+}
+figureCount <- 1
+
+## Tradeseq can be run of a monocle object ##
+
+## monocle object for this project
+
+monocleObjectFN <- c(
+    "../../../../workdir/SC22150.branchTA1.monocle.SCE.rds",     
+    "../../../../workdir/SC22150.branchTA2.monocle.SCE.rds"
+)
+
+branches <- c(
+    "BranchTA1",
+    "BranchTA2"
+)
+
+i <- 1
+
+
+## From https://bioconductor.org/packages/release/bioc/vignettes/tradeSeq/inst/doc/Monocle.html
+set.seed(22)
+library(monocle3)
+
+# Load monocle object
+library(magrittr)
+
+sce <- readRDS(monocleObjectFN[1])
+
+## Add metadata for DGE
+dfMeta <- OsC_part@meta.data[colData(sce)$barcode, ]
+names(dfMeta) <- gsub("cellID", "barcode", names(dfMeta))
+
+colData <- data.frame(colData(sce))
+
+colData2 <- dplyr::inner_join(
+    colData, 
+    dfMeta, 
+    by = "barcode"
+)
+
+colDataNew <- DataFrame(colData2)
+row.names(colDataNew) <- colData2$barcode
+
+colData(sce) <- colDataNew
+
+gene_fits <- fit_models(sce, model_formula_str = "~meta_Genotype")
+
+fit_coefs <- coefficient_table(gene_fits)
+
+emb_time_terms <- fit_coefs %>% filter(term == "meta_Genotype")
+
+meta_Genotype
+
+sce <- SingleCellExperiment(assays = list(counts=as.matrix(assays(sce)$counts)), colData=coldata)
+
+library(magrittr)
+# Get the closest vertice for every cell
+y_to_cells <-  principal_graph_aux(sce)$UMAP$pr_graph_cell_proj_closest_vertex %>%
+  as.data.frame()
+y_to_cells$cells <- rownames(y_to_cells)
+y_to_cells$Y <- y_to_cells$V1
+
+root <- cds@principal_graph_aux$UMAP$root_pr_nodes
+
+mst <- principal_graph(sce)$UMAP
+
+# Get the other endpoints
+endpoints <- names(which(igraph::degree(mst) == 1))
+endpoints <- endpoints[!endpoints %in% root]
+
+# For each endpoint
+cellWeights <- lapply(endpoints, function(endpoint) {
+  # We find the path between the endpoint and the root
+  path <- igraph::shortest_paths(mst, root, endpoint)$vpath[[1]]
+  path <- as.character(path)
+  # We find the cells that map along that path
+  df <- y_to_cells %>%
+    dplyr::filter(Y %in% path)
+  df <- data.frame(weights = as.numeric(colnames(cds) %in% df$cells))
+  colnames(df) <- endpoint
+  return(df)
+  }) 
+
+
+set.seed(3)
+icMat <- evaluateK(counts = as.matrix(assays(sce)$counts),
+                   pseudotime = colData(sce)$slingshot$pseudotime,
+                   cellWeights = cellWeights,
+                   #conditions = factor(colData(sce)$pheno$treatment_id),
+                   nGenes = 300,
+                   k = 3:7)
+
+
+rownames(cellWeights) <- colnames(sce)
+
+pseudotime <- matrix(pseudotime(sce), ncol = ncol(cellWeights),
+                     nrow = ncol(sce), byrow = FALSE)
+
+
+sce <- fitGAM(counts = counts,
+              pseudotime = pseudotime,
+              cellWeights = cellWeights)
+
+
+sce <- fitGAM(counts = as.matrix(assays(sce)$counts),
+       pseudotime = pseudotime,
+       cellWeights = cellWeights)
+
+
+traj.coord<- sce@principal_graph_aux@listData[["UMAP"]][["pseudotime"]]
+
+set.seed(3)
+icMat <- evaluateK(
+    counts = as.matrix(assays(sce)$counts),
+    pseudotime = colData(sce)$slingshot$pseudotime,
+                   cellWeights = colData(sce)$slingshot$cellWeights.V1,
+                   conditions = factor(colData(sce)$pheno$treatment_id),
+                   nGenes = 300,
+                   k = 3:7)
+
+## Within lineage comparison
+customRes <- tradeSeq::startVsEndTest(
+    sce #, 
+    #pseudotimeValues = c(0.1, 0.8) # Pseudotime from - to
+)
+
+# Get the closest vertice for every cell
+y_to_cells <-  principal_graph_aux(sce)$UMAP$pr_graph_cell_proj_closest_vertex %>%
+  as.data.frame()
+y_to_cells$cells <- rownames(y_to_cells)
+y_to_cells$Y <- y_to_cells$V1
+
+# Get the root vertices
+# It is the same node as above
+root <- cds@principal_graph_aux$UMAP$root_pr_nodes
+
+# Get the other endpoints
+endpoints <- names(which(igraph::degree(mst) == 1))
+endpoints <- endpoints[!endpoints %in% root]
+
+# For each endpoint
+cellWeights <- lapply(endpoints, function(endpoint) {
+  # We find the path between the endpoint and the root
+  path <- igraph::shortest_paths(mst, root, endpoint)$vpath[[1]]
+  path <- as.character(path)
+  # We find the cells that map along that path
+  df <- y_to_cells[y_to_cells$Y %in% path, ]
+  df <- data.frame(weights = as.numeric(colnames(cds) %in% df$cells))
+  colnames(df) <- endpoint
+  return(df)
+  }) %>% do.call(what = 'cbind', args = .) %>%
+    as.matrix()
+rownames(cellWeights) <- colnames(cds)
+pseudotime <- matrix(pseudotime(cds), ncol = ncol(cellWeights),
+                     nrow = ncol(cds), byrow = FALSE)
+
+sce <- fitGAM(counts = counts,
+              pseudotime = pseudotime,
+              cellWeights = cellWeights)
+
+
+plotList <- list()
+chnkVec <- as.vector(NULL, mode = "character")
+
+
+
+for (i in 1:length(branches)){
+        if (branches[i] == "Branch2sub"){
+            cellSel <- OsC_part@meta.data[OsC_part@meta.data[,ptBranches[i]] != 0 & !(OsC_part@meta.data$clusterName %in% c("Tuft", "Paneth")), "cellID"]
+        } else {
+            cellSel <- OsC_part@meta.data[OsC_part@meta.data[,ptBranches[i]] != 0, "cellID"]
+        }
+        
+        
+        OsC_part_dMap <- OsC_part[,colnames(OsC_part) %in% cellSel]
+        
+        ## this case only
+        
+        
+        invertPT <- invertPTvec[i]
+        
+        
+        
+        
+        
+        #library(Seurat)
+        #library(destiny)
+        
+        dfPCA <- OsC_part_dMap@meta.data
+        dfPCA <- dfPCA[,grep("PC_", names(dfPCA))]
+        
+        ## cells to filter
+        
+        if (exists("filterList") & length(grep(branches[i], names(filterList))) > 0 ){
+            cellsToFilter <- filterList[[branches[i]]]
+        
+            dfPCA <- dfPCA[!(row.names(dfPCA) %in% cellsToFilter),]
+        }
+        
+        
+        dmPCA <- destiny::DiffusionMap(
+            dfPCA
+        )
+        
+        
+        
+        
+        #dpt <- DPT(dm, tips = 268)
+        #dpt <- DPT(dm)
+        dpt <- destiny::DPT(dmPCA)
+        #pseudotime <- dpt$dpt
+        
+        # Plot DC1 vs DC2 and color the cells by their inferred diffusion pseudotime.
+        # We can accesss diffusion pseudotime via dpt$dpt.
+        df <- data.frame(
+          DC1 = destiny::eigenvectors(dmPCA)[, 1], 
+          DC2 = destiny::eigenvectors(dmPCA)[, 2], 
+          "DM_Pseudotime" = dpt$dpt
+        )
+        
+        df$cellID <- row.names(dfPCA)
+        
+        ## For this project reverse pseudotime ##
+        if (invertPT){
+            PTmax <- max(df$DM_Pseudotime)
+            df$DM_Pseudotime <- -1* (df$DM_Pseudotime - PTmax)
+            ## Invert DC1, 2, 3
+            df$DC1 <- -1* df$DC1
+            df$DC2 <- -1* df$DC2
+        }
+        
+        ## For nicer display in this case, invert DC1/DC2
+        df$DC1 <- -1* df$DC1
+        df$DC2 <- -1* df$DC2
+        
+        ## Add to table ##
+        df$cellID <- row.names(dfPCA)
+        
+        names(df) <- gsub("^DC", paste0(branches[i], "_DC") ,names(df))
+        names(df) <- gsub("^DM_Pseudotime", paste0("DM_Pseudotime_", branches[i]) ,names(df))
+        
+        dfT <- data.frame(OsC_part@meta.data[,c("cellID", "clusterName")])
+        
+        df <- dplyr::full_join(
+            df, 
+            dfT, 
+            by = "cellID"
+        )
+        
+        df[is.na(df)] <- 0
+        
+        df$clusterName <- NULL
+        
+        row.names(df) <- df$cellID
+        df$cellID <- NULL
+        ## Rename columns
+        
+        ## add here ##
+        OsC_part <- biologicToolsSC::addDf2seuratMetaData(
+          obj = OsC_part, 
+          dfAdd = df
+        )
+        
+        ## Create Pseudotime plot ##
+        dfTemp <- OsC_part@meta.data
+        dfTemp <- dfTemp[!is.na(dfTemp[,paste0("DM_Pseudotime_", branches[i]) ]),]
+        dfTemp <- dfTemp[!(dfTemp[,paste0(branches[i], "_DC1")] == 0 & dfTemp[,paste0(branches[i], "_DC2")] == 0),]
+        
+        dotsize <- 0.75
+        dotcolor <- "darkblue"
+        tag <-  paste0(branches[i], "_DC1_DC2_colored_by_DM_Pseudotime")  
+        
+        if (branches[i] ==  "Branch2sub"){
+            selString <- "Branch2"
+        } else {
+            selString <- branches[i]
+        }
+        
+        
+        plotList[[tag]] <- ggplot2::ggplot(dfTemp, ggplot2::aes_string(paste0(branches[i], "_DC1"), paste0(branches[i], "_DC2"), color= paste0("DM_Pseudotime_", branches[i]) )
+            )+ ggplot2::geom_point( 
+                shape = 16,
+                size = as.numeric(dotsize)
+            ) + ggplot2::xlab(paste0(branches[i], "_DC1")) + ggplot2::ylab(paste0(branches[i], "_DC2")) + ggplot2::scale_color_gradient(
+                "Pseudotime",
+                low="#ff6600", 
+                high=dotcolor #, 
+                #limits=c(0,maxExpr)
+            ) + ggplot2::theme_bw(
+            ) +  ggplot2::theme(
+                axis.text.y   = ggplot2::element_text(size=8),
+                axis.text.x   = ggplot2::element_text(size=8),
+                axis.title.y  = ggplot2::element_text(size=8),
+                axis.title.x  = ggplot2::element_text(size=8),
+                axis.line = ggplot2::element_line(colour = "black"),
+                panel.border = ggplot2::element_rect(colour = "black", fill=NA, size=1),
+                plot.title = ggplot2::element_text(hjust = 0.5, size = 12)
+            ) + ggplot2::ggtitle(paste0("DC1, DC2 and DM Pseudotime for ", branches[i])
+            )  #+ xlim(minX, maxX) + ylim(minY, maxY)  
+        
+        
+        
+                ## Save to file ##
+                FNbase <- paste0("Pseudotime_overview", branches[i], VersionPdfExt)
+                FN <- paste0(Obio@parameterList$reportFigDir, FNbase)
+                FNrel <- paste0("report_figures/", FNbase)
+                
+               
+                pdf(FN)
+                print(plotList[[tag]])
+                dev.off()
+                
+                
+                
+                ## Create R markdown chunk ##
+                figLegend <- paste0(
+                    '**Figure ', 
+                    figureCount, 
+                    '**: Figure depicting diffusion map components 1 and 2 with the diffusion map pseudotime highlighted in color. Download a pdf of this figure <a href="',FNrel,'" target="_blank">here</a>. '
+                )
+                figureCount <- figureCount + 1 
+                
+                NewChnk <- paste0(
+                    "\n### ", gsub("_", " ", tag),
+                    "\n```{r ", tag, ", results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",
+                    figLegend,"'}\n",
+                    "\n",
+                    "\n print(plotList[['",tag,"']])",
+                    "\n cat(  '\n')",
+                    "\n\n\n```\n"   
+                )
+                
+                chnkVec <- c(
+                    chnkVec,
+                    NewChnk
+                )
+        
+        tag <-  paste0(branches[i], "_DC1_DC2_colored_by_Cluster")   
+                
+        dfCol <- unique(OsC_part_dMap@meta.data[,c("clusterName", "clusterColor")])
+        
+        colVec <- dfCol$clusterColor
+        names(colVec) <- dfCol$clusterName
+        
+        dfTemp <- dfTemp[!(dfTemp[,paste0(branches[i], "_DC1")] == 0 & dfTemp[,paste0(branches[i], "_DC2")] == 0),]
+        dfTemp$clusterName <- factor(dfTemp$clusterName)
+        
+        
+        plotList[[tag]] <- ggplot2::ggplot(dfTemp, ggplot2::aes_string(paste0(branches[i], "_DC1"), paste0(branches[i], "_DC2"), color= "clusterName" )
+            )+ ggplot2::geom_point( 
+                shape = 16,
+                size = as.numeric(dotsize)
+            ) + ggplot2::xlab(paste0(branches[i], "_DC1")) + ggplot2::ylab(paste0(branches[i], "_DC2"))  + ggplot2::theme_bw(
+            ) +  ggplot2::theme(
+                axis.text.y   = ggplot2::element_text(size=8),
+                axis.text.x   = ggplot2::element_text(size=8),
+                axis.title.y  = ggplot2::element_text(size=8),
+                axis.title.x  = ggplot2::element_text(size=8),
+                axis.line = ggplot2::element_line(colour = "black"),
+                panel.border = ggplot2::element_rect(colour = "black", fill=NA, size=1),
+                plot.title = ggplot2::element_text(hjust = 0.5, size = 12)
+            ) + ggplot2::ggtitle(paste0("DC1, DC2 and DM Pseudotime for ", branches[i])
+            ) + ggplot2::scale_color_manual(values = colVec)  
+        #+ xlim(minX, maxX) + ylim(minY, maxY)  
+        
+        
+        
+                ## Save to file ##
+                FNbase <- paste0("Pseudotime_overview", branches[i], VersionPdfExt)
+                FN <- paste0(Obio@parameterList$reportFigDir, FNbase)
+                FNrel <- paste0("report_figures/", FNbase)
+                
+               
+                pdf(FN)
+                print(plotList[[tag]])
+                dev.off()
+                
+                
+                
+                ## Create R markdown chunk ##
+                figLegend <- paste0(
+                    '**Figure ', 
+                    figureCount, 
+                    '**: Figure Diffusionmap DC1 and DC2 components. Download a pdf of this figure <a href="',FNrel,'" target="_blank">here</a>. '
+                )
+                figureCount <- figureCount + 1 
+                
+                NewChnk <- paste0(
+                    "\n### ", gsub("_", " ", tag),
+                    "\n```{r ", tag, ", results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",
+                    figLegend,"'}\n",
+                    "\n",
+                    "\n print(plotList[['",tag,"']])",
+                    "\n cat(  '\n')",
+                    "\n\n\n```\n"   
+                )
+                
+                chnkVec <- c(
+                    chnkVec,
+                    NewChnk
+                )
+}
+        
+if (length(plotList) > 3){
+    tabVar <- ".tabset .tabset-fade .tabset-dropdown"
+} else {
+    tabVar <- ".tabset .tabset-fade .tabset-pills"
+}
+```
+
+## Diffusionmap Plots {`r tabVar`} 
+
+```{r pseudotime-plot, echo=T, eval=TRUE, warning=FALSE, results='asis'}
+###############################################################################
+## Do category enrichment on clusters                                        ##
+
+cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = '\n'))
+
+## Done doing enrichment on clusters                                         ##
+###############################################################################
+```
+
+
+
+```{r saveobject, eval=TRUE, echo=T, results=F}
+### Will save Obio object here, so it can be re-used with different parameters
+# save(Obio, 
+#      file = paste0(
+#          Obio@parameterList$localWorkDir,
+#          Obio@parameterList$project_id,
+#          ".bioLOGIC.Robj"
+#      )
+# )
+# 
+# print("Obio Object saved.")
+
+## OsC_part saving occurs within the modules already
+# save(OsC_part,
+#     file = paste0(
+#          Obio@parameterList$localWorkDir,
+#          Obio@parameterList$project_id,
+#         ".Seurat.Robj"
+#      )
+# )
+
+print("Obio Object saved.")
+save(OsC_part,
+    file = paste0(
+         Obio@parameterList$localWorkDir,
+         Obio@parameterList$project_id,
+        ".Seurat.Robj"
+     )
+)
+
+
+
+```
+
+
+
+```{r create_report_params, eval=T, results="asis"}
+
+## Try to retrieve project data from db ##
+library(RMySQL)
+db.pwd2 <- "zU3ufd9L"
+db.user2 <- "reader"
+host2 <- "clvd1-db-u-p-17.thecrick.org"
+projectParams <- Obio@documentationParams
+
+tryCatch({
+    dbDB = DBI::dbConnect(
+        drv = RMySQL::MySQL(), 
+        user = db.user2, 
+        password = db.pwd2, 
+        host = host2, 
+        dbname = "clarity_shadow"
+    )
+dfProposal =  DBI::dbGetQuery(dbDB, paste0("SELECT * FROM clarify_asf_proposals WHERE project_name ='",Obio@parameterList$lims.id,"'"))
+dbDisconnect(dbDB)
+  }, error = function(x) {
+    message("Project Database could not be reached or has no entry in Obio@parameterList$lims.id for this analysis.")
+   
+})
+
+if (exists("dfProposal")){
+  if (nrow(dfProposal) == 1){
+      if (!is.na(dfProposal[1,"ProjectAlias"]) & dfProposal[1,"ProjectAlias"] != ""){
+          projectParams[["title"]] = paste0(dfProposal[1,"ProjectAlias"], " - ", dfProposal[1,"project_name"])
+      }
+      
+      if (!is.na(dfProposal[1,"project_user"]) & dfProposal[1,"project_user"] != ""){
+          projectParams[["subtitle"]] = paste0(dfProposal[1,"user_lab"], " Lab - ", dfProposal[1,"project_user"])
+          projectParams[["subtitle"]] <- gsub("^ Lab - ", "", projectParams[["subtitle"]])
+          
+      }
+      
+      if (!is.na(dfProposal[1,"proposal_text"]) & dfProposal[1,"proposal_text"] != ""){
+          projectParams[["abstract"]] = dfProposal[1,"proposal_text"]
+         
+          
+      }
+  }
+}
+   
+## Escape all special characters
+projectParams <- lapply(
+  projectParams, function(x) 
+  #gsub("([.|()\\^{}+$*?]|\\[|\\])", "\\\\\1", x)
+  gsub("([.|()/\\^{}+$*?]|\\[|\\])", " ", x)
+) 
+
+projectParams <- lapply(
+  projectParams, function(x) 
+  #gsub("([.|()\\^{}+$*?]|\\[|\\])", "\\\\\1", x)
+  gsub("\\\n", " ", x)
+) 
+
+
+#projectParams$title <- "Title"
+# projectParams$abstract <- "This is the QC section."
+#projectParams$subtitle <- "Abstract"
+
+```
+
+
+
+## Documentation
+```{r documentation, eval=TRUE, echo=T, results=T}
+
+sessionInfo()
+```
+
+---
+title: "`r projectParams$title`"
+subtitle:  "Diffusionmap Module"
+author:
+    - Bioinformatics: Stefan Boeing^[The Francis Crick Institute, stefan.boeing@crick.ac.uk]
+date: 'Compiled: `r format(Sys.Date(), "%B %d, %Y")`'
+
+abstract: |
+    "This module provides a diffusion map pseudotime analysis."
+
+
+---
