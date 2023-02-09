@@ -32,7 +32,7 @@ load(FN)
 ## Data selection for subsetting:
 #sampleID: primaryTumor
 
-selectedClusters <- c(5, 7, 12, 13, 16)
+selectedClusters <- c(12, 14, 17)
 
 # Select only cluster 1
 OsC_sel1 <- subset(x = OsC, subset = seurat_clusters %in% selectedClusters)

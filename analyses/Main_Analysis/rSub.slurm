@@ -550,7 +550,7 @@ Solving environment: ...working... done
 
 ## Package Plan ##
 
-  environment location: /camp/stp/babs/working/boeings/Projects/evang/roderik.kortlever/532_scRNAseq_subclustering_of_496_C5_C12_C13_C7_C16_subset2/scripts/scRNAseq/analyses/Main_Analysis/renv/python/r-reticulate
+  environment location: /camp/stp/babs/working/boeings/Projects/evang/roderik.kortlever/533_scRNAseq_subclustering_of_496_C7_C11_C12_subset3/scripts/scRNAseq/analyses/Main_Analysis/renv/python/r-reticulate
 
   added / updated specs:
     - numpy
@@ -608,7 +608,7 @@ Please update conda by running
 #
 # To activate this environment, use
 #
-#     $ conda activate /camp/stp/babs/working/boeings/Projects/evang/roderik.kortlever/532_scRNAseq_subclustering_of_496_C5_C12_C13_C7_C16_subset2/scripts/scRNAseq/analyses/Main_Analysis/renv/python/r-reticulate
+#     $ conda activate /camp/stp/babs/working/boeings/Projects/evang/roderik.kortlever/533_scRNAseq_subclustering_of_496_C7_C11_C12_subset3/scripts/scRNAseq/analyses/Main_Analysis/renv/python/r-reticulate
 #
 # To deactivate an active environment, use
 #
@@ -616,20 +616,20 @@ Please update conda by running
 
 Attaching SeuratObject
 [1] "Sample in group Myc4W:Myc4W_A5, Myc4W_B5, Myc4W_A11, Myc4W_B11, Myc4W_C1, Myc4W_D1, Myc4W_A1, Myc4W_B1"
-[1] "Myc4W: 8908"
+[1] "Myc4W: 2694"
 [1] "Processed."
 [1] "Sample in group Myc4W_2hrsOff:Myc4W_2hrsOff_C11, Myc4W_2hrsOff_D11, Myc4W_2hrsOff_E11, Myc4W_2hrsOff_C1, Myc4W_2hrsOff_D1, Myc4W_2hrsOff_E1"
-[1] "Myc4W_2hrsOff: 1857"
+[1] "Myc4W_2hrsOff: 908"
 [1] "Processed."
 [1] "Sample in group Myc4W_4hrsOff:Myc4W_4hrsOff_F11, Myc4W_4hrsOff_G11, Myc4W_4hrsOff_H11, Myc4W_4hrsOff_F1, Myc4W_4hrsOff_G1, Myc4W_4hrsOff_H1"
-[1] "Myc4W_4hrsOff: 2010"
+[1] "Myc4W_4hrsOff: 786"
 [1] "Processed."
 [1] "Sample in group Myc4W_8hrsOff:Myc4W_8hrsOff_C5, Myc4W_8hrsOff_D5, Myc4W_8hrsOff_A1, Myc4W_8hrsOff_B1"
-[1] "Myc4W_8hrsOff: 9708"
+[1] "Myc4W_8hrsOff: 6915"
 [1] "Processed."
 [1] "Sample in group Myc4W_12hrsOff:Myc4W_12hrsOff_E5, Myc4W_12hrsOff_F5, Myc4W_12hrsOff_G1, Myc4W_12hrsOff_H1"
-[1] "Myc4W_12hrsOff: 7388"
+[1] "Myc4W_12hrsOff: 3911"
 [1] "Processed."
 [1] "Sample in group Myc4W_24hrsOff:Myc4W_24hrsOff_G5, Myc4W_24hrsOff_H5, Myc4W_24hrsOff_E1, Myc4W_24hrsOff_F1"
-[1] "Myc4W_24hrsOff: 8060"
+[1] "Myc4W_24hrsOff: 1152"
 [1] "Processed."
