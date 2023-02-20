@@ -35,9 +35,9 @@ limsID,MOC1_1E,MOC1_1L,MOC1_2E,MOC1_2L,MOC1_3L,MOC1_4E,MOC2_2,MOC2_3,MOC2_4
 type,TenX,TenX,TenX,TenX,TenX,TenX,TenX,TenX,TenX
 gene.column,2,2,2,2,2,2,2,2,2
 path,/camp/stp/babs/working/schneid/projects/sahaie/giovanni.giangreco/Characterisation_of_CAF_in_HPV_cancer_scrnaseq/output_cellRanger/MOC1_1E/outs/filtered_feature_bc_matrix,/camp/stp/babs/working/schneid/projects/sahaie/giovanni.giangreco/Characterisation_of_CAF_in_HPV_cancer_scrnaseq/output_cellRanger/MOC1_1L/outs/filtered_feature_bc_matrix,/camp/stp/babs/working/schneid/projects/sahaie/giovanni.giangreco/Characterisation_of_CAF_in_HPV_cancer_scrnaseq/output_cellRanger/MOC1_2E/outs/filtered_feature_bc_matrix,/camp/stp/babs/working/schneid/projects/sahaie/giovanni.giangreco/Characterisation_of_CAF_in_HPV_cancer_scrnaseq/output_cellRanger/MOC1_2L/outs/filtered_feature_bc_matrix,/camp/stp/babs/working/schneid/projects/sahaie/giovanni.giangreco/Characterisation_of_CAF_in_HPV_cancer_scrnaseq/output_cellRanger/MOC1_3L/outs/filtered_feature_bc_matrix,/camp/stp/babs/working/schneid/projects/sahaie/giovanni.giangreco/Characterisation_of_CAF_in_HPV_cancer_scrnaseq/output_cellRanger/MOC1_4E/outs/filtered_feature_bc_matrix,/camp/stp/babs/working/schneid/projects/sahaie/giovanni.giangreco/Characterisation_of_CAF_in_HPV_cancer_scrnaseq/output_cellRanger/MOC2_2/outs/filtered_feature_bc_matrix,/camp/stp/babs/working/schneid/projects/sahaie/giovanni.giangreco/Characterisation_of_CAF_in_HPV_cancer_scrnaseq/output_cellRanger/MOC2_3/outs/filtered_feature_bc_matrix,/camp/stp/babs/working/schneid/projects/sahaie/giovanni.giangreco/Characterisation_of_CAF_in_HPV_cancer_scrnaseq/output_cellRanger/MOC2_4/outs/filtered_feature_bc_matrix
-singleCellSeuratMtCutoff,30,30,30,30,30,30,30,30,30
+singleCellSeuratMtCutoff,15,15,20,15,15,15,10,15,15
 SeuratNrnaMaxFeatures,10000,10000,10000,10000,10000,10000,10000,10000,10000
-SeuratNrnaMinFeatures,200,200,200,200,200,200,200,200,200
+SeuratNrnaMinFeatures,500,500,500,500,500,500,500,500,500
 ,,,,,,,,,
 Database Parameters,,,,,,,,,
 primDataDB,esl_data,,,,,,,,
