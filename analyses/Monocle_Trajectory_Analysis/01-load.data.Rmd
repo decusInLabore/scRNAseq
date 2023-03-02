@@ -87,7 +87,6 @@ if (!dir.exists(Obio@parameterList$reportFigDir)){
     dir.create(Obio@parameterList$reportFigDir)
 }
 
-Obio@parameterList[["reportFigDir"]] <- paste0(Obio@parameterList$html_local, "report_figures/")
 pdfTemp <- paste0(Obio@parameterList$reportFigDir, "temp.pdf")
 ## Done                                                                      ##
 ###############################################################################

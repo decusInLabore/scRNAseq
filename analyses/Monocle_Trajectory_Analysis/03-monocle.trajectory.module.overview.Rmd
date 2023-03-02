@@ -20,7 +20,7 @@ VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.Date()), ".pdf")
 
 # sbatch --time=24:00:00 --wrap "module purge;conda deactivate;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;ml cairo/1.16.0-GCCcore-10.3.0;ml rgdal/1.5-16-foss-2020a-R-4.0.0;load pandoc/2.2.3.2-foss-2016b;Rscript runRmd.r sc_Trajectory_Analysis.run.monocle.Rmd " --job-name=$project  --mem=200G -o ../rT.$project.slurm >> commands.txt
 
-invertMonoclePseudotime <- FALSE
+invertMonoclePseudotime <- TRUE
 useCachedMonocleObject <- TRUE
 startClusterID <- 2
 startClusterColName <- "seurat_clusters"
@@ -49,7 +49,7 @@ if (!exists("data.analysis.mode")){
 
 
 
-```{r, eval=data.analysis.mode, echo=T, results=F}
+```{r, eval=data.analysis.mode, echo=T, results="asis", message=FALSE}
 ## This part will only be run for the data analysis mode
 
 ## Tutorial from the Trapnell lab
@@ -140,7 +140,10 @@ cds_from_seurat@preprocess_aux$gene_loadings <- seurat@reductions[["pca"]]@featu
 
 print("Learning graph, which can take a while depends on the sample")
 
-cds_from_seurat <- learn_graph(cds_from_seurat, use_partition = T)
+# cds_from_seurat <- learn_graph(cds_from_seurat, use_partition = F)
+# Changed to:
+cds_from_seurat <- learn_graph(cds_from_seurat, use_partition = F)
+# on project SC22177
 
 #plot_cells(cds_from_seurat)
 
@@ -172,8 +175,7 @@ root_cells <- as.vector(
 
 closest_vertex <- cds_from_seurat@principal_graph_aux[["UMAP"]]$pr_graph_cell_proj_closest_vertex
 
-root_pr_nodes <-
-  igraph::V(principal_graph(cds_from_seurat)[["UMAP"]])$name[as.numeric(names
+root_pr_nodes <- igraph::V(principal_graph(cds_from_seurat)[["UMAP"]])$name[as.numeric(names
   (which.max(table(closest_vertex[root_cells,]))))]
 
 cds_from_seurat <- order_cells(
@@ -194,7 +196,7 @@ saveRDS(object = cds_from_seurat, file = FN)
 
 ```
 
-```{r, echo=TRUE, eval=TRUE, warning=FALSE, results=F}
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, results="asis", message=FALSE}
 ###############################################################################
 ## Visualization                                                             ##
 ## Load Rds
@@ -223,7 +225,14 @@ chnkVec <- as.vector(NULL, mode = "character")
 # Clusters Polykeratins (5) > mTecDiff (12) > mTec MYO (8)
 # branch3 <- c(5, 12, 8)
 
-traj.coord<- cds_from_seurat@principal_graph_aux@listData[["UMAP"]][["pseudotime"]]
+traj.coord <- cds_from_seurat@principal_graph_aux@listData[["UMAP"]][["pseudotime"]]
+
+if (invertMonoclePseudotime){
+    PTmax <- max(traj.coord)
+    traj.coord <- -1 * (traj.coord - PTmax)
+    cds_from_seurat@principal_graph_aux@listData[["UMAP"]][["pseudotime"]] <- traj.coord
+} 
+
 dfPseudo <- data.frame(cellID = names(traj.coord), Pseudotime_MC = traj.coord)
 
 dfPseudo$cellID <- NULL
@@ -299,6 +308,12 @@ plotList[[tag]] <- plot_cells(cds_from_seurat,
 FNbase <- paste0(tag, VersionPdfExt)
 FN <- paste0(Obio@parameterList$reportFigDir, FNbase)
 FNrel <- paste0("report_figures/", FNbase)
+
+pdf(FN)
+    print(plotList[[tag]])
+dev.off()
+    
+    
             
 if (exists("shinyURL") & !is.null(shinyURL)){
     link <- paste0(

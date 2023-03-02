@@ -46,7 +46,7 @@ always_allow_html: yes
 # module purge
 # conda deactivate
 # ml cairo/1.16.0-GCCcore-10.3.0;ml rgdal/1.5-16-foss-2020a-R-4.0.0
-# source .bashrc
+# source ~/.bashrc
 # conda activate R-monocle3;R
 
 # Check for presence of monocle3
@@ -271,25 +271,24 @@ db.pwd <- as.vector(dbTable[1,1])
 
 
 <!-- Optional 5: monocle3 -->
-```{r child = '03-monocle.trajectory.module.overview.Rmd', eval=TRUE}
+```{r child = '03-monocle.trajectory.module.overview.Rmd', eval=TRUE, results=FALSE, message= FALSE}
 ```
 
 <!-- Optional 5: monocle3 Branch 1 Subtrajectory -->
 <!-- Add as many sub-trajectory analyses as necessary as banch.1, branch.2, branch.3... -->
-```{r child = '04-monocle.trajectory.module.branch.1.Rmd', eval=TRUE}
+```{r child = '04-monocle.trajectory.module.branch.1.Rmd', eval=TRUE, results=FALSE, message = FALSE}
+```
+
+<!-- Optional 5: monocle3 Branch 1 Subtrajectory -->
+<!-- Add as many sub-trajectory analyses as necessary as banch.1, branch.2, branch.3... -->
+```{r child = '04-monocle.trajectory.module.branch.2.Rmd', eval=TRUE, results=FALSE, message = FALSE}
 ```
 
 
 
 ```{r saveobject, eval=TRUE, echo=T, results=F}
 ### Will save Obio object here, so it can be re-used with different parameters
-save(Obio, 
-     file = paste0(
-         Obio@parameterList$localWorkDir,
-         Obio@parameterList$project_id,
-         ".bioLOGIC.Robj"
-     )
-)
+source("save.biologic.robj.R")
 
 print("Obio Object saved.")
 
@@ -308,7 +307,7 @@ print("Obio Object saved.")
 
 
 
-```{r create_report_params, eval=T, results="asis"}
+```{r create_report_params, eval=T, results="asis",error = TRUE}
 
 ## Try to retrieve project data from db ##
 library(RMySQL)

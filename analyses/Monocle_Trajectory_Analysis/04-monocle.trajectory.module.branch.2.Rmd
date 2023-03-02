@@ -1,20 +1,19 @@
 <!-- Set Parameters Module -->
 <!-- Set the chnkPrefix to make all chunks unique in the overall folder -->
-# Branch 1
-Clusters 0, 1, 2, 3, and 5
-
-```{r, echo=TRUE, eval=TRUE, warning=FALSE, message= FALSE, results=F}
+# Branch 2
+Clusters 0, 3, 4, 6, 7, 8, and 9.
+```{r, echo=TRUE, eval=TRUE, warning=FALSE}
 
 ## Export Pseudotime to Seurat object ##
 # Branch 1
 
 branchSelectionCol <- "seurat_clusters"
-branchSelection <- c(0, 3, 1, 2, 5)
+branchSelection <- c(0, 3, 4, 6, 7, 8, 9)
 
 #branch1 <- c(5, 9, 0, 6,3)
 #branch1 <- c(5, 12, 1, 4, 2, 11)
 
-branchName <- "branch1"
+branchName <- "branch2"
 
 chnkPrefix <- paste0("T3.mc.", branchName, ".")
 VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.Date()), ".pdf")

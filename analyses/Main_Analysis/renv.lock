@@ -808,8 +808,8 @@
       "RemoteUsername": "decusInLabore",
       "RemoteRepo": "biologicViewerSC",
       "RemoteRef": "main",
-      "RemoteSha": "f9036ed00dc3c2983ee9b41d2dba99791d0bba53",
-      "Hash": "8df61a0cc2454aead8280d91c6e0817e",
+      "RemoteSha": "b1973ea834fd508f855064cc20c848889c4c7cf1",
+      "Hash": "06be1d8b386794d9ab10e8834cd2d635",
       "Requirements": [
         "DBI",
         "DT",
@@ -825,6 +825,7 @@
         "htmltools",
         "officer",
         "pkgload",
+        "purrr",
         "scales",
         "shiny",
         "thinkr",
