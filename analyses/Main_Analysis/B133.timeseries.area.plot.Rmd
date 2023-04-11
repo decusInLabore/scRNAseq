@@ -21,12 +21,23 @@ i = 1
  
     dfRes <- OsC@meta.data
     
-    selVec <- c("cellID", "clusterName", "clusterColor", "meta_Timepoint")
+    pos <- grep("^meta_Timepoint$", names(OsC@meta.data))
     
-    # dfRes <- dfRes[dfRes$meta_Genotype == genotypes[i], selVec]
-    dfRes[["timepoint"]] <- gsub("^T", "", dfRes$meta_Timepoint)
-    dfRes[["timepoint"]] <- gsub("hrs", "", dfRes$timepoint)
-    dfRes$timepoint <- as.numeric(dfRes$timepoint)
+    if (length(pos) == 1){
+        selCol <- "meta_Timepoint"
+        
+        # dfRes <- dfRes[dfRes$meta_Genotype == genotypes[i], selVec]
+        dfRes[["timepoint"]] <- gsub("^T", "", dfRes$meta_Timepoint)
+        dfRes[["timepoint"]] <- gsub("hrs", "", dfRes$timepoint)
+        dfRes$timepoint <- as.numeric(dfRes$timepoint)
+    
+    } else {
+        selCol <- "sampleName"
+    }
+    
+    selVec <- c("cellID", "clusterName", "clusterColor", selCol)
+    
+    
     
     
     dfCol <- unique(dfRes[,c("clusterName", "clusterColor")])
@@ -35,6 +46,7 @@ i = 1
     names(colVec) <- dfCol$clusterName
     
     
+    if (length(pos) == 1) {
     # Percentages
     library(dplyr)
     data <- dfRes  %>%
@@ -103,8 +115,11 @@ i = 1
             chnkVec,
             NewChnk
         )
-# }
-
+} else {
+  ## Make area plot without time axis
+  
+  
+}## end of If 
             
 if (length(plotList) > 3){
     tabVar <- ".tabset .tabset-fade .tabset-dropdown"
