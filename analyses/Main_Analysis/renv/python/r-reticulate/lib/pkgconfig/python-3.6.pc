@@ -1,0 +1,13 @@
+# See: man pkg-config
+prefix=/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/450_singleCell_scPDAC_PRJCA001063full/scripts/scRNAseq/analyses/Main_Analysis/renv/python/r-reticulate
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: Python
+Description: Python library
+Requires: 
+Version: 3.6
+Libs.private: -lpthread -ldl  -lutil -lrt
+Libs: -L${libdir} -lpython3.6m
+Cflags: -I${includedir}/python3.6m

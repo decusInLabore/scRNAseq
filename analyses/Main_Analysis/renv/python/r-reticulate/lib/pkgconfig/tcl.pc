@@ -1,0 +1,15 @@
+# tcl pkg-config source file
+
+prefix=/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/450_singleCell_scPDAC_PRJCA001063full/scripts/scRNAseq/analyses/Main_Analysis/renv/python/r-reticulate
+exec_prefix=/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/450_singleCell_scPDAC_PRJCA001063full/scripts/scRNAseq/analyses/Main_Analysis/renv/python/r-reticulate
+libdir=/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/450_singleCell_scPDAC_PRJCA001063full/scripts/scRNAseq/analyses/Main_Analysis/renv/python/r-reticulate/lib
+includedir=${prefix}/include
+
+Name: Tool Command Language
+Description: Tcl is a powerful, easy-to-learn dynamic programming language, suitable for a wide range of uses.
+URL: https://www.tcl-tk.org/
+Version: 8.6.12
+Requires.private: zlib >= 1.2.3
+Libs: -L${libdir} -ltcl8.6 -ltclstub8.6
+Libs.private: -ldl -lz  -lpthread -lm
+Cflags: -I${includedir}

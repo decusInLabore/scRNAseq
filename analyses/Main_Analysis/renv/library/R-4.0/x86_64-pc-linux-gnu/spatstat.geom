@@ -1,0 +1,1 @@
+/camp/stp/babs/working/boeings/Projects/reference_data/renv/cache/v5/R-4.0/x86_64-pc-linux-gnu/spatstat.geom/2.3-0/2d3b807f27c260acb715aa4f94f02428/spatstat.geom

@@ -1,0 +1,86 @@
+{
+  "build": "py36_0",
+  "build_number": 0,
+  "channel": "https://conda.anaconda.org/conda-forge/linux-64",
+  "constrains": [
+    "python_abi * *_cp36m"
+  ],
+  "depends": [
+    "python 3.6*"
+  ],
+  "extracted_package_dir": "/camp/stp/babs/working/software/anaconda/pkgs/certifi-2016.9.26-py36_0",
+  "features": "",
+  "files": [
+    "lib/python3.6/site-packages/certifi-2016.09.26-py3.6.egg-info",
+    "lib/python3.6/site-packages/certifi/__init__.py",
+    "lib/python3.6/site-packages/certifi/__main__.py",
+    "lib/python3.6/site-packages/certifi/__pycache__/__init__.cpython-36.pyc",
+    "lib/python3.6/site-packages/certifi/__pycache__/__main__.cpython-36.pyc",
+    "lib/python3.6/site-packages/certifi/__pycache__/core.cpython-36.pyc",
+    "lib/python3.6/site-packages/certifi/cacert.pem",
+    "lib/python3.6/site-packages/certifi/core.py",
+    "lib/python3.6/site-packages/certifi/old_root.pem",
+    "lib/python3.6/site-packages/certifi/weak.pem"
+  ],
+  "fn": "certifi-2016.9.26-py36_0.tar.bz2",
+  "license": "ISC",
+  "link": {
+    "source": "/camp/stp/babs/working/software/anaconda/pkgs/certifi-2016.9.26-py36_0",
+    "type": 1
+  },
+  "md5": "28573e69c9d5031e49bced1bd3f8a9c0",
+  "name": "certifi",
+  "package_tarball_full_path": "/camp/stp/babs/working/software/anaconda/pkgs/certifi-2016.9.26-py36_0",
+  "paths_data": {
+    "paths": [
+      {
+        "_path": "lib/python3.6/site-packages/certifi-2016.09.26-py3.6.egg-info",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "lib/python3.6/site-packages/certifi/__init__.py",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "lib/python3.6/site-packages/certifi/__main__.py",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "lib/python3.6/site-packages/certifi/__pycache__/__init__.cpython-36.pyc",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "lib/python3.6/site-packages/certifi/__pycache__/__main__.cpython-36.pyc",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "lib/python3.6/site-packages/certifi/__pycache__/core.cpython-36.pyc",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "lib/python3.6/site-packages/certifi/cacert.pem",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "lib/python3.6/site-packages/certifi/core.py",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "lib/python3.6/site-packages/certifi/old_root.pem",
+        "path_type": "hardlink"
+      },
+      {
+        "_path": "lib/python3.6/site-packages/certifi/weak.pem",
+        "path_type": "hardlink"
+      }
+    ],
+    "paths_version": 1
+  },
+  "requested_spec": "None",
+  "sha256": "6652e9daa71c6462c23499f0265cbbc8f4ebdd098f0cdc638dfd533884f01d54",
+  "size": 221701,
+  "subdir": "linux-64",
+  "track_features": "",
+  "url": "https://conda.anaconda.org/conda-forge/linux-64/certifi-2016.9.26-py36_0.tar.bz2",
+  "version": "2016.9.26"
+}
