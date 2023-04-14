@@ -71,6 +71,25 @@
         "BiocGenerics"
       ]
     },
+    "BiocFileCache": {
+      "Package": "BiocFileCache",
+      "Version": "1.14.0",
+      "Source": "Bioconductor",
+      "git_url": "https://git.bioconductor.org/packages/BiocFileCache",
+      "git_branch": "RELEASE_3_12",
+      "git_last_commit": "cdcde4b",
+      "git_last_commit_date": "2020-10-27",
+      "Hash": "1b129af4e6ee37b16d4d424aebed81f7",
+      "Requirements": [
+        "DBI",
+        "RSQLite",
+        "curl",
+        "dbplyr",
+        "dplyr",
+        "httr",
+        "rappdirs"
+      ]
+    },
     "BiocGenerics": {
       "Package": "BiocGenerics",
       "Version": "0.36.1",
@@ -768,17 +787,18 @@
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
-      "RemoteUsername": "decusinlabore",
+      "RemoteUsername": "decusInLabore",
       "RemoteRepo": "biologicSeqTools2",
       "RemoteRef": "main",
-      "RemoteSha": "5bb6ca3b660d02fcccded96fcc388bc59a898909",
-      "Hash": "aef6ed67a3dad12c23765851576039d5",
+      "RemoteSha": "b40420d967e08df77f4e45e05007d07bdc79ee14",
+      "Hash": "a542cbf973b93169e9b5dc87b784a6dc",
       "Requirements": [
         "DBI",
         "DESeq2",
         "RMySQL",
         "RSQLite",
         "Seurat",
+        "biomaRt",
         "dplyr",
         "jsonlite",
         "openxlsx"
@@ -793,8 +813,8 @@
       "RemoteUsername": "decusInLabore",
       "RemoteRepo": "biologicToolsSC",
       "RemoteRef": "main",
-      "RemoteSha": "1d65b32df7d535512b36dd7d61d0e00f9c694899",
-      "Hash": "e26d84a78ebe98d4a7d3b7c9e866ff56",
+      "RemoteSha": "3cd703b48762f888cb57917761fa715edd3657f2",
+      "Hash": "efa2a4e935c619ae2f7393041bfb06e5",
       "Requirements": [
         "Matrix"
       ]
@@ -831,6 +851,27 @@
         "thinkr",
         "tibble",
         "tidyr"
+      ]
+    },
+    "biomaRt": {
+      "Package": "biomaRt",
+      "Version": "2.46.3",
+      "Source": "Bioconductor",
+      "git_url": "https://git.bioconductor.org/packages/biomaRt",
+      "git_branch": "RELEASE_3_12",
+      "git_last_commit": "607b632",
+      "git_last_commit_date": "2021-02-08",
+      "Hash": "1dba821d9a19d3b70fa324cab2fb4d0b",
+      "Requirements": [
+        "AnnotationDbi",
+        "BiocFileCache",
+        "XML",
+        "httr",
+        "openssl",
+        "progress",
+        "rappdirs",
+        "stringr",
+        "xml2"
       ]
     },
     "bit": {
