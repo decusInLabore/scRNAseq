@@ -409,7 +409,7 @@ OsC <- Seurat::ScaleData(OsC, verbose = FALSE, features=allGenes)
 
 ###############################################################################
 ## Add custom cluster annotation if specified                                ##
-FNcol <- paste0(cwd, "/design/customClusterAnnotation.txt")
+FNcol <- paste0("../../design/customClusterAnnotation.txt")
 tableValid <- FALSE
 
 if (file.exists(FNcol)){
@@ -440,7 +440,7 @@ if (file.exists(FNcol)){
     ## Check if clusters match ##
     inClust <- unique(as.character(dfClusterAnnotation$seurat_clusters))
     oClust <- unique(as.character(OsC@meta.data$seurat_clusters))
-    if (length(inClust) == length(intersect(inClust, oClust))){
+    if (length(inClust) == length(intersect(inClust, oClust)) & (length(inClust) == length(oClust))){
       tableValid <- TRUE
     } else {
       tableValid <- FALSE
@@ -472,7 +472,7 @@ if (!file.exists(FNcol) | !tableValid){
   #dfClusterAnnotation$cellID <- NULL
   ## Add sample colors ##
   
-  annoDir <- paste0(cwd, "/design")
+  annoDir <- paste0("../../design")
   
   if (!dir.exists(annoDir)){
     dir.create(annoDir)
@@ -559,7 +559,7 @@ Seurat::Idents(OsC) <- factor(Seurat::Idents(OsC), levels = Obio@parameterList[[
 
 ###############################################################################
 ## Add custom sample annotation if specified                                 ##
-FNsample <- paste0(cwd, "/design/customSampleAnnotation.txt")
+FNsample <- paste0("../../design/customSampleAnnotation.txt")
 tableValid <- FALSE
 
 if (file.exists(FNsample)){
