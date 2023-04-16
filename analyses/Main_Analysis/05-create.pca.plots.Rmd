@@ -600,82 +600,82 @@ for (i in 1:length(sampleVec)){
 ###############################################################################
 ## Add cluster dendrogram by sample                                          ##
 
-if (length(unique(OsC@meta.data$sampleID)) > 2){
-  
-  library(ggtree)
-  library(Seurat)
-  # Buildclustertree only works like this
-  Seurat::Idents(OsC) <- "sampleName"
-  OsC <- BuildClusterTree(OsC)
-      
-  tag <- paste0("Sample_Dendrogram")
-      
-  OsC@tools$BuildClusterTree$tip.label <- paste0( OsC@tools$BuildClusterTree$tip.label)
-      
-  plotList[[tag]]  <- ggplot2::ggplot(OsC@tools$BuildClusterTree
-      ) + ggtree::geom_tree(
-      ) + ggtree::theme_tree(
-      ) 
-  
-  h <- sum(c("sampleName", "sampleColor") %in% names(OsC@meta.data))
-  if (h ==2){
-    dfCol <- unique(OsC@meta.data[,c("sampleName", "sampleColor")])
-    colVec <- as.vector(dfCol$sampleColor)
-    names(colVec) <- as.vector(dfCol$sampleName)
-    plotList[[tag]] <- plotList[[tag]] + ggtree::geom_tiplab(color=colVec
-      ) 
-  } else {
-    plotList[[tag]] <- plotList[[tag]] + ggtree::geom_tiplab(
-      )   
-  }
-  
-  #plotList[[tag]] <- plotList[[tag]] + geom_tippoint(aes(color=sampleName), size=1.5)
-  
-  plotList[[tag]] <- plotList[[tag]] + ggplot2::labs(title=tag
-      ) + ggplot2::theme(
-        panel.border = ggplot2::element_rect(colour = "black", fill=NA, size=1),
-        axis.title.x=ggplot2::element_blank(),
-        plot.title = ggplot2::element_text(hjust = 0.5, size = 12)
-      )  + ggplot2::xlim(0,dendrofactor*max(OsC@tools$BuildClusterTree[[2]]))
- 
-      
-  ## Save to file ##
-  FNbase <- paste0(tag,".", VersionPdfExt)
-  FN <- paste0(Obio@parameterList$reportFigDir, FNbase)
-  FNrel <- paste0("report_figures/", FNbase)
-      
-  pdf(FN)
-      print(plotList[[tag]])
-  dev.off()
-      
-  
-  
-  figLegend <- paste0(
-      '**Figure ', 
-          figureCount, 
-          ':** ',
-          ' Clusterplot dendrogram by sample ID. ','A pdf of this figure can be downloaded <a href="',FNrel,'" target="_blank">here</a>. '
-      )
-      
-      
-      NewChnk <- paste0(
-          "#### SampleID Dendrogram",
-          "\n```{r ", tag, "results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",
-          figLegend,"'}\n",
-          "\n",
-          "\n print(plotList[['",tag,"']])",
-          "\n cat(  '\n')",
-          "\n\n\n```\n"   
-      )
-      
-      chnkVec <- c(
-          chnkVec,
-          NewChnk
-      )
-      
-      
-      figureCount <- figureCount + 1
-}
+# if (length(unique(OsC@meta.data$sampleID)) > 2){
+#   
+#   library(ggtree)
+#   library(Seurat)
+#   # Buildclustertree only works like this
+#   Seurat::Idents(OsC) <- "sampleName"
+#   OsC <- Seurat::BuildClusterTree(OsC)
+#       
+#   tag <- paste0("Sample_Dendrogram")
+#       
+#   OsC@tools$BuildClusterTree$tip.label <- paste0( OsC@tools$BuildClusterTree$tip.label)
+#       
+#   plotList[[tag]]  <- ggplot2::ggplot(OsC@tools$BuildClusterTree
+#       ) + ggtree::geom_tree(
+#       ) + ggtree::theme_tree(
+#       ) 
+#   
+#   h <- sum(c("sampleName", "sampleColor") %in% names(OsC@meta.data))
+#   if (h ==2){
+#     dfCol <- unique(OsC@meta.data[,c("sampleName", "sampleColor")])
+#     colVec <- as.vector(dfCol$sampleColor)
+#     names(colVec) <- as.vector(dfCol$sampleName)
+#     plotList[[tag]] <- plotList[[tag]] + ggtree::geom_tiplab(color=colVec
+#       ) 
+#   } else {
+#     plotList[[tag]] <- plotList[[tag]] + ggtree::geom_tiplab(
+#       )   
+#   }
+#   
+#   #plotList[[tag]] <- plotList[[tag]] + geom_tippoint(aes(color=sampleName), size=1.5)
+#   
+#   plotList[[tag]] <- plotList[[tag]] + ggplot2::labs(title=tag
+#       ) + ggplot2::theme(
+#         panel.border = ggplot2::element_rect(colour = "black", fill=NA, size=1),
+#         axis.title.x=ggplot2::element_blank(),
+#         plot.title = ggplot2::element_text(hjust = 0.5, size = 12)
+#       )  + ggplot2::xlim(0,dendrofactor*max(OsC@tools$BuildClusterTree[[2]]))
+#  
+#       
+#   ## Save to file ##
+#   FNbase <- paste0(tag,".", VersionPdfExt)
+#   FN <- paste0(Obio@parameterList$reportFigDir, FNbase)
+#   FNrel <- paste0("report_figures/", FNbase)
+#       
+#   pdf(FN)
+#       print(plotList[[tag]])
+#   dev.off()
+#       
+#   
+#   
+#   figLegend <- paste0(
+#       '**Figure ', 
+#           figureCount, 
+#           ':** ',
+#           ' Clusterplot dendrogram by sample ID. ','A pdf of this figure can be downloaded <a href="',FNrel,'" target="_blank">here</a>. '
+#       )
+#       
+#       
+#       NewChnk <- paste0(
+#           "#### SampleID Dendrogram",
+#           "\n```{r ", tag, "results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",
+#           figLegend,"'}\n",
+#           "\n",
+#           "\n print(plotList[['",tag,"']])",
+#           "\n cat(  '\n')",
+#           "\n\n\n```\n"   
+#       )
+#       
+#       chnkVec <- c(
+#           chnkVec,
+#           NewChnk
+#       )
+#       
+#       
+#       figureCount <- figureCount + 1
+# }
 
 ## Done by sample                                                            ##
 ###############################################################################

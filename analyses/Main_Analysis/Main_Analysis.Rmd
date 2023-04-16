@@ -135,7 +135,7 @@ print("OsC Object saved.")
 ```
 
 <!-- Optional 4: (creates output only): Create variation plots Chapter/Module -->
-```{r child = '04-create.variation.plots.Rmd', eval=createNew}
+```{r child = '04-create.variation.plots.Rmd', eval=FALSE}
 ```
 
 
@@ -192,12 +192,12 @@ DGE Marker gene upload Chapter/Module -->
 ```
 
 <!-- Optional 9: (Output only): Create pca plots Chapter/Module -->
-```{r child = '08-euclidian.distances.figure.Rmd', eval=TRUE}
+```{r child = '08-euclidian.distances.figure.Rmd', eval=FALSE}
 ```
 
 
 <!-- Optional 10: (Output only): Doublet Estimate Chapter/Module -->
-```{r child = '09-doublet.estimation.plots.Rmd', eval=TRUE}
+```{r child = '09-doublet.estimation.plots.Rmd', eval=FALSE}
 ```
 
 <!-- Optional 11: (Output only): Doublet Estimate Chapter/Module -->
@@ -213,15 +213,15 @@ DGE Marker gene upload Chapter/Module -->
 ```
 
 <!-- Optional 13: (Output only):Category Enrichments Chapter/Module -->
-```{r child = '12-AUC.cat.enrichments.Rmd', eval=TRUE}
+```{r child = '12-AUC.cat.enrichments.Rmd', eval=FALSE}
 ```
 
 <!-- Essential 14: (output required later):Category Linear Regression Marker Gene Data Prep Chapter/Module -->
-```{r child = '13-linear.regression.data.prep.Rmd', eval=TRUE}
+```{r child = '13-linear.regression.data.prep.Rmd', eval=FALSE}
 ```
 
 <!-- Essential 15: (output required later):Category Linear Regression Marker Gene Data Prep Chapter/Module -->
-```{r child = '14-heatmaps.and.dotplots.Rmd', eval=TRUE}
+```{r child = '14-heatmaps.and.dotplots.Rmd', eval=FALSE}
 ```
 
 <!-- Essential 16: (output required later):Category Make cluster table Data Prep Chapter/Module -->
@@ -229,12 +229,12 @@ DGE Marker gene upload Chapter/Module -->
 ```
 
 <!-- Essential 18: (output required later):Category Make cluster table Data Prep Chapter/Module -->
-```{r child = '16-gene.set.heatmaps.Rmd', eval=TRUE}
+```{r child = '16-gene.set.heatmaps.Rmd', eval=FALSE}
 ```
 
 
 <!-- Essential 19: (output required later):Category Make cluster table Data Prep Chapter/Module -->
-```{r child = '17-example.feature.plots.Rmd', eval=TRUE}
+```{r child = '17-example.feature.plots.Rmd', eval=FALSE}
 ```
 
 <!-- Essential 20: (output required later):Category Make cluster table Data Prep Chapter/Module -->
