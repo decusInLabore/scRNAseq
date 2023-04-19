@@ -101,6 +101,9 @@ if (loadProjectDataForThisModule){
     ## Seurat object
     SeuratFN <- paste0(Obio@parameterList$localWorkDir,list.files(Obio@parameterList$localWorkDir)[grep(".Seurat.Robj", list.files(Obio@parameterList$localWorkDir))])
 
+    if (length(SeuratFN) > 1){
+        print("Multiple Seurat objects present for this projet: ", paste0(SeuratFN, collapse=","))
+    }
     
     load(SeuratFN)
 }
@@ -182,10 +185,10 @@ if (species == "mus_musculus"){
     )
 } else if (species == "homo_sapiens"){
     selVec <- c(
-        "ref_hema_microarray",
-        "ref_cortex_dev",
-        "ref_pan_indrop",
-        "ref_pan_smartseq2"
+        "ref_hema_microarray"
+        #"ref_cortex_dev",
+        #"ref_pan_indrop",
+        #"ref_pan_smartseq2"
     )
     
 } 
