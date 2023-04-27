@@ -1,0 +1,244 @@
+---
+output: 
+    html_document:
+        code_folding: hide
+        df_print: tibble
+        highlight: default
+        theme: paper
+        toc: true
+        toc_depth: 5
+        toc_float: true
+        css: src/style/style.css
+
+always_allow_html: yes
+---
+
+
+```{r setup, include=FALSE}
+# R to use
+# module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;R
+
+## Option to resmume analysis after time-consuming integration. 
+resume <- TRUE
+
+if (resume){
+    createNew <- FALSE
+} else {
+    createNew <- TRUE
+}
+
+knitr::opts_chunk$set(
+    tidy = F,
+    tidy.opts = list(width.cutoff = 120),
+    message = FALSE,
+    warning = FALSE
+)
+
+
+if (!requireNamespace("remotes")){
+  install.packages("remotes")
+}
+
+
+if (!requireNamespace("renv")){
+  remotes::install_github("rstudio/renv")
+}
+
+if (!file.exists("renv.lock")){
+    renv::init()
+} else {
+    renv::restore(prompt = FALSE)
+}
+
+
+library(tidyverse)
+library(dplyr)
+library(Seurat)
+library(ggplot2)
+library(tidyr)
+library(knitr)
+
+cwd <- paste0(here::here(),"/")
+tempWorkDir <- paste0(cwd, "../")
+
+## Load custom packages specific for this analysis ##
+#source("assets/R/scTools.r")
+#source("assets/R/SBwebtools.pckg.r")
+
+#renv::install("decusInLabore/biologicSeqTools")
+#renv::install("decusInLabore/biologicToolsSC")
+library(Seurat)
+library(biologicSeqTools2)
+library(biologicToolsSC)
+
+## Make sure the correct future version (> 1.2) is installed
+#renv::install("https://cran.r-project.org/src/contrib/Archive/future/future_1.19.1.tar.gz")
+## Doublet Finder
+#renv::install("chris-mcginnis-ucsf/DoubletFinder")
+#renv::install("bioc::clusterProfiler")
+#renv::install("bioc::AUCell")
+#renv::install("YuLab-SMU/ggtree")
+
+upload.results.to.database <- TRUE
+save.chunk.intermediates <- TRUE
+
+
+###############################################################################
+##                                                                           ##
+projectDir <- gsub("scripts/scRNAseq/analyses/Main_Analysis", "", getwd())
+workdir <- paste0(projectDir, "workdir/")
+
+
+figureCount <- 1
+
+##                                                                           ##
+###############################################################################
+
+
+
+
+```
+
+
+
+```{r, eval=createNew, echo=TRUE}
+
+## The above step is the most time consuming. Saving the Obio and OsC object here allows 
+## This will load the objects saved in B6. 
+source("load.biologic.robj.R")
+
+load(paste0(
+         Obio@parameterList$localWorkDir,
+         Obio@parameterList$project_id,
+        ".Seurat.Robj"
+     )
+)
+
+
+
+dotsize  = 1
+
+if (nrow(OsC@meta.data) > 50000){
+  dotsize  = 0.05
+} else if (nrow(OsC@meta.data) > 20000){
+  dotsize = 0.1
+} else if (nrow(OsC@meta.data) > 10000){
+  dotsize = 0.5
+} else if (nrow(OsC@meta.data) > 1000){
+  dotsize = 0.75
+}
+
+Obio@parameterList$dotsize <- dotsize
+
+legendDotSize <- 5
+Obio@parameterList$legendDotSize <- legendDotSize
+dendrofactor <- 5
+Obio@parameterList$dendrofactor <- dendrofactor
+
+
+```
+
+
+## INHBA expression across 22 patients split by Tumor and Normal
+```{r , echo=TRUE, eval=TRUE, warning=FALSE, results=FALSE} 
+
+plotList <- list()
+chnkVec <- as.vector(NULL, mode = "character")
+
+
+## Order
+lev <- c(
+    "C4",   # 5 clusters selected for sub-clusteringsss
+    "C5",
+    "C6",
+    "C15",
+    "C17",
+    
+    
+    "C0",
+    "C1",
+    "C2",
+    "C3",
+    "C7",
+    "C8",
+    "C9",
+    "C10",
+    "C11",
+    "C12",
+    "C13",
+    "C14",
+    "C16"
+)
+
+OsC@meta.data$clusterName <- factor(
+  OsC@meta.data$clusterName,
+  levels = lev
+)
+
+tag <- "Clusters"
+
+
+Idents(OsC) <- "clusterName"
+
+library(RColorBrewer)
+
+getPalette = colorRampPalette(RColorBrewer::brewer.pal(9, "Greys"))
+
+cols <- c(scales::hue_pal()(5), getPalette(13))
+#cols <- c(scales::hue_pal()(18))
+names(cols) <- unique(sort(OsC@meta.data$clusterName))
+
+plotList[[tag]] <- Seurat::DimPlot(OsC, cols = cols, split.by = "meta_Tumor_Normal")
+
+
+
+geneVec <- c(
+    "INHBA",
+    "COL12A1",
+    "ACTA",
+    "CLEC3B",
+    "COL14A1",
+    "GSN",
+    "LY6C1",
+    "CXCL12",
+    "TNC",
+    "TGFB1",
+    "THY1",
+    "TAGLN",
+    "COL12A1",
+    "PDGFRB",
+    "SLPI",
+    "SAA3",
+    "CD74",
+    "NKAIN4",
+    "IRL5",
+    "ITGAM",
+    "ITGAX",
+    "ADGRE1",
+    "LY6G",
+    "CD33",
+    "S100A8",
+    "S100A9",
+    "LIF",
+    "LMNA",
+    "DPT",
+    "PDPN",
+    "LRRC15",
+    "IL6",
+    "H21B1",
+    "HLADRB1",
+    "HLADRA"
+)
+
+## Check if genes are present in this dataset
+geneVec <- unique(geneVec[geneVec %in% row.names(OsC)])
+
+for (i in 1:length(geneVec)){
+    tag <- geneVec[i]
+    plotList[[tag]] <- Seurat::FeaturePlot(OsC, geneVec[i], split.by = "meta_Tumor_Normal" )
+}
+
+
+```
+
+

@@ -217,7 +217,7 @@ DGE Marker gene upload Chapter/Module -->
 ```
 
 <!-- Essential 14: (output required later):Category Linear Regression Marker Gene Data Prep Chapter/Module -->
-```{r child = '13-linear.regression.data.prep.Rmd', eval=FALSE}
+```{r child = '13-linear.regression.data.prep.Rmd', eval=TRUE}
 ```
 
 <!-- Essential 15: (output required later):Category Linear Regression Marker Gene Data Prep Chapter/Module -->

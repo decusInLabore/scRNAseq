@@ -497,31 +497,32 @@ if (length(pos) ==1){
   dfClusterAnnotation <- dfClusterAnnotation[order(dfClusterAnnotation$clusterOrder, decreasing = F),]
   orderVec <- dfClusterAnnotation$clusterName
   Obio@parameterList[["clusterNameOrder"]] <- orderVec
-} else {
-  ###############################################################################
-  ## Order average expression by cluster similarity (most variable genes)      ##
-  assay <- NULL
-  assay <- assay %||% DefaultAssay(object = OsC)
-  
-  
-  features <- VariableFeatures(object = OsC)
-  features <- intersect(x = features, y = rownames(x = OsC))
-  data.avg <- AverageExpression(object = OsC, assays = assay, 
-                                features = features, slot = "data", verbose = T)[[1]]
-  
-  
-  
-  if (ncol(data.avg) > 1){
-    data.dist <- dist(x = t(x = data.avg[features, ]))
-    dforder <- hclust(d = data.dist)
-    orderVec <- names(dfAvgExpr)[dforder$order]
-  } else {
-    orderVec <- names(data.avg)
-  }
-  
-  Obio@parameterList[["clusterNameOrder"]] <- orderVec
-  
-}
+} 
+# else {
+#   ###############################################################################
+#   ## Order average expression by cluster similarity (most variable genes)      ##
+#   assay <- NULL
+#   assay <- assay %||% DefaultAssay(object = OsC)
+#   
+#   
+#   features <- VariableFeatures(object = OsC)
+#   features <- intersect(x = features, y = rownames(x = OsC))
+#   data.avg <- AverageExpression(object = OsC, assays = assay, 
+#                                 features = features, slot = "data", verbose = T)[[1]]
+#   
+#   
+#   
+#   if (ncol(data.avg) > 1){
+#     data.dist <- dist(x = t(x = data.avg[features, ]))
+#     dforder <- hclust(d = data.dist)
+#     orderVec <- names(dfAvgExpr)[dforder$order]
+#   } else {
+#     orderVec <- names(data.avg)
+#   }
+#   
+#   Obio@parameterList[["clusterNameOrder"]] <- orderVec
+#   
+# }
 
 ###############################################################################
 ## Merge into OsC@meta.data                                                  ##
