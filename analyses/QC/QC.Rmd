@@ -103,11 +103,11 @@ db.pwd <- as.vector(dbTable[1,1])
 ```
 
 <!-- Optional 3: Create QC Plots Chapter/Module -->
-```{r child = '05-create.sample.level.QC.plots.Rmd', eval=TRUE}
+```{r child = '05-create.sample.level.QC.plots.Rmd', eval=FALSE}
 ```
 
 <!-- Optional 4: Create QC Cell Cycle Plots Chapter/Module -->
-```{r child = '06-create.sample.level.cell.cycle.QC.plots.Rmd', eval=TRUE}
+```{r child = '06-create.sample.level.cell.cycle.QC.plots.Rmd', eval=FALSE}
 ```
 
 <!-- Optional 5: Doublet finder module run.doublet.finder.Rmd -->

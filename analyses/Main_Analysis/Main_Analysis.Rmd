@@ -152,6 +152,15 @@ load(paste0(
 )
 
 
+## Make sure that variable features have been calculated
+if ( length(OsC@assays$RNA@meta.features) == 0 ){
+        OsC <- Seurat::FindVariableFeatures(
+        object = OsC,
+        selection.method = 'vst', 
+        nfeatures = Obio@parameterList$NtopGenes
+    )
+}
+
 
 dotsize  = 1
 
@@ -221,7 +230,7 @@ DGE Marker gene upload Chapter/Module -->
 ```
 
 <!-- Essential 15: (output required later):Category Linear Regression Marker Gene Data Prep Chapter/Module -->
-```{r child = '14-heatmaps.and.dotplots.Rmd', eval=FALSE}
+```{r child = '14-heatmaps.and.dotplots.Rmd', eval=TRUE}
 ```
 
 <!-- Essential 16: (output required later):Category Make cluster table Data Prep Chapter/Module -->
