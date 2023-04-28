@@ -28,22 +28,22 @@ if (!file.exists("renv.lock")){
 library(Seurat)
 ## load Seurat object with basedata
 
-baseDir <- "/camp/stp/babs/working/boeings/Projects/sahaie/rebecca.lee/506_mouse_liver_single_cell_SC20154_plus_SC22147/"
-FN <- paste0(baseDir, "workdir/SC22147.Seurat.Robj")
+baseDir <- "/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/450_singleCell_scPDAC_PRJCA001063full/"
+FN <- paste0(baseDir, "workdir/scPDACWuAll.Seurat.Robj")
 
 load(FN)
 
 ## Data selection for subsetting:
 #sampleID: primaryTumor
 
-# 3.	To subcluster Neutrophil (19), Hepatocyte (8) and B_cell (5) clusters in samples 1-5 
+# Subcluster fibroblasts and myeoloid cells C4, C5, C6, C15, C17
 
 ## Review table
 unique(OsC@meta.data[,c("clusterName", "seurat_clusters")])
 
 
 # Select only cluster 1
-selClusters <- c(5,8, 19)
+selClusters <- c(4, 5, 6, 15, 17)
 OsC_sel1 <- subset(x = OsC, subset = seurat_clusters %in% selClusters)
 
 
