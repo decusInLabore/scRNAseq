@@ -28,24 +28,43 @@ if (!file.exists("renv.lock")){
 library(Seurat)
 ## load Seurat object with basedata
 
-baseDir <- "/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/450_singleCell_scPDAC_PRJCA001063full/"
-FN <- paste0(baseDir, "workdir/scPDACWuAll.Seurat.Robj")
+baseDir <- "/camp/stp/babs/working/boeings/Projects/sahaie/rebecca.lee/506_mouse_liver_single_cell_SC20154_plus_SC22147/"
+FN <- paste0(baseDir, "workdir/SC22147.Seurat.Robj")
 
 load(FN)
 
 ## Data selection for subsetting:
 #sampleID: primaryTumor
 
-# Subcluster fibroblasts and myeoloid cells C4, C5, C6, C15, C17
+# To subcluster melanoma cells (current clusters Melanoma_1 and renamed Melanoma_2) 
+# in samples 2,4, and 5
+
+# BackgroundLiverM3	  1
+# LiverMetM3	        2
+# LiverNormalM1	      3
+# SubcutM3	          4
+# SubcutNoLiverMetM2	5
+
+# and to compare proportions of different sub clusters. Deliverables: Subclustering of Melanoma_1 and Melanoma_2 subclusters in samples 2, 3, and 5 in analysis SC22147, summarized in a standard single-cell analysis report. 
 
 ## Review table
 unique(OsC@meta.data[,c("clusterName", "seurat_clusters")])
 
+# Melanoma               3
+#  Melanoma_2           13
 
 # Select only cluster 1
-selClusters <- c(4, 5, 6, 15, 17)
+selClusters <- c(3, 13)
 OsC_sel1 <- subset(x = OsC, subset = seurat_clusters %in% selClusters)
 
+# select samples 2, 4 and 5
+selSamples <- c(
+  "LiverMetM3R1", "LiverMetM3R2",
+  "SubcutM3R1", "SubcutM3R2",
+  "SubcutNoLiverMetM2R1", "SubcutNoLiverMetM2R2"
+)
+
+OsC_sel1 <- subset(x = OsC_sel1, subset = sampleName %in% selSamples)
 
 sampleIDs <- unique(OsC_sel1$sampleID)
 
@@ -97,6 +116,8 @@ for (i in 1:length(sampleIDs)){
     
 }
 
+
+# LiverMetM3R2 features only 10 cells in this selection - excluded. 
 
 # save(
 #   OsC, 
