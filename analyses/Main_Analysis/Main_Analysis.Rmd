@@ -19,7 +19,7 @@ always_allow_html: yes
 # module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;R
 
 ## Option to resmume analysis after time-consuming integration. 
-resume <- TRUE
+resume <- FALSE
 
 if (resume){
     createNew <- FALSE
@@ -201,12 +201,12 @@ DGE Marker gene upload Chapter/Module -->
 ```
 
 <!-- Optional 9: (Output only): Create pca plots Chapter/Module -->
-```{r child = '08-euclidian.distances.figure.Rmd', eval=FALSE}
+```{r child = '08-euclidian.distances.figure.Rmd', eval=TRUE}
 ```
 
 
 <!-- Optional 10: (Output only): Doublet Estimate Chapter/Module -->
-```{r child = '09-doublet.estimation.plots.Rmd', eval=FALSE}
+```{r child = '09-doublet.estimation.plots.Rmd', eval=TRUE}
 ```
 
 <!-- Optional 11: (Output only): Doublet Estimate Chapter/Module -->
@@ -222,7 +222,7 @@ DGE Marker gene upload Chapter/Module -->
 ```
 
 <!-- Optional 13: (Output only):Category Enrichments Chapter/Module -->
-```{r child = '12-AUC.cat.enrichments.Rmd', eval=FALSE}
+```{r child = '12-AUC.cat.enrichments.Rmd', eval=TRUE}
 ```
 
 <!-- Essential 14: (output required later):Category Linear Regression Marker Gene Data Prep Chapter/Module -->
@@ -238,12 +238,12 @@ DGE Marker gene upload Chapter/Module -->
 ```
 
 <!-- Essential 18: (output required later):Category Make cluster table Data Prep Chapter/Module -->
-```{r child = '16-gene.set.heatmaps.Rmd', eval=FALSE}
+```{r child = '16-gene.set.heatmaps.Rmd', eval=TRUE}
 ```
 
 
 <!-- Essential 19: (output required later):Category Make cluster table Data Prep Chapter/Module -->
-```{r child = '17-example.feature.plots.Rmd', eval=FALSE}
+```{r child = '17-example.feature.plots.Rmd', eval=TRUE}
 ```
 
 <!-- Essential 20: (output required later):Category Make cluster table Data Prep Chapter/Module -->
