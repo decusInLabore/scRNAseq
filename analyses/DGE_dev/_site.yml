@@ -1,0 +1,19 @@
+name: "my-website"
+navbar:
+  title: "Differential Gene Expression Analysis"
+  left:
+    - text: "Differential Gene Expression Analysis"
+      href: index.html
+    - text: "About"
+      href: about.html
+      
+output: 
+    html_document:
+        highlight: default
+        theme: paper
+        code_folding: hide
+        df_print: tibble
+        toc: true
+        toc_depth: 3
+        toc_float: true
+        css: src/style/style.css

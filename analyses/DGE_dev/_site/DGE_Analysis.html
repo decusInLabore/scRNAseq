@@ -1,0 +1,2509 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Pseudobulk Differential Gene Expression Analysis</title>
+
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/paper.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+  p.abstract{
+    text-align: center;
+    font-weight: bold;
+  }
+  div.abstract{
+    margin: auto;
+    width: 90%;
+  }
+</style>
+
+
+
+<link rel="stylesheet" href="src/style/style.css" type="text/css" />
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.tab('show');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Differential Gene Expression Analysis</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Differential Gene Expression Analysis</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Pseudobulk Differential Gene Expression Analysis</h1>
+<h3 class="subtitle">Pseudobulk Differential Gene Expression Analyses on Single-cell Results</h3>
+<h4 class="author">true</h4>
+<h4 class="date">Compiled: June 01, 2023</h4>
+<div class="abstract">
+<p class="abstract">Abstract</p>
+In this section pseudo-bulk differential gene expression analyses for this project are presented. The method used here was developed recently by the Huber lab and is desribed in detail <a href="https://www.biorxiv.org/content/10.1101/2020.08.13.249623v2">here</a>.
+</div>
+
+</div>
+
+
+<hr />
+<p>title: “Differential Gene Expression Analysis”</p>
+<hr />
+<pre class="r"><code>###############################################################################
+##  Load packages                                                            ##
+library(Seurat)
+library(biologicSeqTools2)
+library(dplyr)
+
+VersionPdfExt &lt;- paste0(&quot;.V&quot;, gsub(&quot;-&quot;, &quot;&quot;, Sys.Date()), &quot;.pdf&quot;)
+
+
+## Load bioLOGIC object
+source(&quot;load.biologic.robj.R&quot;)
+
+## Make sure paths are set correctly in the Obio object
+Obio &lt;- Obio %&gt;% 
+    biologicSeqTools2::setMountingPoint()  %&gt;% 
+    biologicSeqTools2::setAnalysisPaths() %&gt;% 
+    biologicSeqTools2::setCrickGenomeAndGeneNameTable() %&gt;% 
+    biologicSeqTools2::createAnalysisFolders() %&gt;% 
+    biologicSeqTools2::setDataBaseParameters()
+
+## Load Seurat object ##
+SeuratFN &lt;- paste0(
+    Obio@parameterList$localWorkDir,
+    Obio@parameterList$project_id,
+    &quot;.Seurat.Robj&quot;
+)
+
+load(SeuratFN)
+
+##                                                                           ##
+###############################################################################
+
+###############################################################################
+## Retrieve database password                                                ##
+if (dir.exists(&quot;/Volumes/babs/working/boeings/&quot;)){
+    hpc.mount &lt;- &quot;/Volumes/babs/working/boeings/&quot;
+} else if (dir.exists(&quot;Y:/working/boeings/&quot;)){
+    hpc.mount &lt;- &quot;Y:/working/boeings/&quot;
+} else if (dir.exists(&quot;/camp/stp/babs/working/boeings/&quot;)){
+    hpc.mount &lt;- &quot;/camp/stp/babs/working/boeings/&quot;
+} else {
+    hpc.mount &lt;- &quot;&quot;
+}
+
+FN &lt;- paste0(hpc.mount, &quot;Projects/reference_data/pwd_folder/babs.txt&quot;)
+    dbTable &lt;- read.delim(
+      FN,
+      header = F,
+      sep = &quot;\t&quot;,
+      stringsAsFactors = F
+    )
+#}
+db.pwd &lt;- as.vector(dbTable[1,1])
+
+## Done                                                                      ##
+###############################################################################
+
+###############################################################################
+##  Set variables                                                            ##
+
+# Plotting parameters
+figureCount &lt;- 1
+legendDotSize &lt;- 5
+
+## Define project ID ##
+project_id &lt;- Obio@parameterList$project_id
+
+
+## Set directory for report tables
+reportTableDir &lt;- Obio@parameterList$reportTableDir
+reportFigDir &lt;- Obio@parameterList$reportFigDir
+
+localWorkDir &lt;- Obio@parameterList$localWorkDir
+
+## Create url string
+if (Obio@parameterList$host == &quot;10.27.241.234&quot;){
+    urlString &lt;- &quot;biologic.thecrick.org&quot;
+} else {
+    urlString &lt;- &quot;biologic.crick.ac.uk&quot;
+}
+
+shinyBaseUrl &lt;- &quot;https://bioinformatics.crick.ac.uk/shiny/users/boeings/&quot;
+
+shinyURL &lt;- paste0(
+    shinyBaseUrl,
+    project_id,
+    &quot;_app/&quot;
+)            
+   
+## Set file paths ##
+baseFN &lt;- paste0(
+   project_id, 
+   &quot;.DGE.table.xlsx&quot;
+)
+
+FNrel &lt;- paste0(&quot;report_tables/&quot;, baseFN)
+
+outPutFN &lt;- paste0(
+     reportTableDir,
+     baseFN
+)
+
+tableLink &lt;- paste0(
+    &#39;https://&#39;,
+    urlString,
+    &#39;/mdata/&#39;,project_id, &#39;/html/&#39;, 
+    FNrel
+)
+
+tableString &lt;- paste0(
+    &#39;An Excel table with the DGE results can be downloaded &#39;,
+    tableLink
+)
+
+tableString &lt;- paste0(
+   &#39; An Excel table with the DGE results can be downloaded &lt;a href=&quot;&#39;,tableLink,&#39;&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. &#39;
+)
+  
+
+##  Set variables                                                            ##
+###############################################################################
+
+
+
+###############################################################################
+## Function doDGEsc                                                          ##
+
+#&#39; @title doDGEsc
+#&#39; @description Function to do glmgampoi differential gene expression. When using this function, make sure the glmGamPoi R-package is installed on your system: renv::install(&quot;renv::install(&quot;bioc::glmGamPoi&quot;) 
+#&#39; @param obj Seurat object for the DGE analysis
+#&#39; @param countSlot Seurat object assay to use to retrieve count data.
+#&#39; @param DGEselCol Meta data column in the above Seurat object to use for DGE sample group definitions. 
+#&#39; @param colName Name for the DGE comparison in the meta data
+#&#39; @param contrastTag contrastTag
+#&#39; @param DGEsampleList List specifying the DGE comparisons. 
+#&#39; @import Seurat
+#&#39; @export
+
+
+setGeneric(
+    name=&quot;doDGEsc&quot;,
+    def=function(
+        obj,
+        countSlot = &quot;RNA&quot;,
+        DGEselCol = &quot;sub_clusters_ExNeurons&quot;,
+        colName = &quot;DGE_name&quot;,
+        contrastTag = &quot;contrast_1_&quot;,
+        DGEsampleList = list(
+            &quot;M1&quot; = c(5),
+            &quot;M2&quot; = c(1)
+        )
+    ) {
+    
+    ############################################################################
+    ## Add DGE cell selection to meta-data                                    ##
+    colName &lt;- unlist(colName)
+    DGEselCol &lt;- unlist(DGEselCol)
+
+    pos &lt;- grep(colName, names(obj@meta.data))
+    if (length(pos) &gt; 0){
+        obj@meta.data &lt;- obj@meta.data[,-pos]
+    }
+
+    mColName &lt;- substr(paste0(&quot;meta_&quot;, colName), 1, 63)
+    obj@meta.data[[mColName]] &lt;- &quot;Rest&quot; 
+    
+    for (i in 1:length(DGEsampleList)){
+        obj@meta.data[obj@meta.data[,DGEselCol] %in% DGEsampleList[[i]], mColName] &lt;- names(DGEsampleList)[i]
+    }
+    
+    dfMeta &lt;- obj@meta.data
+    dfMeta &lt;- dfMeta[dfMeta[,mColName] != &quot;Rest&quot;,]
+    
+    ##                                                                        ##
+    ############################################################################
+    
+    ############################################################################
+    ## Get counts for DGE                                                     ##
+    cellVec &lt;- dfMeta$cellID
+    group &lt;-  as.vector(dfMeta[,mColName])
+    
+    dfMatrix &lt;- obj[[countSlot]]@counts
+    dfMatrix &lt;- data.matrix(dfMatrix[,cellVec])
+    dfMatrix &lt;- dfMatrix[rowSums(dfMatrix) != 0, ]
+    
+    ## Pseudobulk DGE
+    
+    ## LRT ##
+    # fit &lt;- glm_gp(dfMatrix, design = group)
+    # res &lt;- test_de(fit, reduced_design = ~ 1)
+    
+    sample_labels &lt;- group
+    
+    sample_labels[sample_labels == names(DGEsampleList)[1]] &lt;- paste0(sample_labels[sample_labels == names(DGEsampleList[1])], &quot;_&quot;, 1:length(sample_labels[sample_labels == names(DGEsampleList)[1]]))
+    
+    sample_labels[sample_labels == names(DGEsampleList)[2]] &lt;- paste0(sample_labels[sample_labels == names(DGEsampleList[2])], &quot;_&quot;, 1:length(sample_labels[sample_labels == names(DGEsampleList)[2]]))
+    
+    cell_type_lables &lt;- group
+    unique(group)
+    
+    fit &lt;- glmGamPoi::glm_gp(
+        dfMatrix, 
+        design = group
+    )
+    
+    comparison &lt;- names(DGEsampleList)
+    
+    contrastString &lt;- (paste0(comparison[1], &quot; - &quot;, comparison[2]))
+    
+    res &lt;- glmGamPoi::test_de(fit, contrast = contrastString,
+            pseudobulk_by = sample_labels, 
+            #subset_to = cell_type_labels == &quot;T-cells&quot;,
+            #n_max = 4, 
+            sort_by = pval, 
+            decreasing = FALSE
+    )
+    
+    dfRes &lt;- res[order(res$lfc),]
+    
+    ## Remove extreme outliers ##
+    dfRes &lt;- dfRes[dfRes$lfc &gt; -100 &amp; dfRes$lfc &lt; 100, ]
+    dfRes[[&quot;padj&quot;]] &lt;- dfRes$adj_pval
+    minP &lt;- min(dfRes$padj[dfRes$padj != 0])
+    dfRes[dfRes$padj == 0, &quot;padj&quot;] &lt;- minP
+    dfRes[[&quot;lg10p&quot;]] &lt;- -1 * log10(dfRes$padj)
+    
+    
+    comp_1 &lt;- dfRes
+    comp_1[[&quot;gene&quot;]] &lt;- dfRes$name
+    names(comp_1) &lt;- gsub(&quot;lfc&quot;, paste0(contrastTag, &quot;logFC_&quot; ,colName), names(comp_1))
+    
+    names(comp_1) &lt;- gsub(&quot;padj&quot;, paste0(contrastTag, &quot;padj_&quot;,colName), names(comp_1))
+    names(comp_1) &lt;- gsub(&quot;lg10p&quot;, paste0(contrastTag, &quot;lg10p_&quot;,colName), names(comp_1))
+    
+    selVec &lt;- c(
+        &quot;gene&quot;,
+        names(comp_1)[grep(contrastTag, names(comp_1))]
+    )
+    
+    comp_1 &lt;- unique(comp_1[,selVec])
+    
+    ## Cut all strings in comp_1 to a maximum of 63 charcters 
+    names(comp_1) &lt;- sapply(names(comp_1), function(x) substr(x, 1, 63))
+    
+    
+    
+    ##                                                                        ##
+    ############################################################################
+    
+    
+    
+    returnList &lt;- list(
+      &quot;OsC&quot; = obj,
+      DGEtable = comp_1
+    )
+    
+    return(returnList)
+})
+
+
+## End doDGEsc Function                                                      ##
+###############################################################################
+
+###############################################################################
+## Define differential gene expression comparisons in a list                 ##
+## One list entry per comparison                                             ##
+
+## Create custom column for this project:
+# samplegroup_seurat_clusters
+
+
+OsC@meta.data[[&quot;seurat_clusters_state&quot;]] &lt;- paste0(
+    &quot;C&quot;,
+    OsC@meta.data$seurat_clusters,
+    &quot;_&quot;,
+    OsC@meta.data$meta_State
+)
+
+
+
+dfTemp &lt;- unique(OsC@meta.data[,c(&quot;clusterName&quot;, &quot;seurat_clusters&quot;, &quot;seurat_clusters_state&quot;, &quot;meta_State&quot;)])
+dfTemp &lt;- dfTemp[order(dfTemp$seurat_clusters),]
+
+comparisonCol &lt;- &quot;seurat_clusters&quot;
+groupCol &lt;- &quot;seurat_clusters_state&quot;
+
+DGEoptions &lt;- unique(dfTemp[,comparisonCol])
+
+compList &lt;- list()
+
+## Make DGE list
+for (i in 1:length(DGEoptions)){
+    tag &lt;- paste0(&quot;comp_&quot;, i)
+    
+    dfTemp2 &lt;- dfTemp[grep(as.vector(paste0(&quot;^&quot;, DGEoptions[i], &quot;$&quot;)), dfTemp[,comparisonCol]),]
+    
+    if (nrow(dfTemp2) == 2){
+      groupA &lt;- dfTemp2[1, groupCol ]
+      groupB &lt;- dfTemp2[2, groupCol ]
+      name &lt;- paste0(&quot;DGE_&quot;, groupA, &quot;_vs_&quot;, groupB)
+      
+      Ldge &lt;- list(
+          &quot;pert&quot; = c(groupA),
+          &quot;baseline&quot; = c(groupB)
+      )
+      
+      names(Ldge) &lt;- c(groupA, groupB)
+      
+      compList[[tag]] &lt;- list(
+          &quot;name&quot;    = name,
+          &quot;DGEselCol&quot; = groupCol,
+          &quot;DGEsampleList&quot; =  Ldge
+        
+      )
+      
+      names(compList)
+     
+      
+    } else {
+      stop(&quot;Reconfiguration L351 required&quot;)
+    }
+    
+    
+    
+}
+
+
+DGEtagVec &lt;- as.vector(NULL, mode = &quot;character&quot;)
+
+
+DGEinputList &lt;- compList
+
+
+# DGEinputList &lt;- list(
+#   &quot;comp_1&quot; = list(
+#       &quot;name&quot;    = &quot;DGE_Ex_C6_Old_vs_Young&quot;,
+#       &quot;DGEselCol&quot; = &quot;samplegroup_seurat_clusters&quot;,
+#       &quot;DGEsampleList&quot; = list(
+#           &quot;Ex_C6_Old&quot;   = c(&quot;Old_C6&quot;),
+#           &quot;Ex_C6_Young&quot;   = c(&quot;Young_C6&quot;)
+#       )
+#   ),
+#   &quot;comp_2&quot; = list(
+#       &quot;name&quot;    = &quot;DGE_Ex_C16_Old_vs_Young&quot;,
+#       &quot;DGEselCol&quot; = &quot;samplegroup_seurat_clusters&quot;,
+#       &quot;DGEsampleList&quot; = list(
+#           &quot;Ex_C16_Old&quot;   = c(&quot;Old_C16&quot;),
+#           &quot;Ex_C16_Young&quot;   = c(&quot;Young_C16&quot;)
+#       )
+#   ),
+#   &quot;comp_3&quot; = list(
+#       &quot;name&quot;    = &quot;DGE_Ex_C11_Old_vs_Young&quot;,
+#       &quot;DGEselCol&quot; = &quot;samplegroup_seurat_clusters&quot;,
+#       &quot;DGEsampleList&quot; = list(
+#           &quot;Ex_C11_Old&quot;   = c(&quot;Old_C11&quot;),
+#           &quot;Ex_C11_Young&quot;   = c(&quot;Young_C11&quot;)
+#       )
+#   ),
+#   &quot;comp_4&quot; = list(
+#       &quot;name&quot;    = &quot;DGE_Ex_C9_Old_vs_Young&quot;,
+#       &quot;DGEselCol&quot; = &quot;samplegroup_seurat_clusters&quot;,
+#       &quot;DGEsampleList&quot; = list(
+#           &quot;Ex_C9_Old&quot;   = c(&quot;Old_C9&quot;),
+#           &quot;Ex_C9_Young&quot;   = c(&quot;Young_C9&quot;)
+#       )
+#   ),
+#   &quot;comp_5&quot; = list(
+#       &quot;name&quot;    = &quot;DGE_Ex_C7_Old_vs_Young&quot;,
+#       &quot;DGEselCol&quot; = &quot;samplegroup_seurat_clusters&quot;,
+#       &quot;DGEsampleList&quot; = list(
+#           &quot;Ex_C7_Old&quot;   = c(&quot;Old_C7&quot;),
+#           &quot;Ex_C7_Young&quot;   = c(&quot;Young_C7&quot;)
+#       )
+#   ),
+#   &quot;comp_6&quot; = list(
+#       &quot;name&quot;    = &quot;DGE_Ex_C8_Old_vs_Young&quot;,
+#       &quot;DGEselCol&quot; = &quot;samplegroup_seurat_clusters&quot;,
+#       &quot;DGEsampleList&quot; = list(
+#           &quot;Ex_C8_Old&quot;   = c(&quot;Old_C8&quot;),
+#           &quot;Ex_C8_Young&quot;   = c(&quot;Young_C8&quot;)
+#       )
+#   ),
+#   &quot;comp_7&quot; = list(
+#       &quot;name&quot;    = &quot;DGE_Astro_C13_Old_vs_Young&quot;,
+#       &quot;DGEselCol&quot; = &quot;samplegroup_seurat_clusters&quot;,
+#       &quot;DGEsampleList&quot; = list(
+#           &quot;Astro_C13_Old&quot;   = c(&quot;Old_C13&quot;),
+#           &quot;Astro_C13_Young&quot;   = c(&quot;Young_C13&quot;)
+#       )
+#   ),
+#   &quot;comp_8&quot; = list(
+#       &quot;name&quot;    = &quot;DGE_Astro_C1_Old_vs_Young&quot;,
+#       &quot;DGEselCol&quot; = &quot;samplegroup_seurat_clusters&quot;,
+#       &quot;DGEsampleList&quot; = list(
+#           &quot;Astro_C1_Old&quot;   = c(&quot;Old_C1&quot;),
+#           &quot;Astro_C1_Young&quot;   = c(&quot;Young_C1&quot;)
+#       )
+#   ),
+#   &quot;comp_9&quot; = list(
+#       &quot;name&quot;    = &quot;DGE_Astro_C2_Old_vs_Young&quot;,
+#       &quot;DGEselCol&quot; = &quot;samplegroup_seurat_clusters&quot;,
+#       &quot;DGEsampleList&quot; = list(
+#           &quot;Astro_C2_Old&quot;   = c(&quot;Old_C2&quot;),
+#           &quot;Astro_C2_Young&quot;   = c(&quot;Young_C2&quot;)
+#       )
+#   ),
+#   &quot;comp_10&quot; = list(
+#       &quot;name&quot;    = &quot;DGE_Astro_C10_Old_vs_Young&quot;,
+#       &quot;DGEselCol&quot; = &quot;samplegroup_seurat_clusters&quot;,
+#       &quot;DGEsampleList&quot; = list(
+#           &quot;Astro_C10_Old&quot;   = c(&quot;Old_C10&quot;),
+#           &quot;Astro_C10_Young&quot;   = c(&quot;Young_C10&quot;)
+#       )
+#   ),
+#   &quot;comp_11&quot; = list(
+#       &quot;name&quot;    = &quot;DGE_Vasc_C15_Old_vs_Young&quot;,
+#       &quot;DGEselCol&quot; = &quot;samplegroup_seurat_clusters&quot;,
+#       &quot;DGEsampleList&quot; = list(
+#           &quot;Vasc_C15_Old&quot;   = c(&quot;Old_C15&quot;),
+#           &quot;Vasc_C15_Young&quot;   = c(&quot;Young_C15&quot;)
+#       )
+#   ),
+#   &quot;comp_12&quot; = list(
+#       &quot;name&quot;    = &quot;DGE_Vasc_C12_Old_vs_Young&quot;,
+#       &quot;DGEselCol&quot; = &quot;samplegroup_seurat_clusters&quot;,
+#       &quot;DGEsampleList&quot; = list(
+#           &quot;Vasc_C12_Old&quot;   = c(&quot;Old_C12&quot;),
+#           &quot;Vasc_C12_Young&quot;   = c(&quot;Young_C12&quot;)
+#       )
+#   ),
+#   &quot;comp_13&quot; = list(
+#       &quot;name&quot;    = &quot;DGE_Vasc_C17_Old_vs_Young&quot;,
+#       &quot;DGEselCol&quot; = &quot;samplegroup_seurat_clusters&quot;,
+#       &quot;DGEsampleList&quot; = list(
+#           &quot;Vasc_C17_Old&quot;   = c(&quot;Old_C17&quot;),
+#           &quot;Vasc_C17_Young&quot;   = c(&quot;Young_C17&quot;)
+#       )
+#   ),
+#   &quot;comp_14&quot; = list(
+#       &quot;name&quot;    = &quot;DGE_Mglia_C5_Old_vs_Young&quot;,
+#       &quot;DGEselCol&quot; = &quot;samplegroup_seurat_clusters&quot;,
+#       &quot;DGEsampleList&quot; = list(
+#           &quot;Mglia_C5_Old&quot;   = c(&quot;Old_C5&quot;),
+#           &quot;Mglia_C5_Young&quot;   = c(&quot;Young_C5&quot;)
+#       )
+#   ),
+#   &quot;comp_15&quot; = list(
+#       &quot;name&quot;    = &quot;DGE_OD_C19_Old_vs_Young&quot;,
+#       &quot;DGEselCol&quot; = &quot;samplegroup_seurat_clusters&quot;,
+#       &quot;DGEsampleList&quot; = list(
+#           &quot;OD_C19_Old&quot;   = c(&quot;Old_C19&quot;),
+#           &quot;OD_C19_Young&quot;   = c(&quot;Young_C19&quot;)
+#       )
+#   ),
+#   &quot;comp_16&quot; = list(
+#       &quot;name&quot;    = &quot;DGE_OD_C3_Old_vs_Young&quot;,
+#       &quot;DGEselCol&quot; = &quot;samplegroup_seurat_clusters&quot;,
+#       &quot;DGEsampleList&quot; = list(
+#           &quot;OD_C3_Old&quot;   = c(&quot;Old_C3&quot;),
+#           &quot;OD_C3_Young&quot;   = c(&quot;Young_C3&quot;)
+#       )
+#   ),
+#   &quot;comp_17&quot; = list(
+#       &quot;name&quot;    = &quot;DGE_OD_C18_Old_vs_Young&quot;,
+#       &quot;DGEselCol&quot; = &quot;samplegroup_seurat_clusters&quot;,
+#       &quot;DGEsampleList&quot; = list(
+#           &quot;OD_C18_Old&quot;   = c(&quot;Old_C18&quot;),
+#           &quot;OD_C18_Young&quot;   = c(&quot;Young_C18&quot;)
+#       )
+#   ),
+#   &quot;comp_18&quot; = list(
+#       &quot;name&quot;    = &quot;DGE_OD_C4_Old_vs_Young&quot;,
+#       &quot;DGEselCol&quot; = &quot;samplegroup_seurat_clusters&quot;,
+#       &quot;DGEsampleList&quot; = list(
+#           &quot;OD_C4_Old&quot;   = c(&quot;Old_C4&quot;),
+#           &quot;OD_C4_Young&quot;   = c(&quot;Young_C4&quot;)
+#       )
+#   ),
+#   &quot;comp_19&quot; = list(
+#       &quot;name&quot;    = &quot;DGE_OD_C0_Old_vs_Young&quot;,
+#       &quot;DGEselCol&quot; = &quot;samplegroup_seurat_clusters&quot;,
+#       &quot;DGEsampleList&quot; = list(
+#           &quot;OD_C0_Old&quot;   = c(&quot;Old_C0&quot;),
+#           &quot;OD_C0_Young&quot;   = c(&quot;Young_C0&quot;)
+#       )
+#   ),
+#   
+#   &quot;comp_20&quot; = list(
+#       &quot;name&quot;    = &quot;DGE_Immune_C14_Old_vs_Young&quot;,
+#       &quot;DGEselCol&quot; = &quot;samplegroup_seurat_clusters&quot;,
+#       &quot;DGEsampleList&quot; = list(
+#           &quot;Immune_C14_Old&quot;   = c(&quot;Old_C14&quot;),
+#           &quot;Immune_C14_Young&quot;   = c(&quot;Young_C14&quot;)
+#       )
+#   )
+# )
+
+
+
+
+###############################################################################
+## Function do scDGE                                                         ##
+
+doScDGEonList &lt;- function(
+    OsC,
+    tag,
+    DGEinputList,
+    DGEtagVec = as.vector(NULL, mode = &quot;character&quot;)
+    
+){
+    resList &lt;- doDGEsc(
+        obj = OsC,
+        DGEselCol = unlist(DGEinputList[[i]][&quot;DGEselCol&quot;]),
+        colName = unlist(DGEinputList[[i]][&quot;name&quot;]),
+        contrastTag = paste0(&quot;contrast_&quot;,i,&quot;_&quot;),
+        DGEsampleList = DGEinputList[[i]][[&quot;DGEsampleList&quot;]]
+    )
+    
+    OsC &lt;- resList$OsC
+    
+    ###########################################################################
+    ## Add average intensity for MA-Plot to DGE table                        ##
+    
+    OsC_DGE &lt;- OsC
+    OsC_DGE@meta.data[[&quot;DGE_sel&quot;]] &lt;- 0
+    
+    OsC_DGE@meta.data[OsC_DGE@meta.data[,unlist(DGEinputList[[i]][&quot;DGEselCol&quot;])] != &quot;&quot;, &quot;DGE_sel&quot;] &lt;- 1
+    
+    #row.names(OsC_DGE@meta.data) &lt;- OsC_DGE@meta.data[,&quot;cellID&quot;]
+    
+    OsC_DGE &lt;- subset(x = OsC_DGE, subset = DGE_sel == 1)
+    
+    
+    Idents(OsC_DGE) &lt;- &quot;DGE_sel&quot;
+    
+    cluster.averages &lt;- Seurat::AverageExpression(
+        OsC_DGE, 
+        return.seurat = TRUE
+    )
+    
+    dfAvgExpr &lt;- data.frame(cluster.averages[[&quot;RNA&quot;]]@data)
+    dfAvgExpr[[&quot;gene&quot;]] &lt;- row.names(dfAvgExpr)
+    row.names(dfAvgExpr) &lt;- NULL
+    
+    nameTag &lt;- paste0(&quot;add_MA_cts_MA_Avg_&quot;, unlist(DGEinputList[[i]]$name))
+    names(dfAvgExpr) &lt;- gsub(&quot;all&quot;, nameTag, names(dfAvgExpr))
+    
+    dfDataTable &lt;- resList$DGEtable
+    
+    dfDataTable &lt;- merge(
+        dfDataTable, 
+        dfAvgExpr, 
+        by.x = &quot;gene&quot;,
+        by.y = &quot;gene&quot;,
+        all =TRUE
+    )
+    
+    dfDataTable[is.na(dfDataTable)] &lt;- 0
+    names(dfDataTable) &lt;- sapply(names(dfDataTable), function(x) substr(x, 1, 63))
+    
+    DGEtagVec &lt;- c(
+      DGEtagVec,
+      tag
+    )
+    
+    resultList &lt;- list(
+        &quot;dfDataTable&quot; = dfDataTable,
+        &quot;DGEtagVec&quot; = DGEtagVec,
+        &quot;OsC&quot; = OsC
+    )
+    
+    return(resultList)
+    
+}
+
+## Done do scDGE                                                             ##
+###############################################################################
+
+###############################################################################
+## DGE Analysis                                                              ##
+
+DGEtagVec = as.vector(NULL, mode = &quot;character&quot;)
+plotList &lt;- list()
+chnkVec &lt;- as.vector(NULL, mode = &quot;character&quot;)
+
+## This does the DGE and creates an overview UMAP figure ##
+for (i in 1:length(DGEinputList)){
+    
+    tag &lt;- paste0(unlist(DGEinputList[[i]][&quot;name&quot;]))
+    
+    
+    resList &lt;- doScDGEonList(
+        OsC = OsC,
+        tag = tag,
+        DGEinputList = DGEinputList,
+        DGEtagVec = DGEtagVec
+    )
+  
+    dfDataTable &lt;- resList[[&quot;dfDataTable&quot;]]
+    DGEtagVec &lt;- resList[[&quot;DGEtagVec&quot;]]
+    OsC &lt;- resList[[&quot;OsC&quot;]]
+    
+    ## Add results to biologic object 
+    Obio@dataTableList[[tag]] &lt;- data.frame(NULL)
+    Obio@dataTableList[[tag]] &lt;- dfDataTable
+    
+    ## Done with DGE Analysis                                                ##
+    ###########################################################################
+    
+    ###########################################################################
+    ## Create DGE Selection plot                                             ##
+    dfPlot &lt;- OsC@meta.data
+    
+    
+    pos &lt;- grep(&quot;included&quot;, names(dfPlot))
+    if (length(pos) == 0){
+        dfPlot[[&quot;included&quot;]] &lt;- &quot;+&quot;
+    }
+
+    pos &lt;- grep(&quot;cellID&quot;, names(dfPlot))
+      if (length(pos) == 0){
+      dfPlot[[&quot;cellID&quot;]] &lt;- row.names(dfPlot)
+    }
+
+    dfPlot$UMAP_1 &lt;- NULL
+    dfPlot$UMAP_2 &lt;- NULL
+            
+    ## Get UMAP coordinates ##
+    coord &lt;- data.frame(OsC@reductions$umap@cell.embeddings)
+    coord[[&quot;cellID&quot;]] &lt;- row.names(coord)
+    coord &lt;-coord[coord$cellID %in% dfPlot$cellID, ]
+            
+    dfPlot &lt;- merge(dfPlot, coord, by.x = &quot;cellID&quot;, by.y=&quot;cellID&quot;, all=T)
+    dfPlot[is.na(dfPlot)] &lt;- 0
+    dfPlot &lt;- dfPlot[dfPlot$UMAP_1 != 0 &amp; dfPlot$UMAP_2 != 0,]
+            
+            
+    ## Add cluster colors ##
+    dfPlot[[&quot;Cluster&quot;]] &lt;- dfPlot[,paste0(&quot;meta_&quot;, unlist(DGEinputList[[i]][&quot;name&quot;]))]
+    dfPlot$Cluster[is.na(dfPlot$Cluster)] &lt;- &quot;&quot;
+    dfPlot[dfPlot$Cluster == &quot;&quot;, &quot;Cluster&quot;] &lt;- &quot;Rest&quot;
+    
+    label &lt;- as.vector(gsub(&quot;DGE_&quot;, &quot;&quot;, unlist(DGEinputList[[i]][&quot;name&quot;])))
+    
+    
+    redGroup &lt;- names(DGEinputList[[i]]$DGEsampleList)[1] #as.vector(unlist(strsplit(label, &quot;_vs_&quot;))[1])
+    blueGroup &lt;- names(DGEinputList[[i]]$DGEsampleList)[2] #as.vector(unlist(strsplit(label, &quot;_vs_&quot;))[2])
+    greyGroup &lt;- &quot;Rest&quot;
+    
+    ## Assigning colors ##
+    dfCol &lt;- data.frame(name = unique(dfPlot$Cluster), col = rep(&quot;&quot;, length(unique(dfPlot$Cluster))), stringsAsFactors = F)
+    dfCol[dfCol$name == redGroup, &quot;col&quot;] &lt;- &quot;#000080&quot;
+    dfCol[dfCol$name == blueGroup, &quot;col&quot;] &lt;- &quot;#009900&quot;
+    dfCol[dfCol$name == greyGroup, &quot;col&quot;] &lt;- &quot;grey&quot;
+    colVec &lt;- dfCol$col
+    names(colVec) &lt;- dfCol$name
+    
+    dfColExtra &lt;- dfCol[dfCol$col == &quot;&quot;,]
+    if (nrow(dfColExtra) &gt; 0){
+        eColVec &lt;- dfColExtra$name
+        library(scales)
+        eCols = hue_pal()(length(eColVec))
+        for (l in 1:length(eColVec)){
+            dfCol[dfCol$name == eColVec[l], &quot;col&quot;] &lt;- eCols[l]
+        }
+    }
+    
+    maxX &lt;- 1.1*max(dfPlot$UMAP_1, na.rm = T)
+    minX &lt;- 1.1*min(dfPlot$UMAP_1, na.rm = T)
+    maxY &lt;- 1.1*max(dfPlot$UMAP_2, na.rm = T)
+    minY &lt;- 1.1*min(dfPlot$UMAP_2, na.rm = T)            
+
+    #colVec &lt;- dfPair$sampleColor
+    #names(colVec) &lt;- dfPair$sampleName
+    levels &lt;- as.vector(dfCol$name)
+    levelsRest &lt;- levels[grep(&quot;Rest&quot;, levels)]
+    levels &lt;- levels[levels != &quot;Rest&quot;]
+    levels &lt;- c(levels, levelsRest)
+    
+    dfPlot$Cluster &lt;- factor(dfPlot$Cluster, levels = levels)
+
+    dotsize  = 1
+    if (nrow(dfPlot) &gt; 10000){
+        dotsize  = 0.5
+    } else if (nrow(dfPlot) &gt; 20000){
+        dotsize = 0.25
+    } else if (nrow(dfPlot) &gt; 50000){
+        dotsize = 0.1
+    }
+
+    ## make plot ##
+    plotList[[tag]] &lt;- ggplot2::ggplot(
+        data=dfPlot[dfPlot$included == &quot;+&quot;,], 
+        ggplot2::aes(UMAP_1, UMAP_2, color=Cluster)) + 
+        ggplot2::geom_point( shape=16, size = as.numeric(dotsize)) + 
+        ggplot2::xlab(&quot;UMAP1&quot;) + 
+        ggplot2::ylab(&quot;UMAP2&quot;) + 
+        ggplot2::theme_bw()  +  
+        ggplot2::theme(
+          axis.text.y   = ggplot2::element_text(size=8),
+          axis.text.x   = ggplot2::element_text(size=8),
+          axis.title.y  = ggplot2::element_text(size=8),
+          axis.title.x  = ggplot2::element_text(size=8),
+          axis.line = ggplot2::element_line(colour = &quot;black&quot;),
+          panel.border = ggplot2::element_rect(colour = &quot;black&quot;, fill=NA, size=1),
+          plot.title = ggplot2::element_text(hjust = 0.5, size = 12),
+          legend.title = ggplot2::element_blank()
+        ) + 
+        ggplot2::guides(col = ggplot2::guide_legend(override.aes = list(shape = 16, size = legendDotSize))) +     
+        ggplot2::ggtitle(paste0(&quot;Cell Selection for &quot;, gsub(&quot;_&quot;, &quot; &quot;, unlist(DGEinputList[[i]][&quot;name&quot;])))) + 
+        ggplot2::xlim(minX, maxX) + 
+        ggplot2::ylim(minY, maxY) + 
+        ggplot2::coord_fixed(ratio=1) + 
+        ggplot2::scale_colour_manual(&quot;DGE Groups&quot; ,values = colVec) + 
+        ggplot2::guides(col = ggplot2::guide_legend(override.aes = list(shape = 16, size = legendDotSize)))
+
+      ## Add colors if specified ##
+
+            
+      ## Make plot figure ##
+      FNbase &lt;- paste0(tag, VersionPdfExt)
+      FN &lt;- paste0(reportFigDir, FNbase)
+      FNrel &lt;- paste0(&quot;report_figures/&quot;, FNbase)
+              
+      pdf(FN)
+          print(plotList[[tag]])
+      dev.off()
+              
+        # link &lt;- paste0(&#39;&lt;a href=&quot;https://&#39;,urlString,&#39;/&#39;,Obio@parameterList$project_id,&#39;/pca?x_axis=UMAP_1&amp;y_axis=UMAP_2&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;&#39;)  
+        
+      if (exists(&quot;shinyURL&quot;) &amp; !is.null(shinyURL)){
+          link &lt;- paste0(
+                  &#39;An interactive version of this figure with additional viewing options can be found &lt;a href=&quot;&#39;,shinyURL,&#39;?_inputs_&amp;y_axis=%22UMAP_2%22&amp;x_axis=%22UMAP_1%22&amp;colorBy=%22&#39;,paste0(&quot;meta_&quot;, tag),&#39;%22&amp;splitByColumn=%22all%22&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. &#39;
+          )
+                
+      } else {
+          link &lt;- &quot;&quot;
+      }
+              
+      figLegend &lt;- paste0(
+      &#39;**Figure &#39;, 
+      figureCount, 
+                &#39;:** &#39;,
+                &#39; UMAP showing all cells from all samples together. Download a pdf of this figure &lt;a href=&quot;&#39;,FNrel,&#39;&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. &#39;,
+                &#39;An interactive version of this figure can be found &#39;, link
+            )
+            
+      figureCount &lt;- figureCount + 1
+            
+      NewChnk &lt;- paste0(
+          &quot;#### &quot;, tag,
+          &quot;\n```{r Sample_DGE_&quot;,
+          tag,&quot;, results=&#39;asis&#39;, echo=F, eval=TRUE, warning=FALSE, fig.cap=&#39;&quot;,
+          figLegend,&quot;&#39;}\n&quot;,
+          &quot;\n&quot;,
+          &quot;\n print(plotList[[&#39;&quot;,tag,&quot;&#39;]])&quot;,
+          &quot;\n cat(  &#39;\n&#39;)&quot;,
+          &quot;\n\n\n```\n&quot;   
+      )
+            
+      chnkVec &lt;- c(
+          chnkVec,
+          NewChnk
+      )
+  
+      ## Done creating DGE selection plot                                      ##
+      ###########################################################################
+      
+      
+      print(paste0(&quot;Done with &quot;, tag))
+}
+
+## Done DGE                                                                  ##
+###############################################################################
+
+if (length(plotList) &gt; 3){
+    tabVar &lt;- &quot;.tabset .tabset-fade .tabset-dropdown&quot;
+} else {
+    tabVar &lt;- &quot;.tabset .tabset-fade .tabset-pills&quot;
+}</code></pre>
+<div id="differential-gene-expression-comparions-cell-selections" class="section level3 tabset tabset-fade tabset-dropdown">
+<h3>Differential Gene Expression Comparions Cell Selections</h3>
+<p>In this section the cells that were used for the DGE comparisons are highlighted.</p>
+<pre class="r"><code>cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = &quot;\n&quot;))</code></pre>
+<div id="dge_c0_mycon_vs_c0_mycoff" class="section level4">
+<h4>DGE_C0_MycON_vs_C0_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Sample_DGE_DGE_C0_MycON_vs_C0_MycOff-1.svg" alt="**Figure 1:**  UMAP showing all cells from all samples together. Download a pdf of this figure &lt;a href=&quot;report_figures/DGE_C0_MycON_vs_C0_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found &lt;a href=&quot;https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&amp;y_axis=%22UMAP_2%22&amp;x_axis=%22UMAP_1%22&amp;colorBy=%22meta_DGE_C0_MycON_vs_C0_MycOff%22&amp;splitByColumn=%22all%22&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 1:</strong> UMAP showing all cells from all samples together. Download a pdf of this figure <a href="report_figures/DGE_C0_MycON_vs_C0_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found <a href="https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&y_axis=%22UMAP_2%22&x_axis=%22UMAP_1%22&colorBy=%22meta_DGE_C0_MycON_vs_C0_MycOff%22&splitByColumn=%22all%22" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="dge_c1_mycon_vs_c1_mycoff" class="section level4">
+<h4>DGE_C1_MycON_vs_C1_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Sample_DGE_DGE_C1_MycON_vs_C1_MycOff-1.svg" alt="**Figure 2:**  UMAP showing all cells from all samples together. Download a pdf of this figure &lt;a href=&quot;report_figures/DGE_C1_MycON_vs_C1_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found &lt;a href=&quot;https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&amp;y_axis=%22UMAP_2%22&amp;x_axis=%22UMAP_1%22&amp;colorBy=%22meta_DGE_C1_MycON_vs_C1_MycOff%22&amp;splitByColumn=%22all%22&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 2:</strong> UMAP showing all cells from all samples together. Download a pdf of this figure <a href="report_figures/DGE_C1_MycON_vs_C1_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found <a href="https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&y_axis=%22UMAP_2%22&x_axis=%22UMAP_1%22&colorBy=%22meta_DGE_C1_MycON_vs_C1_MycOff%22&splitByColumn=%22all%22" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="dge_c2_mycon_vs_c2_mycoff" class="section level4">
+<h4>DGE_C2_MycON_vs_C2_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Sample_DGE_DGE_C2_MycON_vs_C2_MycOff-1.svg" alt="**Figure 3:**  UMAP showing all cells from all samples together. Download a pdf of this figure &lt;a href=&quot;report_figures/DGE_C2_MycON_vs_C2_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found &lt;a href=&quot;https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&amp;y_axis=%22UMAP_2%22&amp;x_axis=%22UMAP_1%22&amp;colorBy=%22meta_DGE_C2_MycON_vs_C2_MycOff%22&amp;splitByColumn=%22all%22&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 3:</strong> UMAP showing all cells from all samples together. Download a pdf of this figure <a href="report_figures/DGE_C2_MycON_vs_C2_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found <a href="https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&y_axis=%22UMAP_2%22&x_axis=%22UMAP_1%22&colorBy=%22meta_DGE_C2_MycON_vs_C2_MycOff%22&splitByColumn=%22all%22" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="dge_c3_mycon_vs_c3_mycoff" class="section level4">
+<h4>DGE_C3_MycON_vs_C3_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Sample_DGE_DGE_C3_MycON_vs_C3_MycOff-1.svg" alt="**Figure 4:**  UMAP showing all cells from all samples together. Download a pdf of this figure &lt;a href=&quot;report_figures/DGE_C3_MycON_vs_C3_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found &lt;a href=&quot;https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&amp;y_axis=%22UMAP_2%22&amp;x_axis=%22UMAP_1%22&amp;colorBy=%22meta_DGE_C3_MycON_vs_C3_MycOff%22&amp;splitByColumn=%22all%22&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 4:</strong> UMAP showing all cells from all samples together. Download a pdf of this figure <a href="report_figures/DGE_C3_MycON_vs_C3_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found <a href="https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&y_axis=%22UMAP_2%22&x_axis=%22UMAP_1%22&colorBy=%22meta_DGE_C3_MycON_vs_C3_MycOff%22&splitByColumn=%22all%22" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="dge_c4_mycon_vs_c4_mycoff" class="section level4">
+<h4>DGE_C4_MycON_vs_C4_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Sample_DGE_DGE_C4_MycON_vs_C4_MycOff-1.svg" alt="**Figure 5:**  UMAP showing all cells from all samples together. Download a pdf of this figure &lt;a href=&quot;report_figures/DGE_C4_MycON_vs_C4_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found &lt;a href=&quot;https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&amp;y_axis=%22UMAP_2%22&amp;x_axis=%22UMAP_1%22&amp;colorBy=%22meta_DGE_C4_MycON_vs_C4_MycOff%22&amp;splitByColumn=%22all%22&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 5:</strong> UMAP showing all cells from all samples together. Download a pdf of this figure <a href="report_figures/DGE_C4_MycON_vs_C4_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found <a href="https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&y_axis=%22UMAP_2%22&x_axis=%22UMAP_1%22&colorBy=%22meta_DGE_C4_MycON_vs_C4_MycOff%22&splitByColumn=%22all%22" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="dge_c5_mycon_vs_c5_mycoff" class="section level4">
+<h4>DGE_C5_MycON_vs_C5_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Sample_DGE_DGE_C5_MycON_vs_C5_MycOff-1.svg" alt="**Figure 6:**  UMAP showing all cells from all samples together. Download a pdf of this figure &lt;a href=&quot;report_figures/DGE_C5_MycON_vs_C5_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found &lt;a href=&quot;https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&amp;y_axis=%22UMAP_2%22&amp;x_axis=%22UMAP_1%22&amp;colorBy=%22meta_DGE_C5_MycON_vs_C5_MycOff%22&amp;splitByColumn=%22all%22&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 6:</strong> UMAP showing all cells from all samples together. Download a pdf of this figure <a href="report_figures/DGE_C5_MycON_vs_C5_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found <a href="https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&y_axis=%22UMAP_2%22&x_axis=%22UMAP_1%22&colorBy=%22meta_DGE_C5_MycON_vs_C5_MycOff%22&splitByColumn=%22all%22" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="dge_c6_mycon_vs_c6_mycoff" class="section level4">
+<h4>DGE_C6_MycON_vs_C6_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Sample_DGE_DGE_C6_MycON_vs_C6_MycOff-1.svg" alt="**Figure 7:**  UMAP showing all cells from all samples together. Download a pdf of this figure &lt;a href=&quot;report_figures/DGE_C6_MycON_vs_C6_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found &lt;a href=&quot;https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&amp;y_axis=%22UMAP_2%22&amp;x_axis=%22UMAP_1%22&amp;colorBy=%22meta_DGE_C6_MycON_vs_C6_MycOff%22&amp;splitByColumn=%22all%22&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 7:</strong> UMAP showing all cells from all samples together. Download a pdf of this figure <a href="report_figures/DGE_C6_MycON_vs_C6_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found <a href="https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&y_axis=%22UMAP_2%22&x_axis=%22UMAP_1%22&colorBy=%22meta_DGE_C6_MycON_vs_C6_MycOff%22&splitByColumn=%22all%22" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="dge_c7_mycon_vs_c7_mycoff" class="section level4">
+<h4>DGE_C7_MycON_vs_C7_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Sample_DGE_DGE_C7_MycON_vs_C7_MycOff-1.svg" alt="**Figure 8:**  UMAP showing all cells from all samples together. Download a pdf of this figure &lt;a href=&quot;report_figures/DGE_C7_MycON_vs_C7_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found &lt;a href=&quot;https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&amp;y_axis=%22UMAP_2%22&amp;x_axis=%22UMAP_1%22&amp;colorBy=%22meta_DGE_C7_MycON_vs_C7_MycOff%22&amp;splitByColumn=%22all%22&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 8:</strong> UMAP showing all cells from all samples together. Download a pdf of this figure <a href="report_figures/DGE_C7_MycON_vs_C7_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found <a href="https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&y_axis=%22UMAP_2%22&x_axis=%22UMAP_1%22&colorBy=%22meta_DGE_C7_MycON_vs_C7_MycOff%22&splitByColumn=%22all%22" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="dge_c8_mycon_vs_c8_mycoff" class="section level4">
+<h4>DGE_C8_MycON_vs_C8_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Sample_DGE_DGE_C8_MycON_vs_C8_MycOff-1.svg" alt="**Figure 9:**  UMAP showing all cells from all samples together. Download a pdf of this figure &lt;a href=&quot;report_figures/DGE_C8_MycON_vs_C8_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found &lt;a href=&quot;https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&amp;y_axis=%22UMAP_2%22&amp;x_axis=%22UMAP_1%22&amp;colorBy=%22meta_DGE_C8_MycON_vs_C8_MycOff%22&amp;splitByColumn=%22all%22&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 9:</strong> UMAP showing all cells from all samples together. Download a pdf of this figure <a href="report_figures/DGE_C8_MycON_vs_C8_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found <a href="https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&y_axis=%22UMAP_2%22&x_axis=%22UMAP_1%22&colorBy=%22meta_DGE_C8_MycON_vs_C8_MycOff%22&splitByColumn=%22all%22" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="dge_c9_mycon_vs_c9_mycoff" class="section level4">
+<h4>DGE_C9_MycON_vs_C9_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Sample_DGE_DGE_C9_MycON_vs_C9_MycOff-1.svg" alt="**Figure 10:**  UMAP showing all cells from all samples together. Download a pdf of this figure &lt;a href=&quot;report_figures/DGE_C9_MycON_vs_C9_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found &lt;a href=&quot;https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&amp;y_axis=%22UMAP_2%22&amp;x_axis=%22UMAP_1%22&amp;colorBy=%22meta_DGE_C9_MycON_vs_C9_MycOff%22&amp;splitByColumn=%22all%22&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 10:</strong> UMAP showing all cells from all samples together. Download a pdf of this figure <a href="report_figures/DGE_C9_MycON_vs_C9_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found <a href="https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&y_axis=%22UMAP_2%22&x_axis=%22UMAP_1%22&colorBy=%22meta_DGE_C9_MycON_vs_C9_MycOff%22&splitByColumn=%22all%22" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="dge_c10_mycon_vs_c10_mycoff" class="section level4">
+<h4>DGE_C10_MycON_vs_C10_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Sample_DGE_DGE_C10_MycON_vs_C10_MycOff-1.svg" alt="**Figure 11:**  UMAP showing all cells from all samples together. Download a pdf of this figure &lt;a href=&quot;report_figures/DGE_C10_MycON_vs_C10_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found &lt;a href=&quot;https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&amp;y_axis=%22UMAP_2%22&amp;x_axis=%22UMAP_1%22&amp;colorBy=%22meta_DGE_C10_MycON_vs_C10_MycOff%22&amp;splitByColumn=%22all%22&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 11:</strong> UMAP showing all cells from all samples together. Download a pdf of this figure <a href="report_figures/DGE_C10_MycON_vs_C10_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found <a href="https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&y_axis=%22UMAP_2%22&x_axis=%22UMAP_1%22&colorBy=%22meta_DGE_C10_MycON_vs_C10_MycOff%22&splitByColumn=%22all%22" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="dge_c11_mycon_vs_c11_mycoff" class="section level4">
+<h4>DGE_C11_MycON_vs_C11_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Sample_DGE_DGE_C11_MycON_vs_C11_MycOff-1.svg" alt="**Figure 12:**  UMAP showing all cells from all samples together. Download a pdf of this figure &lt;a href=&quot;report_figures/DGE_C11_MycON_vs_C11_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found &lt;a href=&quot;https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&amp;y_axis=%22UMAP_2%22&amp;x_axis=%22UMAP_1%22&amp;colorBy=%22meta_DGE_C11_MycON_vs_C11_MycOff%22&amp;splitByColumn=%22all%22&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 12:</strong> UMAP showing all cells from all samples together. Download a pdf of this figure <a href="report_figures/DGE_C11_MycON_vs_C11_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found <a href="https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&y_axis=%22UMAP_2%22&x_axis=%22UMAP_1%22&colorBy=%22meta_DGE_C11_MycON_vs_C11_MycOff%22&splitByColumn=%22all%22" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="dge_c12_mycon_vs_c12_mycoff" class="section level4">
+<h4>DGE_C12_MycON_vs_C12_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Sample_DGE_DGE_C12_MycON_vs_C12_MycOff-1.svg" alt="**Figure 13:**  UMAP showing all cells from all samples together. Download a pdf of this figure &lt;a href=&quot;report_figures/DGE_C12_MycON_vs_C12_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found &lt;a href=&quot;https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&amp;y_axis=%22UMAP_2%22&amp;x_axis=%22UMAP_1%22&amp;colorBy=%22meta_DGE_C12_MycON_vs_C12_MycOff%22&amp;splitByColumn=%22all%22&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 13:</strong> UMAP showing all cells from all samples together. Download a pdf of this figure <a href="report_figures/DGE_C12_MycON_vs_C12_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found <a href="https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&y_axis=%22UMAP_2%22&x_axis=%22UMAP_1%22&colorBy=%22meta_DGE_C12_MycON_vs_C12_MycOff%22&splitByColumn=%22all%22" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="dge_c13_mycon_vs_c13_mycoff" class="section level4">
+<h4>DGE_C13_MycON_vs_C13_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Sample_DGE_DGE_C13_MycON_vs_C13_MycOff-1.svg" alt="**Figure 14:**  UMAP showing all cells from all samples together. Download a pdf of this figure &lt;a href=&quot;report_figures/DGE_C13_MycON_vs_C13_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found &lt;a href=&quot;https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&amp;y_axis=%22UMAP_2%22&amp;x_axis=%22UMAP_1%22&amp;colorBy=%22meta_DGE_C13_MycON_vs_C13_MycOff%22&amp;splitByColumn=%22all%22&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 14:</strong> UMAP showing all cells from all samples together. Download a pdf of this figure <a href="report_figures/DGE_C13_MycON_vs_C13_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found <a href="https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&y_axis=%22UMAP_2%22&x_axis=%22UMAP_1%22&colorBy=%22meta_DGE_C13_MycON_vs_C13_MycOff%22&splitByColumn=%22all%22" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="dge_c14_mycon_vs_c14_mycoff" class="section level4">
+<h4>DGE_C14_MycON_vs_C14_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Sample_DGE_DGE_C14_MycON_vs_C14_MycOff-1.svg" alt="**Figure 15:**  UMAP showing all cells from all samples together. Download a pdf of this figure &lt;a href=&quot;report_figures/DGE_C14_MycON_vs_C14_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found &lt;a href=&quot;https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&amp;y_axis=%22UMAP_2%22&amp;x_axis=%22UMAP_1%22&amp;colorBy=%22meta_DGE_C14_MycON_vs_C14_MycOff%22&amp;splitByColumn=%22all%22&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 15:</strong> UMAP showing all cells from all samples together. Download a pdf of this figure <a href="report_figures/DGE_C14_MycON_vs_C14_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found <a href="https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&y_axis=%22UMAP_2%22&x_axis=%22UMAP_1%22&colorBy=%22meta_DGE_C14_MycON_vs_C14_MycOff%22&splitByColumn=%22all%22" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="dge_c15_mycon_vs_c15_mycoff" class="section level4">
+<h4>DGE_C15_MycON_vs_C15_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Sample_DGE_DGE_C15_MycON_vs_C15_MycOff-1.svg" alt="**Figure 16:**  UMAP showing all cells from all samples together. Download a pdf of this figure &lt;a href=&quot;report_figures/DGE_C15_MycON_vs_C15_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found &lt;a href=&quot;https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&amp;y_axis=%22UMAP_2%22&amp;x_axis=%22UMAP_1%22&amp;colorBy=%22meta_DGE_C15_MycON_vs_C15_MycOff%22&amp;splitByColumn=%22all%22&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 16:</strong> UMAP showing all cells from all samples together. Download a pdf of this figure <a href="report_figures/DGE_C15_MycON_vs_C15_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found <a href="https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&y_axis=%22UMAP_2%22&x_axis=%22UMAP_1%22&colorBy=%22meta_DGE_C15_MycON_vs_C15_MycOff%22&splitByColumn=%22all%22" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="dge_c16_mycon_vs_c16_mycoff" class="section level4">
+<h4>DGE_C16_MycON_vs_C16_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Sample_DGE_DGE_C16_MycON_vs_C16_MycOff-1.svg" alt="**Figure 17:**  UMAP showing all cells from all samples together. Download a pdf of this figure &lt;a href=&quot;report_figures/DGE_C16_MycON_vs_C16_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found &lt;a href=&quot;https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&amp;y_axis=%22UMAP_2%22&amp;x_axis=%22UMAP_1%22&amp;colorBy=%22meta_DGE_C16_MycON_vs_C16_MycOff%22&amp;splitByColumn=%22all%22&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 17:</strong> UMAP showing all cells from all samples together. Download a pdf of this figure <a href="report_figures/DGE_C16_MycON_vs_C16_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found <a href="https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&y_axis=%22UMAP_2%22&x_axis=%22UMAP_1%22&colorBy=%22meta_DGE_C16_MycON_vs_C16_MycOff%22&splitByColumn=%22all%22" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="dge_c17_mycon_vs_c17_mycoff" class="section level4">
+<h4>DGE_C17_MycON_vs_C17_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Sample_DGE_DGE_C17_MycON_vs_C17_MycOff-1.svg" alt="**Figure 18:**  UMAP showing all cells from all samples together. Download a pdf of this figure &lt;a href=&quot;report_figures/DGE_C17_MycON_vs_C17_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found &lt;a href=&quot;https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&amp;y_axis=%22UMAP_2%22&amp;x_axis=%22UMAP_1%22&amp;colorBy=%22meta_DGE_C17_MycON_vs_C17_MycOff%22&amp;splitByColumn=%22all%22&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 18:</strong> UMAP showing all cells from all samples together. Download a pdf of this figure <a href="report_figures/DGE_C17_MycON_vs_C17_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found <a href="https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&y_axis=%22UMAP_2%22&x_axis=%22UMAP_1%22&colorBy=%22meta_DGE_C17_MycON_vs_C17_MycOff%22&splitByColumn=%22all%22" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="dge_c18_mycon_vs_c18_mycoff" class="section level4">
+<h4>DGE_C18_MycON_vs_C18_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Sample_DGE_DGE_C18_MycON_vs_C18_MycOff-1.svg" alt="**Figure 19:**  UMAP showing all cells from all samples together. Download a pdf of this figure &lt;a href=&quot;report_figures/DGE_C18_MycON_vs_C18_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found &lt;a href=&quot;https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&amp;y_axis=%22UMAP_2%22&amp;x_axis=%22UMAP_1%22&amp;colorBy=%22meta_DGE_C18_MycON_vs_C18_MycOff%22&amp;splitByColumn=%22all%22&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 19:</strong> UMAP showing all cells from all samples together. Download a pdf of this figure <a href="report_figures/DGE_C18_MycON_vs_C18_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found An interactive version of this figure with additional viewing options can be found <a href="https://bioinformatics.crick.ac.uk/shiny/users/boeings/PDACmyc_app/?_inputs_&y_axis=%22UMAP_2%22&x_axis=%22UMAP_1%22&colorBy=%22meta_DGE_C18_MycON_vs_C18_MycOff%22&splitByColumn=%22all%22" target="_blank">here</a>.
+</p>
+</div>
+</div>
+</div>
+<div id="dge-ma-style-plots" class="section level3 tabset tabset-fade tabset-dropdown">
+<h3>DGE MA-style Plots</h3>
+<pre class="r"><code>cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = &quot;\n&quot;))</code></pre>
+<div id="ma_plot_dge_c0_mycon_vs_c0_mycoff" class="section level4">
+<h4>MA_Plot_DGE_C0_MycON_vs_C0_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/MA_DGE_MA_Plot_DGE_C0_MycON_vs_C0_MycOff-1.svg" alt="**Figure 20:**  MA-style plot for differential gene expression comparison DGE C0 MycON vs C0 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/MA_Plot_DGE_C0_MycON_vs_C0_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C0_MycON_vs_C0_MycOff&amp;y_axis=contrast_1_logFC_DGE_C0_MycON_vs_C0_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 20:</strong> MA-style plot for differential gene expression comparison DGE C0 MycON vs C0 MycOff. Download a pdf of this figure <a href="report_figures/MA_Plot_DGE_C0_MycON_vs_C0_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C0_MycON_vs_C0_MycOff&y_axis=contrast_1_logFC_DGE_C0_MycON_vs_C0_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="ma_plot_dge_c1_mycon_vs_c1_mycoff" class="section level4">
+<h4>MA_Plot_DGE_C1_MycON_vs_C1_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/MA_DGE_MA_Plot_DGE_C1_MycON_vs_C1_MycOff-1.svg" alt="**Figure 21:**  MA-style plot for differential gene expression comparison DGE C1 MycON vs C1 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/MA_Plot_DGE_C1_MycON_vs_C1_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C1_MycON_vs_C1_MycOff&amp;y_axis=contrast_2_logFC_DGE_C1_MycON_vs_C1_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 21:</strong> MA-style plot for differential gene expression comparison DGE C1 MycON vs C1 MycOff. Download a pdf of this figure <a href="report_figures/MA_Plot_DGE_C1_MycON_vs_C1_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C1_MycON_vs_C1_MycOff&y_axis=contrast_2_logFC_DGE_C1_MycON_vs_C1_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="ma_plot_dge_c2_mycon_vs_c2_mycoff" class="section level4">
+<h4>MA_Plot_DGE_C2_MycON_vs_C2_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/MA_DGE_MA_Plot_DGE_C2_MycON_vs_C2_MycOff-1.svg" alt="**Figure 22:**  MA-style plot for differential gene expression comparison DGE C2 MycON vs C2 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/MA_Plot_DGE_C2_MycON_vs_C2_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C2_MycON_vs_C2_MycOff&amp;y_axis=contrast_3_logFC_DGE_C2_MycON_vs_C2_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 22:</strong> MA-style plot for differential gene expression comparison DGE C2 MycON vs C2 MycOff. Download a pdf of this figure <a href="report_figures/MA_Plot_DGE_C2_MycON_vs_C2_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C2_MycON_vs_C2_MycOff&y_axis=contrast_3_logFC_DGE_C2_MycON_vs_C2_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="ma_plot_dge_c3_mycon_vs_c3_mycoff" class="section level4">
+<h4>MA_Plot_DGE_C3_MycON_vs_C3_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/MA_DGE_MA_Plot_DGE_C3_MycON_vs_C3_MycOff-1.svg" alt="**Figure 23:**  MA-style plot for differential gene expression comparison DGE C3 MycON vs C3 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/MA_Plot_DGE_C3_MycON_vs_C3_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C3_MycON_vs_C3_MycOff&amp;y_axis=contrast_4_logFC_DGE_C3_MycON_vs_C3_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 23:</strong> MA-style plot for differential gene expression comparison DGE C3 MycON vs C3 MycOff. Download a pdf of this figure <a href="report_figures/MA_Plot_DGE_C3_MycON_vs_C3_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C3_MycON_vs_C3_MycOff&y_axis=contrast_4_logFC_DGE_C3_MycON_vs_C3_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="ma_plot_dge_c4_mycon_vs_c4_mycoff" class="section level4">
+<h4>MA_Plot_DGE_C4_MycON_vs_C4_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/MA_DGE_MA_Plot_DGE_C4_MycON_vs_C4_MycOff-1.svg" alt="**Figure 24:**  MA-style plot for differential gene expression comparison DGE C4 MycON vs C4 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/MA_Plot_DGE_C4_MycON_vs_C4_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C4_MycON_vs_C4_MycOff&amp;y_axis=contrast_5_logFC_DGE_C4_MycON_vs_C4_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 24:</strong> MA-style plot for differential gene expression comparison DGE C4 MycON vs C4 MycOff. Download a pdf of this figure <a href="report_figures/MA_Plot_DGE_C4_MycON_vs_C4_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C4_MycON_vs_C4_MycOff&y_axis=contrast_5_logFC_DGE_C4_MycON_vs_C4_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="ma_plot_dge_c5_mycon_vs_c5_mycoff" class="section level4">
+<h4>MA_Plot_DGE_C5_MycON_vs_C5_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/MA_DGE_MA_Plot_DGE_C5_MycON_vs_C5_MycOff-1.svg" alt="**Figure 25:**  MA-style plot for differential gene expression comparison DGE C5 MycON vs C5 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/MA_Plot_DGE_C5_MycON_vs_C5_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C5_MycON_vs_C5_MycOff&amp;y_axis=contrast_6_logFC_DGE_C5_MycON_vs_C5_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 25:</strong> MA-style plot for differential gene expression comparison DGE C5 MycON vs C5 MycOff. Download a pdf of this figure <a href="report_figures/MA_Plot_DGE_C5_MycON_vs_C5_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C5_MycON_vs_C5_MycOff&y_axis=contrast_6_logFC_DGE_C5_MycON_vs_C5_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="ma_plot_dge_c6_mycon_vs_c6_mycoff" class="section level4">
+<h4>MA_Plot_DGE_C6_MycON_vs_C6_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/MA_DGE_MA_Plot_DGE_C6_MycON_vs_C6_MycOff-1.svg" alt="**Figure 26:**  MA-style plot for differential gene expression comparison DGE C6 MycON vs C6 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/MA_Plot_DGE_C6_MycON_vs_C6_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C6_MycON_vs_C6_MycOff&amp;y_axis=contrast_7_logFC_DGE_C6_MycON_vs_C6_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 26:</strong> MA-style plot for differential gene expression comparison DGE C6 MycON vs C6 MycOff. Download a pdf of this figure <a href="report_figures/MA_Plot_DGE_C6_MycON_vs_C6_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C6_MycON_vs_C6_MycOff&y_axis=contrast_7_logFC_DGE_C6_MycON_vs_C6_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="ma_plot_dge_c7_mycon_vs_c7_mycoff" class="section level4">
+<h4>MA_Plot_DGE_C7_MycON_vs_C7_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/MA_DGE_MA_Plot_DGE_C7_MycON_vs_C7_MycOff-1.svg" alt="**Figure 27:**  MA-style plot for differential gene expression comparison DGE C7 MycON vs C7 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/MA_Plot_DGE_C7_MycON_vs_C7_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C7_MycON_vs_C7_MycOff&amp;y_axis=contrast_8_logFC_DGE_C7_MycON_vs_C7_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 27:</strong> MA-style plot for differential gene expression comparison DGE C7 MycON vs C7 MycOff. Download a pdf of this figure <a href="report_figures/MA_Plot_DGE_C7_MycON_vs_C7_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C7_MycON_vs_C7_MycOff&y_axis=contrast_8_logFC_DGE_C7_MycON_vs_C7_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="ma_plot_dge_c8_mycon_vs_c8_mycoff" class="section level4">
+<h4>MA_Plot_DGE_C8_MycON_vs_C8_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/MA_DGE_MA_Plot_DGE_C8_MycON_vs_C8_MycOff-1.svg" alt="**Figure 28:**  MA-style plot for differential gene expression comparison DGE C8 MycON vs C8 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/MA_Plot_DGE_C8_MycON_vs_C8_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C8_MycON_vs_C8_MycOff&amp;y_axis=contrast_9_logFC_DGE_C8_MycON_vs_C8_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 28:</strong> MA-style plot for differential gene expression comparison DGE C8 MycON vs C8 MycOff. Download a pdf of this figure <a href="report_figures/MA_Plot_DGE_C8_MycON_vs_C8_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C8_MycON_vs_C8_MycOff&y_axis=contrast_9_logFC_DGE_C8_MycON_vs_C8_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="ma_plot_dge_c9_mycon_vs_c9_mycoff" class="section level4">
+<h4>MA_Plot_DGE_C9_MycON_vs_C9_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/MA_DGE_MA_Plot_DGE_C9_MycON_vs_C9_MycOff-1.svg" alt="**Figure 29:**  MA-style plot for differential gene expression comparison DGE C9 MycON vs C9 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/MA_Plot_DGE_C9_MycON_vs_C9_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C9_MycON_vs_C9_MycOff&amp;y_axis=contrast_10_logFC_DGE_C9_MycON_vs_C9_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 29:</strong> MA-style plot for differential gene expression comparison DGE C9 MycON vs C9 MycOff. Download a pdf of this figure <a href="report_figures/MA_Plot_DGE_C9_MycON_vs_C9_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C9_MycON_vs_C9_MycOff&y_axis=contrast_10_logFC_DGE_C9_MycON_vs_C9_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="ma_plot_dge_c10_mycon_vs_c10_mycoff" class="section level4">
+<h4>MA_Plot_DGE_C10_MycON_vs_C10_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/MA_DGE_MA_Plot_DGE_C10_MycON_vs_C10_MycOff-1.svg" alt="**Figure 30:**  MA-style plot for differential gene expression comparison DGE C10 MycON vs C10 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/MA_Plot_DGE_C10_MycON_vs_C10_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C10_MycON_vs_C10_MycOff&amp;y_axis=contrast_11_logFC_DGE_C10_MycON_vs_C10_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 30:</strong> MA-style plot for differential gene expression comparison DGE C10 MycON vs C10 MycOff. Download a pdf of this figure <a href="report_figures/MA_Plot_DGE_C10_MycON_vs_C10_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C10_MycON_vs_C10_MycOff&y_axis=contrast_11_logFC_DGE_C10_MycON_vs_C10_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="ma_plot_dge_c11_mycon_vs_c11_mycoff" class="section level4">
+<h4>MA_Plot_DGE_C11_MycON_vs_C11_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/MA_DGE_MA_Plot_DGE_C11_MycON_vs_C11_MycOff-1.svg" alt="**Figure 31:**  MA-style plot for differential gene expression comparison DGE C11 MycON vs C11 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/MA_Plot_DGE_C11_MycON_vs_C11_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C11_MycON_vs_C11_MycOff&amp;y_axis=contrast_12_logFC_DGE_C11_MycON_vs_C11_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 31:</strong> MA-style plot for differential gene expression comparison DGE C11 MycON vs C11 MycOff. Download a pdf of this figure <a href="report_figures/MA_Plot_DGE_C11_MycON_vs_C11_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C11_MycON_vs_C11_MycOff&y_axis=contrast_12_logFC_DGE_C11_MycON_vs_C11_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="ma_plot_dge_c12_mycon_vs_c12_mycoff" class="section level4">
+<h4>MA_Plot_DGE_C12_MycON_vs_C12_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/MA_DGE_MA_Plot_DGE_C12_MycON_vs_C12_MycOff-1.svg" alt="**Figure 32:**  MA-style plot for differential gene expression comparison DGE C12 MycON vs C12 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/MA_Plot_DGE_C12_MycON_vs_C12_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C12_MycON_vs_C12_MycOff&amp;y_axis=contrast_13_logFC_DGE_C12_MycON_vs_C12_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 32:</strong> MA-style plot for differential gene expression comparison DGE C12 MycON vs C12 MycOff. Download a pdf of this figure <a href="report_figures/MA_Plot_DGE_C12_MycON_vs_C12_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C12_MycON_vs_C12_MycOff&y_axis=contrast_13_logFC_DGE_C12_MycON_vs_C12_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="ma_plot_dge_c13_mycon_vs_c13_mycoff" class="section level4">
+<h4>MA_Plot_DGE_C13_MycON_vs_C13_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/MA_DGE_MA_Plot_DGE_C13_MycON_vs_C13_MycOff-1.svg" alt="**Figure 33:**  MA-style plot for differential gene expression comparison DGE C13 MycON vs C13 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/MA_Plot_DGE_C13_MycON_vs_C13_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C13_MycON_vs_C13_MycOff&amp;y_axis=contrast_14_logFC_DGE_C13_MycON_vs_C13_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 33:</strong> MA-style plot for differential gene expression comparison DGE C13 MycON vs C13 MycOff. Download a pdf of this figure <a href="report_figures/MA_Plot_DGE_C13_MycON_vs_C13_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C13_MycON_vs_C13_MycOff&y_axis=contrast_14_logFC_DGE_C13_MycON_vs_C13_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="ma_plot_dge_c14_mycon_vs_c14_mycoff" class="section level4">
+<h4>MA_Plot_DGE_C14_MycON_vs_C14_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/MA_DGE_MA_Plot_DGE_C14_MycON_vs_C14_MycOff-1.svg" alt="**Figure 34:**  MA-style plot for differential gene expression comparison DGE C14 MycON vs C14 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/MA_Plot_DGE_C14_MycON_vs_C14_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C14_MycON_vs_C14_MycOff&amp;y_axis=contrast_15_logFC_DGE_C14_MycON_vs_C14_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 34:</strong> MA-style plot for differential gene expression comparison DGE C14 MycON vs C14 MycOff. Download a pdf of this figure <a href="report_figures/MA_Plot_DGE_C14_MycON_vs_C14_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C14_MycON_vs_C14_MycOff&y_axis=contrast_15_logFC_DGE_C14_MycON_vs_C14_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="ma_plot_dge_c15_mycon_vs_c15_mycoff" class="section level4">
+<h4>MA_Plot_DGE_C15_MycON_vs_C15_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/MA_DGE_MA_Plot_DGE_C15_MycON_vs_C15_MycOff-1.svg" alt="**Figure 35:**  MA-style plot for differential gene expression comparison DGE C15 MycON vs C15 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/MA_Plot_DGE_C15_MycON_vs_C15_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C15_MycON_vs_C15_MycOff&amp;y_axis=contrast_16_logFC_DGE_C15_MycON_vs_C15_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 35:</strong> MA-style plot for differential gene expression comparison DGE C15 MycON vs C15 MycOff. Download a pdf of this figure <a href="report_figures/MA_Plot_DGE_C15_MycON_vs_C15_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C15_MycON_vs_C15_MycOff&y_axis=contrast_16_logFC_DGE_C15_MycON_vs_C15_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="ma_plot_dge_c16_mycon_vs_c16_mycoff" class="section level4">
+<h4>MA_Plot_DGE_C16_MycON_vs_C16_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/MA_DGE_MA_Plot_DGE_C16_MycON_vs_C16_MycOff-1.svg" alt="**Figure 36:**  MA-style plot for differential gene expression comparison DGE C16 MycON vs C16 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/MA_Plot_DGE_C16_MycON_vs_C16_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C16_MycON_vs_C16_MycOff&amp;y_axis=contrast_17_logFC_DGE_C16_MycON_vs_C16_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 36:</strong> MA-style plot for differential gene expression comparison DGE C16 MycON vs C16 MycOff. Download a pdf of this figure <a href="report_figures/MA_Plot_DGE_C16_MycON_vs_C16_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C16_MycON_vs_C16_MycOff&y_axis=contrast_17_logFC_DGE_C16_MycON_vs_C16_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="ma_plot_dge_c17_mycon_vs_c17_mycoff" class="section level4">
+<h4>MA_Plot_DGE_C17_MycON_vs_C17_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/MA_DGE_MA_Plot_DGE_C17_MycON_vs_C17_MycOff-1.svg" alt="**Figure 37:**  MA-style plot for differential gene expression comparison DGE C17 MycON vs C17 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/MA_Plot_DGE_C17_MycON_vs_C17_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C17_MycON_vs_C17_MycOff&amp;y_axis=contrast_18_logFC_DGE_C17_MycON_vs_C17_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 37:</strong> MA-style plot for differential gene expression comparison DGE C17 MycON vs C17 MycOff. Download a pdf of this figure <a href="report_figures/MA_Plot_DGE_C17_MycON_vs_C17_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C17_MycON_vs_C17_MycOff&y_axis=contrast_18_logFC_DGE_C17_MycON_vs_C17_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="ma_plot_dge_c18_mycon_vs_c18_mycoff" class="section level4">
+<h4>MA_Plot_DGE_C18_MycON_vs_C18_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/MA_DGE_MA_Plot_DGE_C18_MycON_vs_C18_MycOff-1.svg" alt="**Figure 38:**  MA-style plot for differential gene expression comparison DGE C18 MycON vs C18 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/MA_Plot_DGE_C18_MycON_vs_C18_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C18_MycON_vs_C18_MycOff&amp;y_axis=contrast_19_logFC_DGE_C18_MycON_vs_C18_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 38:</strong> MA-style plot for differential gene expression comparison DGE C18 MycON vs C18 MycOff. Download a pdf of this figure <a href="report_figures/MA_Plot_DGE_C18_MycON_vs_C18_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=add_MA_cts_MA_Avg_DGE_C18_MycON_vs_C18_MycOff&y_axis=contrast_19_logFC_DGE_C18_MycON_vs_C18_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+</div>
+</div>
+<div id="dge-volcano-plots" class="section level3 tabset tabset-fade tabset-dropdown">
+<h3>DGE Volcano Plots</h3>
+<pre class="r"><code>cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = &quot;\n&quot;))</code></pre>
+<div id="volcano_plot_dge_c0_mycon_vs_c0_mycoff" class="section level4">
+<h4>Volcano_Plot_DGE_C0_MycON_vs_C0_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Volcano_DGE_Volcano_Plot_DGE_C0_MycON_vs_C0_MycOff-1.svg" alt="**Figure 39:**  Volcano plot for differential gene expression comparison DGE C0 MycON vs C0 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/Volcano_Plot_DGE_C0_MycON_vs_C0_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_1_logFC_DGE_C0_MycON_vs_C0_MycOff&amp;y_axis=contrast_1_lg10p_DGE_C0_MycON_vs_C0_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 39:</strong> Volcano plot for differential gene expression comparison DGE C0 MycON vs C0 MycOff. Download a pdf of this figure <a href="report_figures/Volcano_Plot_DGE_C0_MycON_vs_C0_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_1_logFC_DGE_C0_MycON_vs_C0_MycOff&y_axis=contrast_1_lg10p_DGE_C0_MycON_vs_C0_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="volcano_plot_dge_c1_mycon_vs_c1_mycoff" class="section level4">
+<h4>Volcano_Plot_DGE_C1_MycON_vs_C1_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Volcano_DGE_Volcano_Plot_DGE_C1_MycON_vs_C1_MycOff-1.svg" alt="**Figure 40:**  Volcano plot for differential gene expression comparison DGE C1 MycON vs C1 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/Volcano_Plot_DGE_C1_MycON_vs_C1_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_2_logFC_DGE_C1_MycON_vs_C1_MycOff&amp;y_axis=contrast_2_lg10p_DGE_C1_MycON_vs_C1_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 40:</strong> Volcano plot for differential gene expression comparison DGE C1 MycON vs C1 MycOff. Download a pdf of this figure <a href="report_figures/Volcano_Plot_DGE_C1_MycON_vs_C1_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_2_logFC_DGE_C1_MycON_vs_C1_MycOff&y_axis=contrast_2_lg10p_DGE_C1_MycON_vs_C1_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="volcano_plot_dge_c2_mycon_vs_c2_mycoff" class="section level4">
+<h4>Volcano_Plot_DGE_C2_MycON_vs_C2_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Volcano_DGE_Volcano_Plot_DGE_C2_MycON_vs_C2_MycOff-1.svg" alt="**Figure 41:**  Volcano plot for differential gene expression comparison DGE C2 MycON vs C2 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/Volcano_Plot_DGE_C2_MycON_vs_C2_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_3_logFC_DGE_C2_MycON_vs_C2_MycOff&amp;y_axis=contrast_3_lg10p_DGE_C2_MycON_vs_C2_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 41:</strong> Volcano plot for differential gene expression comparison DGE C2 MycON vs C2 MycOff. Download a pdf of this figure <a href="report_figures/Volcano_Plot_DGE_C2_MycON_vs_C2_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_3_logFC_DGE_C2_MycON_vs_C2_MycOff&y_axis=contrast_3_lg10p_DGE_C2_MycON_vs_C2_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="volcano_plot_dge_c3_mycon_vs_c3_mycoff" class="section level4">
+<h4>Volcano_Plot_DGE_C3_MycON_vs_C3_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Volcano_DGE_Volcano_Plot_DGE_C3_MycON_vs_C3_MycOff-1.svg" alt="**Figure 42:**  Volcano plot for differential gene expression comparison DGE C3 MycON vs C3 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/Volcano_Plot_DGE_C3_MycON_vs_C3_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_4_logFC_DGE_C3_MycON_vs_C3_MycOff&amp;y_axis=contrast_4_lg10p_DGE_C3_MycON_vs_C3_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 42:</strong> Volcano plot for differential gene expression comparison DGE C3 MycON vs C3 MycOff. Download a pdf of this figure <a href="report_figures/Volcano_Plot_DGE_C3_MycON_vs_C3_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_4_logFC_DGE_C3_MycON_vs_C3_MycOff&y_axis=contrast_4_lg10p_DGE_C3_MycON_vs_C3_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="volcano_plot_dge_c4_mycon_vs_c4_mycoff" class="section level4">
+<h4>Volcano_Plot_DGE_C4_MycON_vs_C4_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Volcano_DGE_Volcano_Plot_DGE_C4_MycON_vs_C4_MycOff-1.svg" alt="**Figure 43:**  Volcano plot for differential gene expression comparison DGE C4 MycON vs C4 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/Volcano_Plot_DGE_C4_MycON_vs_C4_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_5_logFC_DGE_C4_MycON_vs_C4_MycOff&amp;y_axis=contrast_5_lg10p_DGE_C4_MycON_vs_C4_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 43:</strong> Volcano plot for differential gene expression comparison DGE C4 MycON vs C4 MycOff. Download a pdf of this figure <a href="report_figures/Volcano_Plot_DGE_C4_MycON_vs_C4_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_5_logFC_DGE_C4_MycON_vs_C4_MycOff&y_axis=contrast_5_lg10p_DGE_C4_MycON_vs_C4_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="volcano_plot_dge_c5_mycon_vs_c5_mycoff" class="section level4">
+<h4>Volcano_Plot_DGE_C5_MycON_vs_C5_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Volcano_DGE_Volcano_Plot_DGE_C5_MycON_vs_C5_MycOff-1.svg" alt="**Figure 44:**  Volcano plot for differential gene expression comparison DGE C5 MycON vs C5 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/Volcano_Plot_DGE_C5_MycON_vs_C5_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_6_logFC_DGE_C5_MycON_vs_C5_MycOff&amp;y_axis=contrast_6_lg10p_DGE_C5_MycON_vs_C5_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 44:</strong> Volcano plot for differential gene expression comparison DGE C5 MycON vs C5 MycOff. Download a pdf of this figure <a href="report_figures/Volcano_Plot_DGE_C5_MycON_vs_C5_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_6_logFC_DGE_C5_MycON_vs_C5_MycOff&y_axis=contrast_6_lg10p_DGE_C5_MycON_vs_C5_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="volcano_plot_dge_c6_mycon_vs_c6_mycoff" class="section level4">
+<h4>Volcano_Plot_DGE_C6_MycON_vs_C6_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Volcano_DGE_Volcano_Plot_DGE_C6_MycON_vs_C6_MycOff-1.svg" alt="**Figure 45:**  Volcano plot for differential gene expression comparison DGE C6 MycON vs C6 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/Volcano_Plot_DGE_C6_MycON_vs_C6_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_7_logFC_DGE_C6_MycON_vs_C6_MycOff&amp;y_axis=contrast_7_lg10p_DGE_C6_MycON_vs_C6_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 45:</strong> Volcano plot for differential gene expression comparison DGE C6 MycON vs C6 MycOff. Download a pdf of this figure <a href="report_figures/Volcano_Plot_DGE_C6_MycON_vs_C6_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_7_logFC_DGE_C6_MycON_vs_C6_MycOff&y_axis=contrast_7_lg10p_DGE_C6_MycON_vs_C6_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="volcano_plot_dge_c7_mycon_vs_c7_mycoff" class="section level4">
+<h4>Volcano_Plot_DGE_C7_MycON_vs_C7_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Volcano_DGE_Volcano_Plot_DGE_C7_MycON_vs_C7_MycOff-1.svg" alt="**Figure 46:**  Volcano plot for differential gene expression comparison DGE C7 MycON vs C7 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/Volcano_Plot_DGE_C7_MycON_vs_C7_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_8_logFC_DGE_C7_MycON_vs_C7_MycOff&amp;y_axis=contrast_8_lg10p_DGE_C7_MycON_vs_C7_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 46:</strong> Volcano plot for differential gene expression comparison DGE C7 MycON vs C7 MycOff. Download a pdf of this figure <a href="report_figures/Volcano_Plot_DGE_C7_MycON_vs_C7_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_8_logFC_DGE_C7_MycON_vs_C7_MycOff&y_axis=contrast_8_lg10p_DGE_C7_MycON_vs_C7_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="volcano_plot_dge_c8_mycon_vs_c8_mycoff" class="section level4">
+<h4>Volcano_Plot_DGE_C8_MycON_vs_C8_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Volcano_DGE_Volcano_Plot_DGE_C8_MycON_vs_C8_MycOff-1.svg" alt="**Figure 47:**  Volcano plot for differential gene expression comparison DGE C8 MycON vs C8 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/Volcano_Plot_DGE_C8_MycON_vs_C8_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_9_logFC_DGE_C8_MycON_vs_C8_MycOff&amp;y_axis=contrast_9_lg10p_DGE_C8_MycON_vs_C8_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 47:</strong> Volcano plot for differential gene expression comparison DGE C8 MycON vs C8 MycOff. Download a pdf of this figure <a href="report_figures/Volcano_Plot_DGE_C8_MycON_vs_C8_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_9_logFC_DGE_C8_MycON_vs_C8_MycOff&y_axis=contrast_9_lg10p_DGE_C8_MycON_vs_C8_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="volcano_plot_dge_c9_mycon_vs_c9_mycoff" class="section level4">
+<h4>Volcano_Plot_DGE_C9_MycON_vs_C9_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Volcano_DGE_Volcano_Plot_DGE_C9_MycON_vs_C9_MycOff-1.svg" alt="**Figure 48:**  Volcano plot for differential gene expression comparison DGE C9 MycON vs C9 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/Volcano_Plot_DGE_C9_MycON_vs_C9_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_10_logFC_DGE_C9_MycON_vs_C9_MycOff&amp;y_axis=contrast_10_lg10p_DGE_C9_MycON_vs_C9_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 48:</strong> Volcano plot for differential gene expression comparison DGE C9 MycON vs C9 MycOff. Download a pdf of this figure <a href="report_figures/Volcano_Plot_DGE_C9_MycON_vs_C9_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_10_logFC_DGE_C9_MycON_vs_C9_MycOff&y_axis=contrast_10_lg10p_DGE_C9_MycON_vs_C9_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="volcano_plot_dge_c10_mycon_vs_c10_mycoff" class="section level4">
+<h4>Volcano_Plot_DGE_C10_MycON_vs_C10_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Volcano_DGE_Volcano_Plot_DGE_C10_MycON_vs_C10_MycOff-1.svg" alt="**Figure 49:**  Volcano plot for differential gene expression comparison DGE C10 MycON vs C10 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/Volcano_Plot_DGE_C10_MycON_vs_C10_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_11_logFC_DGE_C10_MycON_vs_C10_MycOff&amp;y_axis=contrast_11_lg10p_DGE_C10_MycON_vs_C10_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 49:</strong> Volcano plot for differential gene expression comparison DGE C10 MycON vs C10 MycOff. Download a pdf of this figure <a href="report_figures/Volcano_Plot_DGE_C10_MycON_vs_C10_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_11_logFC_DGE_C10_MycON_vs_C10_MycOff&y_axis=contrast_11_lg10p_DGE_C10_MycON_vs_C10_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="volcano_plot_dge_c11_mycon_vs_c11_mycoff" class="section level4">
+<h4>Volcano_Plot_DGE_C11_MycON_vs_C11_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Volcano_DGE_Volcano_Plot_DGE_C11_MycON_vs_C11_MycOff-1.svg" alt="**Figure 50:**  Volcano plot for differential gene expression comparison DGE C11 MycON vs C11 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/Volcano_Plot_DGE_C11_MycON_vs_C11_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_12_logFC_DGE_C11_MycON_vs_C11_MycOff&amp;y_axis=contrast_12_lg10p_DGE_C11_MycON_vs_C11_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 50:</strong> Volcano plot for differential gene expression comparison DGE C11 MycON vs C11 MycOff. Download a pdf of this figure <a href="report_figures/Volcano_Plot_DGE_C11_MycON_vs_C11_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_12_logFC_DGE_C11_MycON_vs_C11_MycOff&y_axis=contrast_12_lg10p_DGE_C11_MycON_vs_C11_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="volcano_plot_dge_c12_mycon_vs_c12_mycoff" class="section level4">
+<h4>Volcano_Plot_DGE_C12_MycON_vs_C12_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Volcano_DGE_Volcano_Plot_DGE_C12_MycON_vs_C12_MycOff-1.svg" alt="**Figure 51:**  Volcano plot for differential gene expression comparison DGE C12 MycON vs C12 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/Volcano_Plot_DGE_C12_MycON_vs_C12_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_13_logFC_DGE_C12_MycON_vs_C12_MycOff&amp;y_axis=contrast_13_lg10p_DGE_C12_MycON_vs_C12_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 51:</strong> Volcano plot for differential gene expression comparison DGE C12 MycON vs C12 MycOff. Download a pdf of this figure <a href="report_figures/Volcano_Plot_DGE_C12_MycON_vs_C12_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_13_logFC_DGE_C12_MycON_vs_C12_MycOff&y_axis=contrast_13_lg10p_DGE_C12_MycON_vs_C12_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="volcano_plot_dge_c13_mycon_vs_c13_mycoff" class="section level4">
+<h4>Volcano_Plot_DGE_C13_MycON_vs_C13_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Volcano_DGE_Volcano_Plot_DGE_C13_MycON_vs_C13_MycOff-1.svg" alt="**Figure 52:**  Volcano plot for differential gene expression comparison DGE C13 MycON vs C13 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/Volcano_Plot_DGE_C13_MycON_vs_C13_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_14_logFC_DGE_C13_MycON_vs_C13_MycOff&amp;y_axis=contrast_14_lg10p_DGE_C13_MycON_vs_C13_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 52:</strong> Volcano plot for differential gene expression comparison DGE C13 MycON vs C13 MycOff. Download a pdf of this figure <a href="report_figures/Volcano_Plot_DGE_C13_MycON_vs_C13_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_14_logFC_DGE_C13_MycON_vs_C13_MycOff&y_axis=contrast_14_lg10p_DGE_C13_MycON_vs_C13_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="volcano_plot_dge_c14_mycon_vs_c14_mycoff" class="section level4">
+<h4>Volcano_Plot_DGE_C14_MycON_vs_C14_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Volcano_DGE_Volcano_Plot_DGE_C14_MycON_vs_C14_MycOff-1.svg" alt="**Figure 53:**  Volcano plot for differential gene expression comparison DGE C14 MycON vs C14 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/Volcano_Plot_DGE_C14_MycON_vs_C14_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_15_logFC_DGE_C14_MycON_vs_C14_MycOff&amp;y_axis=contrast_15_lg10p_DGE_C14_MycON_vs_C14_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 53:</strong> Volcano plot for differential gene expression comparison DGE C14 MycON vs C14 MycOff. Download a pdf of this figure <a href="report_figures/Volcano_Plot_DGE_C14_MycON_vs_C14_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_15_logFC_DGE_C14_MycON_vs_C14_MycOff&y_axis=contrast_15_lg10p_DGE_C14_MycON_vs_C14_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="volcano_plot_dge_c15_mycon_vs_c15_mycoff" class="section level4">
+<h4>Volcano_Plot_DGE_C15_MycON_vs_C15_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Volcano_DGE_Volcano_Plot_DGE_C15_MycON_vs_C15_MycOff-1.svg" alt="**Figure 54:**  Volcano plot for differential gene expression comparison DGE C15 MycON vs C15 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/Volcano_Plot_DGE_C15_MycON_vs_C15_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_16_logFC_DGE_C15_MycON_vs_C15_MycOff&amp;y_axis=contrast_16_lg10p_DGE_C15_MycON_vs_C15_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 54:</strong> Volcano plot for differential gene expression comparison DGE C15 MycON vs C15 MycOff. Download a pdf of this figure <a href="report_figures/Volcano_Plot_DGE_C15_MycON_vs_C15_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_16_logFC_DGE_C15_MycON_vs_C15_MycOff&y_axis=contrast_16_lg10p_DGE_C15_MycON_vs_C15_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="volcano_plot_dge_c16_mycon_vs_c16_mycoff" class="section level4">
+<h4>Volcano_Plot_DGE_C16_MycON_vs_C16_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Volcano_DGE_Volcano_Plot_DGE_C16_MycON_vs_C16_MycOff-1.svg" alt="**Figure 55:**  Volcano plot for differential gene expression comparison DGE C16 MycON vs C16 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/Volcano_Plot_DGE_C16_MycON_vs_C16_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_17_logFC_DGE_C16_MycON_vs_C16_MycOff&amp;y_axis=contrast_17_lg10p_DGE_C16_MycON_vs_C16_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 55:</strong> Volcano plot for differential gene expression comparison DGE C16 MycON vs C16 MycOff. Download a pdf of this figure <a href="report_figures/Volcano_Plot_DGE_C16_MycON_vs_C16_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_17_logFC_DGE_C16_MycON_vs_C16_MycOff&y_axis=contrast_17_lg10p_DGE_C16_MycON_vs_C16_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="volcano_plot_dge_c17_mycon_vs_c17_mycoff" class="section level4">
+<h4>Volcano_Plot_DGE_C17_MycON_vs_C17_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Volcano_DGE_Volcano_Plot_DGE_C17_MycON_vs_C17_MycOff-1.svg" alt="**Figure 56:**  Volcano plot for differential gene expression comparison DGE C17 MycON vs C17 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/Volcano_Plot_DGE_C17_MycON_vs_C17_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_18_logFC_DGE_C17_MycON_vs_C17_MycOff&amp;y_axis=contrast_18_lg10p_DGE_C17_MycON_vs_C17_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 56:</strong> Volcano plot for differential gene expression comparison DGE C17 MycON vs C17 MycOff. Download a pdf of this figure <a href="report_figures/Volcano_Plot_DGE_C17_MycON_vs_C17_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_18_logFC_DGE_C17_MycON_vs_C17_MycOff&y_axis=contrast_18_lg10p_DGE_C17_MycON_vs_C17_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+</div>
+<div id="volcano_plot_dge_c18_mycon_vs_c18_mycoff" class="section level4">
+<h4>Volcano_Plot_DGE_C18_MycON_vs_C18_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/Volcano_DGE_Volcano_Plot_DGE_C18_MycON_vs_C18_MycOff-1.svg" alt="**Figure 57:**  Volcano plot for differential gene expression comparison DGE C18 MycON vs C18 MycOff. Download a pdf of this figure &lt;a href=&quot;report_figures/Volcano_Plot_DGE_C18_MycON_vs_C18_MycOff.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. An interactive version of this figure can be found &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_19_logFC_DGE_C18_MycON_vs_C18_MycOff&amp;y_axis=contrast_19_lg10p_DGE_C18_MycON_vs_C18_MycOff&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.  An Excel table with the DGE results can be downloaded &lt;a href=&quot;https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. " width="672" />
+<p class="caption">
+<strong>Figure 57:</strong> Volcano plot for differential gene expression comparison DGE C18 MycON vs C18 MycOff. Download a pdf of this figure <a href="report_figures/Volcano_Plot_DGE_C18_MycON_vs_C18_MycOff.V20230601.pdf" target="_blank">here</a>. An interactive version of this figure can be found <a href="https://biologic.crick.ac.uk/PDACmyc/scatterplot?x_axis=contrast_19_logFC_DGE_C18_MycON_vs_C18_MycOff&y_axis=contrast_19_lg10p_DGE_C18_MycON_vs_C18_MycOff" target="_blank">here</a>. An Excel table with the DGE results can be downloaded <a href="https://biologic.crick.ac.uk/mdata/PDACmyc/html/report_tables/PDACmyc.DGE.table.xlsx" target="_blank">here</a>.
+</p>
+</div>
+<pre class="r"><code>Obio@dbDetailList$db.user &lt;- &quot;babs&quot;
+## Create enriched genes list ##
+EnrichedGenesList &lt;- list()
+dfAllPlots &lt;- Obio@dataTableList[[&quot;DGE_table&quot;]] 
+
+if (Obio@parameterList$geneIDcolumn != &quot;mgi_symbol&quot; &amp; Obio@parameterList$geneIDcolumn != &quot;hgnc_symbol&quot;) {
+            queryGS &lt;- &quot;hgnc_symbol&quot; 
+        } else {
+            queryGS &lt;- Obio@parameterList$geneIDcolumn
+        }
+
+for (i in 1:length(DGEtagVec)){
+    tag &lt;- paste0(&quot;MA_Plot_&quot;, DGEtagVec[i])  
+    tagGLpos &lt;- paste0(DGEtagVec[i], &quot;_pos&quot;) 
+    tagGLneg &lt;- paste0(DGEtagVec[i], &quot;_neg&quot;) 
+    
+    selVec &lt;- c(
+        &quot;gene&quot;,
+        names(dfAllPlots)[grep(paste0(DGEtagVec[i], &quot;$&quot;), names(dfAllPlots))]
+    )
+    
+    dfPlot &lt;- dfAllPlots[,selVec]
+    pos &lt;- grep(&quot;included&quot;, names(dfPlot))
+    if (length(pos) == 0){
+        dfPlot[[&quot;included&quot;]] &lt;- &quot;+&quot;
+    }
+    
+    logFCtwoSD &lt;- 2*sd(dfPlot[,grep(&quot;_logFC_&quot;, names(dfPlot))])
+    
+    dfPlot[[&quot;DGE_Status&quot;]] &lt;- &quot;Unchanged&quot;
+    dfPlot[dfPlot[,grep(&quot;_logFC_&quot;, names(dfPlot))] &gt; logFCtwoSD &amp; dfPlot[,grep(&quot;_padj_&quot;, names(dfPlot))] &lt; 0.05, &quot;DGE_Status&quot;] &lt;- &quot;Up&quot;
+    EnrichedGenesList[[tagGLpos]] &lt;- unique(dfPlot[dfPlot$DGE_Status == &quot;Up&quot;, &quot;gene&quot;])
+    
+    dfPlot[dfPlot[,grep(&quot;_logFC_&quot;, names(dfPlot))] &lt; -1 *logFCtwoSD &amp; dfPlot[,grep(&quot;_padj_&quot;, names(dfPlot))] &lt; 0.05, &quot;DGE_Status&quot;] &lt;- &quot;Down&quot;
+    EnrichedGenesList[[tagGLneg]] &lt;- unique(dfPlot[dfPlot$DGE_Status == &quot;Down&quot;, &quot;gene&quot;])
+} 
+
+#library(knitr::)
+#library(ggplot2)
+
+#save.image(&quot;temp.RData&quot;)
+#library(clusterProfiler)
+
+    gmtList &lt;- list()
+    pos &lt;- grep(&quot;clusterSigEnrichmentList&quot;, slotNames(Obio))
+    
+    if (length(pos) &gt; 0){
+    if (is.null(Obio@clusterSigEnrichmentList)){
+      dbtableList &lt;- list(
+          &quot;Cell Type Signatures&quot; = &quot;mysigdb_sc_sig&quot;,
+          &quot;Cell Type Signatures&quot; = &quot;cibersort_L22&quot;,
+          &quot;GO-MF&quot; = &quot;mysigdb_c5_MF&quot;,
+          &quot;Pathways&quot; = &quot;mysigdb_c2_1329_canonical_pathways&quot;,
+          &quot;Protein Complexes&quot; = &quot;networkcategories&quot;
+      )
+    } else {
+        dbtableList &lt;- Obio@clusterSigEnrichmentList
+    }
+    } else {
+      dbtableList &lt;- list(
+          &quot;Cell Type Signatures&quot; = &quot;mysigdb_sc_sig&quot;,
+          &quot;Cell Type Signatures&quot; = &quot;cibersort_L22&quot;,
+          &quot;GO-MF&quot; = &quot;mysigdb_c5_MF&quot;,
+          &quot;Pathways&quot; = &quot;mysigdb_c2_1329_canonical_pathways&quot;,
+          &quot;Protein Complexes&quot; = &quot;networkcategories&quot;
+      )
+    }
+    
+    
+    rmVec &lt;- grep(&quot;Cell Type Signatures&quot;, names(dbtableList))
+    if (length(rmVec) &gt; 0){
+        dbtableList &lt;- dbtableList[-rmVec]
+    }
+    
+    for (i in 1:length(dbtableList)){
+        
+        dfTemp &lt;- unique(import.db.table.from.db(
+            host = Obio@dbDetailList$host,
+            dbname = Obio@dbDetailList$ref.cat.db,
+            dbtable = dbtableList [[i]],
+            password = db.pwd,
+            user = Obio@dbDetailList$db.user
+        ))
+        
+        ## Remove duplicated entries ##
+        dfTemp &lt;- dfTemp[!(duplicated(dfTemp$cat_name)),]
+        
+        rmVec &lt;- grep(&quot;temp_&quot;, dfTemp$cat_type)
+        if (length(rmVec) &gt; 0){
+            dfTemp &lt;- dfTemp[-rmVec, ]
+        }
+        
+        dfTemp &lt;- unique(dbcat2gmt(
+            dfTemp, # As downloaded from reference_categories_db_new database
+            gene.id.column = queryGS
+        ))
+        
+        dfTemp &lt;- unique(dfTemp[!duplicated(as.vector(dfTemp[,1])), ])
+        
+        write.table(
+            dfTemp,
+            &quot;temp.gmt.txt&quot;,
+            row.names = F, 
+            sep = &quot;\t&quot;,
+            col.names = F,
+            quote = F
+        )
+        
+        CPgmt &lt;- clusterProfiler::read.gmt(&quot;temp.gmt.txt&quot;)
+        unlink(&quot;temp.gmt.txt&quot;)
+        CPgmt &lt;- unique(CPgmt[CPgmt$gene != &quot;&quot;, ])
+        
+        gmtList[[dbtableList[[i]]]] &lt;- CPgmt
+    }
+    
+    ## Edit collection names for plot
+    names(gmtList) &lt;- gsub(&quot;mysigdb_&quot;, &quot;&quot;,names(gmtList))
+    names(gmtList) &lt;- gsub(&quot;c2_1329_canonical_p&quot;, &quot;P&quot;,names(gmtList))
+    names(gmtList) &lt;- gsub(&quot;sc_sig&quot;, &quot;CellSig&quot;,names(gmtList))
+    names(gmtList) &lt;- gsub(&quot;cibersort_L22&quot;, &quot;CellSig&quot;,names(gmtList))
+    names(gmtList) &lt;- gsub(&quot;c5_&quot;, &quot;GO_&quot;,names(gmtList))
+    names(gmtList) &lt;- gsub(&quot;networkcategories&quot;, &quot;Complexes&quot;,names(gmtList))
+    ## Done creating gmt list
+    ###########################
+    
+    ## Select colors ##
+    #library(scales)
+    enrCols &lt;- scales::hue_pal()(length(gmtList))
+    names(enrCols) &lt;- substr(names(gmtList),1,10)
+
+
+
+plotList &lt;- list()
+chnkVec &lt;- as.vector(NULL, mode = &quot;character&quot;)
+
+
+
+for (j in 1:length(DGEtagVec)){
+    posTestGeneSet &lt;- as.vector(
+        unique(
+            EnrichedGenesList[[paste0(DGEtagVec[j], &quot;_pos&quot;)]]
+        )
+    )
+    
+    
+    negTestGeneSet &lt;- as.vector(
+        unique(
+            EnrichedGenesList[[paste0(DGEtagVec[j], &quot;_neg&quot;)]]
+        )
+    )
+   
+    
+    ###########################################################################
+    ## Create GMT file for category enrichment                               ##
+    
+    ###########################
+    ## Create gmt list
+    ## Retrieve gmt files from database
+    ## Add custom gmt files
+    
+    
+    
+    
+    ## Done                                                                  ##
+    ###########################################################################
+     
+    #library(clusterProfiler)
+    #library(ggplot2)
+    #library(tidyr)
+        
+        if (Obio@parameterList$geneIDcolumn != &quot;mgi_symbol&quot; &amp; Obio@parameterList$geneIDcolumn != &quot;hgnc_symbol&quot;) {
+            queryGS &lt;- &quot;hgnc_symbol&quot; 
+        } else {
+            queryGS &lt;- Obio@parameterList$geneIDcolumn
+        }
+        
+        if (Obio@parameterList$host == &quot;10.27.241.234&quot;){
+            urlString &lt;- &quot;biologic.thecrick.org&quot;
+        } else {
+            urlString &lt;- &quot;biologic.crick.ac.uk&quot;
+        }
+    
+    colVec &lt;- c(&quot;#009900&quot;, &quot;#000080&quot;)
+    pvalueCutoff &lt;- 0.5
+    topMaxCat &lt;- 10
+    
+    ## Get background gene set ##
+    #backgroundGeneVec &lt;- row.names(OsC[[&quot;RNA&quot;]]@counts)
+    if ((length(posTestGeneSet) &gt;= 3) | (length(negTestGeneSet) &gt;= 3)){
+        ## Do enrichment ##
+        first &lt;- TRUE
+        if (length(posTestGeneSet) &gt;= 3){
+            for (k in 1:length(gmtList)){
+                    egmt &lt;- data.frame(
+                        clusterProfiler::enricher(
+                            negTestGeneSet, 
+                            TERM2GENE=gmtList[[k]],
+                            pvalueCutoff = pvalueCutoff
+                        )
+                    )
+                    if (!is.null(egmt)){
+                        if (nrow(egmt) &gt; 0){
+                            egmt[[&quot;Collection&quot;]] &lt;- substr(names(gmtList)[k], 1,10)
+                        }
+                        if (first){
+                            dfTempEnriched &lt;- egmt    
+                            first &lt;- FALSE
+                        } else {
+                            dfTempEnriched &lt;- rbind(
+                                dfTempEnriched, 
+                                egmt
+                            )    
+                        }
+                        
+                    }
+            }
+           
+            if (exists(&quot;dfTempEnriched&quot;) &amp;&amp; nrow(dfTempEnriched) &gt; 0){
+                dfTempEnriched[[&quot;direction&quot;]] &lt;- &quot;positive&quot;
+                dfTempEnriched[[&quot;log10FDR&quot;]] &lt;- log10(dfTempEnriched$p.adjust)
+                dfTempEnriched &lt;- dfTempEnriched[order(dfTempEnriched$log10FDR, decreasing = F),]
+                dfTempEnriched &lt;- na.omit(dfTempEnriched)
+                dfEnriched &lt;- dfTempEnriched
+                
+                if (nrow(dfTempEnriched) &gt; topMaxCat){
+                    dfTempEnriched &lt;- dfTempEnriched[1:topMaxCat, ]
+                }
+            }
+          
+            
+        } # end positive
+            
+            ## Now the negative side ##
+            if (length(negTestGeneSet) &gt;= 3){
+            first &lt;- TRUE
+            for (k in 1:length(gmtList)){
+                    egmt &lt;- data.frame(
+                        clusterProfiler::enricher(
+                            posTestGeneSet, 
+                            TERM2GENE=gmtList[[k]],
+                            pvalueCutoff = pvalueCutoff
+                        )
+                    )
+                    if (!is.null(egmt)){
+                        if (nrow(egmt) &gt; 0){
+                            egmt[[&quot;Collection&quot;]] &lt;- substr(names(gmtList)[k], 1,10)
+                        }
+                        if (first){
+                            dfTempEnrichedNeg &lt;- egmt    
+                            first &lt;- FALSE
+                        } else {
+                            dfTempEnrichedNeg &lt;- rbind(
+                                dfTempEnrichedNeg, 
+                                egmt
+                            )    
+                        }
+                        
+                    } 
+            }
+            if (exists(&quot;dfTempEnrichedNeg&quot;) &amp;&amp; nrow(dfTempEnrichedNeg) &gt; 0){
+                dfTempEnrichedNeg[[&quot;direction&quot;]] &lt;- &quot;negative&quot;
+                dfTempEnrichedNeg[[&quot;log10FDR&quot;]] &lt;- -1*log10(dfTempEnrichedNeg$p.adjust)
+                dfTempEnrichedNeg &lt;- dfTempEnrichedNeg[order(dfTempEnrichedNeg$log10FDR, decreasing = T),]
+                dfTempEnrichedNeg &lt;- na.omit(dfTempEnrichedNeg)
+                dfEnrichedNeg &lt;- dfTempEnrichedNeg
+                
+                if (nrow(dfTempEnrichedNeg) &gt; topMaxCat){
+                    dfTempEnrichedNeg &lt;- dfTempEnrichedNeg[1:topMaxCat, ]
+                }
+            }
+            } # end negative
+        
+            
+            
+            ## Make plot 
+            if ((nrow(dfTempEnriched) &gt; 0) | (nrow(dfTempEnrichedNeg) &gt; 0)){
+            
+            
+            
+            
+            dfSel &lt;- rbind(
+                dfTempEnriched,
+                dfTempEnrichedNeg
+            )
+            
+            dfSel &lt;- na.omit(dfSel)
+            dfSel &lt;- dfSel[order(dfSel$log10FDR),]
+            dfSel$log10FDR &lt;- round(dfSel$log10FDR, 2)
+            
+            dfSel[[&quot;Category&quot;]] &lt;- &quot;&quot;
+            dfSel[dfSel$log10FDR &gt;= 0, &quot;Category&quot;] &lt;- &quot;Enr.&quot;
+            dfSel[dfSel$log10FDR &lt; 0, &quot;Category&quot;] &lt;- &quot;Depl.&quot;
+            
+            for (l in 1:nrow(dfSel)){
+                if (nchar(dfSel[l, &quot;ID&quot;]) &gt; 30){
+                    part1 &lt;- substr(dfSel[l, &quot;ID&quot;], 1, 30)
+                    part2 &lt;- substr(dfSel[l, &quot;ID&quot;], 31, 60)
+                    dfSel[l, &quot;ID&quot;] &lt;- paste0(part1, &quot; \n &quot;, part2)
+                  
+                }
+            }
+            
+            
+            #dfSel$Term &lt;- gsub(&quot;\\(GO&quot;, &quot;\\\n\\(GO&quot;, dfSel$Term)
+            
+            dfSel$ID &lt;- factor(dfSel$ID, levels = unique(dfSel$ID))
+            
+            
+            
+            plotList[[paste0(&quot;PCA_ENR_&quot;, j)]] &lt;- ggplot2::ggplot(
+                data=dfSel, ggplot2::aes(x= ID, y=log10FDR, fill=Collection, order=log10FDR)
+            ) + ggplot2::geom_bar(stat=&quot;identity&quot;, colour=&quot;black&quot;
+            ) + ggplot2::coord_flip() + ggplot2::scale_fill_manual(values=enrCols
+            ) + ggplot2::theme_bw(
+            )  +  ggplot2::theme(
+                axis.text.y   = ggplot2::element_text(size=8),
+                axis.text.x   = ggplot2::element_text(size=8),
+                axis.title.y  = ggplot2::element_text(size=8),
+                axis.title.x  = ggplot2::element_text(size=8),
+                axis.line = ggplot2::element_line(colour = &quot;black&quot;),
+                panel.border = ggplot2::element_rect(colour = &quot;black&quot;, fill=NA, size=1),
+                plot.title = ggplot2::element_text(hjust = 0.5, size = 12)
+            )  + ggplot2::labs(title = paste0(&quot;Comparison &quot;, DGEtagVec[j],&quot; enriched genes&quot;) ,y = &quot;-log10(FDR)&quot;, x = &quot;&quot;
+            ) + ggplot2::geom_hline(yintercept = c(-log10(0.05), log10(0.05)), color = &quot;grey&quot;, size=0.5, lty=2
+            ) + ggplot2::geom_hline(yintercept = 0, color = &quot;black&quot;, size=0.5
+            ) 
+            cat(&quot;  \n&quot;)
+            
+            
+            
+            ## Save to file ##
+            FNbase &lt;- paste0(&quot;DGE_comparison_&quot;, DGEtagVec[j],&quot;.enriched.genes&quot;, VersionPdfExt)
+            FN &lt;- paste0(Obio@parameterList$reportFigDir, FNbase)
+            FNrel &lt;- paste0(&quot;report_figures/&quot;, FNbase)
+            
+           
+            pdf(FN)
+            print(plotList[[paste0(&quot;PCA_ENR_&quot;, j)]])
+            dev.off()
+            
+            link &lt;- paste0(
+                &#39;&lt;a href=&quot;https://&#39;, urlString, &#39;/&#39;,
+                Obio@parameterList$project_id,
+                &#39;/category-view?category_type=GO-BP&quot; target=&quot;_blank&quot;&gt;CategoryView&lt;/a&gt;&#39;
+            )
+            
+            ## Create R markdown chunk ##
+            figLegend &lt;- paste0(
+                &#39;**Figure &#39;, 
+                figureCount, 
+                &#39;**: Category enrichment analysis for the top genes that have  &lt;font color = &quot;&#39;,colVec[2],&#39;&quot;&gt; the most positive &lt;/font&gt; and &lt;font color = &quot;&#39;,colVec[1],&#39;&quot;&gt;the most negative&lt;/font&gt; PCA loading values in dimension &#39;, 
+               DGEtagVec[j],
+                &#39; associated with them. Download a pdf of this figure &lt;a href=&quot;&#39;,FNrel,&#39;&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. To view these gene sets in the context of your data, go to &#39;,link,&#39; and find these categories using the search box.&#39;
+            )
+            figureCount &lt;- figureCount + 1 
+            
+            NewChnk &lt;- paste0(
+                &quot;#### &quot;, DGEtagVec[j],
+                &quot;\n```{r enrichr_&quot;,
+                j,&quot;, results=&#39;asis&#39;, echo=F, eval=TRUE, warning=FALSE, fig.cap=&#39;&quot;,
+                figLegend,&quot;&#39;}\n&quot;,
+                &quot;\n&quot;,
+                &quot;\n print(plotList[[&#39;&quot;,paste0(&quot;PCA_ENR_&quot;, j),&quot;&#39;]])&quot;,
+                &quot;\n cat(  &#39;\n&#39;)&quot;,
+                &quot;\n\n\n```\n&quot;   
+            )
+            
+            chnkVec &lt;- c(
+                chnkVec,
+                NewChnk
+            )
+            
+            
+            ####################################################################
+            ## Create full output table                                       ##
+            dfResTemp &lt;- rbind(
+                dfEnriched,
+                dfEnrichedNeg
+            )
+            
+            dfResTemp[[&quot;comparison&quot;]] &lt;- tag
+            
+            if (j==1){
+                dfResTable &lt;- dfResTemp
+            } else {
+                dfResTable &lt;- rbind(
+                    dfResTable, 
+                    dfResTemp
+                )
+            }
+            ## Done                                                           ##
+            ####################################################################
+        }
+            
+            
+            ## done with plot 
+            
+    } ## Done with per dimension loops
+}        
+     
+ 
+ 
+
+if (length(plotList) &gt; 3){
+    tabVar &lt;- &quot;.tabset .tabset-fade .tabset-dropdown&quot;
+} else {
+    tabVar &lt;- &quot;.tabset .tabset-fade .tabset-pills&quot;
+}</code></pre>
+</div>
+</div>
+<div id="category-enrichments-differential-gene-expression-results" class="section level3 tabset tabset-fade tabset-dropdown">
+<h3>Category Enrichments Differential Gene Expression Results</h3>
+<pre class="r"><code>############################################################################### Do category enrichment on clusters ##
+cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = &quot;\n&quot;))</code></pre>
+<div id="dge_c0_mycon_vs_c0_mycoff-1" class="section level4">
+<h4>DGE_C0_MycON_vs_C0_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/enrichr_1-1.svg" alt="**Figure 58**: Category enrichment analysis for the top genes that have  &lt;font color = &quot;#000080&quot;&gt; the most positive &lt;/font&gt; and &lt;font color = &quot;#009900&quot;&gt;the most negative&lt;/font&gt; PCA loading values in dimension DGE_C0_MycON_vs_C0_MycOff associated with them. Download a pdf of this figure &lt;a href=&quot;report_figures/DGE_comparison_DGE_C0_MycON_vs_C0_MycOff.enriched.genes.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. To view these gene sets in the context of your data, go to &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/category-view?category_type=GO-BP&quot; target=&quot;_blank&quot;&gt;CategoryView&lt;/a&gt; and find these categories using the search box." width="672" />
+<p class="caption">
+<strong>Figure 58</strong>: Category enrichment analysis for the top genes that have <font color = "#000080"> the most positive </font> and <font color = "#009900">the most negative</font> PCA loading values in dimension DGE_C0_MycON_vs_C0_MycOff associated with them. Download a pdf of this figure <a href="report_figures/DGE_comparison_DGE_C0_MycON_vs_C0_MycOff.enriched.genes.V20230601.pdf" target="_blank">here</a>. To view these gene sets in the context of your data, go to <a href="https://biologic.crick.ac.uk/PDACmyc/category-view?category_type=GO-BP" target="_blank">CategoryView</a> and find these categories using the search box.
+</p>
+</div>
+</div>
+<div id="dge_c1_mycon_vs_c1_mycoff-1" class="section level4">
+<h4>DGE_C1_MycON_vs_C1_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/enrichr_2-1.svg" alt="**Figure 59**: Category enrichment analysis for the top genes that have  &lt;font color = &quot;#000080&quot;&gt; the most positive &lt;/font&gt; and &lt;font color = &quot;#009900&quot;&gt;the most negative&lt;/font&gt; PCA loading values in dimension DGE_C1_MycON_vs_C1_MycOff associated with them. Download a pdf of this figure &lt;a href=&quot;report_figures/DGE_comparison_DGE_C1_MycON_vs_C1_MycOff.enriched.genes.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. To view these gene sets in the context of your data, go to &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/category-view?category_type=GO-BP&quot; target=&quot;_blank&quot;&gt;CategoryView&lt;/a&gt; and find these categories using the search box." width="672" />
+<p class="caption">
+<strong>Figure 59</strong>: Category enrichment analysis for the top genes that have <font color = "#000080"> the most positive </font> and <font color = "#009900">the most negative</font> PCA loading values in dimension DGE_C1_MycON_vs_C1_MycOff associated with them. Download a pdf of this figure <a href="report_figures/DGE_comparison_DGE_C1_MycON_vs_C1_MycOff.enriched.genes.V20230601.pdf" target="_blank">here</a>. To view these gene sets in the context of your data, go to <a href="https://biologic.crick.ac.uk/PDACmyc/category-view?category_type=GO-BP" target="_blank">CategoryView</a> and find these categories using the search box.
+</p>
+</div>
+</div>
+<div id="dge_c2_mycon_vs_c2_mycoff-1" class="section level4">
+<h4>DGE_C2_MycON_vs_C2_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/enrichr_3-1.svg" alt="**Figure 60**: Category enrichment analysis for the top genes that have  &lt;font color = &quot;#000080&quot;&gt; the most positive &lt;/font&gt; and &lt;font color = &quot;#009900&quot;&gt;the most negative&lt;/font&gt; PCA loading values in dimension DGE_C2_MycON_vs_C2_MycOff associated with them. Download a pdf of this figure &lt;a href=&quot;report_figures/DGE_comparison_DGE_C2_MycON_vs_C2_MycOff.enriched.genes.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. To view these gene sets in the context of your data, go to &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/category-view?category_type=GO-BP&quot; target=&quot;_blank&quot;&gt;CategoryView&lt;/a&gt; and find these categories using the search box." width="672" />
+<p class="caption">
+<strong>Figure 60</strong>: Category enrichment analysis for the top genes that have <font color = "#000080"> the most positive </font> and <font color = "#009900">the most negative</font> PCA loading values in dimension DGE_C2_MycON_vs_C2_MycOff associated with them. Download a pdf of this figure <a href="report_figures/DGE_comparison_DGE_C2_MycON_vs_C2_MycOff.enriched.genes.V20230601.pdf" target="_blank">here</a>. To view these gene sets in the context of your data, go to <a href="https://biologic.crick.ac.uk/PDACmyc/category-view?category_type=GO-BP" target="_blank">CategoryView</a> and find these categories using the search box.
+</p>
+</div>
+</div>
+<div id="dge_c3_mycon_vs_c3_mycoff-1" class="section level4">
+<h4>DGE_C3_MycON_vs_C3_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/enrichr_4-1.svg" alt="**Figure 61**: Category enrichment analysis for the top genes that have  &lt;font color = &quot;#000080&quot;&gt; the most positive &lt;/font&gt; and &lt;font color = &quot;#009900&quot;&gt;the most negative&lt;/font&gt; PCA loading values in dimension DGE_C3_MycON_vs_C3_MycOff associated with them. Download a pdf of this figure &lt;a href=&quot;report_figures/DGE_comparison_DGE_C3_MycON_vs_C3_MycOff.enriched.genes.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. To view these gene sets in the context of your data, go to &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/category-view?category_type=GO-BP&quot; target=&quot;_blank&quot;&gt;CategoryView&lt;/a&gt; and find these categories using the search box." width="672" />
+<p class="caption">
+<strong>Figure 61</strong>: Category enrichment analysis for the top genes that have <font color = "#000080"> the most positive </font> and <font color = "#009900">the most negative</font> PCA loading values in dimension DGE_C3_MycON_vs_C3_MycOff associated with them. Download a pdf of this figure <a href="report_figures/DGE_comparison_DGE_C3_MycON_vs_C3_MycOff.enriched.genes.V20230601.pdf" target="_blank">here</a>. To view these gene sets in the context of your data, go to <a href="https://biologic.crick.ac.uk/PDACmyc/category-view?category_type=GO-BP" target="_blank">CategoryView</a> and find these categories using the search box.
+</p>
+</div>
+</div>
+<div id="dge_c4_mycon_vs_c4_mycoff-1" class="section level4">
+<h4>DGE_C4_MycON_vs_C4_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/enrichr_5-1.svg" alt="**Figure 62**: Category enrichment analysis for the top genes that have  &lt;font color = &quot;#000080&quot;&gt; the most positive &lt;/font&gt; and &lt;font color = &quot;#009900&quot;&gt;the most negative&lt;/font&gt; PCA loading values in dimension DGE_C4_MycON_vs_C4_MycOff associated with them. Download a pdf of this figure &lt;a href=&quot;report_figures/DGE_comparison_DGE_C4_MycON_vs_C4_MycOff.enriched.genes.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. To view these gene sets in the context of your data, go to &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/category-view?category_type=GO-BP&quot; target=&quot;_blank&quot;&gt;CategoryView&lt;/a&gt; and find these categories using the search box." width="672" />
+<p class="caption">
+<strong>Figure 62</strong>: Category enrichment analysis for the top genes that have <font color = "#000080"> the most positive </font> and <font color = "#009900">the most negative</font> PCA loading values in dimension DGE_C4_MycON_vs_C4_MycOff associated with them. Download a pdf of this figure <a href="report_figures/DGE_comparison_DGE_C4_MycON_vs_C4_MycOff.enriched.genes.V20230601.pdf" target="_blank">here</a>. To view these gene sets in the context of your data, go to <a href="https://biologic.crick.ac.uk/PDACmyc/category-view?category_type=GO-BP" target="_blank">CategoryView</a> and find these categories using the search box.
+</p>
+</div>
+</div>
+<div id="dge_c5_mycon_vs_c5_mycoff-1" class="section level4">
+<h4>DGE_C5_MycON_vs_C5_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/enrichr_6-1.svg" alt="**Figure 63**: Category enrichment analysis for the top genes that have  &lt;font color = &quot;#000080&quot;&gt; the most positive &lt;/font&gt; and &lt;font color = &quot;#009900&quot;&gt;the most negative&lt;/font&gt; PCA loading values in dimension DGE_C5_MycON_vs_C5_MycOff associated with them. Download a pdf of this figure &lt;a href=&quot;report_figures/DGE_comparison_DGE_C5_MycON_vs_C5_MycOff.enriched.genes.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. To view these gene sets in the context of your data, go to &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/category-view?category_type=GO-BP&quot; target=&quot;_blank&quot;&gt;CategoryView&lt;/a&gt; and find these categories using the search box." width="672" />
+<p class="caption">
+<strong>Figure 63</strong>: Category enrichment analysis for the top genes that have <font color = "#000080"> the most positive </font> and <font color = "#009900">the most negative</font> PCA loading values in dimension DGE_C5_MycON_vs_C5_MycOff associated with them. Download a pdf of this figure <a href="report_figures/DGE_comparison_DGE_C5_MycON_vs_C5_MycOff.enriched.genes.V20230601.pdf" target="_blank">here</a>. To view these gene sets in the context of your data, go to <a href="https://biologic.crick.ac.uk/PDACmyc/category-view?category_type=GO-BP" target="_blank">CategoryView</a> and find these categories using the search box.
+</p>
+</div>
+</div>
+<div id="dge_c6_mycon_vs_c6_mycoff-1" class="section level4">
+<h4>DGE_C6_MycON_vs_C6_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/enrichr_7-1.svg" alt="**Figure 64**: Category enrichment analysis for the top genes that have  &lt;font color = &quot;#000080&quot;&gt; the most positive &lt;/font&gt; and &lt;font color = &quot;#009900&quot;&gt;the most negative&lt;/font&gt; PCA loading values in dimension DGE_C6_MycON_vs_C6_MycOff associated with them. Download a pdf of this figure &lt;a href=&quot;report_figures/DGE_comparison_DGE_C6_MycON_vs_C6_MycOff.enriched.genes.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. To view these gene sets in the context of your data, go to &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/category-view?category_type=GO-BP&quot; target=&quot;_blank&quot;&gt;CategoryView&lt;/a&gt; and find these categories using the search box." width="672" />
+<p class="caption">
+<strong>Figure 64</strong>: Category enrichment analysis for the top genes that have <font color = "#000080"> the most positive </font> and <font color = "#009900">the most negative</font> PCA loading values in dimension DGE_C6_MycON_vs_C6_MycOff associated with them. Download a pdf of this figure <a href="report_figures/DGE_comparison_DGE_C6_MycON_vs_C6_MycOff.enriched.genes.V20230601.pdf" target="_blank">here</a>. To view these gene sets in the context of your data, go to <a href="https://biologic.crick.ac.uk/PDACmyc/category-view?category_type=GO-BP" target="_blank">CategoryView</a> and find these categories using the search box.
+</p>
+</div>
+</div>
+<div id="dge_c7_mycon_vs_c7_mycoff-1" class="section level4">
+<h4>DGE_C7_MycON_vs_C7_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/enrichr_8-1.svg" alt="**Figure 65**: Category enrichment analysis for the top genes that have  &lt;font color = &quot;#000080&quot;&gt; the most positive &lt;/font&gt; and &lt;font color = &quot;#009900&quot;&gt;the most negative&lt;/font&gt; PCA loading values in dimension DGE_C7_MycON_vs_C7_MycOff associated with them. Download a pdf of this figure &lt;a href=&quot;report_figures/DGE_comparison_DGE_C7_MycON_vs_C7_MycOff.enriched.genes.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. To view these gene sets in the context of your data, go to &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/category-view?category_type=GO-BP&quot; target=&quot;_blank&quot;&gt;CategoryView&lt;/a&gt; and find these categories using the search box." width="672" />
+<p class="caption">
+<strong>Figure 65</strong>: Category enrichment analysis for the top genes that have <font color = "#000080"> the most positive </font> and <font color = "#009900">the most negative</font> PCA loading values in dimension DGE_C7_MycON_vs_C7_MycOff associated with them. Download a pdf of this figure <a href="report_figures/DGE_comparison_DGE_C7_MycON_vs_C7_MycOff.enriched.genes.V20230601.pdf" target="_blank">here</a>. To view these gene sets in the context of your data, go to <a href="https://biologic.crick.ac.uk/PDACmyc/category-view?category_type=GO-BP" target="_blank">CategoryView</a> and find these categories using the search box.
+</p>
+</div>
+</div>
+<div id="dge_c8_mycon_vs_c8_mycoff-1" class="section level4">
+<h4>DGE_C8_MycON_vs_C8_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/enrichr_9-1.svg" alt="**Figure 66**: Category enrichment analysis for the top genes that have  &lt;font color = &quot;#000080&quot;&gt; the most positive &lt;/font&gt; and &lt;font color = &quot;#009900&quot;&gt;the most negative&lt;/font&gt; PCA loading values in dimension DGE_C8_MycON_vs_C8_MycOff associated with them. Download a pdf of this figure &lt;a href=&quot;report_figures/DGE_comparison_DGE_C8_MycON_vs_C8_MycOff.enriched.genes.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. To view these gene sets in the context of your data, go to &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/category-view?category_type=GO-BP&quot; target=&quot;_blank&quot;&gt;CategoryView&lt;/a&gt; and find these categories using the search box." width="672" />
+<p class="caption">
+<strong>Figure 66</strong>: Category enrichment analysis for the top genes that have <font color = "#000080"> the most positive </font> and <font color = "#009900">the most negative</font> PCA loading values in dimension DGE_C8_MycON_vs_C8_MycOff associated with them. Download a pdf of this figure <a href="report_figures/DGE_comparison_DGE_C8_MycON_vs_C8_MycOff.enriched.genes.V20230601.pdf" target="_blank">here</a>. To view these gene sets in the context of your data, go to <a href="https://biologic.crick.ac.uk/PDACmyc/category-view?category_type=GO-BP" target="_blank">CategoryView</a> and find these categories using the search box.
+</p>
+</div>
+</div>
+<div id="dge_c9_mycon_vs_c9_mycoff-1" class="section level4">
+<h4>DGE_C9_MycON_vs_C9_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/enrichr_10-1.svg" alt="**Figure 67**: Category enrichment analysis for the top genes that have  &lt;font color = &quot;#000080&quot;&gt; the most positive &lt;/font&gt; and &lt;font color = &quot;#009900&quot;&gt;the most negative&lt;/font&gt; PCA loading values in dimension DGE_C9_MycON_vs_C9_MycOff associated with them. Download a pdf of this figure &lt;a href=&quot;report_figures/DGE_comparison_DGE_C9_MycON_vs_C9_MycOff.enriched.genes.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. To view these gene sets in the context of your data, go to &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/category-view?category_type=GO-BP&quot; target=&quot;_blank&quot;&gt;CategoryView&lt;/a&gt; and find these categories using the search box." width="672" />
+<p class="caption">
+<strong>Figure 67</strong>: Category enrichment analysis for the top genes that have <font color = "#000080"> the most positive </font> and <font color = "#009900">the most negative</font> PCA loading values in dimension DGE_C9_MycON_vs_C9_MycOff associated with them. Download a pdf of this figure <a href="report_figures/DGE_comparison_DGE_C9_MycON_vs_C9_MycOff.enriched.genes.V20230601.pdf" target="_blank">here</a>. To view these gene sets in the context of your data, go to <a href="https://biologic.crick.ac.uk/PDACmyc/category-view?category_type=GO-BP" target="_blank">CategoryView</a> and find these categories using the search box.
+</p>
+</div>
+</div>
+<div id="dge_c10_mycon_vs_c10_mycoff-1" class="section level4">
+<h4>DGE_C10_MycON_vs_C10_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/enrichr_11-1.svg" alt="**Figure 68**: Category enrichment analysis for the top genes that have  &lt;font color = &quot;#000080&quot;&gt; the most positive &lt;/font&gt; and &lt;font color = &quot;#009900&quot;&gt;the most negative&lt;/font&gt; PCA loading values in dimension DGE_C10_MycON_vs_C10_MycOff associated with them. Download a pdf of this figure &lt;a href=&quot;report_figures/DGE_comparison_DGE_C10_MycON_vs_C10_MycOff.enriched.genes.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. To view these gene sets in the context of your data, go to &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/category-view?category_type=GO-BP&quot; target=&quot;_blank&quot;&gt;CategoryView&lt;/a&gt; and find these categories using the search box." width="672" />
+<p class="caption">
+<strong>Figure 68</strong>: Category enrichment analysis for the top genes that have <font color = "#000080"> the most positive </font> and <font color = "#009900">the most negative</font> PCA loading values in dimension DGE_C10_MycON_vs_C10_MycOff associated with them. Download a pdf of this figure <a href="report_figures/DGE_comparison_DGE_C10_MycON_vs_C10_MycOff.enriched.genes.V20230601.pdf" target="_blank">here</a>. To view these gene sets in the context of your data, go to <a href="https://biologic.crick.ac.uk/PDACmyc/category-view?category_type=GO-BP" target="_blank">CategoryView</a> and find these categories using the search box.
+</p>
+</div>
+</div>
+<div id="dge_c11_mycon_vs_c11_mycoff-1" class="section level4">
+<h4>DGE_C11_MycON_vs_C11_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/enrichr_12-1.svg" alt="**Figure 69**: Category enrichment analysis for the top genes that have  &lt;font color = &quot;#000080&quot;&gt; the most positive &lt;/font&gt; and &lt;font color = &quot;#009900&quot;&gt;the most negative&lt;/font&gt; PCA loading values in dimension DGE_C11_MycON_vs_C11_MycOff associated with them. Download a pdf of this figure &lt;a href=&quot;report_figures/DGE_comparison_DGE_C11_MycON_vs_C11_MycOff.enriched.genes.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. To view these gene sets in the context of your data, go to &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/category-view?category_type=GO-BP&quot; target=&quot;_blank&quot;&gt;CategoryView&lt;/a&gt; and find these categories using the search box." width="672" />
+<p class="caption">
+<strong>Figure 69</strong>: Category enrichment analysis for the top genes that have <font color = "#000080"> the most positive </font> and <font color = "#009900">the most negative</font> PCA loading values in dimension DGE_C11_MycON_vs_C11_MycOff associated with them. Download a pdf of this figure <a href="report_figures/DGE_comparison_DGE_C11_MycON_vs_C11_MycOff.enriched.genes.V20230601.pdf" target="_blank">here</a>. To view these gene sets in the context of your data, go to <a href="https://biologic.crick.ac.uk/PDACmyc/category-view?category_type=GO-BP" target="_blank">CategoryView</a> and find these categories using the search box.
+</p>
+</div>
+</div>
+<div id="dge_c12_mycon_vs_c12_mycoff-1" class="section level4">
+<h4>DGE_C12_MycON_vs_C12_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/enrichr_13-1.svg" alt="**Figure 70**: Category enrichment analysis for the top genes that have  &lt;font color = &quot;#000080&quot;&gt; the most positive &lt;/font&gt; and &lt;font color = &quot;#009900&quot;&gt;the most negative&lt;/font&gt; PCA loading values in dimension DGE_C12_MycON_vs_C12_MycOff associated with them. Download a pdf of this figure &lt;a href=&quot;report_figures/DGE_comparison_DGE_C12_MycON_vs_C12_MycOff.enriched.genes.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. To view these gene sets in the context of your data, go to &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/category-view?category_type=GO-BP&quot; target=&quot;_blank&quot;&gt;CategoryView&lt;/a&gt; and find these categories using the search box." width="672" />
+<p class="caption">
+<strong>Figure 70</strong>: Category enrichment analysis for the top genes that have <font color = "#000080"> the most positive </font> and <font color = "#009900">the most negative</font> PCA loading values in dimension DGE_C12_MycON_vs_C12_MycOff associated with them. Download a pdf of this figure <a href="report_figures/DGE_comparison_DGE_C12_MycON_vs_C12_MycOff.enriched.genes.V20230601.pdf" target="_blank">here</a>. To view these gene sets in the context of your data, go to <a href="https://biologic.crick.ac.uk/PDACmyc/category-view?category_type=GO-BP" target="_blank">CategoryView</a> and find these categories using the search box.
+</p>
+</div>
+</div>
+<div id="dge_c13_mycon_vs_c13_mycoff-1" class="section level4">
+<h4>DGE_C13_MycON_vs_C13_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/enrichr_14-1.svg" alt="**Figure 71**: Category enrichment analysis for the top genes that have  &lt;font color = &quot;#000080&quot;&gt; the most positive &lt;/font&gt; and &lt;font color = &quot;#009900&quot;&gt;the most negative&lt;/font&gt; PCA loading values in dimension DGE_C13_MycON_vs_C13_MycOff associated with them. Download a pdf of this figure &lt;a href=&quot;report_figures/DGE_comparison_DGE_C13_MycON_vs_C13_MycOff.enriched.genes.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. To view these gene sets in the context of your data, go to &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/category-view?category_type=GO-BP&quot; target=&quot;_blank&quot;&gt;CategoryView&lt;/a&gt; and find these categories using the search box." width="672" />
+<p class="caption">
+<strong>Figure 71</strong>: Category enrichment analysis for the top genes that have <font color = "#000080"> the most positive </font> and <font color = "#009900">the most negative</font> PCA loading values in dimension DGE_C13_MycON_vs_C13_MycOff associated with them. Download a pdf of this figure <a href="report_figures/DGE_comparison_DGE_C13_MycON_vs_C13_MycOff.enriched.genes.V20230601.pdf" target="_blank">here</a>. To view these gene sets in the context of your data, go to <a href="https://biologic.crick.ac.uk/PDACmyc/category-view?category_type=GO-BP" target="_blank">CategoryView</a> and find these categories using the search box.
+</p>
+</div>
+</div>
+<div id="dge_c14_mycon_vs_c14_mycoff-1" class="section level4">
+<h4>DGE_C14_MycON_vs_C14_MycOff</h4>
+<div class="figure">
+<img src="DGE_Analysis_files/figure-html/enrichr_15-1.svg" alt="**Figure 72**: Category enrichment analysis for the top genes that have  &lt;font color = &quot;#000080&quot;&gt; the most positive &lt;/font&gt; and &lt;font color = &quot;#009900&quot;&gt;the most negative&lt;/font&gt; PCA loading values in dimension DGE_C14_MycON_vs_C14_MycOff associated with them. Download a pdf of this figure &lt;a href=&quot;report_figures/DGE_comparison_DGE_C14_MycON_vs_C14_MycOff.enriched.genes.V20230601.pdf&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. To view these gene sets in the context of your data, go to &lt;a href=&quot;https://biologic.crick.ac.uk/PDACmyc/category-view?category_type=GO-BP&quot; target=&quot;_blank&quot;&gt;CategoryView&lt;/a&gt; and find these categories using the search box." width="672" />
+<p class="caption">
+<strong>Figure 72</strong>: Category enrichment analysis for the top genes that have <font color = "#000080"> the most positive </font> and <font color = "#009900">the most negative</font> PCA loading values in dimension DGE_C14_MycON_vs_C14_MycOff associated with them. Download a pdf of this figure <a href="report_figures/DGE_comparison_DGE_C14_MycON_vs_C14_MycOff.enriched.genes.V20230601.pdf" target="_blank">here</a>. To view these gene sets in the context of your data, go to <a href="https://biologic.crick.ac.uk/PDACmyc/category-view?category_type=GO-BP" target="_blank">CategoryView</a> and find these categories using the search box.
+</p>
+</div>
+<pre class="r"><code>## Done doing enrichment on clusters ##</code></pre>
+<pre class="r"><code>documentationParams &lt;- list(
+
+    &quot;title&quot; = &quot;Pseudobulk Differential Gene Expression Analysis&quot;,
+    &quot;subtitle&quot; =  &quot;&quot;,
+    &quot;abstract&quot; = &quot;&quot;
+
+)
+
+Obio@parameterList$lims.id &lt;- &quot;SC19235&quot;
+
+## Try to retrieve project data from db ##
+library(RMySQL)
+db.pwd2 &lt;- &quot;_asf_&quot;
+db.user2 &lt;- &quot;asf&quot;
+host2 &lt;- &quot;ms1.thecrick.org&quot;
+projectParams &lt;- documentationParams
+
+tryCatch({
+    dbDB = dbConnect(drv = RMySQL::MySQL(), user = db.user2, password = db.pwd2, host = host2, dbname = &quot;asf&quot;);
+dfProposal =  dbGetQuery(dbDB, paste0(&quot;SELECT * FROM asf_proposals WHERE project_name =&#39;&quot;,Obio@parameterList$lims.id,&quot;&#39;&quot;));
+dbDisconnect(dbDB)
+  }, error = function(x) {
+    message(&quot;Project Database could not be reached or has no entry in Obio@parameterList$lims.id for this analysis.&quot;)
+   
+})
+
+if (exists(&quot;dfProposal&quot;)){
+  if (nrow(dfProposal) == 1){
+      if (!is.na(dfProposal[1,&quot;ProjectAlias&quot;]) &amp; dfProposal[1,&quot;ProjectAlias&quot;] != &quot;&quot;){
+          projectParams[[&quot;title&quot;]] = paste0(dfProposal[1,&quot;ProjectAlias&quot;], &quot; - &quot;, dfProposal[1,&quot;project_name&quot;])
+      }
+      
+      if (!is.na(dfProposal[1,&quot;project_user&quot;]) &amp; dfProposal[1,&quot;project_user&quot;] != &quot;&quot;){
+          projectParams[[&quot;subtitle&quot;]] = paste0(dfProposal[1,&quot;user_lab&quot;], &quot; Lab - &quot;, dfProposal[1,&quot;project_user&quot;])
+          projectParams[[&quot;subtitle&quot;]] &lt;- gsub(&quot;^ Lab - &quot;, &quot;&quot;, projectParams[[&quot;subtitle&quot;]])
+          
+      }
+      
+      if (!is.na(dfProposal[1,&quot;proposal_text&quot;]) &amp; dfProposal[1,&quot;proposal_text&quot;] != &quot;&quot;){
+          projectParams[[&quot;abstract&quot;]] = dfProposal[1,&quot;proposal_text&quot;]
+         
+          
+      }
+  }
+}
+   
+## Escape all special characters
+projectParams &lt;- lapply(
+  projectParams, function(x) 
+  #gsub(&quot;([.|()\\^{}+$*?]|\\[|\\])&quot;, &quot;\\\\\1&quot;, x)
+  gsub(&quot;([.|()/\\^{}+$*?]|\\[|\\])&quot;, &quot; &quot;, x)
+) 
+
+projectParams &lt;- lapply(
+  projectParams, function(x) 
+  #gsub(&quot;([.|()\\^{}+$*?]|\\[|\\])&quot;, &quot;\\\\\1&quot;, x)
+  gsub(&quot;\\\n&quot;, &quot; &quot;, x)
+) 
+
+
+#projectParams$title &lt;- &quot;Title&quot;
+# projectParams$abstract &lt;- &quot;This is the QC section.&quot;
+#projectParams$subtitle &lt;- &quot;Abstract&quot;</code></pre>
+</div>
+</div>
+<div id="documentation" class="section level2">
+<h2>Documentation</h2>
+<pre class="r"><code>print(paste0(&quot;Analysisdirectory: &quot;, getwd()))</code></pre>
+<pre><code>## [1] &quot;Analysisdirectory: /nemo/stp/babs/working/boeings/Projects/evang/tania.campos.vidal/540_scRNAseq_PDAC_MycOff/scripts/scRNAseq/analyses/DGE_dev&quot;</code></pre>
+<pre class="r"><code>biologic_active_object_dir &lt;- paste0(Obio@parameterList$folder, &quot;data/biologic_active_object/&quot;)
+
+bFN &lt;- paste0(biologic_active_object_dir, Obio@parameterList$project_id, &quot;.bioLOGIC.Robj&quot;)
+print(paste0(&quot;bioLOGIC data object: &quot;, bFN))</code></pre>
+<pre><code>## [1] &quot;bioLOGIC data object: /camp/stp/babs/working/boeings/Projects/evang/tania.campos.vidal/540_scRNAseq_PDAC_MycOff/data/biologic_active_object/PDACmyc.bioLOGIC.Robj&quot;</code></pre>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>## R version 4.0.3 (2020-10-10)
+## Platform: x86_64-pc-linux-gnu (64-bit)
+## Running under: CentOS Linux 7 (Core)
+## 
+## Matrix products: default
+## BLAS/LAPACK: /flask/apps/eb/dev/software/OpenBLAS/0.3.9-GCC-9.3.0/lib/libopenblas_haswellp-r0.3.9.so
+## 
+## locale:
+##  [1] LC_CTYPE=en_GB.utf-8       LC_NUMERIC=C              
+##  [3] LC_TIME=en_GB.utf-8        LC_COLLATE=en_GB.utf-8    
+##  [5] LC_MONETARY=en_GB.utf-8    LC_MESSAGES=en_GB.utf-8   
+##  [7] LC_PAPER=en_GB.utf-8       LC_NAME=C                 
+##  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+## [11] LC_MEASUREMENT=en_GB.utf-8 LC_IDENTIFICATION=C       
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+## [1] openxlsx_4.1.4               RMySQL_0.10.22              
+## [3] DBI_1.1.1                    dplyr_1.0.7                 
+## [5] biologicSeqTools2_0.0.0.9000 SeuratObject_4.0.3          
+## [7] Seurat_4.0.5                
+## 
+## loaded via a namespace (and not attached):
+##   [1] utf8_1.2.2                  reticulate_1.15            
+##   [3] tidyselect_1.1.1            RSQLite_2.2.0              
+##   [5] AnnotationDbi_1.52.0        htmlwidgets_1.5.1          
+##   [7] grid_4.0.3                  BiocParallel_1.24.1        
+##   [9] Rtsne_0.15                  scatterpie_0.1.7           
+##  [11] munsell_0.5.0               codetools_0.2-18           
+##  [13] ica_1.0-2                   future_1.19.1              
+##  [15] miniUI_0.1.1.1              colorspace_2.0-2           
+##  [17] GOSemSim_2.16.1             Biobase_2.50.0             
+##  [19] highr_0.9                   knitr_1.39                 
+##  [21] stats4_4.0.3                ROCR_1.0-7                 
+##  [23] tensor_1.5                  DOSE_3.16.0                
+##  [25] listenv_0.8.0               MatrixGenerics_1.2.1       
+##  [27] labeling_0.4.2              GenomeInfoDbData_1.2.4     
+##  [29] polyclip_1.10-0             bit64_0.9-7                
+##  [31] farver_2.1.0                downloader_0.4             
+##  [33] vctrs_0.3.8                 generics_0.1.1             
+##  [35] xfun_0.30                   R6_2.5.1                   
+##  [37] GenomeInfoDb_1.26.7         graphlayouts_0.7.1         
+##  [39] locfit_1.5-9.4              bitops_1.0-6               
+##  [41] spatstat.utils_2.2-0        fgsea_1.16.0               
+##  [43] DelayedArray_0.16.3         assertthat_0.2.1           
+##  [45] promises_1.2.0.1            scales_1.1.1               
+##  [47] ggraph_2.0.5                enrichplot_1.10.2          
+##  [49] gtable_0.3.0                npsurv_0.4-0               
+##  [51] globals_0.14.0              goftest_1.2-2              
+##  [53] tidygraph_1.2.0             rlang_0.4.12               
+##  [55] genefilter_1.72.1           splines_4.0.3              
+##  [57] lazyeval_0.2.2              spatstat.geom_2.3-0        
+##  [59] BiocManager_1.30.16         yaml_2.2.1                 
+##  [61] reshape2_1.4.4              abind_1.4-5                
+##  [63] httpuv_1.6.3                qvalue_2.22.0              
+##  [65] clusterProfiler_3.18.1      tools_4.0.3                
+##  [67] ggplot2_3.3.5               ellipsis_0.3.2             
+##  [69] gplots_3.0.3                spatstat.core_2.3-1        
+##  [71] jquerylib_0.1.4             RColorBrewer_1.1-2         
+##  [73] BiocGenerics_0.36.1         ggridges_0.5.2             
+##  [75] Rcpp_1.0.9                  plyr_1.8.6                 
+##  [77] sparseMatrixStats_1.2.1     zlibbioc_1.36.0            
+##  [79] purrr_0.3.4                 RCurl_1.98-1.5             
+##  [81] rpart_4.1-15                deldir_1.0-6               
+##  [83] viridis_0.5.1               pbapply_1.4-2              
+##  [85] cowplot_1.1.1               S4Vectors_0.28.1           
+##  [87] zoo_1.8-7                   SummarizedExperiment_1.20.0
+##  [89] ggrepel_0.8.2               cluster_2.1.0              
+##  [91] magrittr_2.0.1              data.table_1.12.8          
+##  [93] glmGamPoi_1.2.0             scattermore_0.7            
+##  [95] DO.db_2.9                   lmtest_0.9-37              
+##  [97] RANN_2.6.1                  fitdistrplus_1.0-14        
+##  [99] matrixStats_0.61.0          patchwork_1.0.0            
+## [101] lsei_1.2-0                  mime_0.12                  
+## [103] evaluate_0.15               xtable_1.8-4               
+## [105] XML_3.99-0.3                IRanges_2.24.1             
+## [107] gridExtra_2.3               compiler_4.0.3             
+## [109] tibble_3.1.6                shadowtext_0.0.9           
+## [111] KernSmooth_2.23-17          crayon_1.4.2               
+## [113] htmltools_0.5.2             ggfun_0.0.6                
+## [115] mgcv_1.8-38                 later_1.3.0                
+## [117] tidyr_1.1.4                 geneplotter_1.68.0         
+## [119] tweenr_1.0.2                formatR_1.11               
+## [121] MASS_7.3-54                 rappdirs_0.3.3             
+## [123] Matrix_1.3-4                gdata_2.18.0               
+## [125] parallel_4.0.3              igraph_1.2.5               
+## [127] GenomicRanges_1.42.0        pkgconfig_2.0.3            
+## [129] rvcheck_0.2.1               plotly_4.9.2.1             
+## [131] spatstat.sparse_2.0-0       annotate_1.68.0            
+## [133] bslib_0.3.1                 XVector_0.30.0             
+## [135] yulab.utils_0.0.4           stringr_1.4.0              
+## [137] digest_0.6.28               sctransform_0.3.2          
+## [139] RcppAnnoy_0.0.19            spatstat.data_2.1-0        
+## [141] rmarkdown_2.13              leiden_0.3.3               
+## [143] fastmatch_1.1-3             uwot_0.1.10                
+## [145] DelayedMatrixStats_1.12.3   shiny_1.7.1                
+## [147] gtools_3.8.2                lifecycle_1.0.1            
+## [149] nlme_3.1-153                jsonlite_1.7.2             
+## [151] viridisLite_0.4.0           fansi_0.5.0                
+## [153] pillar_1.6.4                lattice_0.20-45            
+## [155] fastmap_1.1.0               httr_1.4.2                 
+## [157] survival_3.1-12             GO.db_3.12.1               
+## [159] glue_1.5.0                  remotes_2.4.1              
+## [161] zip_2.2.0                   png_0.1-7                  
+## [163] bit_1.1-15.2                ggforce_0.3.3              
+## [165] stringi_1.7.5               sass_0.4.0                 
+## [167] blob_1.2.1                  DESeq2_1.30.1              
+## [169] caTools_1.18.0              memoise_1.1.0              
+## [171] renv_0.15.4-11              irlba_2.3.3                
+## [173] future.apply_1.4.0</code></pre>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>The Francis Crick Institute, <a href="mailto:stefan.boeing@crick.ac.uk">stefan.boeing@crick.ac.uk</a><a href="#fnref1" class="footnote-back">↩</a></p></li>
+</ol>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
