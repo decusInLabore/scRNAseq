@@ -1,5 +1,5 @@
 Project Deborah Cell Cycle Test,,,,,
-singleCellClusterParameter,0.4,,,,
+singleCellClusterParameter,0.3,,,,
 NtopGenes,2000,,,,
 scNintegrationFeatures,3000,,,,
 primReduction,umap,,,,
