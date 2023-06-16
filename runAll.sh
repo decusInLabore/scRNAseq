@@ -12,7 +12,7 @@ sleep 300
 done
 }
 
-project_id=543
+project_id=511
 project=rA_$project_id
 cd ./analyses/QC/
 #sbatch --time=24:00:00 --wrap "module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;Rscript runRmd.r QC.Rmd" --job-name=$project -p hmem --mem=600G -o ../../../../workdir/rA.$project.slurm >> ../commands.txt
