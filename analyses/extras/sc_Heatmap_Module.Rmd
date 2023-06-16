@@ -1,0 +1,275 @@
+<!-- Set PArameters Module -->
+<!-- Set the chnkPrefix to make all chunks unique in the overall folder -->
+```{r partB_create_integrated_Seurat_object_init, echo=TRUE, eval=TRUE, warning=FALSE}
+chnkPrefix <- "HMM."
+VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.Date()), ".pdf")
+
+```
+
+
+# Heatmap section
+
+## Prepare Data
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, results=F}
+
+library(biologicSeqTools2)
+
+## Load Obio file
+ObioFN <- paste0("../", list.files("..")[grep("bioLOGIC.Robj", list.files(".."))])
+load(ObioFN)
+
+## Load Seurat Object
+library(Seurat)
+## Load Seurat object
+SeuratFN <- paste0(Obio@parameterList$localWorkDir,list.files(Obio@parameterList$localWorkDir)[grep(".Seurat.Robj", list.files(Obio@parameterList$localWorkDir))])
+
+
+if (file.exists(SeuratFN)){
+    load(SeuratFN)
+    print(paste0("Obio object ", Obio@parameterList$localWorkDir,SeuratFN, " exists and is loaded."))
+    
+} else {
+    exit()
+}
+
+## Get the gene set for plotting
+## Make general markers heatmpa ##
+dfGeneralMarkers <- Obio@dataTableList$dfGeneralMarkers 
+dfGeneralMarkersPos <- dfGeneralMarkers[dfGeneralMarkers$avg_diff > 0,]
+
+Nsel <- 1
+Ncluster <- length(unique(OsC@meta.data$clusterName))
+
+geneVec <- as.vector(NULL, mode="character")
+
+library(dplyr)
+
+while(length(geneVec) < 5*Ncluster & Nsel < nrow(dfGeneralMarkersPos)){
+    geneVec <-  as.vector(unique(data.frame(dfGeneralMarkersPos %>% group_by(cluster) %>% top_n(Nsel, avg_diff))[,"gene"]))
+    Nsel <- Nsel + 1
+}
+
+
+
+```
+
+## Prepare Plots 1
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, results=F}
+###############################################################################
+## Do percent mt plots  
+
+
+library("RColorBrewer")
+library("Seurat")
+library("ggplot2")
+library("viridis")
+#library("scMCA")
+library("circlize")
+library("ComplexHeatmap")
+
+
+
+## Complex heatmap of cell/celltype correlations using just the top annotation per cell.  It's split by seurat cluster.
+numbers_plot <- 1
+cors       <-  data.frame(OsC[["RNA"]]@data)
+#cors_index <- apply(cors, 2, gettissue, numbers_plot)
+#cors_index <- sort(unique(as.integer(cors_index)))
+heat.dat   <- cors[geneVec, ]
+#heat.dat   <- t(apply(heat.dat,1,function(x){(x-mean(x))/sd(x)}))
+heat.dat   <- t(apply(heat.dat,1,function(x){log2((x/mean(x)))}))
+heat.dat[heat.dat == -Inf] <- 0
+
+dfCol <- unique(OsC@meta.data[,c("clusterColor", "clusterName")])
+colVec <- dfCol$clusterColor
+names(colVec) <- dfCol$clusterName
+
+ht.anno <- HeatmapAnnotation(
+    Cluster =  OsC@meta.data$clusterName,
+    col = list(
+        Cluster = colVec
+    )
+)
+#     df = data.frame(
+#         cluster = OsC@meta.data$clusterName),
+#     # col = list(
+#     #     gp = gpar(col = "white")
+#     # ),
+#     annotation_legend_param = list(direction = "horizontal")
+# )
+
+ht <- Heatmap(
+    heat.dat,
+    name                    = "log2 row mean",
+    column_title_gp         = gpar(fontsize = 8),
+    row_title_rot           = 0,
+    # column_split            = OsC@meta.data$clusterName,
+    column_split            = factor(OsC@meta.data$clusterName, levels = Obio@parameterList$clusterNameOrder),
+    cluster_column_slices = FALSE,
+    cluster_columns         = TRUE,
+    cluster_rows            = TRUE,
+    show_row_names          = TRUE,
+    show_column_names       = FALSE,
+    column_names_side       = "bottom",
+    show_column_dend        = TRUE,
+    row_dend_width          = unit(20, "mm"),
+    show_heatmap_legend     = FALSE,
+    column_names_max_height = unit(8, "cm"),
+    row_names_gp            = gpar(fontsize = 6),
+    top_annotation          = ht.anno,
+    #col                     = colorRamp2(c(-2, 0, 2),magma(3)),
+    col                     = colorRamp2(c(-3, 0, 3),c("#3060cf", "#fffbbc","#c4463a")),
+    column_names_rot        = 90,
+    border = TRUE
+) 
+draw(ht)
+```
+
+## Prepare Plots 2
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, results=F}
+###############################################################################
+## Do percent mt plots  
+
+## Get bulk results ##
+username <- "rll352B_da"
+pass <- "ibgFVXGM"
+host <- "10.27.241.82"
+db <- "rll_data"
+
+mainTB <- "rll352B_bulk_rna_seq_table"
+
+dfMainDataBulk <- biologicSeqTools2::import.db.table.from.db(
+    dbname = db,
+    dbtable = mainTB,
+    host = host,
+    user = username,
+    password = pass
+)
+
+selVec <- c(
+    "mgi_symbol",
+    names(dfMainDataBulk)[grep("contrast_2_logFC", names(dfMainDataBulk))],
+    names(dfMainDataBulk)[grep("contrast_2_padj", names(dfMainDataBulk))]
+)
+
+dfBulk <- unique(dfMainDataBulk[,selVec])
+
+cutOff <- 2*sd(dfBulk$contrast_2_logFC_p27NULL_E185OC_vs_WT_E185OC)
+
+dfSel <- dfBulk[dfBulk$contrast_2_logFC_p27NULL_E185OC_vs_WT_E185OC > 1 | dfBulk$contrast_2_logFC_p27NULL_E185OC_vs_WT_E185OC  < -1, ]
+dfSel <- dfSel[dfSel$contrast_2_padj_p27NULL_E185OC_vs_WT_E185OC < 0.05, ]
+row.names(dfSel) <- dfSel$mgi_symbol
+
+geneGroupList <- list(
+    "Up" = unique(dfSel[dfSel$contrast_2_logFC_p27NULL_E185OC_vs_WT_E185OC > 0, "mgi_symbol"]),
+    "Down" = unique(dfSel[dfSel$contrast_2_logFC_p27NULL_E185OC_vs_WT_E185OC < 0, "mgi_symbol"])
+)
+
+allGenes <- unique(as.vector(unlist(geneGroupList)))
+
+library("RColorBrewer")
+library("Seurat")
+library("ggplot2")
+library("viridis")
+#library("scMCA")
+library("circlize")
+library("ComplexHeatmap")
+
+
+
+## Complex heatmap of cell/celltype correlations using just the top annotation per cell.  It's split by seurat cluster.
+numbers_plot <- 1
+cors       <-  data.frame(OsC[["RNA"]]@data)
+#cors_index <- apply(cors, 2, gettissue, numbers_plot)
+#cors_index <- sort(unique(as.integer(cors_index)))
+allGenes <- allGenes[allGenes %in% row.names(cors)]
+
+heat.dat   <- cors[allGenes, ]
+#heat.dat   <- t(apply(heat.dat,1,function(x){(x-mean(x))/sd(x)}))
+heat.dat   <- t(apply(heat.dat,1,function(x){log2((x/mean(x)))}))
+heat.dat[heat.dat == -Inf] <- 0
+
+
+rowSplitVec <- row.names(heat.dat)   
+for (i in 1:length(geneGroupList)){
+  rowSplitVec[rowSplitVec %in% geneGroupList[[i]]] <- names(geneGroupList)[i]
+}
+
+dfCol <- unique(OsC@meta.data[,c("clusterColor", "clusterName")])
+colVec <- dfCol$clusterColor
+names(colVec) <- dfCol$clusterName
+
+dfCol2 <- unique(OsC@meta.data[,c("sampleColor", "sampleName")])
+colVec2 <- dfCol2$sampleColor
+names(colVec2) <- dfCol2$sampleName
+
+ht.anno <- HeatmapAnnotation(
+    Sample =  OsC@meta.data$sampleName,
+    Cluster =  OsC@meta.data$clusterName,
+    col = list(
+        Sample = colVec2,
+        Cluster = colVec
+    ),
+    show_legend = showAllLegends
+)
+
+
+bulkLogFC <- dfSel[allGenes, "contrast_2_logFC_p27NULL_E185OC_vs_WT_E185OC"]
+xcol <- ifelse(bulkLogFC < 0, "blue", "red")
+
+showAllLegends <- TRUE
+
+row_ha = rowAnnotation(Bulk = anno_barplot(bulkLogFC, gp = gpar(fill=xcol)),
+        show_legend = showAllLegends
+)   
+
+lrow_ha = rowAnnotation(foo = anno_block(gp = gpar(fill = c("blue", "red")),
+        labels = c("Down", "Up"), 
+        labels_gp = gpar(col = "white", fontsize = 10)),
+        show_legend = showAllLegends
+)
+#     df = data.frame(
+#         cluster = OsC@meta.data$clusterName),
+#     # col = list(
+#     #     gp = gpar(col = "white")
+#     # ),
+#     annotation_legend_param = list(direction = "horizontal")
+# )
+
+ht <- Heatmap(
+    heat.dat,
+    row_split               = rowSplitVec,
+    name                    = "log2 row mean",
+    column_title_gp         = gpar(fontsize = 8),
+    row_title_rot           = 0,
+    # column_split            = OsC@meta.data$clusterName,
+    column_split            = factor(OsC@meta.data$clusterName, levels = Obio@parameterList$clusterNameOrder),
+    cluster_column_slices   = FALSE,
+    cluster_columns         = TRUE,
+    cluster_rows            = TRUE,
+    show_row_names          = TRUE,
+    show_column_names       = FALSE,
+    column_names_side       = "bottom",
+    show_column_dend        = TRUE,
+    row_dend_width          = unit(20, "mm"),
+    show_heatmap_legend     = showAllLegends,
+    column_names_max_height = unit(8, "cm"),
+    row_names_gp            = gpar(fontsize = 6),
+    top_annotation          = ht.anno,
+    right_annotation = row_ha,
+    left_annotation = lrow_ha,
+    #col                     = colorRamp2(c(-2, 0, 2),magma(3)),
+    col                     = colorRamp2(c(-3, 0, 3),c("#3060cf", "#fffbbc","#c4463a")),
+    column_names_rot        = 90,
+    border = TRUE
+) 
+
+pdf("../html_local/report_figures/rll352B.bulk.logFC.E18.WT.MT.1.plus.rll358B.sc..withLegends.pdf")
+draw(ht)
+dev.off()
+```
+
+## Plots
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, results=F}
+###############################################################################
+## Do percent mt plots  
+```
