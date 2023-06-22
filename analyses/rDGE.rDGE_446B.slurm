@@ -1,0 +1,138 @@
+
+The following have been reloaded with a version change:
+  1) FFTW/3.3.4-gompi-2016b => FFTW/3.3.8-gompi-2020a
+  2) GCC/5.4.0-2.26 => GCC/9.3.0
+  3) GCCcore/5.4.0 => GCCcore/9.3.0
+  4) OpenBLAS/0.2.18-GCC-5.4.0-2.26-LAPACK-3.6.1 => OpenBLAS/0.3.9-GCC-9.3.0
+  5) OpenMPI/1.10.3-GCC-5.4.0-2.26 => OpenMPI/4.0.3-GCC-9.3.0
+  6) ScaLAPACK/2.0.2-gompi-2016b-OpenBLAS-0.2.18-LAPACK-3.6.1 => ScaLAPACK/2.1.0-gompi-2020a
+  7) binutils/2.26-GCCcore-5.4.0 => binutils/2.34-GCCcore-9.3.0
+  8) foss/2016b => foss/2020a
+  9) gompi/2016b => gompi/2020a
+ 10) hwloc/1.11.3-GCC-5.4.0-2.26 => hwloc/2.2.0-GCCcore-9.3.0
+ 11) numactl/2.0.11-GCC-5.4.0-2.26 => numactl/2.0.13-GCCcore-9.3.0
+
+
+
+processing file: DGE_Analysis_202306.Rmd
+  |                                                                              |                                                                      |   0%  |                                                                              |..                                                                    |   3%
+  ordinary text without R code
+
+  |                                                                              |....                                                                  |   6%
+label: setup (with options) 
+List of 1
+ $ include: logi FALSE
+
+  |                                                                              |......                                                                |   9%
+  ordinary text without R code
+
+  |                                                                              |........                                                              |  11%
+label: unnamed-chunk-1 (with options) 
+List of 1
+ $ include: logi FALSE
+
+  |                                                                              |..........                                                            |  14%
+  ordinary text without R code
+
+  |                                                                              |............                                                          |  17%
+label: unnamed-chunk-2 (with options) 
+List of 3
+ $ eval   : logi TRUE
+ $ echo   : logi FALSE
+ $ results: logi FALSE
+
+Loading required namespace: remotes
+Loading required namespace: renv
+  |                                                                              |..............                                                        |  20%
+  ordinary text without R code
+
+  |                                                                              |................                                                      |  23%
+label: unnamed-chunk-3 (with options) 
+List of 3
+ $ eval   : logi TRUE
+ $ echo   : logi TRUE
+ $ results: logi FALSE
+
+Attaching SeuratObject
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Loading required package: biologicSeqTools
+
+Attaching package: 'biologicSeqTools'
+
+The following objects are masked from 'package:biologicSeqTools2':
+
+    add.category.to.lab.reference.table.hs, add2labCatSelectionDBtable,
+    add2vec, addCoVar, addDGEcomparisons2DesignFile, addGeneAnnotation,
+    addProject2ProjectTable, addTPMorFPKMtable,
+    assignDbUsersAndPrivileges, completeDesignBasedOnSampleID,
+    create.gmt.file.from.ref.data.table, create.gsea.rnk.files,
+    create.GSEA.table, create.timecourse.cat.lines,
+    create.tpm.and.fpkm.tables, create.website.parameters,
+    createAlignmentShellScript, createAnalysisFolders,
+    createAndFormatExcelOutputFiles,
+    createbulkRNASeqAnalysisBashScripts,
+    createConcatenateFASTQfilesShellScript, createDdsObject,
+    createDesignFileCrickASFsamples, createExcelWorkbook,
+    createNewProject, createPCAloadingPlots, createRMDscript,
+    createSampleDendrogram, createSettingsFile, createSettingsJSON,
+    createSeuratSettingsFile, createSRAdownloadScript,
+    createSRRdownloadScript, createTrimGaloreShellScript,
+    datatable.to.website.ptm, dbcat2gmt, DGEanalysis,
+    do.differential.expression.analyis, doDGEanalysis,
+    doLinearFittings, doLRTanalysis, doPCA, doQuery, DotPlotSB, excel,
+    hpcClusterSubmisison, import.db.table.from.db, inferDBcategories,
+    killDbConnections, list.db.table.col.names, list.db.tables.in.db,
+    listExistingProjects, LRTanalysis, make.hm, msigdb.gmt2refDB,
+    organizeFastqFiles, prepareRSEMcountMatrix, profileCluster,
+    readAndPrepareCountMatrix, retrieve.gene.category.from.db,
+    selectHeatmapGenes, setAnalysisPaths,
+    setCrickGenomeAndGeneNameTable, setDataBaseParameters,
+    setMountingPoint, upload.datatable.to.database,
+    upload.pca.table.to.db, uploadDbTableInfile
+
+  |                                                                              |..................                                                    |  26%
+  ordinary text without R code
+
+  |                                                                              |....................                                                  |  29%
+label: unnamed-chunk-4 (with options) 
+List of 4
+ $ echo   : logi FALSE
+ $ eval   : logi TRUE
+ $ warning: logi FALSE
+ $ results: chr "asis"
+
+  |                                                                              |......................                                                |  31%
+  ordinary text without R code
+
+  |                                                                              |........................                                              |  34%
+label: unnamed-chunk-5 (with options) 
+List of 3
+ $ eval   : logi TRUE
+ $ echo   : logi TRUE
+ $ results: logi FALSE
+
+The following grouping variables have 1 value and will be ignored: ident
+All grouping variables have 1 value only. Computing across all cells.
+Warning: The following arguments are not used: row.names
+Centering and scaling data matrix
+  |                                                                              |                                                                      |   0%  |                                                                              |==                                                                    |   4%  |                                                                              |=====                                                                 |   7%  |                                                                              |========                                                              |  11%  |                                                                              |==========                                                            |  14%  |                                                                              |============                                                          |  18%  |                                                                              |===============                                                       |  21%  |                                                                              |==================                                                    |  25%  |                                                                              |====================                                                  |  29%  |                                                                              |======================                                                |  32%  |                                                                              |=========================                                             |  36%  |                                                                              |============================                                          |  39%  |                                                                              |==============================                                        |  43%  |                                                                              |================================                                      |  46%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================                                |  54%  |                                                                              |========================================                              |  57%  |                                                                              |==========================================                            |  61%  |                                                                              |=============================================                         |  64%  |                                                                              |================================================                      |  68%  |                                                                              |==================================================                    |  71%  |                                                                              |====================================================                  |  75%  |                                                                              |=======================================================               |  79%  |                                                                              |==========================================================            |  82%  |                                                                              |============================================================          |  86%  |                                                                              |==============================================================        |  89%  |                                                                              |=================================================================     |  93%  |                                                                              |====================================================================  |  96%  |                                                                              |======================================================================| 100%
+The following grouping variables have 1 value and will be ignored: ident
+All grouping variables have 1 value only. Computing across all cells.
+Warning: The following arguments are not used: row.names
+Centering and scaling data matrix
+  |                                                                              |                                                                      |   0%  |                                                                              |==                                                                    |   4%  |                                                                              |=====                                                                 |   7%  |                                                                              |========                                                              |  11%  |                                                                              |==========                                                            |  14%  |                                                                              |============                                                          |  18%  |                                                                              |===============                                                       |  21%  |                                                                              |==================                                                    |  25%  |                                                                              |====================                                                  |  29%  |                                                                              |======================                                                |  32%  |                                                                              |=========================                                             |  36%  |                                                                              |============================                                          |  39%  |                                                                              |==============================                                        |  43%  |                                                                              |================================                                      |  46%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================                                |  54%  |                                                                              |========================================                              |  57%  |                                                                              |==========================================                            |  61%  |                                                                              |=============================================                         |  64%  |                                                                              |================================================                      |  68%  |                                                                              |==================================================                    |  71%  |                                                                              |====================================================                  |  75%  |                                                                              |=======================================================               |  79%  |                                                                              |==========================================================            |  82%  |                                                                              |============================================================          |  86%  |                                                                              |==============================================================        |  89%  |                                                                              |=================================================================     |  93%  |                                                                              |====================================================================  |  96%  |                                                                              |======================================================================| 100%
+The following grouping variables have 1 value and will be ignored: ident
+All grouping variables have 1 value only. Computing across all cells.
+Warning: The following arguments are not used: row.names
+Centering and scaling data matrix
+  |                                                                              |                                                                      |   0%  |                                                                              |==                                                                    |   4%  |                                                                              |=====                                                                 |   7%  |                                                                              |========                                                              |  11%  |                                                                              |==========                                                            |  14%  |                                                                              |============                                                          |  18%  |                                                                              |===============                                                       |  21%  |                                                                              |==================                                                    |  25%  |                                                                              |====================                                                  |  29%  |                                                                              |======================                                                |  32%  |                                                                              |=========================                                             |  36%  |                                                                              |============================                                          |  39%  |                                                                              |==============================                                        |  43%  |                                                                              |================================                                      |  46%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================                                |  54%  |                                                                              |========================================                              |  57%  |                                                                              |==========================================                            |  61%  |                                                                              |=============================================                         |  64%  |                                                                              |================================================                      |  68%  |                                                                              |==================================================                    |  71%  |                                                                              |====================================================                  |  75%  |                                                                              |=======================================================               |  79%  |                                                                              |==========================================================            |  82%  |                                                                              |============================================================          |  86%  |                                                                              |==============================================================        |  89%  |                                                                              |=================================================================     |  93%  |                                                                              |====================================================================  |  96%  |                                                                              |======================================================================| 100%

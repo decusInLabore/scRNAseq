@@ -34,6 +34,25 @@ knitr::opts_chunk$set(
 
 ## R version for this analysis 
 # module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a
+###############################################################################
+##                                                                           ##
+if (!requireNamespace("remotes")){
+  install.packages("remotes")
+}
+
+
+if (!requireNamespace("renv")){
+  remotes::install_github("rstudio/renv")
+}
+
+if (!file.exists("renv.lock")){
+    renv::init()
+} else {
+    renv::restore(prompt = FALSE)
+}
+
+## Done                                                                      ##
+###############################################################################
 
 ```
 
@@ -44,8 +63,11 @@ knitr::opts_chunk$set(
 
 #library(scales)
 
-projectDir <- gsub("scripts/scRNAseq/analyses/Main_Analysis", "", getwd())
-workdir <- gsub("scripts/scRNAseq/analyses/Main_Analysis","workdir/",getwd())
+#projectDir <- gsub("scripts/scRNAseq/analyses/Main_Analysis", "", getwd())
+projectDir <-  "/nemo/stp/babs/working/boeings/Projects/bonfantip/roberta.ragazzini/446B_scRNAseq_subClustering_pbl359B_12clusters/"
+
+
+workdir <- "/nemo/stp/babs/working/boeings/Projects/bonfantip/roberta.ragazzini/446B_scRNAseq_subClustering_pbl359B_12clusters/workdir/"
 
 
 VersionPdfExt <- paste0(".V", gsub("-", "", Sys.Date()), ".pdf")
@@ -80,11 +102,11 @@ db.pwd <- as.vector(dbTable[1,1])
 
 
 
-if (file.exists("renv.lock")){
-    renv::restore(prompt = FALSE)
-} else {
-    renv::init()
-}
+# if (file.exists("renv.lock")){
+#     renv::restore(prompt = FALSE)
+# } else {
+#     renv::init()
+# }
 
 # remotes::install_github("rstudio/renv")
 # renv::install("rstudio/renv")
