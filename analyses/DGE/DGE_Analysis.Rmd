@@ -1416,6 +1416,7 @@ for (i in 1:length(DGEtagVec)){
 
 plotList <- list()
 chnkVec <- as.vector(NULL, mode = "character")
+wb <- openxlsx::createWorkbook()
 
 
 
@@ -1705,7 +1706,15 @@ for (j in 1:length(DGEtagVec)){
             ## Done                                                           ##
             ####################################################################
         }
-            
+        sheetName <- paste0(substr(DGEtagVec[i],1,23), "_comp_",i)
+
+        openxlsx::addWorksheet(wb, sheetName)
+        openxlsx::freezePane(wb, sheetName ,  firstActiveRow = 2)
+        openxlsx::writeData(wb, 1, dfResTable, startRow = 1, startCol = 1, headerStyle = hs1)
+        openxlsx::addFilter(wb, 1, row=1, cols = 1:ncol(dfResTable))
+
+        
+    
             
             ## done with plot 
             
@@ -1783,11 +1792,6 @@ outPutFN <- paste0(
  
 FNrel <- paste0("report_table/", baseFN)
     
-sheetName <- substr(paste0(Obio@parameterList$project_id, "_cat_enrichment_DGE"),1,30)
-
-wb <- openxlsx::createWorkbook()
-    openxlsx::addWorksheet(wb, sheetName)
-    openxlsx::freezePane(wb, sheetName ,  firstActiveRow = 2)
     
     ## Filter is inactivated, as it does not appear to be compatible with the current version of Excel
     #addFilter(wb, 1, row = 1, cols = 1:ncol(dfOutput))
@@ -1800,8 +1804,6 @@ hs1 <- openxlsx::createStyle(
   textDecoration = "Bold"
 )
     
-openxlsx::writeData(wb, 1, dfResTable, startRow = 1, startCol = 1, headerStyle = hs1)
-openxlsx::addFilter(wb, 1, row=1, cols = 1:ncol(dfResTable))
     
 saveWorkbook(
   wb, 
