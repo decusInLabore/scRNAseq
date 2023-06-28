@@ -66,7 +66,8 @@ library(biologicSeqTools2)
 library(dplyr)
 
 VersionPdfExt <- paste0(".V", gsub("-", "", Sys.Date()), ".pdf")
-
+rasterDpi <- 400
+calculateLRTfromScratch <- FALSE
 
 ## Load bioLOGIC object
 source("load.biologic.robj.R")
@@ -151,7 +152,7 @@ shinyURL <- paste0(
 ## Set file paths ##
 baseFN <- paste0(
    project_id, 
-   ".DGE.table.xlsx"
+   ".LRT.table.xlsx"
 )
 
 FNrel <- paste0("report_tables/", baseFN)
@@ -169,12 +170,12 @@ tableLink <- paste0(
 )
 
 tableString <- paste0(
-    'An Excel table with the DGE results can be downloaded ',
+    'An Excel table with the LRT results can be downloaded ',
     tableLink
 )
 
 tableString <- paste0(
-   ' An Excel table with the DGE results can be downloaded <a href="',tableLink,'" target="_blank">here</a>. '
+   ' An Excel table with the LRT results can be downloaded <a href="',tableLink,'" target="_blank">here</a>. '
 )
   
 
@@ -184,16 +185,16 @@ tableString <- paste0(
 
 
 ###############################################################################
-## Function doDGEsc                                                          ##
+## Function doLRTsc                                                          ##
 
-#' @title doDGEsc
+#' @title doLRTsc
 #' @description Function to do glmgampoi differential gene expression. When using this function, make sure the glmGamPoi R-package is installed on your system: renv::install("renv::install("bioc::glmGamPoi") 
-#' @param obj Seurat object for the DGE analysis
+#' @param obj Seurat object for the LRT analysis
 #' @param countSlot Seurat object assay to use to retrieve count data.
-#' @param DGEselCol Meta data column in the above Seurat object to use for DGE sample group definitions. 
-#' @param colName Name for the DGE comparison in the meta data
+#' @param LRTselCol Meta data column in the above Seurat object to use for LRT sample group definitions. 
+#' @param colName Name for the LRT comparison in the meta data
 #' @param contrastTag contrastTag
-#' @param DGEsampleList List specifying the DGE comparisons. 
+#' @param LRTsampleList List specifying the LRT comparisons. 
 #' @import Seurat
 #' @export
 
@@ -204,7 +205,6 @@ setGeneric(
         obj,
         countSlot = "RNA",
         LRTselCol = "seurat_clusters",
-        #LRTgroupCol = "meta_Age_Group",
         colName = "LRT_test",
         contrastTag = "contrast_L1_test",
         LRTsampleList = list(
@@ -213,7 +213,7 @@ setGeneric(
     ) {
     
     ############################################################################
-    ## Add DGE cell selection to meta-data                                    ##
+    ## Add LRT cell selection to meta-data                                    ##
     colName <- unlist(colName)
     LRTselCol <- unlist(LRTselCol)
 
@@ -241,7 +241,7 @@ setGeneric(
     ############################################################################
     
     ############################################################################
-    ## Get counts for DGE                                                     ##
+    ## Get counts for LRT                                                     ##
     cellVec <- dfMeta$cellID
     group <-  as.vector(dfMeta[,mColName])
     
@@ -249,7 +249,7 @@ setGeneric(
     dfMatrix <- data.matrix(dfMatrix[,cellVec])
     dfMatrix <- dfMatrix[rowSums(dfMatrix) != 0, ]
     
-    ## Pseudobulk DGE
+    ## Pseudobulk LRT
     
     ## LRT ##
      fit <- glmGamPoi::glm_gp(dfMatrix, design = group)
@@ -257,9 +257,9 @@ setGeneric(
     
     # sample_labels <- group
     # 
-    # sample_labels[sample_labels == names(DGEsampleList)[1]] <- paste0(sample_labels[sample_labels == names(DGEsampleList[1])], "_", 1:length(sample_labels[sample_labels == names(DGEsampleList)[1]]))
+    # sample_labels[sample_labels == names(LRTsampleList)[1]] <- paste0(sample_labels[sample_labels == names(LRTsampleList[1])], "_", 1:length(sample_labels[sample_labels == names(LRTsampleList)[1]]))
     # 
-    # sample_labels[sample_labels == names(DGEsampleList)[2]] <- paste0(sample_labels[sample_labels == names(DGEsampleList[2])], "_", 1:length(sample_labels[sample_labels == names(DGEsampleList)[2]]))
+    # sample_labels[sample_labels == names(LRTsampleList)[2]] <- paste0(sample_labels[sample_labels == names(LRTsampleList[2])], "_", 1:length(sample_labels[sample_labels == names(LRTsampleList)[2]]))
     # 
     # cell_type_lables <- group
     # unique(group)
@@ -328,7 +328,7 @@ setGeneric(
 })
 
 
-## End doDGEsc Function                                                      ##
+## End doLRTsc Function                                                      ##
 ###############################################################################
 
 ###############################################################################
@@ -353,26 +353,26 @@ dfTemp <- dfTemp[order(dfTemp$clusterName),]
 comparisonCol <- "seurat_clusters"
 groupCol <- "clusterName"
 
-DGEoptions <- unique(dfTemp[,groupCol])
+LRToptions <- unique(dfTemp[,groupCol])
 
 compList <- list()
 
-## Make DGE list
-for (i in 1:length(DGEoptions)){
+## Make LRT list
+for (i in 1:length(LRToptions)){
     tag <- paste0("LRT_", i)
     
     name <- paste0("LRT_", as.vector(dfTemp[i, "clusterName"]), "_Age_Group")
     
-    Ldge <- list(
+    LLRT <- list(
           "seurat_clusters" = as.numeric(dfTemp[i, "seurat_clusters"])
       )
       
-      #names(Ldge) <- name
+      #names(LLRT) <- name
       
       compList[[tag]] <- list(
           "name"    = name,
           "LRTselCol" = "meta_Age_Group",
-          "LRTsampleList" =  Ldge
+          "LRTsampleList" =  LLRT
         
       )
       
@@ -416,7 +416,7 @@ LRTinputList <- compList
 
 
 ###############################################################################
-## Function do scDGE                                                         ##
+## Function do scLRT                                                         ##
 
 doScLRTonList <- function(
     OsC,
@@ -436,15 +436,15 @@ doScLRTonList <- function(
     OsC <- resList$OsC
     
     ###########################################################################
-    ## Add average intensity for MA-Plot to DGE table                        ##
+    ## Add average intensity for MA-Plot to LRT table                        ##
     
     OsC_LRT <- OsC
     OsC_LRT@meta.data[["LRT_sel"]] <- 0
     
     OsC_LRT@meta.data[OsC_LRT@meta.data[,paste0("meta_",unlist(LRTinputList[[i]]["name"]))] != "Rest", "LRT_sel"] <- 1
     
-    #row.names(OsC_DGE@meta.data) <- OsC_DGE@meta.data[,"cellID"]
-    #unlist(DGEinputList[[i]]["name"])
+    #row.names(OsC_LRT@meta.data) <- OsC_LRT@meta.data[,"cellID"]
+    #unlist(LRTinputList[[i]]["name"])
     
     
    
@@ -494,7 +494,7 @@ doScLRTonList <- function(
     
 }
 
-## Done do scDGE                                                             ##
+## Done do scLRT                                                             ##
 ###############################################################################
 
 ###############################################################################
@@ -504,31 +504,39 @@ LRTtagVec = as.vector(NULL, mode = "character")
 plotList <- list()
 chnkVec <- as.vector(NULL, mode = "character")
 
-## This does the DGE and creates an overview UMAP figure ##
+## This does the LRT and creates an overview UMAP figure ##
 for (i in 1:length(LRTinputList)){
     
     tag <- paste0(unlist(LRTinputList[[i]]["name"]))
     
-    resList <- doScLRTonList(
-        OsC = OsC,
-        tag = tag,
-        LRTinputList = LRTinputList,
-        LRTtagVec = LRTtagVec
-    )
-  
-    dfDataTable <- resList[["dfDataTable"]]
-    LRTtagVec <- resList[["LRTtagVec"]]
-    OsC <- resList[["OsC"]]
+    if (calculateLRTfromScratch){
+      resList <- doScLRTonList(
+          OsC = OsC,
+          tag = tag,
+          LRTinputList = LRTinputList,
+          LRTtagVec = LRTtagVec
+      )
     
-    ## Add results to biologic object 
-    Obio@dataTableList[[tag]] <- data.frame(NULL)
-    Obio@dataTableList[[tag]] <- dfDataTable
+      dfDataTable <- resList[["dfDataTable"]]
+      LRTtagVec <- resList[["LRTtagVec"]]
+      OsC <- resList[["OsC"]]
+      ## Add results to biologic object 
+      Obio@dataTableList[[tag]] <- data.frame(NULL)
+      Obio@dataTableList[[tag]] <- dfDataTable
+    } else {
+      dfDataTable <- Obio@dataTableList[[tag]]
+      LRTtagVec <- c(
+        LRTtagVec, 
+        tag
+      )
+    }
     
-    ## Done with DGE Analysis                                                ##
+    
+    ## Done with LRT Analysis                                                ##
     ###########################################################################
     
     ###########################################################################
-    ## Create DGE Selection plot                                             ##
+    ## Create LRT Selection plot                                             ##
     dfPlot <- OsC@meta.data
     
     
@@ -564,12 +572,27 @@ for (i in 1:length(LRTinputList)){
     
     
     redGroup <- names(LRTinputList[[i]]$LRTsampleList)[1] #as.vector(unlist(strsplit(label, "_vs_"))[1])
-    #blueGroup <- names(DGEinputList[[i]]$DGEsampleList)[2] #as.vector(unlist(strsplit(label, "_vs_"))[2])
+    #blueGroup <- names(LRTinputList[[i]]$LRTsampleList)[2] #as.vector(unlist(strsplit(label, "_vs_"))[2])
     greyGroup <- "Rest"
     
     ## Assigning colors ##
-    dfCol <- data.frame(name = unique(dfPlot$Cluster), col = rep("", length(unique(dfPlot$Cluster))), stringsAsFactors = F)
     
+    
+    
+    colVec <- c(
+      "Young" = "#E6C229", 
+      "Middle" = "#ED1D58", 
+      "Old"= "#48A6EA",
+      "Rest" = "grey"
+    ) 
+    
+    if (sum(unique(dfPlot$Cluster) %in% names(colVec)) == length(colVec)){
+      dfCol <- data.frame(name = names(colVec), col = colVec)
+    } else {
+      dfCol <- data.frame(name = unique(dfPlot$Cluster), col = rep("", length(unique(dfPlot$Cluster))), stringsAsFactors = F)
+    
+    
+   
     
     #dfCol[dfCol$name == redGroup, "col"] <- "#000080"
     cols <- rainbow(nrow(dfCol[dfCol$name != "Rest",]))
@@ -577,6 +600,9 @@ for (i in 1:length(LRTinputList)){
     dfCol[dfCol$name == greyGroup, "col"] <- "grey"
     colVec <- dfCol$col
     names(colVec) <- dfCol$name
+      
+    }
+    
     
     dfColExtra <- dfCol[dfCol$col == "",]
     if (nrow(dfColExtra) > 0){
@@ -615,7 +641,7 @@ for (i in 1:length(LRTinputList)){
     plotList[[tag]] <- ggplot2::ggplot(
         data=dfPlot[dfPlot$included == "+",], 
         ggplot2::aes(UMAP_1, UMAP_2, color=Cluster)) + 
-        ggplot2::geom_point( shape=16, size = as.numeric(dotsize)) + 
+        ggrastr::rasterize(ggplot2::geom_point( shape=16, size = as.numeric(dotsize)), dpi = rasterDpi) + 
         ggplot2::xlab("UMAP1") + 
         ggplot2::ylab("UMAP2") + 
         ggplot2::theme_bw()  +  
@@ -695,14 +721,14 @@ for (i in 1:length(LRTinputList)){
           NewChnk
       )
   
-      ## Done creating DGE selection plot                                      ##
+      ## Done creating LRT selection plot                                      ##
       ###########################################################################
       
       
       print(paste0("Done with ", tag))
 }
 
-## Done DGE                                                                  ##
+## Done LRT                                                                  ##
 ###############################################################################
 
 if (length(plotList) > 3){
@@ -713,7 +739,7 @@ if (length(plotList) > 3){
 ``` 
 
 ### Likelihood-ratio test Cell Selections {`r tabVar`}
-In this section the cells that were used for the DGE comparisons are highlighted. 
+In this section the cells that were used for the LRT comparisons are highlighted. 
 
 ```{r CellTypePlot, echo=TRUE, eval=TRUE, warning=FALSE, results="asis"} 
 
@@ -722,11 +748,11 @@ cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = '\n'))
 ``` 
 
 
-```{r data_DGE_summary, echo=F, eval=T, warning=FALSE, results="asis"}
+```{r data_LRT_summary, echo=F, eval=T, warning=FALSE, results="asis"}
 
 ###############################################################################
-## Assemble DGE summary table                                                ##
-#dfTemp <- Obio@dataTableList[["DGE_table"]] 
+## Assemble LRT summary table                                                ##
+#dfTemp <- Obio@dataTableList[["LRT_table"]] 
 
 wb <- openxlsx::createWorkbook()
 
@@ -738,7 +764,7 @@ hs1 <- openxlsx::createStyle(
 )
 
 ###############################################################################
-## Add Create DGE result Excel Spreadsheet                                   ##
+## Add Create LRT result Excel Spreadsheet                                   ##
 
 for (i in 1:length(LRTtagVec)){
   
@@ -797,8 +823,8 @@ for (i in 1:length(LRTtagVec)){
       } 
   }
   
-  if (!is.null(Obio@dataTableList[["referenceList"]]$GO_Secreted)){
-    cat <- Obio@dataTableList[["referenceList"]]$GO_Secreted
+  if (!is.null(Obio@dataTableList[["referenceList"]]$GO_Secretion)){
+    cat <- Obio@dataTableList[["referenceList"]]$GO_Secretion
     
      tag <- "GO_Secretion"
     dfOutput[[tag]] <- ""
@@ -920,14 +946,14 @@ for (i in 1:length(LRTtagVec)){
         dfPlot[["included"]] <- "+"
     }
     
-    #logFCtwoSD <- 2*sd(dfPlot[,grep("_logFC_", names(dfPlot))])
+    fourSD <- 4*sd(dfPlot[,grep("_lg10p_", names(dfPlot))])
     
-    # dfPlot[["DGE_Status"]] <- "Unchanged"
-    # dfPlot[dfPlot[,grep("_logFC_", names(dfPlot))] > logFCtwoSD & dfPlot[,grep("_padj_", names(dfPlot))] < 0.05, "DGE_Status"] <- "Up"
-    # dfPlot[dfPlot[,grep("_logFC_", names(dfPlot))] < -1 *logFCtwoSD & dfPlot[,grep("_padj_", names(dfPlot))] < 0.05, "DGE_Status"] <- "Down"
+    dfPlot[["LRT_Status"]] <- "Unchanged"
+    dfPlot[dfPlot[,grep("_lg10p_", names(dfPlot))] > fourSD & dfPlot[,grep("_cts_", names(dfPlot))] > 0, "LRT_Status"] <- "Variable"
+    # dfPlot[dfPlot[,grep("_logFC_", names(dfPlot))] < -1 *logFCfourSD & dfPlot[,grep("_padj_", names(dfPlot))] < 0.05, "LRT_Status"] <- "Down"
     # 
-    # colVec <- c("red", "blue", "black")
-    # names(colVec) <- c("Up", "Down", "Unchanged")
+    colVec <- c("red", "black")
+    names(colVec) <- c("Variable",  "Unchanged")
     # 
     
     dfPlot[["X"]] <- dfPlot[,grep("_cts_MA", names(dfPlot))]
@@ -943,10 +969,10 @@ for (i in 1:length(LRTtagVec)){
       dotsize = 0.5
     }
 
-    logFClims <- ceiling(max(abs(dfPlot$X)))
+    Ylims <- ceiling(max(abs(dfPlot$X)))
     
     ## Add to-regulated gene names ##
-    topNgenes <- 10
+    topNgenes <- 20
     dfPlot <- dfPlot[order(dfPlot$intensity_weighted_lg10p, decreasing = T), ]
     topGenes <- as.vector(dfPlot[1:topNgenes,"gene"])
     
@@ -956,12 +982,19 @@ for (i in 1:length(LRTtagVec)){
     dfPlot[["label"]] <- ""
     dfPlot[dfPlot[,"gene"] %in% c(topGenes), "label"] <- dfPlot[dfPlot[,"gene"] %in% c(topGenes), "gene"]
     
+    breaks <- ceiling(max(dfPlot$Y) / 20)
+    
+    roundUp <- function(x, m) {
+      m * ceiling(x/m)
+    }
+    
+    ybreak <- roundUp(breaks, m = 5)
     
     plotList[[tag]] <- ggplot2::ggplot(
         data=dfPlot[dfPlot$included == "+",], 
-        ggplot2::aes(X, Y, label = "label")) + 
-        ggplot2::geom_hline(yintercept = c(2), col = "#000000", lty=2) +   
-        ggplot2::geom_point( shape=16, size = as.numeric(dotsize),alpha = 0.7, color="darkgrey") + 
+        ggplot2::aes(X, Y, label = label, color= LRT_Status)) + 
+        ggplot2::geom_hline(yintercept = fourSD, col = "darkgrey", lty=2) +   
+        ggrastr::rasterize(ggplot2::geom_point( shape=16, size = as.numeric(dotsize),alpha = 0.7), dpi=rasterDpi) + 
         ggplot2::xlab(paste0("Average Expression Intensity ", gsub("_", " ",label))) + 
         ggplot2::ylab(paste0("-log10(adj LRT p-value) ", gsub("_", " ",label))) + 
         ggplot2::theme_bw()  +  ggplot2::theme(
@@ -974,14 +1007,16 @@ for (i in 1:length(LRTtagVec)){
           plot.title = ggplot2::element_text(hjust = 0.5, size = 12)) + 
       ggplot2::guides(col = ggplot2::guide_legend(override.aes = list(shape = 16, size = legendDotSize))) + 
       ggplot2::ggtitle(paste0("LRT Plot ", gsub("_", " ", label))) + 
-      ggplot2::ylim(logFClims, -1 * logFClims) + 
-      ggplot2::scale_y_continuous(breaks=c(seq(0,400,2))) + 
-      ggplot2::scale_x_continuous(breaks=c(seq(0,400,2)))
+      ggplot2::ylim(Ylims, -1 * Ylims) + 
+      ggplot2::scale_y_continuous(breaks=c(seq(0,400,ybreak))) + 
+      ggplot2::scale_x_continuous(breaks=c(seq(0,400,2))) +  
+      ggplot2::scale_color_manual(values=colVec
+      ) 
 
 
       ## Add labels 
-      # plotList[[tag]] <- plotList[[tag]] + ggrepel::geom_text_repel(size = 3, max.iter = 10000)
-      plotList[[tag]] <- plotList[[tag]] + ggplot2::geom_text()      
+      plotList[[tag]] <- plotList[[tag]] + ggrepel::geom_text_repel(size = 3, max.iter = 10000)
+      # plotList[[tag]] <- plotList[[tag]] + ggplot2::geom_text(nudge_x = 0.05)      
 
       FNbase <- paste0(tag, VersionPdfExt)
       FN <- paste0(Obio@parameterList$reportFigDir, FNbase)
@@ -1010,7 +1045,7 @@ for (i in 1:length(LRTtagVec)){
             
       NewChnk <- paste0(
           "#### ", tag,
-          "\n```{r Volcano_DGE_",
+          "\n```{r Volcano_LRT_",
           tag,", results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",
           figLegend,"'}\n",
           "\n",
@@ -1024,7 +1059,7 @@ for (i in 1:length(LRTtagVec)){
           NewChnk
       )
 
-      ## Done creating DGE selection plot                                      ##
+      ## Done creating LRT selection plot                                      ##
       ###########################################################################
     
     
@@ -1045,50 +1080,57 @@ if (length(plotList) > 3){
 
 ### LRT Plots {`r tabVar`}
 
-```{r DGE_volcano_plot, echo=TRUE, eval=TRUE, warning=FALSE, results="asis"} 
+```{r LRT_volcano_plot, echo=TRUE, eval=TRUE, warning=FALSE, results="asis"} 
 
 cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = '\n'))
 
 ``` 
 
 
-```{r create-pca-enrichment-data, echo=T, eval=TRUE, warning=FALSE, results=F, error=F}
+```{r create-lrt-enrichment-data, echo=T, eval=TRUE, warning=FALSE, results=F, error=F}
 Obio@dbDetailList$db.user <- "babs"
 ## Create enriched genes list ##
+
+## Data processing for category enrichment
+
+
 EnrichedGenesList <- list()
-dfAllPlots <- Obio@dataTableList[["DGE_table"]] 
+dfAllPlots <- Obio@dataTableList[["LRT_table"]] 
 
 if (Obio@parameterList$geneIDcolumn != "mgi_symbol" & Obio@parameterList$geneIDcolumn != "hgnc_symbol") {
-            queryGS <- "hgnc_symbol" 
-        } else {
-            queryGS <- Obio@parameterList$geneIDcolumn
-        }
+  queryGS <- "hgnc_symbol" 
+} else {
+  queryGS <- Obio@parameterList$geneIDcolumn
+}
 
 for (i in 1:length(LRTtagVec)){
-    tag <- paste0("MA_Plot_", LRTtagVec[i])  
-    tagGLpos <- paste0(LRTtagVec[i], "_pos") 
-    tagGLneg <- paste0(LRTtagVec[i], "_neg") 
+  tag <- paste0("LRT_Enrichment_", LRTtagVec[i])  
+  tagGLpos <- paste0(LRTtagVec[i], "_pos") 
+  tagGLneg <- paste0(LRTtagVec[i], "_neg") 
     
-    selVec <- c(
-        "gene",
-        names(dfAllPlots)[grep(paste0(LRTtagVec[i], "$"), names(dfAllPlots))]
-    )
+  selVec <- c(
+    "gene",
+    names(dfAllPlots)[grep(paste0(LRTtagVec[i], "$"), names(dfAllPlots))]
+  )
     
-    dfPlot <- dfAllPlots[,selVec]
-    pos <- grep("included", names(dfPlot))
-    if (length(pos) == 0){
-        dfPlot[["included"]] <- "+"
-    }
+  dfPlot <- dfAllPlots[,selVec]
+  pos <- grep("included", names(dfPlot))
+  if (length(pos) == 0){
+    dfPlot[["included"]] <- "+"
+  }
     
-    logFCtwoSD <- 2*sd(dfPlot[,grep("_logFC_", names(dfPlot))])
+  fourSD <- 4*sd(dfPlot[,grep("_lg10p_", names(dfPlot))])
     
-    dfPlot[["DGE_Status"]] <- "Unchanged"
-    dfPlot[dfPlot[,grep("_logFC_", names(dfPlot))] > logFCtwoSD & dfPlot[,grep("_padj_", names(dfPlot))] < 0.05, "DGE_Status"] <- "Up"
-    EnrichedGenesList[[tagGLpos]] <- unique(dfPlot[dfPlot$DGE_Status == "Up", "gene"])
+  dfPlot[["LRT_Status"]] <- "Unchanged"
+  dfPlot[dfPlot[,grep("_cts_", names(dfPlot))] > 0 & dfPlot[,grep("_lg10p_", names(dfPlot))] > fourSD, "LRT_Status"] <- "Variable"
+    EnrichedGenesList[[tagGLpos]] <- unique(dfPlot[dfPlot$LRT_Status == "Variable", "gene"])
     
-    dfPlot[dfPlot[,grep("_logFC_", names(dfPlot))] < -1 *logFCtwoSD & dfPlot[,grep("_padj_", names(dfPlot))] < 0.05, "DGE_Status"] <- "Down"
-    EnrichedGenesList[[tagGLneg]] <- unique(dfPlot[dfPlot$DGE_Status == "Down", "gene"])
+    #dfPlot[dfPlot[,grep("_logFC_", names(dfPlot))] < -1 *logFCfourSD & dfPlot[,grep("_padj_", names(dfPlot))] < 0.05, "LRT_Status"] <- "Down"
+    #EnrichedGenesList[[tagGLneg]] <- unique(dfPlot[dfPlot$LRT_Status == "Down", "gene"])
 } 
+
+## Done creating gene list                                                   ##
+###############################################################################
 
 #library(knitr::)
 #library(ggplot2)
@@ -1096,49 +1138,49 @@ for (i in 1:length(LRTtagVec)){
 #save.image("temp.RData")
 #library(clusterProfiler)
 
-    gmtList <- list()
-    pos <- grep("clusterSigEnrichmentList", slotNames(Obio))
+gmtList <- list()
+pos <- grep("clusterSigEnrichmentList", slotNames(Obio))
     
-    if (length(pos) > 0){
-    if (is.null(Obio@clusterSigEnrichmentList)){
-      dbtableList <- list(
-          "Cell Type Signatures" = "mysigdb_sc_sig",
-          "Cell Type Signatures" = "cibersort_L22",
-          "GO-MF" = "mysigdb_c5_MF",
-          "Pathways" = "mysigdb_c2_1329_canonical_pathways",
-          "Protein Complexes" = "networkcategories"
-      )
-    } else {
-        dbtableList <- Obio@clusterSigEnrichmentList
-    }
-    } else {
-      dbtableList <- list(
-          "Cell Type Signatures" = "mysigdb_sc_sig",
-          "Cell Type Signatures" = "cibersort_L22",
-          "GO-MF" = "mysigdb_c5_MF",
-          "Pathways" = "mysigdb_c2_1329_canonical_pathways",
-          "Protein Complexes" = "networkcategories"
-      )
-    }
+if (length(pos) > 0){
+  if (is.null(Obio@clusterSigEnrichmentList)){
+    dbtableList <- list(
+      "Cell Type Signatures" = "mysigdb_sc_sig",
+      "Cell Type Signatures" = "cibersort_L22",
+      "GO-MF" = "mysigdb_c5_MF",
+      "Pathways" = "mysigdb_c2_1329_canonical_pathways",
+      "Protein Complexes" = "networkcategories"
+    )
+  } else {
+    dbtableList <- Obio@clusterSigEnrichmentList
+  }
+} else {
+  dbtableList <- list(
+    "Cell Type Signatures" = "mysigdb_sc_sig",
+    "Cell Type Signatures" = "cibersort_L22",
+    "GO-MF" = "mysigdb_c5_MF",
+    "GO-BP" = "mysigdb_c5_BP",
+    "Pathways" = "mysigdb_c2_1329_canonical_pathways",
+    "Protein Complexes" = "networkcategories"
+  )
+}
     
     
-    rmVec <- grep("Cell Type Signatures", names(dbtableList))
-    if (length(rmVec) > 0){
-        dbtableList <- dbtableList[-rmVec]
-    }
+rmVec <- grep("Cell Type Signatures", names(dbtableList))
+if (length(rmVec) > 0){
+  dbtableList <- dbtableList[-rmVec]
+}
     
-    for (i in 1:length(dbtableList)){
+for (i in 1:length(dbtableList)){
+  dfTemp <- unique(import.db.table.from.db(
+  host = Obio@dbDetailList$host,
+  dbname = Obio@dbDetailList$ref.cat.db,
+  dbtable = dbtableList [[i]],
+  password = db.pwd,
+  user = Obio@dbDetailList$db.user
+  ))
         
-        dfTemp <- unique(import.db.table.from.db(
-            host = Obio@dbDetailList$host,
-            dbname = Obio@dbDetailList$ref.cat.db,
-            dbtable = dbtableList [[i]],
-            password = db.pwd,
-            user = Obio@dbDetailList$db.user
-        ))
-        
-        ## Remove duplicated entries ##
-        dfTemp <- dfTemp[!(duplicated(dfTemp$cat_name)),]
+## Remove duplicated entries ##
+dfTemp <- dfTemp[!(duplicated(dfTemp$cat_name)),]
         
         rmVec <- grep("temp_", dfTemp$cat_type)
         if (length(rmVec) > 0){
@@ -1191,151 +1233,128 @@ chnkVec <- as.vector(NULL, mode = "character")
 
 
 for (j in 1:length(LRTtagVec)){
-    posTestGeneSet <- as.vector(
-        unique(
-            EnrichedGenesList[[paste0(LRTtagVec[j], "_pos")]]
-        )
-    )
-    
-    
-    negTestGeneSet <- as.vector(
-        unique(
-            EnrichedGenesList[[paste0(LRTtagVec[j], "_neg")]]
-        )
-    )
-   
-    
-    ###########################################################################
-    ## Create GMT file for category enrichment                               ##
-    
-    ###########################
-    ## Create gmt list
-    ## Retrieve gmt files from database
-    ## Add custom gmt files
-    
-    
-    
-    
-    ## Done                                                                  ##
-    ###########################################################################
-     
-    #library(clusterProfiler)
-    #library(ggplot2)
-    #library(tidyr)
-        
-        if (Obio@parameterList$geneIDcolumn != "mgi_symbol" & Obio@parameterList$geneIDcolumn != "hgnc_symbol") {
-            queryGS <- "hgnc_symbol" 
-        } else {
+  posTestGeneSet <- as.vector(
+      unique(
+          EnrichedGenesList[[paste0(LRTtagVec[j], "_pos")]]
+      )
+  )
+  
+  if (Obio@parameterList$geneIDcolumn != "mgi_symbol" & Obio@parameterList$geneIDcolumn != "hgnc_symbol") {
+    queryGS <- "hgnc_symbol" 
+  } else {
             queryGS <- Obio@parameterList$geneIDcolumn
-        }
+  }
         
-        if (Obio@parameterList$host == "10.27.241.234"){
-            urlString <- "biologic.thecrick.org"
-        } else {
-            urlString <- "biologic.crick.ac.uk"
-        }
+  if (Obio@parameterList$host == "10.27.241.234"){
+    urlString <- "biologic.thecrick.org"
+  } else {
+    urlString <- "biologic.crick.ac.uk"
+  }
     
-    colVec <- c("#009900", "#000080")
-    pvalueCutoff <- 0.5
-    topMaxCat <- 10
+  colVec <- c("#009900")
+  pvalueCutoff <- 0.5
+  topMaxCat <- 20
     
-    ## Get background gene set ##
-    #backgroundGeneVec <- row.names(OsC[["RNA"]]@counts)
-    if ((length(posTestGeneSet) >= 3) | (length(negTestGeneSet) >= 3)){
-        ## Do enrichment ##
-        first <- TRUE
-        if (length(posTestGeneSet) >= 3){
-            for (k in 1:length(gmtList)){
-                    egmt <- data.frame(
-                        clusterProfiler::enricher(
-                            negTestGeneSet, 
-                            TERM2GENE=gmtList[[k]],
-                            pvalueCutoff = pvalueCutoff
-                        )
-                    )
-                    if (!is.null(egmt)){
-                        if (nrow(egmt) > 0){
-                            egmt[["Collection"]] <- substr(names(gmtList)[k], 1,10)
-                        }
-                        if (first){
-                            dfTempEnriched <- egmt    
-                            first <- FALSE
-                        } else {
-                            dfTempEnriched <- rbind(
-                                dfTempEnriched, 
-                                egmt
-                            )    
-                        }
+  ## Get background gene set ##
+  #backgroundGeneVec <- row.names(OsC[["RNA"]]@counts)
+  if ((length(posTestGeneSet) >= 3) ){
+    ## Do enrichment ##
+    first <- TRUE
+    if (length(posTestGeneSet) >= 3){
+      for (k in 1:length(gmtList)){
+        egmt <- data.frame(
+          clusterProfiler::enricher(
+            posTestGeneSet, 
+            TERM2GENE=gmtList[[k]],
+            pvalueCutoff = pvalueCutoff
+          )
+        )
+        if (!is.null(egmt)){
+          if (nrow(egmt) > 0){
+            egmt[["Collection"]] <- substr(names(gmtList)[k], 1,10)
+          }
+          if (first){
+            dfTempEnriched <- egmt    
+            first <- FALSE
+          } else {
+            dfTempEnriched <- rbind(
+              dfTempEnriched, 
+              egmt
+            )    
+          }
                         
-                    }
-            }
+        }
+      }
            
-            if (exists("dfTempEnriched") && nrow(dfTempEnriched) > 0){
-                dfTempEnriched[["direction"]] <- "positive"
-                dfTempEnriched[["log10FDR"]] <- log10(dfTempEnriched$p.adjust)
-                dfTempEnriched <- dfTempEnriched[order(dfTempEnriched$log10FDR, decreasing = F),]
-                dfTempEnriched <- na.omit(dfTempEnriched)
-                dfEnriched <- dfTempEnriched
+      if (exists("dfTempEnriched") && nrow(dfTempEnriched) > 0){
+        dfTempEnriched[["direction"]] <- "positive"
+        dfTempEnriched[["log10FDR"]] <- log10(dfTempEnriched$p.adjust)
+        
+        dfTempEnriched[["log10FDR"]] <- -1*log10(dfTempEnriched$p.adjust)
+        
+        dfTempEnriched <- dfTempEnriched[order(dfTempEnriched$log10FDR, decreasing = F),]
+        dfTempEnriched <- na.omit(dfTempEnriched)
+        dfEnriched <- unique(dfTempEnriched)
                 
-                if (nrow(dfTempEnriched) > topMaxCat){
-                    dfTempEnriched <- dfTempEnriched[1:topMaxCat, ]
-                }
-            }
+        if (nrow(dfTempEnriched) > topMaxCat){
+          dfTempEnriched <- dfTempEnriched[1:topMaxCat, ]
+        }
+      }
           
             
-        } # end positive
+    } # end positive
             
             ## Now the negative side ##
-            if (length(negTestGeneSet) >= 3){
-            first <- TRUE
-            for (k in 1:length(gmtList)){
-                    egmt <- data.frame(
-                        clusterProfiler::enricher(
-                            posTestGeneSet, 
-                            TERM2GENE=gmtList[[k]],
-                            pvalueCutoff = pvalueCutoff
-                        )
-                    )
-                    if (!is.null(egmt)){
-                        if (nrow(egmt) > 0){
-                            egmt[["Collection"]] <- substr(names(gmtList)[k], 1,10)
-                        }
-                        if (first){
-                            dfTempEnrichedNeg <- egmt    
-                            first <- FALSE
-                        } else {
-                            dfTempEnrichedNeg <- rbind(
-                                dfTempEnrichedNeg, 
-                                egmt
-                            )    
-                        }
-                        
-                    } 
-            }
-            if (exists("dfTempEnrichedNeg") && nrow(dfTempEnrichedNeg) > 0){
-                dfTempEnrichedNeg[["direction"]] <- "negative"
-                dfTempEnrichedNeg[["log10FDR"]] <- -1*log10(dfTempEnrichedNeg$p.adjust)
-                dfTempEnrichedNeg <- dfTempEnrichedNeg[order(dfTempEnrichedNeg$log10FDR, decreasing = T),]
-                dfTempEnrichedNeg <- na.omit(dfTempEnrichedNeg)
-                dfEnrichedNeg <- dfTempEnrichedNeg
-                
-                if (nrow(dfTempEnrichedNeg) > topMaxCat){
-                    dfTempEnrichedNeg <- dfTempEnrichedNeg[1:topMaxCat, ]
-                }
-            }
-            } # end negative
+            # if (length(negTestGeneSet) >= 3){
+            # first <- TRUE
+            # for (k in 1:length(gmtList)){
+            #         egmt <- data.frame(
+            #             clusterProfiler::enricher(
+            #                 posTestGeneSet, 
+            #                 TERM2GENE=gmtList[[k]],
+            #                 pvalueCutoff = pvalueCutoff
+            #             )
+            #         )
+            #         if (!is.null(egmt)){
+            #             if (nrow(egmt) > 0){
+            #                 egmt[["Collection"]] <- substr(names(gmtList)[k], 1,10)
+            #             }
+            #             if (first){
+            #                 dfTempEnrichedNeg <- egmt    
+            #                 first <- FALSE
+            #             } else {
+            #                 dfTempEnrichedNeg <- rbind(
+            #                     dfTempEnrichedNeg, 
+            #                     egmt
+            #                 )    
+            #             }
+            #             
+            #         } 
+            # }
+            # if (exists("dfTempEnrichedNeg") && nrow(dfTempEnrichedNeg) > 0){
+            #     dfTempEnrichedNeg[["direction"]] <- "negative"
+            #     dfTempEnrichedNeg[["log10FDR"]] <- -1*log10(dfTempEnrichedNeg$p.adjust)
+            #     dfTempEnrichedNeg <- dfTempEnrichedNeg[order(dfTempEnrichedNeg$log10FDR, decreasing = T),]
+            #     dfTempEnrichedNeg <- na.omit(dfTempEnrichedNeg)
+            #     dfEnrichedNeg <- dfTempEnrichedNeg
+            #     
+            #     if (nrow(dfTempEnrichedNeg) > topMaxCat){
+            #         dfTempEnrichedNeg <- dfTempEnrichedNeg[1:topMaxCat, ]
+            #     }
+            # }
+            # } # end negative
         
             
             
             ## Make plot 
-            if ((nrow(dfTempEnriched) > 0) | (nrow(dfTempEnrichedNeg) > 0)){
+            if (nrow(dfTempEnriched) > 0){
             
             
             
             
             dfSel <- rbind(
-                dfTempEnriched,
-                dfTempEnrichedNeg
+                dfTempEnriched
+                #dfTempEnrichedNeg
             )
             
             dfSel <- na.omit(dfSel)
@@ -1344,7 +1363,7 @@ for (j in 1:length(LRTtagVec)){
             
             dfSel[["Category"]] <- ""
             dfSel[dfSel$log10FDR >= 0, "Category"] <- "Enr."
-            dfSel[dfSel$log10FDR < 0, "Category"] <- "Depl."
+            #dfSel[dfSel$log10FDR < 0, "Category"] <- "Depl."
             
             for (l in 1:nrow(dfSel)){
                 if (nchar(dfSel[l, "ID"]) > 30){
@@ -1362,7 +1381,7 @@ for (j in 1:length(LRTtagVec)){
             
             
             
-            plotList[[paste0("PCA_ENR_", j)]] <- ggplot2::ggplot(
+            plotList[[paste0("LRT_ENR_", j)]] <- ggplot2::ggplot(
                 data=dfSel, ggplot2::aes(x= ID, y=log10FDR, fill=Collection, order=log10FDR)
             ) + ggplot2::geom_bar(stat="identity", colour="black"
             ) + ggplot2::coord_flip() + ggplot2::scale_fill_manual(values=enrCols
@@ -1376,7 +1395,7 @@ for (j in 1:length(LRTtagVec)){
                 panel.border = ggplot2::element_rect(colour = "black", fill=NA, size=1),
                 plot.title = ggplot2::element_text(hjust = 0.5, size = 12)
             )  + ggplot2::labs(title = paste0("Comparison ", LRTtagVec[j]," enriched genes") ,y = "-log10(FDR)", x = ""
-            ) + ggplot2::geom_hline(yintercept = c(-log10(0.05), log10(0.05)), color = "grey", size=0.5, lty=2
+            ) + ggplot2::geom_hline(yintercept = c(-1 * log10(0.05)), color = "grey", size=0.5, lty=2
             ) + ggplot2::geom_hline(yintercept = 0, color = "black", size=0.5
             ) 
             cat("  \n")
@@ -1384,7 +1403,7 @@ for (j in 1:length(LRTtagVec)){
             
             
             ## Save to file ##
-            FNbase <- paste0("DGE_comparison_", LRTtagVec[j],".enriched.genes", VersionPdfExt)
+            FNbase <- paste0("LRT_comparison_", LRTtagVec[j],".enriched.genes", VersionPdfExt)
             FN <- paste0(Obio@parameterList$reportFigDir, FNbase)
             FNrel <- paste0("report_figures/", FNbase)
             
@@ -1415,7 +1434,7 @@ for (j in 1:length(LRTtagVec)){
                 j,", results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",
                 figLegend,"'}\n",
                 "\n",
-                "\n print(plotList[['",paste0("PCA_ENR_", j),"']])",
+                "\n print(plotList[['",paste0("LRT_ENR_", j),"']])",
                 "\n cat(  '\n')",
                 "\n\n\n```\n"   
             )
@@ -1429,8 +1448,8 @@ for (j in 1:length(LRTtagVec)){
             ####################################################################
             ## Create full output table                                       ##
             dfResTemp <- rbind(
-                dfEnriched,
-                dfEnrichedNeg
+                dfEnriched
+                #dfEnrichedNeg
             )
             
             dfResTemp[["comparison"]] <- tag
@@ -1474,7 +1493,578 @@ cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = '\n'))
 
 ```
 
+```{r process_heatmap_data, echo=T, eval=TRUE, warning=FALSE, results=F, error=F}
 
+## Get transcription factor genes ##
+if (dir.exists("/Volumes/babs/working/boeings/")){
+    hpc.mount <- "/Volumes/babs/working/boeings/"
+} else if (dir.exists("Y:/working/boeings/")){
+    hpc.mount <- "Y:/working/boeings/"
+} else if (dir.exists("/camp/stp/babs/working/boeings/")){
+    hpc.mount <- "/nemo/stp/babs/working/boeings/"
+} else {
+    hpc.mount <- ""
+}
+
+
+FN <- paste0(hpc.mount, "Projects/reference_data/pwd_folder/babs.txt")
+    dbTable <- read.delim(
+      FN,
+      header = F,
+      sep = "\t",
+      stringsAsFactors = F
+    )
+db.pwd <- as.vector(dbTable[1,1])
+
+if (Obio@parameterList$geneIDcolumn != "mgi_symbol" & Obio@parameterList$geneIDcolumn != "hgnc_symbol") {
+    queryGS <- "hgnc_symbol" 
+} else {
+    queryGS <- Obio@parameterList$geneIDcolumn
+}
+
+
+TFs <- retrieve.gene.category.from.db(
+    cat_id = "ag_lab_categories__10",
+    password = db.pwd,
+    gene.symbol = queryGS,
+    user = Obio@parameterList$db.user,
+    host = Obio@parameterList$host
+)
+
+GO_Secretion <-  retrieve.gene.category.from.db(
+                          cat_id = "mysigdb_c5_BP__1347",
+                          password = db.pwd,
+                          gene.symbol = queryGS,
+                          user = Obio@dbDetailList$db.user,
+                          host = Obio@dbDetailList$host
+                    )
+
+
+## Interesting genes for each cluster are stored in this list:
+# EnrichedGenesList
+
+## Create a heatmap list for each element of the above list
+
+hmVec <- names(EnrichedGenesList)
+HMgeneSelections <- list()
+
+for (i in 1: length(hmVec)){
+  tag <- paste0("HM_", hmVec[i])
+  
+  geneVec <- EnrichedGenesList[[hmVec[i]]]
+  TFgeneVec <- geneVec[geneVec %in% TFs]
+  secGeneVec <- geneVec[geneVec %in% GO_Secretion]
+  RestGeneVec <- geneVec[!(geneVec %in% unique(c(TFgeneVec, secGeneVec)))]
+  
+  catList <- list()
+  
+  if (length(TFgeneVec) > 0){
+    catList[["TFs"]] <- TFgeneVec
+  }
+  
+  if (length(secGeneVec) > 0){
+    catList[["Secretion"]] <- secGeneVec
+  }
+  
+  if (length( RestGeneVec) > 0){
+     catList[["Other"]] <- RestGeneVec
+  }
+  
+  
+  HMgeneSelections[[tag]] <- catList
+  
+  
+}
+
+## Done creation of gene categories
+##############################
+
+###############################################################################
+## Function to create heatmaps                                               ##
+
+addHeatmap2List <- function(
+    dataMatrix,
+    geneGroupList,
+    cluster_column_slices   = FALSE,
+    cluster_columns         = TRUE,
+    relativeExpression = FALSE,
+    cmdVec = NULL,
+    tag = NULL,
+    showAllLegends = TRUE,
+    figureCount = 1,
+    chnkVec = NULL, 
+    plotList = NULL,
+    maxNcharCatName = 10,
+    dfMeta,
+    group1ColorCol = "clusterColor", 
+    group1NameCol = "clusterName",
+    group2ColorCol = "sampleColor", 
+    group2NameCol = "sampleName",
+    columnSplitCol = "clusterName"
+    ){
+  
+  if (is.null(chnkVec)){
+    chnkVec <- as.vector(NULL, mode="character")
+  }
+  
+  if (is.null(plotList)){
+    plotList <- list()
+  }
+  
+    allGenes <- unique(as.vector(unlist(geneGroupList)))
+    
+    
+    if (is.null(cmdVec)){
+      cmdVec <- as.vector(NULL, mode="character")
+    }
+    
+    if (is.null(tag)){
+      tag <- paste("Heatmap_", (length(plotList) + 1))
+    }
+    
+    if (relativeExpression){
+      legendString <- "log2 row mean"
+    } else {
+      legendString <- "lg10 Expr"
+    }
+
+# library("RColorBrewer")
+# library("Seurat")
+# library("ggplot2")
+# library("viridis")
+# #library("scMCA")
+# library("circlize")
+# library("ComplexHeatmap")
+
+
+
+## Complex heatmap of cell/celltype correlations using just the top annotation per cell.  It's split by seurat cluster.
+numbers_plot <- 1
+# cors       <-  data.frame(OsC[["RNA"]]@data)
+#cors_index <- apply(cors, 2, gettissue, numbers_plot)
+#cors_index <- sort(unique(as.integer(cors_index)))
+allGenes <- allGenes[allGenes %in% row.names(dataMatrix)]
+
+heat.dat   <- dataMatrix[allGenes, ]
+#heat.dat <- heat.dat
+#heat.dat   <- t(apply(heat.dat,1,function(x){(x-mean(x))/sd(x)}))
+
+# Comment out for absolute expression
+
+heat.dat <- heat.dat[apply(heat.dat, 1, mean) != 0, ]
+
+if (relativeExpression){
+  heat.dat   <- t(apply(heat.dat,1,function(x){log2((x/mean(x)))}))  
+} 
+
+heat.dat[heat.dat == -Inf] <- 0
+
+## make sure cat names aren't too long
+nMax <- max(nchar(names(geneGroupList)))
+
+if (nMax > maxNcharCatName){
+  shortNames <- sapply(
+    names(geneGroupList),
+    function(x){
+      substr(x, 1, maxNcharCatName)
+    }
+  )
+  
+  if (sum(duplicated(shortNames)) > 0){
+    indexVec <- 1:length(shortNames)
+    shortNames[duplicated(shortNames)] <- paste0(shortNames[duplicated(shortNames)],"_", indexVec[duplicated(shortNames)])
+  }
+  
+  names(geneGroupList) <- shortNames
+  
+}
+
+
+
+rowSplitVec <- row.names(heat.dat)   
+for (i in 1:length(geneGroupList)){
+  rowSplitVec[rowSplitVec %in% geneGroupList[[i]]] <- names(geneGroupList)[i]
+}
+
+
+
+dfCol <- unique(dfMeta[,c(group1ColorCol, group1NameCol)])
+colVec <- dfCol[,group1ColorCol]
+names(colVec) <- dfCol[,group1NameCol]
+
+dfCol2 <- unique(dfMeta[,c(group2ColorCol, group2NameCol)])
+colVec2 <- dfCol2[,group2ColorCol]
+names(colVec2) <- dfCol2[,group2NameCol]
+# 
+# colList <- list(
+#   dfCol, 
+#   dfCol2
+# )
+
+
+ht.anno <- ComplexHeatmap::HeatmapAnnotation(
+    Age =  dfMeta[,group2NameCol],
+    Cluster =  dfMeta[,group1NameCol],
+    col = list(
+        Age = colVec2,
+        Cluster = colVec
+    ),
+    show_legend = showAllLegends
+)
+
+
+#bulkLogFC <- dfSel[allGenes, "contrast_2_logFC_p27NULL_E185OC_vs_WT_E185OC"]
+#xcol <- ifelse(bulkLogFC < 0, "blue", "red")
+
+
+
+#row_ha = rowAnnotation(Bulk = anno_barplot(bulkLogFC, gp = gpar(fill=xcol)),
+#        show_legend = showAllLegends
+#)   
+
+#lrow_ha = rowAnnotation(foo = anno_block(gp = gpar(fill = c("blue", "red")),
+#        labels = c("Down", "Up"), 
+#        labels_gp = gpar(col = "white", fontsize = 10)),
+#        show_legend = showAllLegends
+#)
+#     df = data.frame(
+#         cluster = OsC_HM@meta.data$clusterName),
+#     # col = list(
+#     #     gp = gpar(col = "white")
+#     # ),
+#     annotation_legend_param = list(direction = "horizontal")
+# )
+
+if (relativeExpression){
+  colRamp <- circlize::colorRamp2(c(-3, 0, 3),c("#3060cf", "#fffbbc","#c4463a"))
+} else {
+  colRamp <- circlize::colorRamp2(c(0, 6),c("#d3d3d3","#3060cf"))
+}
+
+if (nrow(heat.dat) > 100){
+    rowFont <- 1
+} else if (nrow(heat.dat) > 50){
+    rowFont <- 1
+} else if (nrow(heat.dat) > 25){
+    rowFont <- 6
+} else {
+    rowFont <- 8
+}
+
+plotList[[tag]] <- ComplexHeatmap::Heatmap(
+    heat.dat,
+    row_split               = rowSplitVec,
+    name                    = legendString,
+    column_title_gp         = grid::gpar(fontsize = 6),
+    row_title_rot           = 0, # Must be 0 or 90
+    column_title_rot        = 90,
+    column_split            = dfMeta[,columnSplitCol],
+    #column_split            = column_split,
+    cluster_column_slices   = cluster_column_slices,
+    cluster_columns         = cluster_columns,
+    cluster_rows            = TRUE,
+    show_row_names          = TRUE,
+    show_column_names       = FALSE,
+    column_names_side       = "bottom",
+    show_column_dend        = TRUE,
+    row_dend_width          = grid::unit(20, "mm"),
+    show_heatmap_legend     = showAllLegends,
+    column_names_max_height = grid::unit(8, "cm"),
+    row_names_gp            = grid::gpar(fontsize = 6),
+    top_annotation          = ht.anno,
+    #right_annotation = row_ha,
+    #left_annotation = lrow_ha,
+    #col                     = colorRamp2(c(-2, 0, 2),magma(3)),
+    col                     = colRamp,
+    column_names_rot        = 90,
+    border = TRUE
+)
+
+  FNbase <- paste0(tag, VersionPdfExt)
+
+  FN <- paste0(Obio@parameterList$reportFigDir, FNbase)
+  FNrel <- paste0("report_figures/", FNbase)
+            
+  pdf(FN)
+    print(plotList[[tag]])
+  dev.off()
+
+  figLegend <- paste0(
+    '**Figure ', 
+    figureCount, 
+    ':** ',
+    'Heatmap split by cluster for gene set ',gsub("_", " ", tag),'. Download a pdf of this figure <a href="',FNrel,'" target="_blank">here</a>.'
+  )
+            
+  figureCount <- figureCount + 1
+
+  NewChnk <- paste0(
+    "#### ", tag,
+    "\n```{r hm_",
+    tag,", results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",
+    figLegend,"'}\n",
+    "\n",
+    "\n print(plotList[['",tag,"']])",
+    "\n cat(  '\n')",
+    "\n\n\n```\n"   
+)
+
+  chnkVec <- c(
+    chnkVec,
+    NewChnk
+  )
+  
+  returnList <- list(
+    "plotList" = plotList,
+    "chnkVec"  = chnkVec,
+    "figureCount" = figureCount
+  )
+
+return(returnList)
+}
+
+## Done function to create heatmaps
+###############################################################################
+
+dfData <- data.frame(OsC[["RNA"]]@data)
+dataMatrix <- data.matrix(dfData)
+dfMeta <- OsC@meta.data
+
+####################
+## Create datamatrix and dfMeta
+
+
+## Need cluster_stage column
+selClust <- "cluster_age"
+OsC_HM <- OsC
+OsC_HM@meta.data[[selClust]] <- paste0(
+  OsC_HM@meta.data$clusterName, 
+  "_",
+  OsC_HM@meta.data$meta_Age_Group
+)
+
+
+
+###############################################################################
+## Calculataing average expression across all samples                        ##
+Seurat::Idents(OsC_HM) <- selClust
+OsCsel <- Seurat::AverageExpression(OsC_HM, return.seurat = TRUE)
+
+
+# 
+
+dfAdd <- unique(OsC_HM@meta.data[,c("clusterName", "clusterColor",  "meta_Age_Group", selClust)])
+
+dfAdd[["ageGroupColor"]] <- dfAdd$meta_Age_Group
+dfAdd$ageGroupColor <- gsub("Young", "#E6C229", dfAdd$ageGroupColor)
+dfAdd$ageGroupColor <- gsub("Middle", "#ED1D58", dfAdd$ageGroupColor)
+dfAdd$ageGroupColor <- gsub("Old", "#48A6EA", dfAdd$ageGroupColor)
+
+row.names(dfAdd) <- dfAdd[,selClust]
+
+OsCsel <- biologicToolsSC::addDf2seuratMetaData(
+  obj = OsCsel, 
+  dfAdd = dfAdd
+)
+
+OsCsel@meta.data$meta_Age_Group <- factor(
+  OsCsel@meta.data$meta_Age_Group,
+  levels = c("Young", "Middle", "Old")
+)
+
+OsCsel@meta.data$clusterName <- factor(
+  OsCsel@meta.data$clusterName,
+  levels=Obio@parameterList$clusterNameOrder
+)
+
+
+OsCsel@meta.data <- OsCsel@meta.data[order(OsCsel@meta.data$clusterName,OsCsel@meta.data$meta_Age_Group),]
+
+dfData <- data.frame(OsCsel[["RNA"]]@data)
+dataMatrix <- data.matrix(dfData)
+dfMeta <- OsCsel@meta.data
+ 
+dataMatrix <- dataMatrix[,dfMeta[,selClust]]
+
+#library(ComplexHeatmap)
+plotList <- list()
+
+chnkVec <- as.vector(NULL, mode="character")
+
+if (!exists("figureCount")){
+  figureCount <- 1  
+}
+
+
+for (i in 1:length(HMgeneSelections)){
+  if (length(unlist(HMgeneSelections[[i]])) > 1){
+    returnList <- addHeatmap2List(
+        dataMatrix = dataMatrix,
+        cluster_column_slices   = FALSE,
+        cluster_columns         = FALSE,
+        geneGroupList = HMgeneSelections[[i]],
+        relativeExpression = FALSE,
+        cmdVec = NULL,
+        tag = paste0(names(HMgeneSelections)[i], "_Abs"),
+        showAllLegends = TRUE,
+        figureCount = figureCount,
+        plotList = plotList,
+        maxNcharCatName = 10,
+        dfMeta = dfMeta,
+        group1ColorCol = "clusterColor", 
+        group1NameCol = "clusterName",
+        group2ColorCol = "ageGroupColor", 
+        group2NameCol = "meta_Age_Group",
+        chnkVec = chnkVec,
+        columnSplitCol = "clusterName"
+        
+    )
+    
+    plotList <- returnList[["plotList"]]
+    chnkVec <- returnList[["chnkVec"]]
+    figureCount <- returnList[["figureCount"]]
+  }
+}
+
+# plotList <- addHeatmap2List(
+#     OsC = OsC,
+#     geneGroupList = geneGroupList,
+#     relativeExpression = TRUE,
+#     plotList = plotList,
+#     cmdVec = NULL,
+#     tag = "Channels_Rel",
+#     showAllLegends = TRUE
+#     )
+
+
+
+
+            
+if (length(plotList) > 3){
+    tabVar <- ".tabset .tabset-fade .tabset-dropdown"
+} else {
+    tabVar <- ".tabset .tabset-fade .tabset-pills"
+}
+
+## To plot all heatmaps in one file
+# FNbase <- paste0("Summary.heatmaps", VersionPdfExt)
+
+#FN <- paste0(Obio@parameterList$reportFigDir, FNbase)
+#FNrel <- paste0("report_figures/", FNbase)
+            
+#pdf(FN)
+#    print(plotList)
+#dev.off()
+
+```
+
+
+### Heatmaps Absolute {`r tabVar`}
+The heatmaps depict the genes shown in red in the above plots. 
+
+```{r plot-heatmaps, echo=T, eval=TRUE, warning=FALSE, results='asis'}
+###############################################################################
+## Do category enrichment on clusters                                        ##
+cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = '\n'))
+## Done doing enrichment on clusters                                         ##
+###############################################################################
+
+```
+
+```{r process_heatmap_data_rel, echo=T, eval=TRUE, warning=FALSE, results=F, error=F}
+
+plotList <- list()
+
+chnkVec <- as.vector(NULL, mode="character")
+
+if (!exists("figureCount")){
+  figureCount <- 1  
+}
+
+
+for (i in 1:length(HMgeneSelections)){
+  
+  # tag <- names(HMgeneSelections)[i]
+  # tag <- unlist(strsplit(tag, "_LRT_"))[2]
+  # tag <- unlist(strsplit(tag,"_Age_Group_pos"))[1]
+  # 
+  # selCols <- colnames(dataMatrix)[grep(paste0(tag, "_"), colnames(dataMatrix))]
+  # dataMatrix <- dataMatrix[,selCols]
+  # dataMatrix <- dataMatrix[rowSums(dataMatrix) != 0, ]
+  
+  if (length(unlist(HMgeneSelections[[i]])) > 1){
+    returnList <- addHeatmap2List(
+        dataMatrix = dataMatrix,
+        cluster_column_slices   = FALSE,
+        cluster_columns         = FALSE,
+        geneGroupList = HMgeneSelections[[i]],
+        relativeExpression = TRUE,
+        cmdVec = NULL,
+        tag = paste0(names(HMgeneSelections)[i], "_Rel"),
+        showAllLegends = TRUE,
+        figureCount = figureCount,
+        plotList = plotList,
+        maxNcharCatName = 10,
+        dfMeta = dfMeta,
+        group1ColorCol = "clusterColor", 
+        group1NameCol = "clusterName",
+        group2ColorCol = "ageGroupColor", 
+        group2NameCol = "meta_Age_Group",
+        chnkVec = chnkVec ,
+        columnSplitCol = "clusterName"
+        
+    )
+    
+    plotList <- returnList[["plotList"]]
+    chnkVec <- returnList[["chnkVec"]]
+    figureCount <- returnList[["figureCount"]]
+  }
+}
+
+# plotList <- addHeatmap2List(
+#     OsC = OsC,
+#     geneGroupList = geneGroupList,
+#     relativeExpression = TRUE,
+#     plotList = plotList,
+#     cmdVec = NULL,
+#     tag = "Channels_Rel",
+#     showAllLegends = TRUE
+#     )
+
+
+
+
+            
+if (length(plotList) > 3){
+    tabVar <- ".tabset .tabset-fade .tabset-dropdown"
+} else {
+    tabVar <- ".tabset .tabset-fade .tabset-pills"
+}
+
+## To plot all heatmaps in one file
+# FNbase <- paste0("Summary.heatmaps", VersionPdfExt)
+
+#FN <- paste0(Obio@parameterList$reportFigDir, FNbase)
+#FNrel <- paste0("report_figures/", FNbase)
+            
+#pdf(FN)
+#    print(plotList)
+#dev.off()
+
+```
+
+
+### Heatmaps Relative {`r tabVar`}
+The heatmaps depict the genes shown in red in the above plots. 
+
+```{r plot-heatmaps-rel, echo=T, eval=TRUE, warning=FALSE, results='asis'}
+###############################################################################
+## Do category enrichment on clusters                                        ##
+cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = '\n'))
+## Done doing enrichment on clusters                                         ##
+###############################################################################
+
+```
 
 ```{r documentation_saving, echo=F, eval=TRUE, warning=FALSE, results=F, error = FALSE} 
 
@@ -1502,7 +2092,7 @@ save(OsC,
 
 library(openxlsx)
 
-dfTemp <- Obio@dataTableList[["DGE_table"]] 
+dfTemp <- Obio@dataTableList[["LRT_table"]] 
 
 if (!dir.exists( paste0(
    Obio@parameterList$html_local,
@@ -1514,7 +2104,7 @@ if (!dir.exists( paste0(
 
 baseFN <- paste0(
    Obio@parameterList$project_id, 
-   ".DGE.table.xlsx"
+   ".LRT.table.xlsx"
 )
 
 
@@ -1527,7 +2117,7 @@ outPutFN <- paste0(
  
 FNrel <- paste0("report_table/", baseFN)
     
-sheetName <- substr(paste0(Obio@parameterList$project_id, "_subcluster_DGE"),1,30)
+sheetName <- substr(paste0(Obio@parameterList$project_id, "_subcluster_LRT"),1,30)
 
 wb <- createWorkbook()
     addWorksheet(wb, sheetName)
@@ -1576,7 +2166,7 @@ if (!dir.exists( paste0(
 
 baseFN <- paste0(
    Obio@parameterList$project_id, 
-   ".DGE.cat.enrichment.table.xlsx"
+   ".LRT.cat.enrichment.table.xlsx"
 )
 
 
@@ -1589,7 +2179,7 @@ outPutFN <- paste0(
  
 FNrel <- paste0("report_table/", baseFN)
     
-sheetName <- substr(paste0(Obio@parameterList$project_id, "_cat_enrichment_DGE"),1,30)
+sheetName <- substr(paste0(Obio@parameterList$project_id, "_cat_enrichment_LRT"),1,30)
 
 wb <- openxlsx::createWorkbook()
     openxlsx::addWorksheet(wb, sheetName)
