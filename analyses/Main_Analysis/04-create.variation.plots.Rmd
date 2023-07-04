@@ -82,7 +82,7 @@ plotList[[tag]] <- ggplot2::ggplot(
             x=Avg.Expression, 
             y=variance.standardized, label = text, color = Type
         )
-  ) + ggplot2::geom_point( shape=16, size = dotsize
+  ) + ggrastr::rasterize(ggplot2::geom_point( shape=16, size = dotsize), dpi = rasterDpi
   ) + ggplot2::xlab("Average Expression") + ggplot2::ylab("Variance Standarized"
   ) + ggplot2::theme_bw(
   ) +  ggplot2::theme(
@@ -237,8 +237,7 @@ for (i in 1:length(SampleList)){
         ggplot2::aes(
             x=Avg.Expression, 
             y=variance.standardized, label = text, color = Type)
-            ) + ggplot2::geom_point( shape=16, size = dotsize
-            ) + ggplot2::xlab("Average Expression") + ggplot2::ylab("Variance Standarized"
+            ) + ggrastr::rasterize(ggplot2::geom_point( shape=16, size = dotsize ), dpi = rasterDpi ) + ggplot2::xlab("Average Expression") + ggplot2::ylab("Variance Standarized"
             ) + ggplot2::theme_bw(
             ) +  ggplot2::theme(
                 axis.text.y   = ggplot2::element_text(size=8),

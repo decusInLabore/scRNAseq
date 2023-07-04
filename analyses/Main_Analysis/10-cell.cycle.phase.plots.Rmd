@@ -78,7 +78,7 @@ minY <- 1.1*min(dfPlot$UMAP_2, na.rm = T)
 # }
 
 plotList[[tag]] <- ggplot(data=dfPlot[dfPlot$included == "+",], aes(UMAP_1, UMAP_2, color=Phase)
-            ) + geom_point( shape=16, size = as.numeric(dotsize)
+            ) + ggrastr::rasterize(ggplot2::geom_point( shape=16, size = as.numeric(dotsize), dpi = rasterDpi)
             ) + xlab("UMAP1") + ylab("UMAP2"
             ) + theme_bw(
             )  +  theme(
@@ -191,7 +191,7 @@ minY <- 1.1*min(dfPlot$tSNE_2, na.rm = T)
 # }
 
 plotList[[tag]] <- ggplot(data=dfPlot[dfPlot$included == "+",], aes(tSNE_1, tSNE_2, color=Phase)
-            ) + geom_point( shape=16, size = as.numeric(dotsize)
+            ) + ggrastr::rasterize(ggplot2::geom_point( shape=16, size = as.numeric(dotsize), dpi = rasterDpi)
             ) + xlab("tSNE1") + ylab("tSNE2"
             ) + theme_bw(
             )  +  theme(
@@ -304,7 +304,7 @@ for (i in 1:length(sampleVec)){
             
             
     plotList[[tag]] <- ggplot(data=dfPlotSel[dfPlot$included == "+",], aes(UMAP_1, UMAP_2, color=Phase)
-            ) + geom_point( shape=16, size = as.numeric(dotsize)
+            ) + ggrastr::rasterize(ggplot2::geom_point( shape=16, size = as.numeric(dotsize), dpi=rasterDpi)
             ) + xlab("UMAP1") + ylab("UMAP2"
             ) + theme_bw(
             )  +  theme(

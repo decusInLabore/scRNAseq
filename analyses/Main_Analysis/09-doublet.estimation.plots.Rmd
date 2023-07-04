@@ -50,9 +50,9 @@ if (length(pos) > 0){
   colVec <- colVec[unique(dfTemp$DF_Classification)]
   
   plotList[[tag]] <- ggplot(dfTemp, aes(UMAP_1, UMAP_2, color=DF_Classification)
-          )+ geom_point( 
+          )+ ggrastr::rasterize(ggplot2::geom_point( 
               shape = 16,
-              size = as.numeric(dotsize)
+              size = as.numeric(dotsize), dpi = rasterDpi)
           ) + xlab("UMAP1") + ylab("UMAP2"
           ) + theme_bw(
           )  +  theme(

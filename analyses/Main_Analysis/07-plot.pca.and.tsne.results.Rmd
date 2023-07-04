@@ -68,7 +68,7 @@ if (nrow(dfPlot) > 70000){
 }
 
 plotList[[tag]] <- ggplot(data=dfPlot[dfPlot$included == "+",], aes(UMAP_1, UMAP_2, color=Cluster)
-            ) + geom_point( shape=16, size = as.numeric(dotsize)
+            ) + ggrastr::rasterize(ggplot2::geom_point( shape=16, size = as.numeric(dotsize), dpi = rasterDpi)
             ) + xlab("UMAP1") + ylab("UMAP2"
             ) + theme_bw(
             )  +  theme(
@@ -204,7 +204,7 @@ if (nrow(dfPlot) > 70000){
 
 dfPlot$clusterName <- factor(dfPlot$clusterName)
 plotList[[tag]] <- ggplot(data=dfPlot[dfPlot$included == "+",], aes(tSNE_1, tSNE_2, color=Cluster)
-            ) + geom_point( shape=16, size = as.numeric(dotsize)
+            ) + ggrastr::rasterize(ggplot2::geom_point( shape=16, size = as.numeric(dotsize), dpi=rasterDpi)
             ) + xlab("tSNE1") + ylab("tSNE2"
             ) + theme_bw(
             )  +  theme(
@@ -334,7 +334,7 @@ for (i in 1:length(sampleVec)){
     }           
             
     plotList[[tag]] <- ggplot(data=dfPlotSel[dfPlotSel$included == "+",], aes(UMAP_1, UMAP_2, color=Cluster)
-            ) + geom_point( shape=16, size = as.numeric(dotsize)
+            ) + ggrastr::rasterize(ggplot2::geom_point( shape=16, size = as.numeric(dotsize), dpi=rasterDpi)
             ) + xlab("UMAP1") + ylab("UMAP2"
             )  + theme_bw(
             ) + theme(

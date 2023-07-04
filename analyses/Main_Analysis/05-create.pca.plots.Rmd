@@ -238,7 +238,7 @@ dfPlot <- dfPlot[order(dfPlot$sampleName),]
 plotList[[tag]] <- ggplot2::ggplot(
     data=dfPlot[dfPlot$included == "+",], 
     ggplot2::aes(UMAP_1, UMAP_2, color=sampleName)
-  ) + ggplot2::geom_point( shape=16, size = as.numeric(dotsize)
+  ) + ggrastr::rasterize(ggplot2::geom_point( shape=16, size = as.numeric(dotsize), dpi=rasterDpi)
   ) + ggplot2::xlab("UMAP1") + ggplot2::ylab("UMAP2"
   ) + ggplot2::theme_bw(
   )  +  ggplot2::theme(
@@ -380,8 +380,7 @@ dfPlot$sampleName <- factor(
 dfPlot <- dfPlot[order(dfPlot$sampleName),]
 
 plotList[[tag]] <- ggplot2::ggplot(data=dfPlot[dfPlot$included == "+",], ggplot2::aes(tSNE_1, tSNE_2, color=sampleName)
-            ) + ggplot2::geom_point( shape=16, size = as.numeric(dotsize)
-            ) + ggplot2::xlab("tSNE1") + ylab("tSNE2"
+            ) + ggrastr::rasterize(ggplot2::geom_point( shape=16, size = as.numeric(dotsize), dpi = rasterDpi)) + ggplot2::xlab("tSNE1") + ylab("tSNE2"
             ) + ggplot2::theme_bw(
             )  +  ggplot2::theme(
                 axis.text.y   = ggplot2::element_text(size=8),
@@ -509,8 +508,7 @@ for (i in 1:length(sampleVec)){
             
             
     plotList[[tag]] <- ggplot2::ggplot(data=dfPlotSel[dfPlotSel$included == "+",], ggplot2::aes(UMAP_1, UMAP_2, color=sampleName)
-            ) + ggplot2::geom_point( shape=16, size = as.numeric(dotsize)
-            ) + ggplot2::xlab("UMAP1") + ggplot2::ylab("UMAP2"
+            ) + ggrastr::rasterize(ggplot2::geom_point( shape=16, size = as.numeric(dotsize), dpi = rasterDpi)) + ggplot2::xlab("UMAP1") + ggplot2::ylab("UMAP2"
             ) + ggplot2::theme_bw(
             )  +  ggplot2::theme(
                 axis.text.y   = ggplot2::element_text(size=8),

@@ -9,8 +9,7 @@ output:
         toc_depth: 5
         toc_float: true
         css: src/style/style.css
-
-always_allow_html: yes
+        always_allow_html: yes
 ---
 
 
@@ -18,8 +17,13 @@ always_allow_html: yes
 # R to use
 # module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;R
 
+
+## ggrasterize option
+rasterDpi <- 300
+
+
 ## Option to resmume analysis after time-consuming integration. 
-resume <- FALSE
+resume <- TRUE
 
 if (resume){
     createNew <- FALSE
@@ -180,6 +184,19 @@ legendDotSize <- 5
 Obio@parameterList$legendDotSize <- legendDotSize
 dendrofactor <- 5
 Obio@parameterList$dendrofactor <- dendrofactor
+
+
+## Edit header section
+if (is.null(Obio@documentationParams$title) | Obio@documentationParams$title == ""){
+  ## This project:
+  # Set project parameters manually
+  Obio@documentationParams$title <-   "Single-nuclei Analysis of Mouse Brain Cells"
+  
+  Obio@documentationParams$subtitle <- "Thomas Kerloch"
+  
+  Obio@documentationParams$abstract <- "This is a single-nuclei study investigating how age affects gene expression in various neuronal cell populations."
+}
+
 ```
 
 <!-- Essential 6: (output required later): 
@@ -218,7 +235,7 @@ DGE Marker gene upload Chapter/Module -->
 ```
 
 <!-- Optional 12b: (Output only): Area Chart Chapter/Module -->
-```{r child = 'B133.timeseries.area.plot.Rmd', eval=FALSE}
+```{r child = 'B133.timeseries.area.plot.Rmd', eval=TRUE}
 ```
 
 <!-- Optional 13: (Output only):Category Enrichments Chapter/Module -->
@@ -311,25 +328,34 @@ firstup <- function(x) {
 ##
 ###############################################################################
 
-
+## Use automatic entries if no information is available. 
 if (exists("dfProposal")){
     if (!is.na(dfProposal[1,"ProjectAlias"]) & dfProposal[1,"ProjectAlias"] != ""){
+      if (is.null(projectParams[["title"]]) | projectParams[["title"]] == ""){
         projectParams[["title"]] = paste0(dfProposal[1,"ProjectAlias"], " - ", dfProposal[1,"project_name"])
+      }
     }
     
     if (!is.na(dfProposal[1,"project_user"]) & dfProposal[1,"project_user"] != ""){
+      if (is.null(projectParams[["subtitle"]]) | projectParams[["subtitle"]] == ""){
         labString <- firstup(dfProposal[1,"user_lab"])
         labString <- substr(labString, 1, (nchar(labString) - 1))
       
         projectParams[["subtitle"]] = paste0(labString, " Lab - ", dfProposal[1,"project_user"])
         projectParams[["subtitle"]] <- gsub("^ Lab - ", "", projectParams[["subtitle"]])
-        
+      }
     }
     
     if (!is.na(dfProposal[1,"proposal_text"]) & dfProposal[1,"proposal_text"] != ""){
+      if (!is.null(projectParams[["abstract"]]) | projectParams[["abstract"]] == ""){
+        projectParams[["abstract"]] <- paste0(
+          projectParams[["abstract"]],
+          "\n",
+          dfProposal[1,"proposal_text"]
+        )
+      } else {
         projectParams[["abstract"]] = dfProposal[1,"proposal_text"]
-       
-        
+      }
     }
 }
    

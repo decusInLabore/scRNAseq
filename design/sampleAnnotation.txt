@@ -1,6 +1,0 @@
-"sampleID"	"sampleName"	"sampleColor"
-"SubcutNoLiverMetM2R1"	"SubcutNoLiverMetM2R1"	"#F8766D"
-"LiverMetM3R1"	"LiverMetM3R1"	"#A3A500"
-"SubcutM3R1"	"SubcutM3R1"	"#00BF7D"
-"SubcutNoLiverMetM2R2"	"SubcutNoLiverMetM2R2"	"#00B0F6"
-"SubcutM3R2"	"SubcutM3R2"	"#E76BF3"

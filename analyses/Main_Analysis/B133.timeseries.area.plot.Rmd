@@ -11,6 +11,31 @@ VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.D
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE, results=F}
 
 
+###############################################################################
+## This part will allow to just render this chapter                          ##
+
+## Set renderChapter = TRUE if you want individual chapters to be processed
+if (!exists("renderChapter")){
+    renderChapter <- FALSE
+}
+
+# renderChapter <- TRUE
+
+## Load Obio biologic object and OsC single-cell object for renderByChapter mode
+if (renderChapter){
+      
+      ## Load biologic object
+      source("load.biologic.robj.R")
+  
+      ## Load Seurat object
+      SeuratFN <- paste0(Obio@parameterList$localWorkDir,list.files(Obio@parameterList$localWorkDir)[grep(".Seurat.Robj", list.files(Obio@parameterList$localWorkDir))])
+      
+      load(SeuratFN)
+}
+
+## All data for this chapter loaded                                          ##
+###############################################################################
+
 plotList <- list()
 chnkVec <- as.vector(NULL, mode = "character")
 
@@ -21,32 +46,25 @@ i = 1
  
     dfRes <- OsC@meta.data
     
-    pos <- grep("^meta_Timepoint$", names(OsC@meta.data))
+    selVec <- c("cellID", "clusterName", "clusterColor", "meta_Age_Group")
     
-    if (length(pos) == 1){
-        selCol <- "meta_Timepoint"
-        
-        # dfRes <- dfRes[dfRes$meta_Genotype == genotypes[i], selVec]
-        dfRes[["timepoint"]] <- gsub("^T", "", dfRes$meta_Timepoint)
-        dfRes[["timepoint"]] <- gsub("hrs", "", dfRes$timepoint)
-        dfRes$timepoint <- as.numeric(dfRes$timepoint)
-    
-    } else {
-        selCol <- "sampleName"
-    }
-    
-    selVec <- c("cellID", "clusterName", "clusterColor", selCol)
-    
-    
+    # dfRes <- dfRes[dfRes$meta_Genotype == genotypes[i], selVec]
+    dfRes[["timepoint"]] <- dfRes$meta_Age_Group
+    dfRes[["timepoint"]] <- gsub("Young", 2.5, dfRes$timepoint)
+    dfRes[["timepoint"]] <- gsub("Middle", 7.5, dfRes$timepoint)
+    dfRes[["timepoint"]] <- gsub("Old", 20, dfRes$timepoint)
+  
+    dfRes$timepoint <- as.numeric(dfRes$timepoint)
     
     
     dfCol <- unique(dfRes[,c("clusterName", "clusterColor")])
+    row.names(dfCol) <- dfCol$clusterName
+    dfCol <- dfCol[Obio@parameterList$clusterNameOrder, ]
     
     colVec <- dfCol$clusterColor
     names(colVec) <- dfCol$clusterName
     
     
-    if (length(pos) == 1) {
     # Percentages
     library(dplyr)
     data <- dfRes  %>%
@@ -55,7 +73,14 @@ i = 1
       mutate(percentage = n / sum(n))
     
     
-    tag <- paste0("Area_plot_", genotypes[i])
+    tag <- paste0("Percent_Area_plot_", genotypes[i])
+    
+    data$clusterName <- factor(
+        data$clusterName, 
+        levels = Obio@parameterList[["clusterNameOrder"]]
+    )
+    
+    data$clusterName <- factor(data$clusterName, levels = Obio@parameterList$clusterNameOrder)
     
     plotList[[tag]] <- ggplot2::ggplot(data, ggplot2::aes(x = timepoint, y = percentage,
                          fill = clusterName)) +
@@ -74,8 +99,8 @@ i = 1
         ggplot2::ggtitle(paste0("Area plot for ", genotypes[i])) + 
         ggplot2::scale_fill_manual("Clusters" ,values = colVec) +
         ggplot2::scale_x_continuous(
-            breaks=c(0, 2, 4, 8, 12, 24), 
-            labels=c("0", "2", "4", "8", "12", "24")
+            breaks=c(2.5,7.5,20), 
+            labels=c("Young","Middle","Old")
         )
 
 
@@ -115,17 +140,127 @@ i = 1
             chnkVec,
             NewChnk
         )
-} else {
-  ## Make area plot without time axis
+# }
+
+        
+###############################################################################
+## Add N-cell chart                                                          ##
+    
+genotypes <- "WT"
+i = 1
+
+# for (i in 1:length(genotypes)){
+ 
+    dfRes <- OsC@meta.data
+    
+    selVec <- c("cellID", "clusterName", "clusterColor", "meta_Age_Group")
+    
+    # dfRes <- dfRes[dfRes$meta_Genotype == genotypes[i], selVec]
+    dfRes[["timepoint"]] <- dfRes$meta_Age_Group
+    dfRes[["timepoint"]] <- gsub("Young", 1, dfRes$timepoint)
+    dfRes[["timepoint"]] <- gsub("Middle", 2, dfRes$timepoint)
+    dfRes[["timepoint"]] <- gsub("Old", 3, dfRes$timepoint)
   
-  
-}## end of If 
+    dfRes$timepoint <- as.numeric(dfRes$timepoint)
+    
+    
+    dfCol <- unique(dfRes[,c("clusterName", "clusterColor")])
+    row.names(dfCol) <- dfCol$clusterName
+    dfCol <- dfCol[Obio@parameterList$clusterNameOrder, ]
+    
+    colVec <- dfCol$clusterColor
+    names(colVec) <- dfCol$clusterName
+    
+    
+    # Percentages
+    library(dplyr)
+    data <- dfRes  %>%
+      group_by(timepoint, clusterName) %>%
+      summarise(n = n())
+    
+    
+    tag <- paste0("N_cells_Area_plot_", genotypes[i])
+    
+    data$clusterName <- factor(
+        data$clusterName, 
+        levels = Obio@parameterList[["clusterNameOrder"]]
+    )
+    
+    data$clusterName <- factor(data$clusterName, levels = Obio@parameterList$clusterNameOrder)
+    
+    plotList[[tag]] <- ggplot2::ggplot(data, ggplot2::aes(x = timepoint, y = n,
+                         fill = clusterName)) +
+        ggplot2::geom_area() +
+        ggplot2::theme_bw()  +  
+        ggplot2::theme(
+          axis.text.y   = ggplot2::element_text(size=8),
+          axis.text.x   = ggplot2::element_text(size=8),
+          axis.title.y  = ggplot2::element_text(size=8),
+          axis.title.x  = ggplot2::element_text(size=8),
+          axis.line = ggplot2::element_line(colour = "black"),
+          panel.border = ggplot2::element_rect(colour = "black", fill=NA, size=1),
+          plot.title = ggplot2::element_text(hjust = 0.5, size = 12),
+          legend.title = ggplot2::element_blank()
+        ) + 
+        ggplot2::ggtitle(gsub("_", " ", tag)) + 
+        ggplot2::scale_fill_manual("Clusters" ,values = colVec) +
+        ggplot2::scale_x_continuous(
+            breaks=c(1,2,3), 
+            labels=c("Young","Middle","Old")
+        )
+
+
+
+        FNbase <- paste0(tag, VersionPdfExt)
+
+        FN <- paste0(Obio@parameterList$reportFigDir, FNbase)
+        FNrel <- paste0("report_figures/", FNbase)
+                    
+        pdf(FN)
+            print(plotList[[tag]])
+        dev.off()
+            
+          
+            
+        figLegend <- paste0(
+                    '**Figure ', 
+                    figureCount, 
+                    ':** ',
+                    'Area distribution plot for genotype ',genotypes[i],'. Download a pdf of this figure <a href="',FNrel,'" target="_blank">here</a>.'
+                )
+                
+        figureCount <- figureCount + 1
+    
+        NewChnk <- paste0(
+        "#### ", tag,
+        "\n```{r area_",
+        tag,", results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",
+        figLegend,"'}\n",
+        "\n",
+        "\n print(plotList[['",tag,"']])",
+        "\n cat(  '\n')",
+        "\n\n\n```\n"   
+        )
+    
+        chnkVec <- c(
+            chnkVec,
+            NewChnk
+        )
+# }        
+            
+## Done                                                                      ##
+###############################################################################
+        
+        
             
 if (length(plotList) > 3){
     tabVar <- ".tabset .tabset-fade .tabset-dropdown"
 } else {
     tabVar <- ".tabset .tabset-fade .tabset-pills"
 }
+        
+        
+        
 
 ```
 
