@@ -5,16 +5,16 @@
 # module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;
 ###############################################################################
 
-
+## This procedure is run in the /Main_Analysis folder to use the renv setup there.
 
 ###############################################################################
 ## Initialise renv
 
-# if (!requireNamespace("remotes")){
-#   install.packages("remotes")
-# }
-# 
-# remotes::install_github("rstudio/renv")
+if (!requireNamespace("remotes")){
+  install.packages("remotes")
+}
+
+remotes::install_github("rstudio/renv")
 
 if (!file.exists("renv.lock")){
     renv::init()
@@ -36,35 +36,16 @@ load(FN)
 ## Data selection for subsetting:
 #sampleID: primaryTumor
 
-# To subcluster melanoma cells (current clusters Melanoma_1 and renamed Melanoma_2) 
-# in samples 2,4, and 5
-
-# BackgroundLiverM3	  1
-# LiverMetM3	        2
-# LiverNormalM1	      3
-# SubcutM3	          4
-# SubcutNoLiverMetM2	5
-
-# and to compare proportions of different sub clusters. Deliverables: Subclustering of Melanoma_1 and Melanoma_2 subclusters in samples 2, 3, and 5 in analysis SC22147, summarized in a standard single-cell analysis report. 
+# 3.	To subcluster Neutrophil (19), Hepatocyte (8) and B_cell (5) clusters in samples 1-5 
 
 ## Review table
 unique(OsC@meta.data[,c("clusterName", "seurat_clusters")])
 
-# Melanoma               3
-#  Melanoma_2           13
 
 # Select only cluster 1
-selClusters <- c(3, 13)
+selClusters <- c(8)
 OsC_sel1 <- subset(x = OsC, subset = seurat_clusters %in% selClusters)
 
-# select samples 2, 4 and 5
-selSamples <- c(
-  "LiverMetM3R1", "LiverMetM3R2",
-  "SubcutM3R1", "SubcutM3R2",
-  "SubcutNoLiverMetM2R1", "SubcutNoLiverMetM2R2"
-)
-
-OsC_sel1 <- subset(x = OsC_sel1, subset = sampleName %in% selSamples)
 
 sampleIDs <- unique(OsC_sel1$sampleID)
 
@@ -97,7 +78,9 @@ for (i in 1:length(sampleIDs)){
     dfMatrix <- OsC_temp[["RNA"]]@counts
     dfMatrix <- dfMatrix[!(Matrix::rowSums(dfMatrix) == 0),]
     print(paste0(sampleIDs[i], ": ", ncol(dfMatrix)))
-    if (ncol(dfMatrix) > 10){
+    
+    ## Only samples with more than 100 cells will be carried forward ##
+    if (length(ncol(dfMatrix)) > 0 && ncol(dfMatrix) > 100){
         write.table(dfMatrix, FNout, sep = "\t")
         print(paste0(sampleIDs[i], " written to file."))
         
@@ -116,8 +99,6 @@ for (i in 1:length(sampleIDs)){
     
 }
 
-
-# LiverMetM3R2 features only 10 cells in this selection - excluded. 
 
 # save(
 #   OsC, 

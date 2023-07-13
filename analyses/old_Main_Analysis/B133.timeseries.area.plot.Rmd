@@ -1,0 +1,139 @@
+<!-- Set PArameters Module -->
+<!-- Set the chnkPrefix to make all chunks unique in the overall folder -->
+```{r create_sankey_init, echo=TRUE, eval=TRUE, warning=FALSE}
+chnkPrefix <- "B132.Areaplot."
+VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.Date()), ".pdf")
+
+```
+
+
+
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, results=F}
+
+
+plotList <- list()
+chnkVec <- as.vector(NULL, mode = "character")
+
+genotypes <- "WT"
+i = 1
+
+# for (i in 1:length(genotypes)){
+ 
+    dfRes <- OsC@meta.data
+    
+    pos <- grep("^meta_Timepoint$", names(OsC@meta.data))
+    
+    if (length(pos) == 1){
+        selCol <- "meta_Timepoint"
+        
+        # dfRes <- dfRes[dfRes$meta_Genotype == genotypes[i], selVec]
+        dfRes[["timepoint"]] <- gsub("^T", "", dfRes$meta_Timepoint)
+        dfRes[["timepoint"]] <- gsub("hrs", "", dfRes$timepoint)
+        dfRes$timepoint <- as.numeric(dfRes$timepoint)
+    
+    } else {
+        selCol <- "sampleName"
+    }
+    
+    selVec <- c("cellID", "clusterName", "clusterColor", selCol)
+    
+    
+    
+    
+    dfCol <- unique(dfRes[,c("clusterName", "clusterColor")])
+    
+    colVec <- dfCol$clusterColor
+    names(colVec) <- dfCol$clusterName
+    
+    
+    if (length(pos) == 1) {
+    # Percentages
+    library(dplyr)
+    data <- dfRes  %>%
+      group_by(timepoint, clusterName) %>%
+      summarise(n = n())  %>%
+      mutate(percentage = n / sum(n))
+    
+    
+    tag <- paste0("Area_plot_", genotypes[i])
+    
+    plotList[[tag]] <- ggplot2::ggplot(data, ggplot2::aes(x = timepoint, y = percentage,
+                         fill = clusterName)) +
+        ggplot2::geom_area() +
+        ggplot2::theme_bw()  +  
+        ggplot2::theme(
+          axis.text.y   = ggplot2::element_text(size=8),
+          axis.text.x   = ggplot2::element_text(size=8),
+          axis.title.y  = ggplot2::element_text(size=8),
+          axis.title.x  = ggplot2::element_text(size=8),
+          axis.line = ggplot2::element_line(colour = "black"),
+          panel.border = ggplot2::element_rect(colour = "black", fill=NA, size=1),
+          plot.title = ggplot2::element_text(hjust = 0.5, size = 12),
+          legend.title = ggplot2::element_blank()
+        ) + 
+        ggplot2::ggtitle(paste0("Area plot for ", genotypes[i])) + 
+        ggplot2::scale_fill_manual("Clusters" ,values = colVec) +
+        ggplot2::scale_x_continuous(
+            breaks=c(0, 2, 4, 8, 12, 24), 
+            labels=c("0", "2", "4", "8", "12", "24")
+        )
+
+
+
+        FNbase <- paste0(tag, VersionPdfExt)
+
+        FN <- paste0(Obio@parameterList$reportFigDir, FNbase)
+        FNrel <- paste0("report_figures/", FNbase)
+                    
+        pdf(FN)
+            print(plotList[[tag]])
+        dev.off()
+            
+          
+            
+        figLegend <- paste0(
+                    '**Figure ', 
+                    figureCount, 
+                    ':** ',
+                    'Area distribution plot for genotype ',genotypes[i],'. Download a pdf of this figure <a href="',FNrel,'" target="_blank">here</a>.'
+                )
+                
+        figureCount <- figureCount + 1
+    
+        NewChnk <- paste0(
+        "#### ", tag,
+        "\n```{r area_",
+        tag,", results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",
+        figLegend,"'}\n",
+        "\n",
+        "\n print(plotList[['",tag,"']])",
+        "\n cat(  '\n')",
+        "\n\n\n```\n"   
+        )
+    
+        chnkVec <- c(
+            chnkVec,
+            NewChnk
+        )
+} else {
+  ## Make area plot without time axis
+  
+  
+}## end of If 
+            
+if (length(plotList) > 3){
+    tabVar <- ".tabset .tabset-fade .tabset-dropdown"
+} else {
+    tabVar <- ".tabset .tabset-fade .tabset-pills"
+}
+
+```
+
+### Area Distribution Plot {`r tabVar`}
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, results="asis"} 
+
+cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = '\n'))
+
+
+```
+

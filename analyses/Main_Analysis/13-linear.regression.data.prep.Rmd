@@ -449,8 +449,8 @@ for (i in 1:length(clusterVec)){
             y=y, label = label, color = ClusterMarker)
     #) + geom_abline(intercept = intersectVec[i], slope = slopeVec[i], linetype="dashed", color = "grey"
     ) + geom_smooth(method='lm', formula= y ~ x, linetype="dashed", se = T, colour = "grey"
-    ) + geom_point( shape=16, size = dotsize
-            )  + xlab("Average Expression All Cells") + ylab(paste0("Average Expression ", clusterVec[[i]])
+    ) + ggrastr::rasterize(ggplot2::geom_point( shape=16, size = dotsize
+            ), dpi = rasterDpi)  + xlab("Average Expression All Cells") + ylab(paste0("Average Expression ", clusterVec[[i]])
             ) + theme_bw(
             )  +  theme(
                 axis.text.y   = element_text(size=8),

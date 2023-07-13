@@ -135,6 +135,14 @@
       "Hash": "ee4d027afb8f52fec1f46b9f0a8660e9",
       "Requirements": []
     },
+    "Cairo": {
+      "Package": "Cairo",
+      "Version": "1.5-12",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "a44aec693253e4eb6c45d2fd789091a0",
+      "Requirements": []
+    },
     "DBI": {
       "Package": "DBI",
       "Version": "1.1.1",
@@ -319,6 +327,14 @@
         "S4Vectors",
         "XVector"
       ]
+    },
+    "GlobalOptions": {
+      "Package": "GlobalOptions",
+      "Version": "0.1.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "819f3084d1ec686a6d56b6385ad3280b",
+      "Requirements": []
     },
     "IRanges": {
       "Package": "IRanges",
@@ -781,6 +797,14 @@
       "Hash": "543776ae6848fde2f48ff3816d0628bc",
       "Requirements": []
     },
+    "beeswarm": {
+      "Package": "beeswarm",
+      "Version": "0.2.3",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "dc538ec663e38888807ef3034489403d",
+      "Requirements": []
+    },
     "biologicSeqTools2": {
       "Package": "biologicSeqTools2",
       "Version": "0.0.0.9000",
@@ -822,14 +846,11 @@
     "biologicViewerSC": {
       "Package": "biologicViewerSC",
       "Version": "0.0.1.0",
-      "Source": "GitHub",
-      "RemoteType": "github",
-      "RemoteHost": "api.github.com",
-      "RemoteUsername": "decusInLabore",
-      "RemoteRepo": "biologicViewerSC",
-      "RemoteRef": "main",
-      "RemoteSha": "b1973ea834fd508f855064cc20c848889c4c7cf1",
-      "Hash": "06be1d8b386794d9ab10e8834cd2d635",
+      "Source": "git",
+      "RemoteType": "git",
+      "RemoteUrl": "https://github.com/decusInLabore/biologicViewerSC",
+      "RemoteRef": "",
+      "Hash": "84b06f6b2aa11d505ba962c76a1ecd44",
       "Requirements": [
         "DBI",
         "DT",
@@ -1028,6 +1049,18 @@
       "Requirements": [
         "rematch",
         "tibble"
+      ]
+    },
+    "circlize": {
+      "Package": "circlize",
+      "Version": "0.4.8",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "0f1b800a8d7c2f2d401e145c88c93722",
+      "Requirements": [
+        "GlobalOptions",
+        "colorspace",
+        "shape"
       ]
     },
     "cli": {
@@ -1647,6 +1680,18 @@
         "zip"
       ]
     },
+    "ggbeeswarm": {
+      "Package": "ggbeeswarm",
+      "Version": "0.6.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "dd68b9b215b2d3119603549a794003c3",
+      "Requirements": [
+        "beeswarm",
+        "ggplot2",
+        "vipor"
+      ]
+    },
     "ggforce": {
       "Package": "ggforce",
       "Version": "0.3.3",
@@ -1758,6 +1803,20 @@
         "tidygraph",
         "viridis",
         "withr"
+      ]
+    },
+    "ggrastr": {
+      "Package": "ggrastr",
+      "Version": "1.0.2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "7c8178842114bfcd44e688e7fd84c52a",
+      "Requirements": [
+        "Cairo",
+        "ggbeeswarm",
+        "ggplot2",
+        "png",
+        "ragg"
       ]
     },
     "ggrepel": {
@@ -2808,6 +2867,17 @@
         "reshape2"
       ]
     },
+    "ragg": {
+      "Package": "ragg",
+      "Version": "1.2.5",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "690bc058ea2b1b8a407d3cfe3dce3ef9",
+      "Requirements": [
+        "systemfonts",
+        "textshaping"
+      ]
+    },
     "rappdirs": {
       "Package": "rappdirs",
       "Version": "0.3.3",
@@ -3223,6 +3293,14 @@
         "scales"
       ]
     },
+    "shape": {
+      "Package": "shape",
+      "Version": "1.4.4",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "ef692f72a633981cad0d4950a5775702",
+      "Requirements": []
+    },
     "shiny": {
       "Package": "shiny",
       "Version": "1.7.1",
@@ -3463,6 +3541,17 @@
         "praise",
         "rlang",
         "withr"
+      ]
+    },
+    "textshaping": {
+      "Package": "textshaping",
+      "Version": "0.3.6",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "1ab6223d3670fac7143202cb6a2d43d5",
+      "Requirements": [
+        "cpp11",
+        "systemfonts"
       ]
     },
     "thinkr": {
@@ -3729,6 +3818,14 @@
         "lifecycle",
         "rlang"
       ]
+    },
+    "vipor": {
+      "Package": "vipor",
+      "Version": "0.4.5",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "ea85683da7f2bfa63a98dc6416892591",
+      "Requirements": []
     },
     "viridis": {
       "Package": "viridis",
