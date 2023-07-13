@@ -78,7 +78,9 @@ for (i in 1:length(sampleIDs)){
     dfMatrix <- OsC_temp[["RNA"]]@counts
     dfMatrix <- dfMatrix[!(Matrix::rowSums(dfMatrix) == 0),]
     print(paste0(sampleIDs[i], ": ", ncol(dfMatrix)))
-    if (length(ncol(dfMatrix)) > 0 && ncol(dfMatrix) > 10){
+    
+    ## Only samples with more than 100 cells will be carried forward ##
+    if (length(ncol(dfMatrix)) > 0 && ncol(dfMatrix) > 100){
         write.table(dfMatrix, FNout, sep = "\t")
         print(paste0(sampleIDs[i], " written to file."))
         

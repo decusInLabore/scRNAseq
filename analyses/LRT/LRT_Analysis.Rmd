@@ -1,5 +1,4 @@
 ---
-
 output: 
     html_document:
         highlight: default
@@ -9,9 +8,8 @@ output:
         toc: true
         toc_depth: 3
         toc_float: true
-        self_contained: no
+        self_contained: yes
         css: src/style/style.css
-
 ---
     
     

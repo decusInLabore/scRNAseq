@@ -17,20 +17,6 @@ output:
 # R to use
 # module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;R
 
-
-## ggrasterize option
-rasterDpi <- 300
-
-
-## Option to resmume analysis after time-consuming integration. 
-resume <- TRUE
-
-if (resume){
-    createNew <- FALSE
-} else {
-    createNew <- TRUE
-}
-
 knitr::opts_chunk$set(
     tidy = F,
     tidy.opts = list(width.cutoff = 120),
@@ -61,6 +47,28 @@ library(Seurat)
 library(ggplot2)
 library(tidyr)
 library(knitr)
+
+
+## ggrasterize option
+rasterDpi <- 300
+
+
+## Option to resmume analysis after time-consuming integration. 
+resume <- TRUE
+
+SeuratFolder <- "../../../../workdir"
+pos <- grep("Seurat.Robj", list.files(SeuratFolder))
+if (length(pos) == 0){
+  resume <- FALSE
+}
+
+if (resume){
+    createNew <- FALSE
+} else {
+    createNew <- TRUE
+}
+
+
 
 cwd <- paste0(here::here(),"/")
 tempWorkDir <- paste0(cwd, "../")
@@ -235,7 +243,7 @@ DGE Marker gene upload Chapter/Module -->
 ```
 
 <!-- Optional 12b: (Output only): Area Chart Chapter/Module -->
-```{r child = 'B133.timeseries.area.plot.Rmd', eval=TRUE}
+```{r child = 'B133.timeseries.area.plot.Rmd', eval=FALSE}
 ```
 
 <!-- Optional 13: (Output only):Category Enrichments Chapter/Module -->

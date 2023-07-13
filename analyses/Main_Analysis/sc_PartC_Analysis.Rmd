@@ -63,11 +63,10 @@ if (!file.exists("renv.lock")){
 
 #library(scales)
 
-#projectDir <- gsub("scripts/scRNAseq/analyses/Main_Analysis", "", getwd())
-projectDir <-  "/nemo/stp/babs/working/boeings/Projects/bonfantip/roberta.ragazzini/446B_scRNAseq_subClustering_pbl359B_12clusters/"
+projectDir <- gsub("scripts/scRNAseq/analyses/Main_Analysis", "", getwd())
 
 
-workdir <- "/nemo/stp/babs/working/boeings/Projects/bonfantip/roberta.ragazzini/446B_scRNAseq_subClustering_pbl359B_12clusters/workdir/"
+workdir <- paste0(projectDir, "workdir/")
 
 
 VersionPdfExt <- paste0(".V", gsub("-", "", Sys.Date()), ".pdf")
