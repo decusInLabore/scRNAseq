@@ -1,0 +1,70 @@
+<!-- Set PArameters Module -->
+<!-- Set the chnkPrefix to make all chunks unique in the overall folder -->
+```{r violin_init, echo=TRUE, eval=TRUE, warning=FALSE}
+chnkPrefix <- "violin."
+VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.Date()), ".pdf")
+
+# Load specific version of R
+#module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a
+```
+
+
+
+```{r data_prep_violin, echo=TRUE, eval=TRUE, warning=FALSE, results=F}
+
+## For Violinplots we want single gene lists
+
+geneList <- lapply(HMgeneSelections, unlist, use.names=F)
+
+plotList <- list()
+
+
+for (i in 1:length(geneList)){
+  
+tag <- paste0("Vln_", names(geneList)[i])  
+
+if (length(geneList[[i]]) > 1 & length(geneList[[i]]) <=  50){
+plotList[[tag]] <- Seurat::VlnPlot(
+    object = OsC,
+    features = geneList[[i]],
+    pt.size = 1,
+    stack=T,
+    flip = T
+) + ggplot2::theme(legend.position = "none"
+) + ggplot2::ggtitle(gsub("_", " ", tag)
+)
+}
+}
+
+# plotList <- addHeatmap2List(
+#     OsC = OsC,
+#     geneGroupList = geneGroupList,
+#     relativeExpression = TRUE,
+#     plotList = plotList,
+#     cmdVec = NULL,
+#     tag = "Channels_Rel",
+#     showAllLegends = TRUE
+#     )
+
+
+# pdf("../../../../html_local/report_figures/stacked.violin.plots.V3.asl545.pdf")
+# plotList
+# dev.off()
+if (length(plotList) > 3){
+    tabVar <- ".tabset .tabset-fade .tabset-dropdown"
+} else {
+    tabVar <- ".tabset .tabset-fade .tabset-pills"
+}    
+    
+```
+
+
+### Violinplots {`r tabVar`}
+
+In this section heatmaps and dotplots for various gene categories are provided. 
+
+```{r Cluster_violinplot_overview, echo=TRUE, eval=TRUE, warning=FALSE, results="asis"}
+
+cat(paste(knit(text = chnkVec, quiet = T), collapse = '\n'))
+
+```
