@@ -1,0 +1,274 @@
+<!-- Set PArameters Module -->
+<!-- Set the chnkPrefix to make all chunks unique in the overall folder -->
+```{r create_sankey_init, echo=TRUE, eval=TRUE, warning=FALSE}
+chnkPrefix <- "B134.Barchart."
+VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.Date()), ".pdf")
+
+```
+
+
+
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, results=F}
+
+
+###############################################################################
+## This part will allow to just render this chapter                          ##
+
+## Set renderChapter = TRUE if you want individual chapters to be processed
+if (!exists("renderChapter")){
+    renderChapter <- FALSE
+}
+
+# renderChapter <- TRUE
+
+## Load Obio biologic object and OsC single-cell object for renderByChapter mode
+if (renderChapter){
+      
+      ## Load biologic object
+      source("load.biologic.robj.R")
+  
+      ## Load Seurat object
+      SeuratFN <- paste0(Obio@parameterList$localWorkDir,list.files(Obio@parameterList$localWorkDir)[grep(".Seurat.Robj", list.files(Obio@parameterList$localWorkDir))])
+      
+      load(SeuratFN)
+}
+
+## All data for this chapter loaded                                          ##
+###############################################################################
+
+## Set sampleIDorder
+## Give the order in which sampleIDs should be displayed
+sampleIDorder <- Obio@parameterList$sampleNameOrder
+sampleNameOrder <- rev(Obio@parameterList$sampleNameOrder)
+
+dfOrder <- OsC@meta.data %>% 
+  dplyr::distinct(sampleName, sampleID)  %>% 
+  magrittr::set_rownames(.$sampleID)
+
+dfOrder <- dfOrder[sampleIDorder,]
+
+
+
+## Define cluster order
+## Can be set manually. Make sure all clusters are present
+clusterOrder <- rev(Obio@parameterList$clusterNameOrder)
+
+project_id <- Obio@parameterList$project_id
+## If you work outside of the biologic framework, set the projectID maually. 
+## It can be any string
+
+## Set table output directory
+reportTableDir <- Obio@parameterList$reportTableDir
+## set the directory manually if you're working outside the biologic framework. 
+## Make sure that the last character is a "/"
+
+## Set table output directory
+reportFigDir <- Obio@parameterList$reportFigDir
+## set the directory manually if you're working outside the biologic framework. 
+## Make sure that the last character is a "/"
+
+## Make sure the directory exists
+if (!dir.exists(reportTableDir)){
+    dir.create(reportTableDir, recursive = T)
+}
+
+## set figure count variable, if it doesent exists already
+if (!exists("figureCount")){
+    figureCount <- 1
+}
+
+```
+
+
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, results="asis"}
+###############################################################################
+## Create datatable for plotting                                             ##
+library(dplyr)
+
+
+## This plotting procedure requires three sets: the sets cellTypeIDs, clusterIDs, cellTypeIDs
+## level1ID, level2ID, level3ID
+selCol <- "meta_Treatment"
+
+pos <- grep(selCol, names(OsC@meta.data))
+
+if (length(pos) != 1){
+  selCol <- "sampleName"
+}
+
+dfCluster <- OsC@meta.data %>% 
+    dplyr::distinct(clusterName, clusterColor) %>% 
+    magrittr::set_rownames(.$clusterName)
+
+dfCluster <- dfCluster[Obio@parameterList$clusterNameOrder,]
+
+
+colVec <- dfCluster$clusterColor
+
+clusterIDs <- unique(OsC@meta.data[,"clusterName"])
+
+if (length(grep("cellIdent", names(OsC@meta.data))) == 0){
+    OsC@meta.data[["cellIdent"]] <- "All"
+}
+
+cellTypeIDs <- unique(OsC@meta.data[,"cellIdent"])
+
+dfTemp <- OsC@meta.data
+
+if (length(grep("^cellIdent$", names(dfTemp))) == 0){
+    dfTemp[["cellIdent"]] <- "All"
+}
+
+dfTemp$cellIdent <- dfTemp$meta_Treatment
+
+
+## Make Ncell barchart
+plotList <- list()
+chnkVec <- as.vector(NULL, mode="character")
+clusterNameOrder <- Obio@parameterList$clusterNameOrder
+
+clusterNameOrder <- clusterNameOrder[clusterNameOrder %in% unique(dfTemp$clusterName)]
+dfTemp$clusterName <- factor(dfTemp$clusterName, levels = clusterNameOrder)
+
+tag <- "Cluster_Barchart_Ncells"
+plotList[[tag]] <- ggplot2::ggplot(data=dfTemp, ggplot2::aes(x=meta_Treatment, fill=clusterName)) + ggplot2::geom_bar() + 
+ggplot2::labs(title=paste0("Cells per Treatment"), x="", y = "Counts") + 
+ggplot2::theme_bw() +  
+ggplot2::theme(
+  panel.border = ggplot2::element_rect(colour = "black", fill=NA, size=1),
+  plot.title = ggplot2::element_text(hjust = 0.5, size = 12)
+) 
+plotList[[tag]] <- plotList[[tag]] + 
+      ggplot2::guides(fill= ggplot2::guide_legend(title="Clusters"))
+  
+    h <- sum(c("clusterName", "clusterColor") %in% names(OsC@meta.data))
+    if (h ==2){
+        dfCol <- unique(OsC@meta.data[,c("clusterName", "clusterColor")])
+        row.names(dfCol) <- dfCol$clusterName
+        dfCol <- dfCol[clusterNameOrder, ]
+        
+        dfCol <- dfCol[dfCol$clusterName %in% unique(dfTemp$clusterName), ]
+        colVec <- as.vector(dfCol$clusterColor)
+        names(colVec) <- as.vector(dfCol$clusterName)
+        colVec <- rev(colVec)
+        
+        plotList[[tag]] <- plotList[[tag]] + ggplot2::scale_fill_manual("Clusters" ,values = colVec
+        ) 
+    }
+
+###########################################################################
+## Save plot to file                                                     ##
+FNbase <- paste0(tag,".Ncells", VersionPdfExt)
+FN <- paste0(reportFigDir, FNbase)
+FNrel <- paste0("report_figures/", FNbase)
+
+pdf(FN)
+  print(plotList[[tag]])
+dev.off()
+##                                                                       ##
+###########################################################################
+figCap <- paste0(
+    '**Figure ',
+    figureCount,
+    ':** Percentages of cells in each treatment group by cluster.',
+    'Download a pdf of this figure <a href="',FNrel,'" target="_blank">here</a>. '
+)
+
+NewChnk <- paste0(
+paste0("#### ", tag),
+    "\n```{r Barchart-",tag,", results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",figCap,"'}\n",
+    "\n",
+    "\n print(plotList[['",tag,"']])",
+    "\n cat(  '\n')",
+    "\n\n\n```\n"   
+)
+
+chnkVec <- c(
+    chnkVec,
+    NewChnk
+)
+    
+## Percentage
+    
+
+tag <- "Cluster_Barchart_Percent"
+plotList[[tag]] <- ggplot2::ggplot(data=dfTemp, ggplot2::aes(x=meta_Treatment, fill=clusterName)) + ggplot2::geom_bar(position = "fill") + 
+ggplot2::labs(title=paste0("Percent Cells per Treatment"), x="", y = "Percent") + 
+ggplot2::theme_bw() +  
+ggplot2::theme(
+  panel.border = ggplot2::element_rect(colour = "black", fill=NA, size=1),
+  plot.title = ggplot2::element_text(hjust = 0.5, size = 12)
+) 
+plotList[[tag]] <- plotList[[tag]] + 
+      ggplot2::guides(fill= ggplot2::guide_legend(title="Clusters"))
+  
+    h <- sum(c("clusterName", "clusterColor") %in% names(OsC@meta.data))
+    if (h ==2){
+        dfCol <- unique(OsC@meta.data[,c("clusterName", "clusterColor")])
+        row.names(dfCol) <- dfCol$clusterName
+        dfCol <- dfCol[clusterNameOrder, ]
+        
+        dfCol <- dfCol[dfCol$clusterName %in% unique(dfTemp$clusterName), ]
+        colVec <- as.vector(dfCol$clusterColor)
+        names(colVec) <- as.vector(dfCol$clusterName)
+        colVec <- rev(colVec)
+        
+        plotList[[tag]] <- plotList[[tag]] + ggplot2::scale_fill_manual("Clusters" ,values = colVec
+        ) 
+    }
+    
+
+###########################################################################
+## Save plot to file                                                     ##
+    FNbase <- paste0(tag,".Ncells", VersionPdfExt)
+    FN <- paste0(reportFigDir, FNbase)
+    FNrel <- paste0("report_figures/", FNbase)
+    
+    pdf(FN)
+      print(plotList[[tag]])
+    dev.off()
+##                                                                       ##
+###########################################################################
+
+figCap <- paste0(
+    '**Figure ',
+    figureCount,
+    ':** Percentages of cells in each treatment group by cluster.',
+    'Download a pdf of this figure <a href="',FNrel,'" target="_blank">here</a>. '
+)
+
+NewChnk <- paste0(
+paste0("#### ", tag),
+    "\n```{r Barchart-",tag,", results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",figCap,"'}\n",
+    "\n",
+    "\n print(plotList[['",tag,"']])",
+    "\n cat(  '\n')",
+    "\n\n\n```\n"   
+)
+
+chnkVec <- c(
+    chnkVec,
+    NewChnk
+)
+## Done adding                                                             ##
+#############################################################################
+            
+    
+## Done barchart                                                             ##
+###############################################################################
+
+
+if (length(plotList) > 3){
+    tabVar <- ".tabset .tabset-fade .tabset-dropdown"
+} else {
+    tabVar <- ".tabset .tabset-fade .tabset-pills"
+}
+
+```
+
+### Barchart N cells and Percent in Clusters {`r tabVar`}
+if you could prepare a bar-shape graph with the %of cells clusters representing our populations (like in the Nat Med)
+
+```{r plot_barchart, echo=TRUE, eval=TRUE, warning=FALSE, results="asis"}
+cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = '\n'))
+```
