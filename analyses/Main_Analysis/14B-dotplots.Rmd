@@ -1,0 +1,92 @@
+<!-- Set PArameters Module -->
+<!-- Set the chnkPrefix to make all chunks unique in the overall folder -->
+```{r partB_create_integrated_Seurat_object_init, echo=TRUE, eval=TRUE, warning=FALSE}
+chnkPrefix <- "Dot."
+VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.Date()), ".pdf")
+
+# Load specific version of R
+#module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a
+```
+
+```{r dotplot_prep, echo=TRUE, eval=TRUE, warning=FALSE, results=F}
+
+## For Violinplots we want single gene lists
+library(tidyr) 
+
+geneList <- lapply(HMgeneSelections, unlist, use.names=F)
+geneList <- lapply(geneList, unique)
+
+plotList <- list()
+ textSize <- 1
+
+for (i in 1:length(geneList)){
+  
+tag <- paste0("Dot_", names(geneList)[i])  
+
+if (length(geneList[[i]]) > 1 & length(geneList[[i]]) <=  50){
+ 
+if (length(geneList[[i]]) > 50){
+  dotScale <- 0.01
+} else if (length(geneList[[i]]) > 30){
+   dotScale <- 0.02
+} else if (length(geneList[[i]]) > 20){
+   dotScale <- 0.04
+} else if (length(geneList[[i]]) > 10){
+   dotScale <- 0.1
+} else {
+  dotscale <- 0.4
+}
+ 
+plotList[[tag]] <- biologicSeqTools2::DotPlotSB(
+        object = OsC,
+        features = geneList[[i]],
+        assay = "RNA",
+        #cols = cols,
+        group.by = NULL,
+        split.by = NULL,
+        dot.scale = dotScale,
+        col.min = 0,
+        col.max = 5
+    ) + ggtitle(gsub("_", " ", tag)
+    ) + xlab(""
+    ) + coord_fixed(
+    # ) + coord_flip(
+    ) + theme_bw() +
+  theme(axis.text.x = element_text(size=rel(textSize), angle = 45, hjust=1, color = colVec))
+
+}
+}
+
+# plotList <- addHeatmap2List(
+#     OsC = OsC,
+#     geneGroupList = geneGroupList,
+#     relativeExpression = TRUE,
+#     plotList = plotList,
+#     cmdVec = NULL,
+#     tag = "Channels_Rel",
+#     showAllLegends = TRUE
+#     )
+
+
+#pdf("../../../../html_local/report_figures/custom.dotplots.plots.asl545.V2.pdf")
+#plotList
+#dev.off()
+
+if (length(plotList) > 3){
+    tabVar <- ".tabset .tabset-fade .tabset-dropdown"
+} else {
+    tabVar <- ".tabset .tabset-fade .tabset-pills"
+}    
+    
+```
+
+
+### Dotplots {`r tabVar`}
+
+In this section heatmaps and dotplots for various gene categories are provided. 
+
+```{r Cluster_dotplot_overview, echo=TRUE, eval=TRUE, warning=FALSE, results="asis"}
+
+cat(paste(knit(text = chnkVec, quiet = T), collapse = '\n'))
+
+```
