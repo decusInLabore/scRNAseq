@@ -198,11 +198,11 @@ Obio@parameterList$dendrofactor <- dendrofactor
 if (is.null(Obio@documentationParams$title) | Obio@documentationParams$title == ""){
   ## This project:
   # Set project parameters manually
-  Obio@documentationParams$title <-   "Single-nuclei Analysis of Mouse Brain Cells"
+  Obio@documentationParams$title <-   "TBD"
   
-  Obio@documentationParams$subtitle <- "Thomas Kerloch"
+  Obio@documentationParams$subtitle <- "TBD"
   
-  Obio@documentationParams$abstract <- "This is a single-nuclei study investigating how age affects gene expression in various neuronal cell populations."
+  Obio@documentationParams$abstract <- "TBD"
 }
 
 ```
@@ -255,7 +255,7 @@ DGE Marker gene upload Chapter/Module -->
 ```
 
 <!-- Essential 15: (output required later):Category Linear Regression Marker Gene Data Prep Chapter/Module -->
-```{r child = '14-heatmaps.and.dotplots.Rmd', eval=TRUE}
+```{r child = '14A-heatmaps.Rmd', eval=TRUE}
 ```
 
 <!-- Essential 16: (output required later):Category Make cluster table Data Prep Chapter/Module -->

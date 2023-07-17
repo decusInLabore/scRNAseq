@@ -40,20 +40,30 @@ plotList <- list()
 chnkVec <- as.vector(NULL, mode = "character")
 
 genotypes <- "WT"
-i = 1
+k = 1
 
 # for (i in 1:length(genotypes)){
  
     dfRes <- OsC@meta.data
+    tag2 <- "meta_Treatment"
     
-    selVec <- c("cellID", "clusterName", "clusterColor", "meta_Age_Group")
+    pos <- grep(tag2, names(dfRes))
+    if (length(pos) == 0){
+      tag <- "sampleName"
+    }
+    
+    selVec <- c("cellID", "clusterName", "clusterColor", tag2)
+    
+    labelOrder <- unique(dfRes[,tag2])
     
     # dfRes <- dfRes[dfRes$meta_Genotype == genotypes[i], selVec]
-    dfRes[["timepoint"]] <- dfRes$meta_Age_Group
-    dfRes[["timepoint"]] <- gsub("Young", 2.5, dfRes$timepoint)
-    dfRes[["timepoint"]] <- gsub("Middle", 7.5, dfRes$timepoint)
-    dfRes[["timepoint"]] <- gsub("Old", 20, dfRes$timepoint)
-  
+    dfRes[["timepoint"]] <- dfRes[,tag2]
+    
+    for (i in 1:length(labelOrder)){
+      dfRes[["timepoint"]] <- gsub(labelOrder[i], i, dfRes$timepoint)
+    }
+    
+    
     dfRes$timepoint <- as.numeric(dfRes$timepoint)
     
     
@@ -73,7 +83,7 @@ i = 1
       mutate(percentage = n / sum(n))
     
     
-    tag <- paste0("Percent_Area_plot_", genotypes[i])
+    tag <- paste0("Percent_Area_plot_", genotypes[k])
     
     data$clusterName <- factor(
         data$clusterName, 
@@ -96,11 +106,12 @@ i = 1
           plot.title = ggplot2::element_text(hjust = 0.5, size = 12),
           legend.title = ggplot2::element_blank()
         ) + 
-        ggplot2::ggtitle(paste0("Area plot for ", genotypes[i])) + 
+        ggplot2::ggtitle(paste0("Area plot for ", genotypes[k])) +
+        ggplot2::xlab(tag2) +
         ggplot2::scale_fill_manual("Clusters" ,values = colVec) +
         ggplot2::scale_x_continuous(
-            breaks=c(2.5,7.5,20), 
-            labels=c("Young","Middle","Old")
+            breaks=c(1:length(labelOrder)), 
+            labels=c(labelOrder)
         )
 
 
@@ -120,7 +131,7 @@ i = 1
                     '**Figure ', 
                     figureCount, 
                     ':** ',
-                    'Area distribution plot for genotype ',genotypes[i],'. Download a pdf of this figure <a href="',FNrel,'" target="_blank">here</a>.'
+                    'Area distribution plot for genotype ',genotypes[k],'. Download a pdf of this figure <a href="',FNrel,'" target="_blank">here</a>.'
                 )
                 
         figureCount <- figureCount + 1
@@ -147,22 +158,32 @@ i = 1
 ## Add N-cell chart                                                          ##
     
 genotypes <- "WT"
-i = 1
+k = 1
 
 # for (i in 1:length(genotypes)){
  
-    dfRes <- OsC@meta.data
+        dfRes <- OsC@meta.data
+    tag2 <- "meta_Treatment"
     
-    selVec <- c("cellID", "clusterName", "clusterColor", "meta_Age_Group")
+    pos <- grep(tag2, names(dfRes))
+    if (length(pos) == 0){
+      tag <- "sampleName"
+    }
+    
+    selVec <- c("cellID", "clusterName", "clusterColor", tag2)
+    
+    labelOrder <- unique(dfRes[,tag2])
     
     # dfRes <- dfRes[dfRes$meta_Genotype == genotypes[i], selVec]
-    dfRes[["timepoint"]] <- dfRes$meta_Age_Group
-    dfRes[["timepoint"]] <- gsub("Young", 1, dfRes$timepoint)
-    dfRes[["timepoint"]] <- gsub("Middle", 2, dfRes$timepoint)
-    dfRes[["timepoint"]] <- gsub("Old", 3, dfRes$timepoint)
-  
-    dfRes$timepoint <- as.numeric(dfRes$timepoint)
+    dfRes[["timepoint"]] <- dfRes[,tag2]
     
+    for (i in 1:length(labelOrder)){
+      dfRes[["timepoint"]] <- gsub(labelOrder[i], i, dfRes$timepoint)
+    }
+    
+    
+    dfRes$timepoint <- as.numeric(dfRes$timepoint)
+
     
     dfCol <- unique(dfRes[,c("clusterName", "clusterColor")])
     row.names(dfCol) <- dfCol$clusterName
@@ -179,7 +200,7 @@ i = 1
       summarise(n = n())
     
     
-    tag <- paste0("N_cells_Area_plot_", genotypes[i])
+    tag <- paste0("N_cells_Area_plot_", genotypes[k])
     
     data$clusterName <- factor(
         data$clusterName, 
@@ -203,10 +224,11 @@ i = 1
           legend.title = ggplot2::element_blank()
         ) + 
         ggplot2::ggtitle(gsub("_", " ", tag)) + 
+        ggplot2::xlab(tag2) +
         ggplot2::scale_fill_manual("Clusters" ,values = colVec) +
         ggplot2::scale_x_continuous(
-            breaks=c(1,2,3), 
-            labels=c("Young","Middle","Old")
+            breaks=c(1:length(labelOrder)), 
+            labels=c(labelOrder)
         )
 
 

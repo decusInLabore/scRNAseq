@@ -235,8 +235,8 @@ for (i in 1:length(geneSets)){
         )
     
      plotList[[tag]] <- ggplot(data = dfAUC, aes(x=UMAP_1, y=UMAP_2, color = mAUC)
-            ) + ggrastr::rasterize(ggplot2::geom_point( shape=16, size = dotsize
-            ), dpi=rasterDpi) + scale_color_gradient("AUC", low="grey", high="darkblue"
+            ) + ggplot2::geom_point( shape=16, size = dotsize
+            ) + scale_color_gradient("AUC", low="grey", high="darkblue"
             ) + xlab(input$x_axis) + ylab(input$y_axis
             ) + theme_bw(
             )  +  theme(

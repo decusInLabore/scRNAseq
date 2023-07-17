@@ -10,71 +10,62 @@ VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.D
 
 ```{r Cluster_overview_data_prep, echo=TRUE, eval=TRUE, warning=FALSE, results=F}
 
-plotList <- list()
-chnkVec <- as.vector(NULL, mode = "character")
+## Need cluster_stage column
+selClust <- "cluster_Treatment"
+OsC_HM <- OsC
+OsC_HM@meta.data[[selClust]] <- paste0(
+  OsC_HM@meta.data$clusterName,
+  "_",
+  OsC_HM@meta.data$meta_Treatment
+)
+
+
 
 ###############################################################################
-## Make Heatmap                                                              ##
+## Calculataing average expression across all samples                        ##
+Seurat::Idents(OsC_HM) <- selClust
+OsCsel <- Seurat::AverageExpression(OsC_HM, return.seurat = TRUE)
 
-#OsC@meta.data[["hmIdent2"]] <- paste0("C", OsC@meta.data[,"seurat_clusters"])
 
-Idents(OsC) <- "clusterName"
-
-# levels <- Obio@parameterList$clusterNameOrder
 # 
-# levels(OsC) <- levels
 
-## Deal with more than 5000 cells ##
-if (nrow(OsC@meta.data) > 5000){
-    set.seed(127)
-    n.cells <- 5000
-    OsC_HM <- OsC
-    OsC_HM@meta.data[["HM_sel"]] <- 0
-    selPos <- sample(x = nrow(OsC_HM@meta.data), size = n.cells, replace = FALSE, prob = NULL)
-    OsC_HM@meta.data[selPos, "HM_sel"] <- 1
-    
-    OsC_HM <- subset(x = OsC_HM, subset = HM_sel == 1)
-    
-    subsetString <- paste0("For this heatmap 5000 cells were randomly selected from ", nrow(OsC@meta.data)," cells in the experiment. ")
-} else {
-    OsC_HM <- OsC
-    subsetString <- ""
-}
+dfAdd <- unique(OsC_HM@meta.data[,c("clusterName", "clusterColor",  "meta_Treatment", selClust)])
 
-## Scale Data ##
-allGenes <- rownames(x = OsC_HM@assays$RNA)
-OsC_HM <- ScaleData(OsC_HM, verbose = FALSE, features=allGenes)
+dfAdd[["treatmentGroupColor"]] <- dfAdd$meta_Treatment
+dfAdd$treatmentGroupColor <- gsub("Control", "#3B5EF7", dfAdd$treatmentGroupColor)
+dfAdd$treatmentGroupColor <- gsub("MatB52", "#4DA868", dfAdd$treatmentGroupColor)
+dfAdd$treatmentGroupColor <- gsub("Regeneron", "#EE6C58", dfAdd$treatmentGroupColor)
 
-## Set cluster order ##
-Idents(OsC_HM) <- "clusterName"
-Idents(OsC_HM) <- factor(Idents(OsC_HM), levels = Obio@parameterList[["clusterNameOrder"]])
+row.names(dfAdd) <- dfAdd[,selClust]
 
-#Idents(OsC_HM) <- "clusterName"
+OsCsel <- biologicToolsSC::addDf2seuratMetaData(
+  obj = OsCsel, 
+  dfAdd = dfAdd
+)
 
-# selVec <- c(
-#   grep("cluster_order", gsub("\\.", "_",names(OsC@meta.data))),
-#   grep("clusterName", names(OsC@meta.data))
-# )
-# 
-# if (length(selVec) == 2) {
-#     dfCO <- unique(OsC@meta.data[,selVec])    
-#     
-#     names(dfCO) <- gsub("\\.", "_", names(dfCO))
-# dfCO <- dfCO[order(dfCO$cluster_order, decreasing=F),]
-# 
-# Idents(OsC_HM) <- factor(Idents(OsC_HM), levels = as.vector(dfCO$clusterName))
-# 
-# Obio@parameterList$clusterNameOrder <- as.vector(dfCO$clusterName)
-# }
+OsCsel@meta.data$meta_Treatment <- factor(
+  OsCsel@meta.data$meta_Treatment,
+  levels = c( "Control", "MatB52", "Regeneron")
+)
 
-## Order Heatmap Genes by cluster similarity
+OsCsel@meta.data$clusterName <- factor(
+  OsCsel@meta.data$clusterName,
+  levels=Obio@parameterList$clusterNameOrder
+)
 
-## For the moment: resetting heatmap list to keep it short ##
 
-## Select heatmap genes ##
+OsCsel@meta.data <- OsCsel@meta.data[order(OsCsel@meta.data$clusterName,OsCsel@meta.data$meta_Treatment),]
+
+dfData <- data.frame(OsCsel[["RNA"]]@data)
+dataMatrix <- data.matrix(dfData)
+dfMeta <- OsCsel@meta.data
  
+dataMatrix <- dataMatrix[,dfMeta[,selClust]]
 
-## Make general markers heatmpa ##
+
+#########################3
+# Create heatmap gene list
+
 dfGeneralMarkers <- Obio@dataTableList$dfGeneralMarkers 
 dfGeneralMarkersPos <- dfGeneralMarkers[dfGeneralMarkers$avg_diff > 0,]
 
@@ -185,6 +176,410 @@ l <- unlist(lapply(Obio@parameterList[["cat2HMplotList"]], function(x) length(as
 selVec <- names(Obio@parameterList[["cat2HMplotList"]] )[l]
 
 Obio@parameterList[["cat2HMplotList"]] <- Obio@parameterList[["cat2HMplotList"]][selVec]
+
+
+## Done creating heatmapgenelists
+
+
+# Done
+##########################
+
+
+#library(ComplexHeatmap)
+plotList <- list()
+chnkVec <- as.vector(NULL, mode="character")
+
+
+## Make Heatmaps
+if (!exists("figureCount")){
+  figureCount <- 1  
+}
+
+###############################################################################
+## Function to create heatmaps                                               ##
+
+addHeatmap2List <- function(
+    dataMatrix,
+    geneGroupList,
+    cluster_column_slices   = FALSE,
+    cluster_columns         = TRUE,
+    relativeExpression = FALSE,
+    cmdVec = NULL,
+    tag = NULL,
+    showAllLegends = TRUE,
+    figureCount = 1,
+    chnkVec = NULL, 
+    plotList = NULL,
+    maxNcharCatName = 10,
+    dfMeta,
+    group1ColorCol = "clusterColor", 
+    group1NameCol = "clusterName",
+    group2ColorCol = "sampleColor", 
+    group2NameCol = "sampleName",
+    columnSplitCol = "clusterName"
+    ){
+  
+  if (is.null(chnkVec)){
+    chnkVec <- as.vector(NULL, mode="character")
+  }
+  
+  if (is.null(plotList)){
+    plotList <- list()
+  }
+  
+    allGenes <- unique(as.vector(unlist(geneGroupList)))
+    
+    
+    if (is.null(cmdVec)){
+      cmdVec <- as.vector(NULL, mode="character")
+    }
+    
+    if (is.null(tag)){
+      tag <- paste("Heatmap_", (length(plotList) + 1))
+    }
+    
+    if (relativeExpression){
+      legendString <- "log2 row mean"
+    } else {
+      legendString <- "lg10 Expr"
+    }
+
+# library("RColorBrewer")
+# library("Seurat")
+# library("ggplot2")
+# library("viridis")
+# #library("scMCA")
+# library("circlize")
+# library("ComplexHeatmap")
+
+
+
+## Complex heatmap of cell/celltype correlations using just the top annotation per cell.  It's split by seurat cluster.
+numbers_plot <- 1
+# cors       <-  data.frame(OsC[["RNA"]]@data)
+#cors_index <- apply(cors, 2, gettissue, numbers_plot)
+#cors_index <- sort(unique(as.integer(cors_index)))
+allGenes <- allGenes[allGenes %in% row.names(dataMatrix)]
+
+heat.dat   <- dataMatrix[allGenes, ]
+#heat.dat <- heat.dat
+#heat.dat   <- t(apply(heat.dat,1,function(x){(x-mean(x))/sd(x)}))
+
+# Comment out for absolute expression
+
+heat.dat <- heat.dat[apply(heat.dat, 1, mean) != 0, ]
+
+if (relativeExpression){
+  heat.dat   <- t(apply(heat.dat,1,function(x){log2((x/mean(x)))}))  
+} 
+
+heat.dat[heat.dat == -Inf] <- 0
+
+## make sure cat names aren't too long
+nMax <- max(nchar(names(geneGroupList)))
+
+if (nMax > maxNcharCatName){
+  shortNames <- sapply(
+    names(geneGroupList),
+    function(x){
+      substr(x, 1, maxNcharCatName)
+    }
+  )
+  
+  if (sum(duplicated(shortNames)) > 0){
+    indexVec <- 1:length(shortNames)
+    shortNames[duplicated(shortNames)] <- paste0(shortNames[duplicated(shortNames)],"_", indexVec[duplicated(shortNames)])
+  }
+  
+  names(geneGroupList) <- shortNames
+  
+}
+
+
+
+rowSplitVec <- row.names(heat.dat)   
+for (i in 1:length(geneGroupList)){
+  rowSplitVec[rowSplitVec %in% geneGroupList[[i]]] <- names(geneGroupList)[i]
+}
+
+
+
+dfCol <- unique(dfMeta[,c(group1ColorCol, group1NameCol)])
+colVec <- dfCol[,group1ColorCol]
+names(colVec) <- dfCol[,group1NameCol]
+
+dfCol2 <- unique(dfMeta[,c(group2ColorCol, group2NameCol)])
+colVec2 <- dfCol2[,group2ColorCol]
+names(colVec2) <- dfCol2[,group2NameCol]
+# 
+# colList <- list(
+#   dfCol, 
+#   dfCol2
+# )
+
+
+ht.anno <- ComplexHeatmap::HeatmapAnnotation(
+    Age =  dfMeta[,group2NameCol],
+    Cluster =  dfMeta[,group1NameCol],
+    col = list(
+        Age = colVec2,
+        Cluster = colVec
+    ),
+    show_legend = showAllLegends
+)
+
+
+#bulkLogFC <- dfSel[allGenes, "contrast_2_logFC_p27NULL_E185OC_vs_WT_E185OC"]
+#xcol <- ifelse(bulkLogFC < 0, "blue", "red")
+
+
+
+#row_ha = rowAnnotation(Bulk = anno_barplot(bulkLogFC, gp = gpar(fill=xcol)),
+#        show_legend = showAllLegends
+#)   
+
+#lrow_ha = rowAnnotation(foo = anno_block(gp = gpar(fill = c("blue", "red")),
+#        labels = c("Down", "Up"), 
+#        labels_gp = gpar(col = "white", fontsize = 10)),
+#        show_legend = showAllLegends
+#)
+#     df = data.frame(
+#         cluster = OsC_HM@meta.data$clusterName),
+#     # col = list(
+#     #     gp = gpar(col = "white")
+#     # ),
+#     annotation_legend_param = list(direction = "horizontal")
+# )
+
+if (relativeExpression){
+  colRamp <- circlize::colorRamp2(c(-3, 0, 3),c("#3060cf", "#fffbbc","#c4463a"))
+} else {
+  colRamp <- circlize::colorRamp2(c(0, 6),c("#d3d3d3","#3060cf"))
+}
+
+if (nrow(heat.dat) > 100){
+    rowFont <- 1
+} else if (nrow(heat.dat) > 50){
+    rowFont <- 1
+} else if (nrow(heat.dat) > 25){
+    rowFont <- 6
+} else {
+    rowFont <- 8
+}
+
+plotList[[tag]] <- ComplexHeatmap::Heatmap(
+    heat.dat,
+    row_split               = rowSplitVec,
+    name                    = legendString,
+    column_title_gp         = grid::gpar(fontsize = 6),
+    row_title_rot           = 0, # Must be 0 or 90
+    column_title_rot        = 90,
+    column_split            = dfMeta[,columnSplitCol],
+    #column_split            = column_split,
+    cluster_column_slices   = cluster_column_slices,
+    cluster_columns         = cluster_columns,
+    cluster_rows            = TRUE,
+    show_row_names          = TRUE,
+    show_column_names       = FALSE,
+    column_names_side       = "bottom",
+    show_column_dend        = TRUE,
+    row_dend_width          = grid::unit(20, "mm"),
+    show_heatmap_legend     = showAllLegends,
+    column_names_max_height = grid::unit(8, "cm"),
+    row_names_gp            = grid::gpar(fontsize = 6),
+    top_annotation          = ht.anno,
+    #right_annotation = row_ha,
+    #left_annotation = lrow_ha,
+    #col                     = colorRamp2(c(-2, 0, 2),magma(3)),
+    col                     = colRamp,
+    column_names_rot        = 90,
+    border = TRUE
+)
+
+  FNbase <- paste0(tag, VersionPdfExt)
+
+  FN <- paste0(Obio@parameterList$reportFigDir, FNbase)
+  FNrel <- paste0("report_figures/", FNbase)
+            
+  pdf(FN)
+    print(plotList[[tag]])
+  dev.off()
+
+  figLegend <- paste0(
+    '**Figure ', 
+    figureCount, 
+    ':** ',
+    'Heatmap split by cluster for gene set ',gsub("_", " ", tag),'. Download a pdf of this figure <a href="',FNrel,'" target="_blank">here</a>.'
+  )
+            
+  figureCount <- figureCount + 1
+
+  NewChnk <- paste0(
+    "#### ", tag,
+    "\n```{r hm_",
+    tag,", results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",
+    figLegend,"'}\n",
+    "\n",
+    "\n print(plotList[['",tag,"']])",
+    "\n cat(  '\n')",
+    "\n\n\n```\n"   
+)
+
+  chnkVec <- c(
+    chnkVec,
+    NewChnk
+  )
+  
+  returnList <- list(
+    "plotList" = plotList,
+    "chnkVec"  = chnkVec,
+    "figureCount" = figureCount
+  )
+
+return(returnList)
+}
+
+## Done function to create heatmaps
+###############################################################################
+
+
+HMgeneSelections <- Obio@parameterList[["cat2HMplotList"]]
+HMgeneSelections2 <- list()
+
+for (i in 1:length(HMgeneSelections)){
+  hl <- list(HMgeneSelections[[i]])
+  names(hl)[1] <- names(HMgeneSelections)[i]
+  HMgeneSelections2[[names(HMgeneSelections)[i]]]  <- hl
+}
+
+
+for (i in 1:length(HMgeneSelections2)){
+  if (length(unlist(HMgeneSelections2[[i]])) > 1){
+    returnList <- addHeatmap2List(
+        dataMatrix = dataMatrix,
+        cluster_column_slices   = FALSE,
+        cluster_columns         = FALSE,
+        geneGroupList = HMgeneSelections2[[i]],
+        relativeExpression = FALSE,
+        cmdVec = NULL,
+        tag = paste0(names(HMgeneSelections)[i], "_Abs"),
+        showAllLegends = TRUE,
+        figureCount = figureCount,
+        plotList = plotList,
+        maxNcharCatName = 10,
+        dfMeta = dfMeta,
+        group1ColorCol = "clusterColor", 
+        group1NameCol = "clusterName",
+        group2ColorCol = "treatmentGroupColor", 
+        group2NameCol = "meta_Treatment",
+        chnkVec = chnkVec,
+        columnSplitCol = "clusterName"
+        
+    )
+    
+    plotList <- returnList[["plotList"]]
+    chnkVec <- returnList[["chnkVec"]]
+    figureCount <- returnList[["figureCount"]]
+  }
+}
+
+## Relative
+for (i in 1:length(HMgeneSelections2)){
+  if (length(unlist(HMgeneSelections2[[i]])) > 1){
+    returnList <- addHeatmap2List(
+        dataMatrix = dataMatrix,
+        cluster_column_slices   = FALSE,
+        cluster_columns         = FALSE,
+        geneGroupList = HMgeneSelections2[[i]],
+        relativeExpression = TRUE,
+        cmdVec = NULL,
+        tag = paste0(names(HMgeneSelections)[i], "_Rel"),
+        showAllLegends = TRUE,
+        figureCount = figureCount,
+        plotList = plotList,
+        maxNcharCatName = 10,
+        dfMeta = dfMeta,
+        group1ColorCol = "clusterColor", 
+        group1NameCol = "clusterName",
+        group2ColorCol = "treatmentGroupColor", 
+        group2NameCol = "meta_Treatment",
+        chnkVec = chnkVec,
+        columnSplitCol = "clusterName"
+        
+    )
+    
+    plotList <- returnList[["plotList"]]
+    chnkVec <- returnList[["chnkVec"]]
+    figureCount <- returnList[["figureCount"]]
+  }
+}
+
+
+
+
+
+###############################################################################
+## Make Heatmap                                                              ##
+
+#OsC@meta.data[["hmIdent2"]] <- paste0("C", OsC@meta.data[,"seurat_clusters"])
+
+#Idents(OsC) <- "clusterName"
+
+# levels <- Obio@parameterList$clusterNameOrder
+# 
+# levels(OsC) <- levels
+
+## Deal with more than 5000 cells ##
+# if (nrow(OsC@meta.data) > 5000){
+#     set.seed(127)
+#     n.cells <- 5000
+#     OsC_HM <- OsC
+#     OsC_HM@meta.data[["HM_sel"]] <- 0
+#     selPos <- sample(x = nrow(OsC_HM@meta.data), size = n.cells, replace = FALSE, prob = NULL)
+#     OsC_HM@meta.data[selPos, "HM_sel"] <- 1
+#     
+#     OsC_HM <- subset(x = OsC_HM, subset = HM_sel == 1)
+#     
+#     subsetString <- paste0("For this heatmap 5000 cells were randomly selected from ", nrow(OsC@meta.data)," cells in the experiment. ")
+# } else {
+#     OsC_HM <- OsC
+#     subsetString <- ""
+# }
+# 
+# ## Scale Data ##
+# allGenes <- rownames(x = OsC_HM@assays$RNA)
+# OsC_HM <- ScaleData(OsC_HM, verbose = FALSE, features=allGenes)
+# 
+# ## Set cluster order ##
+# Idents(OsC_HM) <- "clusterName"
+# Idents(OsC_HM) <- factor(Idents(OsC_HM), levels = Obio@parameterList[["clusterNameOrder"]])
+
+#Idents(OsC_HM) <- "clusterName"
+
+# selVec <- c(
+#   grep("cluster_order", gsub("\\.", "_",names(OsC@meta.data))),
+#   grep("clusterName", names(OsC@meta.data))
+# )
+# 
+# if (length(selVec) == 2) {
+#     dfCO <- unique(OsC@meta.data[,selVec])    
+#     
+#     names(dfCO) <- gsub("\\.", "_", names(dfCO))
+# dfCO <- dfCO[order(dfCO$cluster_order, decreasing=F),]
+# 
+# Idents(OsC_HM) <- factor(Idents(OsC_HM), levels = as.vector(dfCO$clusterName))
+# 
+# Obio@parameterList$clusterNameOrder <- as.vector(dfCO$clusterName)
+# }
+
+## Order Heatmap Genes by cluster similarity
+
+## For the moment: resetting heatmap list to keep it short ##
+
+## Select heatmap genes ##
+ 
+
+## Make general markers heatmpa ##
 
 
 for (i in 1:length(Obio@parameterList[["cat2HMplotList"]])){
