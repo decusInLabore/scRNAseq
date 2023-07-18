@@ -14,26 +14,69 @@ VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.D
 
 ## For Violinplots we want single gene lists
 
-geneList <- lapply(HMgeneSelections, unlist, use.names=F)
+
+geneList <- lapply(HMgeneSelections, function(x) unique(unlist(x)))
+geneList <- lapply(geneList, function(x) x[x %in% row.names(OsC)])
+selVec <- unlist(lapply(geneList, function(x) length(x) != 0))
+geneList <- geneList[selVec]
 
 plotList <- list()
-
+chnkVec <- as.vector(NULL, mode = "character")
 
 for (i in 1:length(geneList)){
   
 tag <- paste0("Vln_", names(geneList)[i])  
 
-if (length(geneList[[i]]) > 1 & length(geneList[[i]]) <=  50){
-plotList[[tag]] <- Seurat::VlnPlot(
-    object = OsC,
-    features = geneList[[i]],
-    pt.size = 1,
-    stack=T,
-    flip = T
-) + ggplot2::theme(legend.position = "none"
-) + ggplot2::ggtitle(gsub("_", " ", tag)
+  geneList[[i]] <- geneList[[i]][rowSums(OsC@assays$RNA[geneList[[i]],]) != 0]
+    
+  if (length(geneList[[i]]) > 1 & length(geneList[[i]]) <=  50){
+    
+      
+    plotList[[tag]] <- Seurat::VlnPlot(
+        object = OsC,
+        features = geneList[[i]],
+        pt.size = 1,
+        stack=T,
+        flip = T
+    ) + ggplot2::theme(legend.position = "none"
+    ) + ggplot2::ggtitle(gsub("_", " ", tag)
+    )
+  
+
+  FNbase <- paste0(tag, VersionPdfExt)
+
+  FN <- paste0(Obio@parameterList$reportFigDir, FNbase)
+  FNrel <- paste0("report_figures/", FNbase)
+            
+  pdf(FN)
+    print(plotList[[tag]])
+  dev.off()
+
+  figLegend <- paste0(
+    '**Figure ', 
+    figureCount, 
+    ':** ',
+    'Violin plots split by cluster for gene set ',gsub("_", " ", tag),'. Download a pdf of this figure <a href="',FNrel,'" target="_blank">here</a>.'
+  )
+            
+  figureCount <- figureCount + 1
+
+  NewChnk <- paste0(
+    "#### ", tag,
+    "\n```{r violin_",
+    tag,", results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",
+    figLegend,"'}\n",
+    "\n",
+    "\n print(plotList[['",tag,"']])",
+    "\n cat(  '\n')",
+    "\n\n\n```\n"   
 )
-}
+
+  chnkVec <- c(
+    chnkVec,
+    NewChnk
+  )
+  }
 }
 
 # plotList <- addHeatmap2List(
@@ -61,7 +104,7 @@ if (length(plotList) > 3){
 
 ### Violinplots {`r tabVar`}
 
-In this section heatmaps and dotplots for various gene categories are provided. 
+In this section violinplots for various gene categories are provided. 
 
 ```{r Cluster_violinplot_overview, echo=TRUE, eval=TRUE, warning=FALSE, results="asis"}
 
