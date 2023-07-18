@@ -258,6 +258,15 @@ DGE Marker gene upload Chapter/Module -->
 ```{r child = '14A-heatmaps.Rmd', eval=TRUE}
 ```
 
+<!-- Essential 15: (output required later):Category Linear Regression Marker Gene Data Prep Chapter/Module -->
+```{r child = '14B-dotplots.Rmd', eval=TRUE}
+```
+
+
+<!-- Essential 15: (output required later):Category Linear Regression Marker Gene Data Prep Chapter/Module -->
+```{r child = '14C-violinplots.Rmd', eval=TRUE}
+```
+
 <!-- Essential 16: (output required later):Category Make cluster table Data Prep Chapter/Module -->
 ```{r child = '15-make.cluster.table.Rmd', eval=FALSE}
 ```

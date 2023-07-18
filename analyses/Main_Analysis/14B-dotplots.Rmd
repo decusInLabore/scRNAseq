@@ -1,6 +1,6 @@
 <!-- Set PArameters Module -->
 <!-- Set the chnkPrefix to make all chunks unique in the overall folder -->
-```{r partB_create_integrated_Seurat_object_init, echo=TRUE, eval=TRUE, warning=FALSE}
+```{r partB_create_dot_init, echo=TRUE, eval=TRUE, warning=FALSE}
 chnkPrefix <- "Dot."
 VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.Date()), ".pdf")
 
@@ -13,49 +13,91 @@ VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.D
 ## For Violinplots we want single gene lists
 library(tidyr) 
 
-geneList <- lapply(HMgeneSelections, unlist, use.names=F)
-geneList <- lapply(geneList, unique)
+geneList <- lapply(HMgeneSelections, function(x) unique(unlist(x)))
+geneList <- lapply(geneList, function(x) x[x %in% row.names(OsC)])
+selVec <- unlist(lapply(geneList, function(x) length(x) != 0))
+geneList <- geneList[selVec]
+
 
 plotList <- list()
+
+chnkVec <- as.vector(NULL, mode = "character")
+
  textSize <- 1
 
 for (i in 1:length(geneList)){
   
 tag <- paste0("Dot_", names(geneList)[i])  
+geneList[[i]] <- geneList[[i]][rowSums(OsC@assays$RNA[geneList[[i]],]) != 0]
+  
+  if (length(geneList[[i]]) > 1 & length(geneList[[i]]) <=  50){
+   
+    if (length(geneList[[i]]) > 50){
+      dotScale <- 0.01
+    } else if (length(geneList[[i]]) > 30){
+       dotScale <- 0.02
+    } else if (length(geneList[[i]]) > 20){
+       dotScale <- 0.04
+    } else if (length(geneList[[i]]) > 10){
+       dotScale <- 0.1
+    } else {
+      dotscale <- 0.4
+    }
+     
+    plotList[[tag]] <- biologicSeqTools2::DotPlotSB(
+            object = OsC,
+            features = geneList[[i]],
+            assay = "RNA",
+            #cols = cols,
+            group.by = NULL,
+            split.by = NULL,
+            dot.scale = dotScale,
+            col.min = 0,
+            col.max = 5
+        ) + ggtitle(gsub("_", " ", tag)
+        ) + xlab(""
+        ) + coord_fixed(
+        # ) + coord_flip(
+        ) + theme_bw() +
+      theme(axis.text.x = element_text(size=rel(textSize), angle = 45, hjust=1, color = colVec))
+  
+  
+  
+  FNbase <- paste0(tag, VersionPdfExt)
 
-if (length(geneList[[i]]) > 1 & length(geneList[[i]]) <=  50){
- 
-if (length(geneList[[i]]) > 50){
-  dotScale <- 0.01
-} else if (length(geneList[[i]]) > 30){
-   dotScale <- 0.02
-} else if (length(geneList[[i]]) > 20){
-   dotScale <- 0.04
-} else if (length(geneList[[i]]) > 10){
-   dotScale <- 0.1
-} else {
-  dotscale <- 0.4
-}
- 
-plotList[[tag]] <- biologicSeqTools2::DotPlotSB(
-        object = OsC,
-        features = geneList[[i]],
-        assay = "RNA",
-        #cols = cols,
-        group.by = NULL,
-        split.by = NULL,
-        dot.scale = dotScale,
-        col.min = 0,
-        col.max = 5
-    ) + ggtitle(gsub("_", " ", tag)
-    ) + xlab(""
-    ) + coord_fixed(
-    # ) + coord_flip(
-    ) + theme_bw() +
-  theme(axis.text.x = element_text(size=rel(textSize), angle = 45, hjust=1, color = colVec))
+  FN <- paste0(Obio@parameterList$reportFigDir, FNbase)
+  FNrel <- paste0("report_figures/", FNbase)
+            
+  pdf(FN)
+    print(plotList[[tag]])
+  dev.off()
 
-}
-}
+  figLegend <- paste0(
+    '**Figure ', 
+    figureCount, 
+    ':** ',
+    'Dotplot split by cluster for gene set ',gsub("_", " ", tag),'. Download a pdf of this figure <a href="',FNrel,'" target="_blank">here</a>.'
+  )
+            
+  figureCount <- figureCount + 1
+
+  NewChnk <- paste0(
+    "#### ", tag,
+    "\n```{r dot_",
+    tag,", results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",
+    figLegend,"'}\n",
+    "\n",
+    "\n print(plotList[['",tag,"']])",
+    "\n cat(  '\n')",
+    "\n\n\n```\n"   
+)
+
+  chnkVec <- c(
+    chnkVec,
+    NewChnk
+  )
+  }
+} # end for loop
 
 # plotList <- addHeatmap2List(
 #     OsC = OsC,
