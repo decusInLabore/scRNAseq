@@ -6,6 +6,11 @@ VersionPdfExt <- VersionPdfExt <- paste0(
   ".", chnkPrefix,"V", gsub("-", "", Sys.Date()), ".pdf"
 )
 
+if (!requireNamespace("ComplexHeatmap")){
+  renv::install("jokergoo/ComplexHeatmap")
+}
+
+
 ```
 
 
@@ -659,12 +664,27 @@ return(returnList)
 
 
 #HMgeneSelections <- Obio@parameterList[["cat2HMplotList"]]
-HMgeneSelections2 <- HMgeneSelections
+
+for (i in 1:length(HMgeneSelections)){
+  for (j in 1:length(HMgeneSelections[[i]])){
+   
+    tv <- HMgeneSelections[[i]][[j]]
+    tv <- tv[tv %in% row.names(OsC)]
+    ## Remove genes with all zero counts
+    tv <- tv[rowSums(OsC@assays$RNA[tv,]) != 0]
+    HMgeneSelections[[i]][[j]] <- tv
+  }  
+}
+
+
+
+
+
 
 # for (i in 1:length(HMgeneSelections)){
 #   hl <- list(HMgeneSelections[[i]])
 #   names(hl)[1] <- names(HMgeneSelections)[i]
-#   HMgeneSelections2[[names(HMgeneSelections)[i]]]  <- hl
+#   geneList[[names(HMgeneSelections)[i]]]  <- hl
 # }
 
 #library(ComplexHeatmap)
@@ -679,13 +699,15 @@ if (!exists("figureCount")){
 
 
 ## Relative Heatmaps for all gene sets
-for (i in 1:length(HMgeneSelections2)){
-  if (length(unlist(HMgeneSelections2[[i]])) > 1){
+for (i in 1:length(HMgeneSelections)){
+  
+  
+  if (length(unlist(HMgeneSelections[[i]])) > 1){
     returnList <- addHeatmap2List(
         dataMatrix = dataMatrix,
         cluster_column_slices   = FALSE,
         cluster_columns         = FALSE,
-        geneGroupList = HMgeneSelections2[[i]],
+        geneGroupList = HMgeneSelections[[i]],
         relativeExpression = FALSE,
         cmdVec = NULL,
         tag = paste0(names(HMgeneSelections)[i], "_Rel"),
@@ -710,13 +732,13 @@ for (i in 1:length(HMgeneSelections2)){
 }
 
 ## Absolute
-for (i in 1:length(HMgeneSelections2)){
-  if (length(unlist(HMgeneSelections2[[i]])) > 1){
+for (i in 1:length(HMgeneSelections)){
+  if (length(unlist(HMgeneSelections[[i]])) > 1){
     returnList <- addHeatmap2List(
         dataMatrix = dataMatrix,
         cluster_column_slices   = FALSE,
         cluster_columns         = FALSE,
-        geneGroupList = HMgeneSelections2[[i]],
+        geneGroupList = HMgeneSelections[[i]],
         relativeExpression = TRUE,
         cmdVec = NULL,
         tag = paste0(names(HMgeneSelections)[i], "_Abs"),

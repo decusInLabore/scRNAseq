@@ -365,28 +365,30 @@ setGeneric(
 
 ## Create custom column for this project:
 # samplegroup_seurat_clusters
+compCol1 <- "clusterName"
+compCol2 <- "sampleName"
+segmentationCol <- paste0(compCol1, "_", compCol2) 
 
-
-OsC@meta.data[["seurat_clusters_meta_Tumor_Normal"]] <- paste0(
-    "C",
-    OsC@meta.data$seurat_clusters,
+OsC@meta.data[[segmentationCol]] <- paste0(
+    OsC@meta.data[[compCol1]],
     "_",
-    OsC@meta.data$meta_Tumor_Normal
+    OsC@meta.data[[compCol2]]
 )
 
 
 
-dfTemp <- unique(OsC@meta.data[,c("clusterName", "seurat_clusters", "seurat_clusters_meta_Tumor_Normal", "meta_Tumor_Normal")])
+dfTemp <- unique(OsC@meta.data[,c(compCol1, compCol2, segmentationCol)])
 
-dfTemp <- dfTemp[order(dfTemp$seurat_clusters),]
+dfTemp <- dfTemp[order(dfTemp[,compCol1]),]
 
-selVec <- c(0, 2, 8, 10)
+## Optional
+#selVec <- c(0, 2, 8, 10)
 ## 8 and 10 only exist in tumor
-selVec <- c(0, 2, 3)
-dfTemp <- dfTemp[dfTemp$seurat_clusters %in% selVec, ]
+#selVec <- c(0, 2, 3)
+#dfTemp <- dfTemp[dfTemp$seurat_clusters %in% selVec, ]
 
 comparisonCol <- "clusterName"
-groupCol <- "seurat_clusters_meta_Tumor_Normal"
+groupCol <- segmentationCol
 
 DGEoptions <- unique(dfTemp[,comparisonCol])
 
@@ -442,17 +444,6 @@ DGEtagVec <- as.vector(NULL, mode = "character")
 DGEinputList <- compList
 
 
-DGEinputList[["comp_3"]]  = list(
-      "name"    = "DGE_iCAFs_vs_myCAFs",
-      "DGEselCol" = "seurat_clusters",
-      "DGEsampleList" = list(
-          "iCAFs"   = c(0),
-          "myCAFs"   = c(2, 10)
-      )
-  )
-
-orderVec <- c( "comp_1", "comp_2", "comp_3", "comp_4" )
-DGEinputList <- DGEinputList[orderVec]
 
 
 ###############################################################################
@@ -1831,7 +1822,113 @@ for (i in 1: length(DGEtagVec)){
 }
 
 ## Done creation of gene categories
-##############################
+##########################################
+
+############################################
+## Now making heatmaps
+
+###############################################################################
+## Depending on the project, another parameter can be used for heatmap       ##
+## segmentation. The default is cluster_sampleName
+
+segmentationCol <- "sampleName"
+
+## Add column for averaging of cells
+selClust <- paste0("clusterName_", segmentationCol)
+OsC_HM <- OsC
+OsC_HM@meta.data[[selClust]] <- paste0(
+  OsC_HM@meta.data$clusterName,
+  "_",
+  OsC_HM@meta.data[,segmentationCol]
+)
+
+
+
+###############################################################################
+## Calculataing average across segmentation                                  ##
+Seurat::Idents(OsC_HM) <- selClust
+OsCsel <- Seurat::AverageExpression(
+  OsC_HM, 
+  return.seurat = TRUE
+)
+
+
+if (segmentationCol == "sampleName" & length(grep("^sampleColor$", names(OsC_HM@meta.data)) == 1)){
+  segmentationColorCol <- "sampleColor"
+} else{
+  segmentationColorCol <- paste0(
+    segmentationCol,
+    "Color"
+  )
+  
+  ## Colors can also be set manually here
+  allCols <- unique(OsC_HM@meta.data[,segmentationCol])
+  colorSel <- scales::hue_pal()(length(allCols))
+  
+  OsC_HM@meta.data[[segmentationColorCol]] <- OsC_HM@meta.data[[segmentationCol]]
+  for (i in 1:length(allCols)){
+    OsC_HM@meta.data[[segmentationColorCol]] <- gsub(
+      allCols[i],
+      colorSel[i],
+      OsC_HM@meta.data[[segmentationColorCol]]
+      
+    )
+  }
+  
+} # done with else of if clause
+
+
+
+selVec <- c(
+  "clusterName", 
+  "clusterColor",  
+  segmentationCol, 
+  segmentationColorCol, 
+  selClust
+)
+
+dfAdd <- unique(OsC_HM@meta.data[,selVec])
+
+## Add color vector for segmentationCol ##
+
+#dfAdd[["treatmentGroupColor"]] <- dfAdd$meta_Treatment
+#dfAdd$treatmentGroupColor <- gsub("Control", "#3B5EF7", dfAdd$treatmentGroupColor)
+#dfAdd$treatmentGroupColor <- gsub("MatB52", "#4DA868", dfAdd$treatmentGroupColor)
+#dfAdd$treatmentGroupColor <- gsub("Regeneron", "#EE6C58", dfAdd$treatmentGroupColor)
+
+row.names(dfAdd) <- dfAdd[,selClust]
+
+OsCsel <- biologicToolsSC::addDf2seuratMetaData(
+  obj = OsCsel, 
+  dfAdd = dfAdd
+)
+
+## Order of factors
+segmentationColOrder <- sort(unique(OsCsel@meta.data[[segmentationCol]]))
+
+if (segmentationCol == "sampleName" & !is.null(Obio@parameterList$sampleNameOrder)){
+  segmentationColOrder <- Obio@parameterList$sampleNameOrder
+}
+
+OsCsel@meta.data[[segmentationCol]] <- factor(
+  OsCsel@meta.data[[segmentationCol]],
+  levels = segmentationColOrder
+)
+
+OsCsel@meta.data$clusterName <- factor(
+  OsCsel@meta.data$clusterName,
+  levels=Obio@parameterList$clusterNameOrder
+)
+
+
+OsCsel@meta.data <- OsCsel@meta.data[order(OsCsel@meta.data$clusterName,OsCsel@meta.data[[segmentationCol]]),]
+
+dfData <- data.frame(OsCsel[["RNA"]]@data)
+dataMatrix <- data.matrix(dfData)
+dfMeta <- OsCsel@meta.data
+ 
+dataMatrix <- dataMatrix[,dfMeta[,selClust]]
+
 
 ###############################################################################
 ## Function to create heatmaps                                               ##
@@ -2080,76 +2177,44 @@ return(returnList)
 ## Done function to create heatmaps
 ###############################################################################
 
-dfData <- data.frame(OsC[["RNA"]]@data)
-dataMatrix <- data.matrix(dfData)
-dfMeta <- OsC@meta.data
 
-####################
-## Create datamatrix and dfMeta
-
-
-## Need cluster_stage column
-selClust <- "cluster_TN"
-OsC_HM <- OsC
-OsC_HM@meta.data[[selClust]] <- paste0(
-  OsC_HM@meta.data$clusterName,
-  "_",
-  OsC_HM@meta.data$meta_Tumor_Normal
-)
+for (i in 1:length(HMgeneSelections)){
+  for (j in 1:length(HMgeneSelections[[i]])){
+   
+    tv <- HMgeneSelections[[i]][[j]]
+    tv <- tv[tv %in% row.names(OsC)]
+    ## Remove genes with all zero counts
+    tv <- tv[rowSums(OsC@assays$RNA[tv,]) != 0]
+    HMgeneSelections[[i]][[j]] <- tv
+  }  
+}
 
 
 
-###############################################################################
-## Calculataing average expression across all samples                        ##
-Seurat::Idents(OsC_HM) <- selClust
-OsCsel <- Seurat::AverageExpression(OsC_HM, return.seurat = TRUE)
 
 
-# 
 
-dfAdd <- unique(OsC_HM@meta.data[,c("clusterName", "clusterColor",  "meta_Tumor_Normal", selClust)])
-
-dfAdd[["diseaseGroupColor"]] <- dfAdd$meta_Tumor_Normal
-dfAdd$diseaseGroupColor <- gsub("Normal", "#0000ff", dfAdd$diseaseGroupColor)
-dfAdd$diseaseGroupColor <- gsub("Tumor", "#ff0000", dfAdd$diseaseGroupColor)
-
-row.names(dfAdd) <- dfAdd[,selClust]
-
-OsCsel <- biologicToolsSC::addDf2seuratMetaData(
-  obj = OsCsel, 
-  dfAdd = dfAdd
-)
-
-OsCsel@meta.data$meta_Tumor_Normal <- factor(
-  OsCsel@meta.data$meta_Tumor_Normal,
-  levels = c( "Normal", "Tumor")
-)
-
-OsCsel@meta.data$clusterName <- factor(
-  OsCsel@meta.data$clusterName,
-  levels=Obio@parameterList$clusterNameOrder
-)
-
-
-OsCsel@meta.data <- OsCsel@meta.data[order(OsCsel@meta.data$clusterName,OsCsel@meta.data$meta_Tumor_Normal),]
-
-dfData <- data.frame(OsCsel[["RNA"]]@data)
-dataMatrix <- data.matrix(dfData)
-dfMeta <- OsCsel@meta.data
- 
-dataMatrix <- dataMatrix[,dfMeta[,selClust]]
+# for (i in 1:length(HMgeneSelections)){
+#   hl <- list(HMgeneSelections[[i]])
+#   names(hl)[1] <- names(HMgeneSelections)[i]
+#   geneList[[names(HMgeneSelections)[i]]]  <- hl
+# }
 
 #library(ComplexHeatmap)
 plotList <- list()
-
 chnkVec <- as.vector(NULL, mode="character")
 
+
+## Make Heatmaps
 if (!exists("figureCount")){
   figureCount <- 1  
 }
 
 
+## Relative Heatmaps for all gene sets
 for (i in 1:length(HMgeneSelections)){
+  
+  
   if (length(unlist(HMgeneSelections[[i]])) > 1){
     returnList <- addHeatmap2List(
         dataMatrix = dataMatrix,
@@ -2158,7 +2223,7 @@ for (i in 1:length(HMgeneSelections)){
         geneGroupList = HMgeneSelections[[i]],
         relativeExpression = FALSE,
         cmdVec = NULL,
-        tag = paste0(names(HMgeneSelections)[i], "_Abs"),
+        tag = paste0(names(HMgeneSelections)[i], "_Rel"),
         showAllLegends = TRUE,
         figureCount = figureCount,
         plotList = plotList,
@@ -2166,8 +2231,8 @@ for (i in 1:length(HMgeneSelections)){
         dfMeta = dfMeta,
         group1ColorCol = "clusterColor", 
         group1NameCol = "clusterName",
-        group2ColorCol = "diseaseGroupColor", 
-        group2NameCol = "meta_Tumor_Normal",
+        group2ColorCol = segmentationColorCol, 
+        group2NameCol = segmentationCol,
         chnkVec = chnkVec,
         columnSplitCol = "clusterName"
         
@@ -2179,50 +2244,67 @@ for (i in 1:length(HMgeneSelections)){
   }
 }
 
-# plotList <- addHeatmap2List(
-#     OsC = OsC,
-#     geneGroupList = geneGroupList,
-#     relativeExpression = TRUE,
-#     plotList = plotList,
-#     cmdVec = NULL,
-#     tag = "Channels_Rel",
-#     showAllLegends = TRUE
-#     )
+## Absolute
+for (i in 1:length(HMgeneSelections)){
+  if (length(unlist(HMgeneSelections[[i]])) > 1){
+    returnList <- addHeatmap2List(
+        dataMatrix = dataMatrix,
+        cluster_column_slices   = FALSE,
+        cluster_columns         = FALSE,
+        geneGroupList = HMgeneSelections[[i]],
+        relativeExpression = TRUE,
+        cmdVec = NULL,
+        tag = paste0(names(HMgeneSelections)[i], "_Abs"),
+        showAllLegends = TRUE,
+        figureCount = figureCount,
+        plotList = plotList,
+        maxNcharCatName = 10,
+        dfMeta = dfMeta,
+        group1ColorCol = "clusterColor", 
+        group1NameCol = "clusterName",
+        group2ColorCol = segmentationColorCol, 
+        group2NameCol = segmentationCol,
+        chnkVec = chnkVec,
+        columnSplitCol = "clusterName"
+        
+    )
+    
+    plotList <- returnList[["plotList"]]
+    chnkVec <- returnList[["chnkVec"]]
+    figureCount <- returnList[["figureCount"]]
+  }
+}
 
 
 
 
-            
+
+rm(OsC_HM)
+
+
+## Done making Heatmap                                                       ##
+###############################################################################
+
+
 if (length(plotList) > 3){
     tabVar <- ".tabset .tabset-fade .tabset-dropdown"
 } else {
     tabVar <- ".tabset .tabset-fade .tabset-pills"
-}
-
-## To plot all heatmaps in one file
-# FNbase <- paste0("Summary.heatmaps", VersionPdfExt)
-
-#FN <- paste0(Obio@parameterList$reportFigDir, FNbase)
-#FNrel <- paste0("report_figures/", FNbase)
-            
-#pdf(FN)
-#    print(plotList)
-#dev.off()
-
+}    
+    
 ```
 
 
-### Heatmaps Absolute {`r tabVar`}
-The heatmaps depict the genes shown in red in the above plots. 
+### Heatmaps {`r tabVar`}
 
-```{r plot-heatmaps, echo=T, eval=TRUE, warning=FALSE, results='asis'}
-###############################################################################
-## Do category enrichment on clusters                                        ##
+In this section heatmaps and dotplots for various gene categories are provided. 
+
+```{r Cluster_overview, echo=TRUE, eval=TRUE, warning=FALSE, results="asis"}
+
 cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = '\n'))
-## Done doing enrichment on clusters                                         ##
-###############################################################################
 
 ```
+
 
 ```{r process_heatmap_data_rel, echo=T, eval=TRUE, warning=FALSE, results=F, error=F}
 
