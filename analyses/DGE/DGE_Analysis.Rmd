@@ -736,6 +736,8 @@ for (i in 1:length(DGEinputList)){
 ## Done DGE                                                                  ##
 ###############################################################################
 
+
+
 if (length(plotList) > 3){
     tabVar <- ".tabset .tabset-fade .tabset-dropdown"
 } else {
@@ -879,6 +881,10 @@ if (!is.null(Obio@dataTableList[["DGE_table"]]) & is.data.frame(Obio@dataTableLi
 Obio@dataTableList[["DGE_table"]] <- NULL
 Obio@dataTableList[["DGE_table"]] <- dfDGE_new
 
+## save changes ##
+if (calculateDGE){
+  source("save.biologic.robj.R")
+}
 
 ## Done creating xlsx spreadsheet                                            ##
 ###############################################################################
@@ -2343,8 +2349,8 @@ for (i in 1:length(HMgeneSelections)){
         dfMeta = dfMeta,
         group1ColorCol = "clusterColor", 
         group1NameCol = "clusterName",
-        group2ColorCol = "diseaseGroupColor", 
-        group2NameCol = "meta_Tumor_Normal",
+        group2ColorCol = segmentationColorCol, 
+        group2NameCol = segmentationCol,
         chnkVec = chnkVec ,
         columnSplitCol = "clusterName"
         
