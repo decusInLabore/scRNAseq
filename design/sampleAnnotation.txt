@@ -1,5 +1,3 @@
 "sampleID"	"sampleName"	"sampleColor"
-"LiverNormalM1R1"	"LiverNormalM1R1"	"#F8766D"
-"LiverNormalM1R2"	"LiverNormalM1R2"	"#7CAE00"
-"BackgroundLiverM3R2"	"BackgroundLiverM3R2"	"#00BFC4"
-"LiverMetM3R2"	"LiverMetM3R2"	"#C77CFF"
+"CTRL"	"CTRL"	"#F8766D"
+"STIM"	"STIM"	"#00BFC4"

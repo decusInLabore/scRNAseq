@@ -4,6 +4,9 @@
 chnkPrefix <- "QC.A.run.doublet.finder."
 VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.Date()), ".pdf")
 
+if (!requireNamespace("DoubletFinder")){
+  renv::install("chris-mcginnis-ucsf/DoubletFinder")
+}
 
 runDoubletFinder <- TRUE
 

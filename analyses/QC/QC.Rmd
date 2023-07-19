@@ -9,10 +9,7 @@ output:
         toc_depth: 5
         toc_float: true
         css: src/style/style.css
-
-always_allow_html: yes
-
-
+        always_allow_html: yes
 ---
     
     
@@ -123,7 +120,7 @@ db.pwd <- as.vector(dbTable[1,1])
 
 
 
-```{r saveobject, eval=TRUE, echo=T, results=F}
+```{r saveobject, eval=TRUE, echo=T, results=TRUE}
 ### Will save Obio object here, so it can be re-used with different parameters
 source("save.biologic.robj.R")
 
