@@ -539,10 +539,10 @@ names(colVec2) <- dfCol2[,group2NameCol]
 
 
 ht.anno <- ComplexHeatmap::HeatmapAnnotation(
-    Age =  dfMeta[,group2NameCol],
+    Sample =  dfMeta[,group2NameCol],
     Cluster =  dfMeta[,group1NameCol],
     col = list(
-        Age = colVec2,
+        Sample = colVec2,
         Cluster = colVec
     ),
     show_legend = showAllLegends
@@ -708,7 +708,7 @@ for (i in 1:length(HMgeneSelections)){
         cluster_column_slices   = FALSE,
         cluster_columns         = FALSE,
         geneGroupList = HMgeneSelections[[i]],
-        relativeExpression = FALSE,
+        relativeExpression = TRUE,
         cmdVec = NULL,
         tag = paste0(names(HMgeneSelections)[i], "_Rel"),
         showAllLegends = TRUE,
@@ -739,7 +739,7 @@ for (i in 1:length(HMgeneSelections)){
         cluster_column_slices   = FALSE,
         cluster_columns         = FALSE,
         geneGroupList = HMgeneSelections[[i]],
-        relativeExpression = TRUE,
+        relativeExpression = FALSE,
         cmdVec = NULL,
         tag = paste0(names(HMgeneSelections)[i], "_Abs"),
         showAllLegends = TRUE,
