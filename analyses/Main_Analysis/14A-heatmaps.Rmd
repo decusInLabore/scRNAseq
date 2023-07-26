@@ -667,12 +667,13 @@ return(returnList)
 
 for (i in 1:length(HMgeneSelections)){
   for (j in 1:length(HMgeneSelections[[i]])){
-   
-    tv <- HMgeneSelections[[i]][[j]]
-    tv <- tv[tv %in% row.names(OsC)]
-    ## Remove genes with all zero counts
-    tv <- tv[rowSums(OsC@assays$RNA[tv,]) != 0]
-    HMgeneSelections[[i]][[j]] <- tv
+    if (length(HMgeneSelections[[i]]) > 0){    
+      tv <- HMgeneSelections[[i]][[j]]
+      tv <- tv[tv %in% row.names(OsC)]
+      ## Remove genes with all zero counts
+      tv <- tv[rowSums(OsC@assays$RNA[tv,]) != 0]
+      HMgeneSelections[[i]][[j]] <- tv
+    } 
   }  
 }
 
