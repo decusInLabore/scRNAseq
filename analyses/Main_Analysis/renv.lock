@@ -143,6 +143,33 @@
       "Hash": "a44aec693253e4eb6c45d2fd789091a0",
       "Requirements": []
     },
+    "ComplexHeatmap": {
+      "Package": "ComplexHeatmap",
+      "Version": "2.15.4",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteUsername": "jokergoo",
+      "RemoteRepo": "ComplexHeatmap",
+      "RemoteRef": "master",
+      "RemoteSha": "ae0ec42cd2e4e0446c114d23dcf43cf2c2f585c8",
+      "Hash": "9625afcf54b2c7fe92075d7d2cb1f83e",
+      "Requirements": [
+        "GetoptLong",
+        "GlobalOptions",
+        "IRanges",
+        "RColorBrewer",
+        "circlize",
+        "clue",
+        "codetools",
+        "colorspace",
+        "digest",
+        "doParallel",
+        "foreach",
+        "matrixStats",
+        "png"
+      ]
+    },
     "DBI": {
       "Package": "DBI",
       "Version": "1.1.1",
@@ -328,12 +355,23 @@
         "XVector"
       ]
     },
-    "GlobalOptions": {
-      "Package": "GlobalOptions",
-      "Version": "0.1.1",
+    "GetoptLong": {
+      "Package": "GetoptLong",
+      "Version": "0.1.8",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "819f3084d1ec686a6d56b6385ad3280b",
+      "Hash": "46b8630cdbdd348ce34d266777be529d",
+      "Requirements": [
+        "GlobalOptions",
+        "rjson"
+      ]
+    },
+    "GlobalOptions": {
+      "Package": "GlobalOptions",
+      "Version": "0.1.2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "c3f7b221e60c28f5f3533d74c6fef024",
       "Requirements": []
     },
     "IRanges": {
@@ -1053,10 +1091,10 @@
     },
     "circlize": {
       "Package": "circlize",
-      "Version": "0.4.8",
+      "Version": "0.4.15",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "0f1b800a8d7c2f2d401e145c88c93722",
+      "Hash": "2bb47a2fe6ab009b1dcc5566d8c3a988",
       "Requirements": [
         "GlobalOptions",
         "colorspace",
@@ -1080,6 +1118,16 @@
       "Repository": "CRAN",
       "Hash": "ebaa97ac99cc2daf04e77eecc7b781d7",
       "Requirements": []
+    },
+    "clue": {
+      "Package": "clue",
+      "Version": "0.3-57",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "c4dcf2e9abe03e3f2c183bbe07461ddc",
+      "Requirements": [
+        "cluster"
+      ]
     },
     "cluster": {
       "Package": "cluster",
@@ -1341,6 +1389,17 @@
       "Hash": "49b5c6e230bfec487b8917d5a0c77cca",
       "Requirements": []
     },
+    "doParallel": {
+      "Package": "doParallel",
+      "Version": "1.0.15",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "1886c5bce3d9c0b4f9d0b113d76f9357",
+      "Requirements": [
+        "foreach",
+        "iterators"
+      ]
+    },
     "dockerfiler": {
       "Package": "dockerfiler",
       "Version": "0.1.4",
@@ -1531,6 +1590,17 @@
         "magrittr",
         "rlang",
         "tibble"
+      ]
+    },
+    "foreach": {
+      "Package": "foreach",
+      "Version": "1.5.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "8fb3ff01ee7d85893f56df8d77213381",
+      "Requirements": [
+        "codetools",
+        "iterators"
       ]
     },
     "foreign": {
@@ -2226,6 +2296,14 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "7ab57a6de7f48a8dc84910d1eca42883",
+      "Requirements": []
+    },
+    "iterators": {
+      "Package": "iterators",
+      "Version": "1.0.12",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "117128f48662573ff4c4e72608b9e202",
       "Requirements": []
     },
     "jquerylib": {
@@ -3031,6 +3109,14 @@
         "readxl",
         "tibble"
       ]
+    },
+    "rjson": {
+      "Package": "rjson",
+      "Version": "0.2.20",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "7d597f982ee6263716b6a2f28efd29fa",
+      "Requirements": []
     },
     "rlang": {
       "Package": "rlang",
