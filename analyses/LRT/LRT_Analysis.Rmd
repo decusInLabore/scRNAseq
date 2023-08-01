@@ -65,7 +65,7 @@ library(dplyr)
 
 VersionPdfExt <- paste0(".V", gsub("-", "", Sys.Date()), ".pdf")
 rasterDpi <- 400
-calculateLRTfromScratch <- FALSE
+calculateLRTfromScratch <- TRUE
 
 ## Load bioLOGIC object
 source("load.biologic.robj.R")
@@ -359,7 +359,7 @@ compList <- list()
 for (i in 1:length(LRToptions)){
     tag <- paste0("LRT_", i)
     
-    name <- paste0("LRT_", as.vector(dfTemp[i, "clusterName"]), "_Age_Group")
+    name <- paste0("LRT_", as.vector(dfTemp[i, "clusterName"]), "_sampleName")
     
     LLRT <- list(
           "seurat_clusters" = as.numeric(dfTemp[i, "seurat_clusters"])
@@ -369,7 +369,7 @@ for (i in 1:length(LRToptions)){
       
       compList[[tag]] <- list(
           "name"    = name,
-          "LRTselCol" = "meta_Age_Group",
+          "LRTselCol" = "sampleName",
           "LRTsampleList" =  LLRT
         
       )
@@ -1701,10 +1701,10 @@ names(colVec2) <- dfCol2[,group2NameCol]
 
 
 ht.anno <- ComplexHeatmap::HeatmapAnnotation(
-    Age =  dfMeta[,group2NameCol],
+    Sample =  dfMeta[,group2NameCol],
     Cluster =  dfMeta[,group1NameCol],
     col = list(
-        Age = colVec2,
+        Sample = colVec2,
         Cluster = colVec
     ),
     show_legend = showAllLegends
@@ -1833,12 +1833,12 @@ dfMeta <- OsC@meta.data
 
 
 ## Need cluster_stage column
-selClust <- "cluster_age"
+selClust <- paste0("cluster_sample")
 OsC_HM <- OsC
 OsC_HM@meta.data[[selClust]] <- paste0(
   OsC_HM@meta.data$clusterName, 
   "_",
-  OsC_HM@meta.data$meta_Age_Group
+  OsC_HM@meta.data$sampleName
 )
 
 
@@ -1851,12 +1851,12 @@ OsCsel <- Seurat::AverageExpression(OsC_HM, return.seurat = TRUE)
 
 # 
 
-dfAdd <- unique(OsC_HM@meta.data[,c("clusterName", "clusterColor",  "meta_Age_Group", selClust)])
+dfAdd <- unique(OsC_HM@meta.data[,c("clusterName", "clusterColor", "sampleName", "sampleColor", selClust)])
 
-dfAdd[["ageGroupColor"]] <- dfAdd$meta_Age_Group
-dfAdd$ageGroupColor <- gsub("Young", "#E6C229", dfAdd$ageGroupColor)
-dfAdd$ageGroupColor <- gsub("Middle", "#ED1D58", dfAdd$ageGroupColor)
-dfAdd$ageGroupColor <- gsub("Old", "#48A6EA", dfAdd$ageGroupColor)
+#dfAdd[["ageGroupColor"]] <- dfAdd$meta_Age_Group
+#dfAdd$ageGroupColor <- gsub("Young", "#E6C229", dfAdd$ageGroupColor)
+#dfAdd$ageGroupColor <- gsub("Middle", "#ED1D58", dfAdd$ageGroupColor)
+#dfAdd$ageGroupColor <- gsub("Old", "#48A6EA", dfAdd$ageGroupColor)
 
 row.names(dfAdd) <- dfAdd[,selClust]
 
@@ -1865,9 +1865,19 @@ OsCsel <- biologicToolsSC::addDf2seuratMetaData(
   dfAdd = dfAdd
 )
 
-OsCsel@meta.data$meta_Age_Group <- factor(
-  OsCsel@meta.data$meta_Age_Group,
-  levels = c("Young", "Middle", "Old")
+# OsCsel@meta.data$meta_Age_Group <- factor(
+#   OsCsel@meta.data$meta_Age_Group,
+#   levels = c("Young", "Middle", "Old")
+# )
+# Obio@parameterList$sampleNameOrder <- c(
+#    "E185",
+#    "PD4",
+#    "PD7"
+# )
+
+OsCsel@meta.data$sampleName <- factor(
+  OsCsel@meta.data$sampleName, 
+  levels = Obio@parameterList$sampleNameOrder
 )
 
 OsCsel@meta.data$clusterName <- factor(
@@ -1876,7 +1886,7 @@ OsCsel@meta.data$clusterName <- factor(
 )
 
 
-OsCsel@meta.data <- OsCsel@meta.data[order(OsCsel@meta.data$clusterName,OsCsel@meta.data$meta_Age_Group),]
+OsCsel@meta.data <- OsCsel@meta.data[order(OsCsel@meta.data$clusterName,OsCsel@meta.data$sampleName),]
 
 dfData <- data.frame(OsCsel[["RNA"]]@data)
 dataMatrix <- data.matrix(dfData)
@@ -1911,8 +1921,8 @@ for (i in 1:length(HMgeneSelections)){
         dfMeta = dfMeta,
         group1ColorCol = "clusterColor", 
         group1NameCol = "clusterName",
-        group2ColorCol = "ageGroupColor", 
-        group2NameCol = "meta_Age_Group",
+        group2ColorCol = "sampleColor", 
+        group2NameCol = "sampleName",
         chnkVec = chnkVec,
         columnSplitCol = "clusterName"
         
@@ -2006,8 +2016,8 @@ for (i in 1:length(HMgeneSelections)){
         dfMeta = dfMeta,
         group1ColorCol = "clusterColor", 
         group1NameCol = "clusterName",
-        group2ColorCol = "ageGroupColor", 
-        group2NameCol = "meta_Age_Group",
+        group2ColorCol = "sampleColor", 
+        group2NameCol = "sampleName",
         chnkVec = chnkVec ,
         columnSplitCol = "clusterName"
         
