@@ -744,6 +744,9 @@ hs1 <- openxlsx::createStyle(
 
 ###############################################################################
 ## Add Create DGE result Excel Spreadsheet                                   ##
+## Add additional filters
+
+
 
 for (i in 1:length(DGEtagVec)){
   
@@ -759,6 +762,25 @@ for (i in 1:length(DGEtagVec)){
   orderVec <- c("gene", "gene_FeatureViewLink", orderVec)
   dfOutput <- dfOutput[, orderVec]
   class(dfOutput$gene_FeatureViewLink) <- c(class(dfOutput$gene_FeatureViewLink), "hyperlink")
+  
+  ## Highlight logFCtwoSD
+  logFCtwoSD <- 2*sd(dfOutput[,grep("_logFC_", names(dfOutput))])
+  dfOutput[["DGE_Status"]] <- "Unchanged"
+  dfOutput[dfOutput[,grep("_logFC_", names(dfOutput))] > logFCtwoSD & dfOutput[,grep("_padj_", names(dfOutput))] < 0.05, "DGE_Status"] <- "Up"
+    dfOutput[dfOutput[,grep("_logFC_", names(dfOutput))] < -1 *logFCtwoSD & dfOutput[,grep("_padj_", names(dfOutput))] < 0.05, "DGE_Status"] <- "Down"
+  
+  if (nrow(dfOutput[dfOutput$DGE_Status != "Unchanged",]) > 0){
+    dfOutput <- dfOutput[dfOutput$DGE_Status != "Unchanged",]  
+  }
+      
+  ## Highlight TFs  
+  if (!is.null(Obio@dataTableList[["referenceList"]][["TFs"]])){
+    geneSet <- Obio@dataTableList[["referenceList"]][["TFs"]]
+    dfOutput[["Transcription_factor"]] <- ""
+    dfOutput[dfOutput$gene %in% geneSet, "Transcription_factor"] <- "+"
+  }
+  
+  
   
   ## Sort based on logFCs
   pos <- grep("logFC_", names(dfOutput))
@@ -798,6 +820,37 @@ for (i in 1:length(DGEtagVec)){
       dfTemp[is.na(dfTemp)] <- 0
   
   }
+  
+  ## Create long-format marker gene list
+  dfOutput[["cluster"]] <- DGEtagVec[i]
+  names(dfOutput) <- c(
+    "gene",
+    "gene_FeatureViewLink",
+    "logFC",
+    "padj",
+    "lg10p",
+    "avg_intensity",
+    "DGE_Status",
+    "Transcription_factor",
+    "cluster"
+  )
+  
+  dfOutput[["intensity_logFC"]] <- dfOutput$avg_intensity * dfOutput$logFC
+  dfOutput <- dfOutput[order(dfOutput$intensity_logFC, decreasing = T), ]
+  dfOutput[["markerRank"]] <- 1:nrow(dfOutput)
+  dfOutput[["clusterName"]] <- dfOutput$cluster
+  dfOutput$clusterName <- gsub("DGE_", "", dfOutput$clusterName)
+  dfOutput$clusterName <- gsub("_vs_other_clusters", "", dfOutput$clusterName)
+  
+  
+  if (i ==1){
+    dfLongMarker <- dfOutput
+  } else {
+    dfLongMarker <- rbind(
+      dfLongMarker, 
+      dfOutput
+    )
+  }
 }
 
 ## Save workbook ##
@@ -823,6 +876,54 @@ openxlsx::saveWorkbook(
         outPutFN ,
         overwrite = TRUE
 )
+
+############################################3
+## Save long format workbook
+wb <- openxlsx::createWorkbook()
+
+hs1 <- openxlsx::createStyle(
+    fontColour = "#ffffff",
+    fgFill = "#000000",
+    halign = "CENTER",
+    textDecoration = "Bold"
+)
+
+sheetName = "ClusterMarkers"
+  openxlsx::addWorksheet(
+      wb, 
+      sheetName = sheetName
+)
+  
+  
+openxlsx::freezePane(wb, sheetName ,  firstActiveRow = 2)
+openxlsx::writeData(wb, sheetName, dfLongMarker, startRow = 1, startCol = 1, headerStyle = hs1)
+openxlsx::addFilter(wb, sheetName, row = 1, cols = 1:ncol(dfOutput))
+
+## Save workbook ##
+baseFN <- paste0(
+   project_id, 
+   ".",folderNameTag,".long.marker.table.",
+   version,
+   ".xlsx"
+)
+
+
+outPutFN <- paste0(
+     reportTableDir,
+     baseFN
+)
+
+if (!dir.exists(reportTableDir)){
+    dir.create(reportTableDir, recursive=T)
+}
+
+openxlsx::saveWorkbook(
+        wb,
+        outPutFN ,
+        overwrite = TRUE
+)
+
+
 
 ## Add to DGE table
 if (!is.null(Obio@dataTableList[["DGE_table"]]) & is.data.frame(Obio@dataTableList[["DGE_table"]])) {
@@ -860,8 +961,145 @@ if (calculateDGE){
 
 ## Done creating xlsx spreadsheet                                            ##
 ###############################################################################
+
 ```
 
+```{r create_focused_marker_list, echo=F, eval=T, warning=FALSE, results="asis"}
+###############################################################################
+## Create topN marker gene list                                              ##
+
+n = 10
+
+dfSel <- dfLongMarker[dfLongMarker$markerRank <= n, ]
+
+clustVec <- unique(dfSel$clusterName)
+
+geneList <- list()
+
+for (i in 1:length(clustVec)){
+  geneVec <- sort(unique(dfSel[dfSel$clusterName == clustVec[i], "gene"]))  
+  if (length(geneVec) > 0){
+    geneList[[clustVec[i]]] <- geneVec
+  }
+}
+
+## Create plot list
+if (!exists("HMgeneSelections")){
+  HMgeneSelections <- list()
+}
+
+HMgeneSelections[[paste0("Top_", n, "_Markers")]] <- geneList
+
+## Now transcription factors
+
+## Done creating top n marker gene list
+
+
+## Focused marker list
+markerList <- list()
+
+## Create focused marker list
+for (i in 1:length(DGEtagVec)){
+  
+  ## Add to Excel workbook ##
+  dfOutput <-   Obio@dataTableList[[DGEtagVec[i]]]
+  orderVec <- names(dfOutput)
+  dfOutput[["gene_FeatureViewLink"]] <- paste0(
+      shinyURL,
+      "?gene=",
+      dfOutput$gene
+  )
+  orderVec <- orderVec[orderVec != "gene"]
+  orderVec <- c("gene", "gene_FeatureViewLink", orderVec)
+  dfOutput <- dfOutput[, orderVec]
+  class(dfOutput$gene_FeatureViewLink) <- c(class(dfOutput$gene_FeatureViewLink), "hyperlink")
+  
+  ## Highlight logFCtwoSD
+  logFCtwoSD <- 2*sd(dfOutput[,grep("_logFC_", names(dfOutput))])
+  dfOutput[["DGE_Status"]] <- "Unchanged"
+  dfOutput[dfOutput[,grep("_logFC_", names(dfOutput))] > logFCtwoSD & dfOutput[,grep("_padj_", names(dfOutput))] < 0.05, "DGE_Status"] <- "Up"
+    dfOutput[dfOutput[,grep("_logFC_", names(dfOutput))] < -1 *logFCtwoSD & dfOutput[,grep("_padj_", names(dfOutput))] < 0.05, "DGE_Status"] <- "Down"
+  
+  if (nrow(dfOutput[dfOutput$DGE_Status != "Unchanged",]) > 0){
+    dfOutput <- dfOutput[dfOutput$DGE_Status != "Unchanged",]  
+  }
+      
+  ## Highlight TFs  
+  if (!is.null(Obio@dataTableList[["referenceList"]][["TFs"]])){
+    geneSet <- Obio@dataTableList[["referenceList"]][["TFs"]]
+    dfOutput[["Transcription_factor"]] <- ""
+    dfOutput[dfOutput$gene %in% geneSet, "Transcription_factor"] <- "+"
+  }
+  
+  
+  
+  ## Sort based on logFCs
+  pos <- grep("logFC_", names(dfOutput))
+  if (length(pos) == 1){
+    dfOutput <- dfOutput[order(dfOutput[, pos], decreasing = T),]  
+  }
+  
+  upVec <- sort(unique(dfOutput[dfOutput$DGE_Status == "Up", "gene"]))
+  markerList[[DGEtagVec[i]]] <- NULL
+  #markerList[[DGEtagVec[i]]] <- list()
+  markerList[[paste0("Up_", DGEtagVec[i])]] <- upVec 
+}
+
+## Remove all duplicated
+
+dups <- as.vector(NULL, mode = "character")
+
+for (i in 1:length(markerList)){
+  dups <- c(
+    dups, 
+    markerList[[i]][!duplicated(markerList[[i]])]
+  )
+}
+
+dups <- unique(dups[duplicated(dups)])
+
+
+## Create plot list
+if (!exists("HMgeneSelections")){
+  HMgeneSelections <- list()
+}
+
+
+## Remove all duplicates from lists##
+for (i in 1:length(markerList)){
+  markerList[[i]] <- markerList[[i]][!(markerList[[i]] %in% dups)] 
+}
+
+
+if (!exists("excelGeneList")){
+  excelGeneList <- list()
+}
+HMgeneSelections[["Up_dedup_marker_list"]] <- markerList
+excelGeneList[["Up_dedup_marker_list"]] <- markerList
+
+
+## filter by intensity (lg10intensity*logFC expression)
+markerListTF <- markerList
+TFgeneVec <- Obio@dataTableList[["referenceList"]][["TFs"]]
+for (i in 1:length(markerListTF)){
+  markerListTF[[i]] <- markerListTF[[i]][(markerListTF[[i]] %in% TFgeneVec)] 
+}
+
+HMgeneSelections[["Up_dedup_markerTF_list"]] <- markerListTF
+excelGeneList[["Up_dedup_markerTF_list"]] <- markerList
+
+## Done creating focused marker list                                         ##
+###############################################################################
+
+###############################################################################
+## Print marker gene selections to file                                      ##
+
+# Ideal format: long: gene name | cluster marker | logFC | intensity | intensity * logFC | TF
+
+##                                                                           ##
+###############################################################################
+
+```
 
 ```{r, echo=F, eval=T, warning=FALSE, results="asis"}
 
@@ -1765,7 +2003,10 @@ GO_Secretion <-  retrieve.gene.category.from.db(
 
 
 #hmVec <- names(EnrichedGenesList)
-HMgeneSelections <- list()
+if (!exists("HMgeneSelections")){
+  HMgeneSelections <- list()
+}
+
 
 for (i in 1: length(DGEtagVec)){
   tag <- paste0("HM_", DGEtagVec[i])
@@ -2032,10 +2273,10 @@ names(colVec2) <- dfCol2[,group2NameCol]
 
 
 ht.anno <- ComplexHeatmap::HeatmapAnnotation(
-    Age =  dfMeta[,group2NameCol],
+    Type =  dfMeta[,group2NameCol],
     Cluster =  dfMeta[,group1NameCol],
     col = list(
-        Age = colVec2,
+        Type = colVec2,
         Cluster = colVec
     ),
     show_legend = showAllLegends
@@ -2223,35 +2464,35 @@ for (i in 1:length(HMgeneSelections)){
 }
 
 ## Absolute
-for (i in 1:length(HMgeneSelections)){
-  if (length(unlist(HMgeneSelections[[i]])) > 1){
-    returnList <- addHeatmap2List(
-        dataMatrix = dataMatrix,
-        cluster_column_slices   = FALSE,
-        cluster_columns         = FALSE,
-        geneGroupList = HMgeneSelections[[i]],
-        relativeExpression = FALSE,
-        cmdVec = NULL,
-        tag = paste0(names(HMgeneSelections)[i], "_Abs"),
-        showAllLegends = TRUE,
-        figureCount = figureCount,
-        plotList = plotList,
-        maxNcharCatName = 10,
-        dfMeta = dfMeta,
-        group1ColorCol = "clusterColor", 
-        group1NameCol = "clusterName",
-        group2ColorCol = segmentationColorCol, 
-        group2NameCol = segmentationCol,
-        chnkVec = chnkVec,
-        columnSplitCol = "clusterName"
-        
-    )
-    
-    plotList <- returnList[["plotList"]]
-    chnkVec <- returnList[["chnkVec"]]
-    figureCount <- returnList[["figureCount"]]
-  }
-}
+# for (i in 1:length(HMgeneSelections)){
+#   if (length(unlist(HMgeneSelections[[i]])) > 1){
+#     returnList <- addHeatmap2List(
+#         dataMatrix = dataMatrix,
+#         cluster_column_slices   = FALSE,
+#         cluster_columns         = FALSE,
+#         geneGroupList = HMgeneSelections[[i]],
+#         relativeExpression = FALSE,
+#         cmdVec = NULL,
+#         tag = paste0(names(HMgeneSelections)[i], "_Abs"),
+#         showAllLegends = TRUE,
+#         figureCount = figureCount,
+#         plotList = plotList,
+#         maxNcharCatName = 10,
+#         dfMeta = dfMeta,
+#         group1ColorCol = "clusterColor", 
+#         group1NameCol = "clusterName",
+#         group2ColorCol = segmentationColorCol, 
+#         group2NameCol = segmentationCol,
+#         chnkVec = chnkVec,
+#         columnSplitCol = "clusterName"
+#         
+#     )
+#     
+#     plotList <- returnList[["plotList"]]
+#     chnkVec <- returnList[["chnkVec"]]
+#     figureCount <- returnList[["figureCount"]]
+#   }
+# }
 
 
 
@@ -2273,7 +2514,7 @@ if (length(plotList) > 3){
 ```
 
 
-### Heatmaps {`r tabVar`}
+### Heatmaps - Relative Expression {`r tabVar`}
 
 In this section heatmaps and dotplots for various gene categories are provided. 
 
@@ -2311,9 +2552,9 @@ for (i in 1:length(HMgeneSelections)){
         cluster_column_slices   = FALSE,
         cluster_columns         = FALSE,
         geneGroupList = HMgeneSelections[[i]],
-        relativeExpression = TRUE,
+        relativeExpression = FALSE,
         cmdVec = NULL,
-        tag = paste0(names(HMgeneSelections)[i], "_Rel"),
+        tag = paste0(names(HMgeneSelections)[i], "_Abs"),
         showAllLegends = TRUE,
         figureCount = figureCount,
         plotList = plotList,
@@ -2367,8 +2608,7 @@ if (length(plotList) > 3){
 ```
 
 
-### Heatmaps Relative {`r tabVar`}
-The heatmaps depict the genes shown in red in the above plots. 
+### Heatmaps - Absolute log10 Expression {`r tabVar`}
 
 ```{r plot-heatmaps-rel, echo=T, eval=TRUE, warning=FALSE, results='asis'}
 ###############################################################################
