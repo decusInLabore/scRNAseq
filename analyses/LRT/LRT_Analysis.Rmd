@@ -343,6 +343,46 @@ setGeneric(
 #     OsC@meta.data$seurat_clusters
 # )
  
+## Test only
+#OsC@meta.data[["test"]] <- OsC@meta.data[["sampleName"]]
+
+segmentationCol <- "Phase"
+
+## Add column for averaging of cells
+selClust <- paste0("clusterName_", segmentationCol)
+OsC@meta.data[[selClust]] <- paste0(
+  OsC@meta.data$clusterName,
+  "_",
+  OsC@meta.data[,segmentationCol]
+)
+
+
+if (segmentationCol == "sampleName" & length(grep("^sampleColor$", names(OsC@meta.data)) == 1)){
+  segmentationColorCol <- "sampleColor"
+} else{
+  segmentationColorCol <- paste0(
+    segmentationCol,
+    "Color"
+  )
+  
+  ## Colors can also be set manually here
+  allCols <- unique(OsC@meta.data[,segmentationCol])
+  colorSel <- scales::hue_pal()(length(allCols))
+  
+  OsC@meta.data[[segmentationColorCol]] <- OsC@meta.data[[segmentationCol]]
+  for (i in 1:length(allCols)){
+    OsC@meta.data[[segmentationColorCol]] <- gsub(
+      allCols[i],
+      colorSel[i],
+      OsC@meta.data[[segmentationColorCol]]
+      
+    )
+  }
+  
+} # done with else of if clause
+
+
+
 dfTemp <- unique(OsC@meta.data[,c("clusterName", "seurat_clusters")])
 dfTemp$clusterName <- factor(dfTemp$clusterName, levels= Obio@parameterList$clusterNameOrder)
 dfTemp <- dfTemp[order(dfTemp$clusterName),]
@@ -359,7 +399,7 @@ compList <- list()
 for (i in 1:length(LRToptions)){
     tag <- paste0("LRT_", i)
     
-    name <- paste0("LRT_", as.vector(dfTemp[i, "clusterName"]), "_sampleName")
+    name <- paste0("LRT_", as.vector(dfTemp[i, "clusterName"]), "_", segmentationCol)
     
     LLRT <- list(
           "seurat_clusters" = as.numeric(dfTemp[i, "seurat_clusters"])
@@ -369,7 +409,7 @@ for (i in 1:length(LRToptions)){
       
       compList[[tag]] <- list(
           "name"    = name,
-          "LRTselCol" = "sampleName",
+          "LRTselCol" = segmentationCol,
           "LRTsampleList" =  LLRT
         
       )
@@ -1596,8 +1636,8 @@ addHeatmap2List <- function(
     dfMeta,
     group1ColorCol = "clusterColor", 
     group1NameCol = "clusterName",
-    group2ColorCol = "sampleColor", 
-    group2NameCol = "sampleName",
+    group2ColorCol =  segmentationColorCol, 
+    group2NameCol = segmentationCol ,
     columnSplitCol = "clusterName"
     ){
   
@@ -1833,12 +1873,13 @@ dfMeta <- OsC@meta.data
 
 
 ## Need cluster_stage column
-selClust <- paste0("cluster_sample")
+#selClust <- selClust
+# selClust <- paste0("clusterName_", segmentationCol)
 OsC_HM <- OsC
 OsC_HM@meta.data[[selClust]] <- paste0(
   OsC_HM@meta.data$clusterName, 
   "_",
-  OsC_HM@meta.data$sampleName
+  OsC_HM@meta.data[,segmentationCol]
 )
 
 
@@ -1851,7 +1892,7 @@ OsCsel <- Seurat::AverageExpression(OsC_HM, return.seurat = TRUE)
 
 # 
 
-dfAdd <- unique(OsC_HM@meta.data[,c("clusterName", "clusterColor", "sampleName", "sampleColor", selClust)])
+dfAdd <- unique(OsC_HM@meta.data[,c("clusterName", "clusterColor", segmentationCol,  segmentationColorCol, selClust)])
 
 #dfAdd[["ageGroupColor"]] <- dfAdd$meta_Age_Group
 #dfAdd$ageGroupColor <- gsub("Young", "#E6C229", dfAdd$ageGroupColor)
@@ -1875,9 +1916,16 @@ OsCsel <- biologicToolsSC::addDf2seuratMetaData(
 #    "PD7"
 # )
 
+if (segmentationCol == "sampleName" & !is.null(Obio@parameterList$sampleNameOrder)){
+  segmentationColOrder <- Obio@parameterList$sampleNameOrder
+} else {
+  segmentationColOrder <- unique(OsC@meta.data[,segmentationCol])
+}
+
+
 OsCsel@meta.data$sampleName <- factor(
-  OsCsel@meta.data$sampleName, 
-  levels = Obio@parameterList$sampleNameOrder
+  OsCsel@meta.data[,segmentationCol], 
+  levels = segmentationColOrder
 )
 
 OsCsel@meta.data$clusterName <- factor(
@@ -1886,7 +1934,7 @@ OsCsel@meta.data$clusterName <- factor(
 )
 
 
-OsCsel@meta.data <- OsCsel@meta.data[order(OsCsel@meta.data$clusterName,OsCsel@meta.data$sampleName),]
+OsCsel@meta.data <- OsCsel@meta.data[order(OsCsel@meta.data$clusterName,OsCsel@meta.data[, segmentationCol]),]
 
 dfData <- data.frame(OsCsel[["RNA"]]@data)
 dataMatrix <- data.matrix(dfData)
@@ -1921,8 +1969,8 @@ for (i in 1:length(HMgeneSelections)){
         dfMeta = dfMeta,
         group1ColorCol = "clusterColor", 
         group1NameCol = "clusterName",
-        group2ColorCol = "sampleColor", 
-        group2NameCol = "sampleName",
+        group2ColorCol = segmentationColorCol, 
+        group2NameCol = segmentationCol,
         chnkVec = chnkVec,
         columnSplitCol = "clusterName"
         
@@ -2016,8 +2064,8 @@ for (i in 1:length(HMgeneSelections)){
         dfMeta = dfMeta,
         group1ColorCol = "clusterColor", 
         group1NameCol = "clusterName",
-        group2ColorCol = "sampleColor", 
-        group2NameCol = "sampleName",
+        group2ColorCol = segmentationColorCol, 
+        group2NameCol = segmentationCol,
         chnkVec = chnkVec ,
         columnSplitCol = "clusterName"
         
