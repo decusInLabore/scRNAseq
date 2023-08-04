@@ -346,7 +346,7 @@ setGeneric(
 ## Test only
 #OsC@meta.data[["test"]] <- OsC@meta.data[["sampleName"]]
 
-segmentationCol <- "Phase"
+segmentationCol <- "meta_Timepoint"
 
 ## Add column for averaging of cells
 selClust <- paste0("clusterName_", segmentationCol)
@@ -1864,8 +1864,8 @@ return(returnList)
 ## Done function to create heatmaps
 ###############################################################################
 
-dfData <- data.frame(OsC[["RNA"]]@data)
-dataMatrix <- data.matrix(dfData)
+#dfData <- data.frame(OsC[["RNA"]]@data)
+#dataMatrix <- data.matrix(dfData)
 dfMeta <- OsC@meta.data
 
 ####################
@@ -1918,12 +1918,21 @@ OsCsel <- biologicToolsSC::addDf2seuratMetaData(
 
 if (segmentationCol == "sampleName" & !is.null(Obio@parameterList$sampleNameOrder)){
   segmentationColOrder <- Obio@parameterList$sampleNameOrder
-} else {
+} else if (segmentationCol == "meta_Timepoint"){
+  segmentationColOrder <- c(
+      "T0hrs", 
+      "T2hrs", 
+      "T4hrs",
+      "T8hrs",
+      "T12hrs",
+      "T24hrs"
+  )
+} else{
   segmentationColOrder <- unique(OsC@meta.data[,segmentationCol])
 }
 
 
-OsCsel@meta.data$sampleName <- factor(
+OsCsel@meta.data[,segmentationCol] <- factor(
   OsCsel@meta.data[,segmentationCol], 
   levels = segmentationColOrder
 )
