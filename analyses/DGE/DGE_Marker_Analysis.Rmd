@@ -72,7 +72,8 @@ folderNameTag <- a[length(a)]
 VersionPdfExt <- paste0(folderNameTag,".",version,".V", gsub("-", "", Sys.Date()), ".pdf")
 
 rasterDpi <- 300
-calculateDGE <- FALSE
+calculateDGE <- TRUE
+nCellMax <- 50000
 
 
 
@@ -504,13 +505,30 @@ plotList <- list()
 chnkVec <- as.vector(NULL, mode = "character")
 
 ## This does the DGE and creates an overview UMAP figure ##
+
+## Downsize to 100k cells if the Seurat object is very large. 
+if (!exists("nCellMax")){
+  nCellMax <- 100000
+}
+
+if (ncol(OsC) > nCellMax) {
+  set.seed(127)
+  sampled.cells <- sample(x = colnames(OsC), size = nCellMax, replace = F)
+  OsCsub <- subset(x=OsC, cells = sampled.cells)
+  print(paste0("DGE calculated with downsampling on ", nCellMax, " cells."))
+  
+} else {
+  OsCsub <- OsC
+}
+
+
 for (i in 1:length(DGEinputList)){
     
     tag <- paste0(unlist(DGEinputList[[i]]["name"]))
     
     if (calculateDGE){
       resList <- doScDGEonList(
-          OsC = OsC,
+          OsC = OsCsub,
           tag = tag,
           DGEinputList = DGEinputList,
           DGEtagVec = DGEtagVec
@@ -518,7 +536,7 @@ for (i in 1:length(DGEinputList)){
     
       dfDataTable <- resList[["dfDataTable"]]
       DGEtagVec <- resList[["DGEtagVec"]]
-      OsC <- resList[["OsC"]]
+      OsCsub <- resList[["OsC"]]
       
       ## Add results to biologic object 
       Obio@dataTableList[[tag]] <- data.frame(NULL)
@@ -535,7 +553,7 @@ for (i in 1:length(DGEinputList)){
     
     ###########################################################################
     ## Create DGE Selection plot                                             ##
-    dfPlot <- OsC@meta.data
+    dfPlot <- OsCsub@meta.data
     
     
     pos <- grep("included", names(dfPlot))
@@ -552,7 +570,7 @@ for (i in 1:length(DGEinputList)){
     dfPlot$UMAP_2 <- NULL
             
     ## Get UMAP coordinates ##
-    coord <- data.frame(OsC@reductions$umap@cell.embeddings)
+    coord <- data.frame(OsCsub@reductions$umap@cell.embeddings)
     coord[["cellID"]] <- row.names(coord)
     coord <-coord[coord$cellID %in% dfPlot$cellID, ]
             
@@ -2142,8 +2160,8 @@ OsCsel@meta.data$clusterName <- factor(
 
 OsCsel@meta.data <- OsCsel@meta.data[order(OsCsel@meta.data$clusterName,OsCsel@meta.data[[segmentationCol]]),]
 
-dfData <- data.frame(OsCsel[["RNA"]]@data)
-dataMatrix <- data.matrix(dfData)
+#dfData <- data.frame(OsCsel[["RNA"]]@data)
+#dataMatrix <- data.matrix(dfData)
 dfMeta <- OsCsel@meta.data
  
 dataMatrix <- dataMatrix[,dfMeta[,selClust]]
