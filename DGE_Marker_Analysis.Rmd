@@ -72,7 +72,8 @@ folderNameTag <- a[length(a)]
 VersionPdfExt <- paste0(folderNameTag,".",version,".V", gsub("-", "", Sys.Date()), ".pdf")
 
 rasterDpi <- 300
-calculateDGE <- FALSE
+calculateDGE <- TRUE
+nCellMax <- 20000
 
 
 
@@ -504,13 +505,30 @@ plotList <- list()
 chnkVec <- as.vector(NULL, mode = "character")
 
 ## This does the DGE and creates an overview UMAP figure ##
+
+## Downsize to 100k cells if the Seurat object is very large. 
+if (!exists("nCellMax")){
+  nCellMax <- 100000
+}
+
+if (ncol(OsC) > nCellMax) {
+  set.seed(127)
+  sampled.cells <- sample(x = colnames(OsC), size = nCellMax, replace = F)
+  OsCsub <- subset(x=OsC, cells = sampled.cells)
+  print(paste0("DGE calculated with downsampling on ", nCellMax, " cells."))
+  
+} else {
+  OsCsub <- OsC
+}
+
+
 for (i in 1:length(DGEinputList)){
     
     tag <- paste0(unlist(DGEinputList[[i]]["name"]))
     
     if (calculateDGE){
       resList <- doScDGEonList(
-          OsC = OsC,
+          OsC = OsCsub,
           tag = tag,
           DGEinputList = DGEinputList,
           DGEtagVec = DGEtagVec
@@ -518,7 +536,7 @@ for (i in 1:length(DGEinputList)){
     
       dfDataTable <- resList[["dfDataTable"]]
       DGEtagVec <- resList[["DGEtagVec"]]
-      OsC <- resList[["OsC"]]
+      OsCsub <- resList[["OsC"]]
       
       ## Add results to biologic object 
       Obio@dataTableList[[tag]] <- data.frame(NULL)
@@ -535,7 +553,7 @@ for (i in 1:length(DGEinputList)){
     
     ###########################################################################
     ## Create DGE Selection plot                                             ##
-    dfPlot <- OsC@meta.data
+    dfPlot <- OsCsub@meta.data
     
     
     pos <- grep("included", names(dfPlot))
@@ -552,7 +570,7 @@ for (i in 1:length(DGEinputList)){
     dfPlot$UMAP_2 <- NULL
             
     ## Get UMAP coordinates ##
-    coord <- data.frame(OsC@reductions$umap@cell.embeddings)
+    coord <- data.frame(OsCsub@reductions$umap@cell.embeddings)
     coord[["cellID"]] <- row.names(coord)
     coord <-coord[coord$cellID %in% dfPlot$cellID, ]
             
@@ -2142,11 +2160,52 @@ OsCsel@meta.data$clusterName <- factor(
 
 OsCsel@meta.data <- OsCsel@meta.data[order(OsCsel@meta.data$clusterName,OsCsel@meta.data[[segmentationCol]]),]
 
-dfData <- data.frame(OsCsel[["RNA"]]@data)
-dataMatrix <- data.matrix(dfData)
+#dfData <- data.frame(OsCsel[["RNA"]]@data)
+#dataMatrix <- data.matrix(dfData)
 dfMeta <- OsCsel@meta.data
  
 dataMatrix <- dataMatrix[,dfMeta[,selClust]]
+
+## Example on how to create dfSidebar ##
+####################################################
+## Make gene selection for dfSidebar
+## Get bulk results ##
+# username <- "rll352B_da"
+# pass <- "ibgFVXGM"
+# host <- "10.27.241.82"
+# db <- "rll_data"
+# 
+# mainTB <- "rll352B_bulk_rna_seq_table"
+# 
+# dfMainDataBulk <- biologicSeqTools2::import.db.table.from.db(
+#     dbname = db,
+#     dbtable = mainTB,
+#     host = host,
+#     user = username,
+#     password = pass
+# )
+# 
+# selVec <- c(
+#     "mgi_symbol",
+#     names(dfMainDataBulk)[grep("contrast_2_logFC", names(dfMainDataBulk))],
+#     names(dfMainDataBulk)[grep("contrast_2_padj", names(dfMainDataBulk))]
+# )
+# 
+# dfBulk <- unique(dfMainDataBulk[,selVec])
+# 
+# cutOff <- 2*sd(dfBulk$contrast_2_logFC_p27NULL_E185OC_vs_WT_E185OC)
+# 
+# dfSel <- dfBulk[dfBulk$contrast_2_logFC_p27NULL_E185OC_vs_WT_E185OC > 1 | dfBulk$contrast_2_logFC_p27NULL_E185OC_vs_WT_E185OC  < -1, ]
+# dfSel <- dfSel[dfSel$contrast_2_padj_p27NULL_E185OC_vs_WT_E185OC < 0.05, ]
+# row.names(dfSel) <- dfSel$mgi_symbol
+# 
+# dfSidebar <- dfSel[,1:2]
+# names(dfSidebar) <- c("gene_id", "logFCp27KOE18")
+# dfSidebar[["sideBarCol"]] <- ifelse(dfSidebar[,2] > 1, "#FF0000", "#0000FF" )
+# dfSidebar[["label"]] <- ifelse(dfSidebar[,2] > 1, "Up", "Down" )
+
+##
+####################################################
 
 
 ###############################################################################
@@ -2162,36 +2221,37 @@ addHeatmap2List <- function(
     tag = NULL,
     showAllLegends = TRUE,
     figureCount = 1,
-    chnkVec = NULL, 
+    chnkVec = NULL,
     plotList = NULL,
     maxNcharCatName = 10,
     dfMeta,
-    group1ColorCol = "clusterColor", 
+    group1ColorCol = "clusterColor",
     group1NameCol = "clusterName",
-    group2ColorCol = "sampleColor", 
+    group2ColorCol = "sampleColor",
     group2NameCol = "sampleName",
-    columnSplitCol = "clusterName"
+    columnSplitCol = "clusterName",
+    dfSidebar = NULL # if specified and valid, a sidebar will be added.
     ){
-  
+
   if (is.null(chnkVec)){
     chnkVec <- as.vector(NULL, mode="character")
   }
-  
+
   if (is.null(plotList)){
     plotList <- list()
   }
-  
+
     allGenes <- unique(as.vector(unlist(geneGroupList)))
-    
-    
+
+
     if (is.null(cmdVec)){
       cmdVec <- as.vector(NULL, mode="character")
     }
-    
+
     if (is.null(tag)){
       tag <- paste("Heatmap_", (length(plotList) + 1))
     }
-    
+
     if (relativeExpression){
       legendString <- "log2 row mean"
     } else {
@@ -2210,7 +2270,7 @@ addHeatmap2List <- function(
 
 ## Complex heatmap of cell/celltype correlations using just the top annotation per cell.  It's split by seurat cluster.
 numbers_plot <- 1
-# cors       <-  data.frame(OsC[["RNA"]]@data)
+# cors       <-  data.frame(OsCsub[["RNA"]]@data)
 #cors_index <- apply(cors, 2, gettissue, numbers_plot)
 #cors_index <- sort(unique(as.integer(cors_index)))
 allGenes <- allGenes[allGenes %in% row.names(dataMatrix)]
@@ -2224,8 +2284,8 @@ heat.dat   <- dataMatrix[allGenes, ]
 heat.dat <- heat.dat[apply(heat.dat, 1, mean) != 0, ]
 
 if (relativeExpression){
-  heat.dat   <- t(apply(heat.dat,1,function(x){log2((x/mean(x)))}))  
-} 
+  heat.dat   <- t(apply(heat.dat,1,function(x){log2((x/mean(x)))}))
+}
 
 heat.dat[heat.dat == -Inf] <- 0
 
@@ -2239,19 +2299,19 @@ if (nMax > maxNcharCatName){
       substr(x, 1, maxNcharCatName)
     }
   )
-  
+
   if (sum(duplicated(shortNames)) > 0){
     indexVec <- 1:length(shortNames)
     shortNames[duplicated(shortNames)] <- paste0(shortNames[duplicated(shortNames)],"_", indexVec[duplicated(shortNames)])
   }
-  
+
   names(geneGroupList) <- shortNames
-  
+
 }
 
 
 
-rowSplitVec <- row.names(heat.dat)   
+rowSplitVec <- row.names(heat.dat)
 for (i in 1:length(geneGroupList)){
   rowSplitVec[rowSplitVec %in% geneGroupList[[i]]] <- names(geneGroupList)[i]
 }
@@ -2265,12 +2325,61 @@ names(colVec) <- dfCol[,group1NameCol]
 dfCol2 <- unique(dfMeta[,c(group2ColorCol, group2NameCol)])
 colVec2 <- dfCol2[,group2ColorCol]
 names(colVec2) <- dfCol2[,group2NameCol]
-# 
+#
 # colList <- list(
-#   dfCol, 
+#   dfCol,
 #   dfCol2
 # )
 
+################################
+# Create sidebr instructions
+
+## set default
+row_ha <- NULL
+
+if (!is.null(dfSidebar)){
+  sidebarGenes <- unique(dfSidebar[,1])
+  matrixGenes <- row.names(heat.dat)
+
+  overlap <- matrixGenes[matrixGenes %in% sidebarGenes]
+
+  if (length(overlap) == length(matrixGenes)){
+    dfSidebar <- dfSidebar[dfSidebar[,1] %in% matrixGenes, ]
+    row.names(dfSidebar) <- dfSidebar[,1]
+    dfSidebar <- dfSidebar[matrixGenes, ]
+
+    #
+    bulkLogFC <- dfSidebar[matrixGenes, names(dfSidebar)[2]]
+
+    pos <- grep("sideBarCol", names(dfSidebar))
+    if (length(pos) == 1){
+      xcol <- as.vector(dfSidebar[,pos])
+    } else {
+      xcol <- ifelse(bulkLogFC < 0, "blue", "red")
+    }
+    row_ha = ComplexHeatmap::rowAnnotation(
+      Scale = ComplexHeatmap::anno_barplot(
+        bulkLogFC, gp = grid::gpar(fill=xcol)
+        ),
+        show_legend = showAllLegends
+    )
+
+    #lrow_ha = rowAnnotation(foo = anno_block(gp = gpar(fill = c("blue", "red")),
+    #      labels = c("Down", "Up"),
+    #      labels_gp = gpar(col = "white", fontsize = 10)),
+    #      show_legend = showAllLegends
+    #)
+
+  } else {
+    print("Sidebar couldn't be added. Check gene list in dfSidebar. It needs to match the genes given for the matrix.")
+  }
+  ## Check gene list in dfSidebar matching heat.dat ##
+}
+
+
+
+
+# Done
 
 ht.anno <- ComplexHeatmap::HeatmapAnnotation(
     Type =  dfMeta[,group2NameCol],
@@ -2290,15 +2399,15 @@ ht.anno <- ComplexHeatmap::HeatmapAnnotation(
 
 #row_ha = rowAnnotation(Bulk = anno_barplot(bulkLogFC, gp = gpar(fill=xcol)),
 #        show_legend = showAllLegends
-#)   
+#)
 
 #lrow_ha = rowAnnotation(foo = anno_block(gp = gpar(fill = c("blue", "red")),
-#        labels = c("Down", "Up"), 
+#        labels = c("Down", "Up"),
 #        labels_gp = gpar(col = "white", fontsize = 10)),
 #        show_legend = showAllLegends
 #)
 #     df = data.frame(
-#         cluster = OsC_HM@meta.data$clusterName),
+#         cluster = OsCsub_HM@meta.data$clusterName),
 #     # col = list(
 #     #     gp = gpar(col = "white")
 #     # ),
@@ -2342,6 +2451,7 @@ plotList[[tag]] <- ComplexHeatmap::Heatmap(
     column_names_max_height = grid::unit(8, "cm"),
     row_names_gp            = grid::gpar(fontsize = 6),
     top_annotation          = ht.anno,
+    right_annotation = row_ha,
     #right_annotation = row_ha,
     #left_annotation = lrow_ha,
     #col                     = colorRamp2(c(-2, 0, 2),magma(3)),
@@ -2354,18 +2464,18 @@ plotList[[tag]] <- ComplexHeatmap::Heatmap(
 
   FN <- paste0(Obio@parameterList$reportFigDir, FNbase)
   FNrel <- paste0("report_figures/", FNbase)
-            
+
   pdf(FN)
     print(plotList[[tag]])
   dev.off()
 
   figLegend <- paste0(
-    '**Figure ', 
-    figureCount, 
+    '**Figure ',
+    figureCount,
     ':** ',
     'Heatmap split by cluster for gene set ',gsub("_", " ", tag),'. Download a pdf of this figure <a href="',FNrel,'" target="_blank">here</a>.'
   )
-            
+
   figureCount <- figureCount + 1
 
   NewChnk <- paste0(
@@ -2376,14 +2486,14 @@ plotList[[tag]] <- ComplexHeatmap::Heatmap(
     "\n",
     "\n print(plotList[['",tag,"']])",
     "\n cat(  '\n')",
-    "\n\n\n```\n"   
+    "\n\n\n```\n"
 )
 
   chnkVec <- c(
     chnkVec,
     NewChnk
   )
-  
+
   returnList <- list(
     "plotList" = plotList,
     "chnkVec"  = chnkVec,
