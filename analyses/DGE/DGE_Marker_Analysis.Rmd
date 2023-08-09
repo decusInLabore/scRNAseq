@@ -2160,8 +2160,8 @@ OsCsel@meta.data$clusterName <- factor(
 
 OsCsel@meta.data <- OsCsel@meta.data[order(OsCsel@meta.data$clusterName,OsCsel@meta.data[[segmentationCol]]),]
 
-#dfData <- data.frame(OsCsel[["RNA"]]@data)
-#dataMatrix <- data.matrix(dfData)
+dfData <- data.frame(OsCsel[["RNA"]]@data)
+dataMatrix <- data.matrix(dfData)
 dfMeta <- OsCsel@meta.data
  
 dataMatrix <- dataMatrix[,dfMeta[,selClust]]

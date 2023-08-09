@@ -264,3 +264,228 @@ Scale for 'y' is already present. Adding another scale for 'y', which will
 replace the existing scale.
 Scale for 'y' is already present. Adding another scale for 'y', which will
 replace the existing scale.
+Scale for 'y' is already present. Adding another scale for 'y', which will
+replace the existing scale.
+Scale for 'y' is already present. Adding another scale for 'y', which will
+replace the existing scale.
+Scale for 'y' is already present. Adding another scale for 'y', which will
+replace the existing scale.
+Scale for 'y' is already present. Adding another scale for 'y', which will
+replace the existing scale.
+Scale for 'y' is already present. Adding another scale for 'y', which will
+replace the existing scale.
+Scale for 'y' is already present. Adding another scale for 'y', which will
+replace the existing scale.
+Scale for 'y' is already present. Adding another scale for 'y', which will
+replace the existing scale.
+  |                                                                              |....................................                                  |  51%
+   inline R code fragments
+
+  |                                                                              |.....................................                                 |  53%
+label: DGE_volcano_plot (with options) 
+List of 4
+ $ echo   : logi TRUE
+ $ eval   : logi TRUE
+ $ warning: logi FALSE
+ $ results: chr "asis"
+
+  |                                                                              |.......................................                               |  55%
+  ordinary text without R code
+
+  |                                                                              |........................................                              |  57%
+label: create-pca-enrichment-data (with options) 
+List of 5
+ $ echo   : logi TRUE
+ $ eval   : logi TRUE
+ $ warning: logi FALSE
+ $ results: logi FALSE
+ $ error  : logi FALSE
+
+Loading required package: DBI
+
+  |                                                                              |.........................................                             |  59%
+   inline R code fragments
+
+  |                                                                              |...........................................                           |  61%
+label: create-cat-enrichment-plot (with options) 
+List of 4
+ $ echo   : logi TRUE
+ $ eval   : logi TRUE
+ $ warning: logi FALSE
+ $ results: chr "asis"
+
+  |                                                                              |............................................                          |  63%
+  ordinary text without R code
+
+  |                                                                              |..............................................                        |  65%
+label: process_heatmap_data (with options) 
+List of 5
+ $ echo   : logi TRUE
+ $ eval   : logi TRUE
+ $ warning: logi FALSE
+ $ results: logi FALSE
+ $ error  : logi FALSE
+
+Warning: The following arguments are not used: row.names
+Centering and scaling data matrix
+  |                                                                              |                                                                      |   0%  |                                                                              |==                                                                    |   3%  |                                                                              |====                                                                  |   6%  |                                                                              |======                                                                |   8%  |                                                                              |========                                                              |  11%  |                                                                              |==========                                                            |  14%  |                                                                              |============                                                          |  17%  |                                                                              |==============                                                        |  19%  |                                                                              |================                                                      |  22%  |                                                                              |==================                                                    |  25%  |                                                                              |===================                                                   |  28%  |                                                                              |=====================                                                 |  31%  |                                                                              |=======================                                               |  33%  |                                                                              |=========================                                             |  36%  |                                                                              |===========================                                           |  39%  |                                                                              |=============================                                         |  42%  |                                                                              |===============================                                       |  44%  |                                                                              |=================================                                     |  47%  |                                                                              |===================================                                   |  50%  |                                                                              |=====================================                                 |  53%  |                                                                              |=======================================                               |  56%  |                                                                              |=========================================                             |  58%  |                                                                              |===========================================                           |  61%  |                                                                              |=============================================                         |  64%  |                                                                              |===============================================                       |  67%  |                                                                              |=================================================                     |  69%  |                                                                              |===================================================                   |  72%  |                                                                              |====================================================                  |  75%  |                                                                              |======================================================                |  78%  |                                                                              |========================================================              |  81%  |                                                                              |==========================================================            |  83%  |                                                                              |============================================================          |  86%  |                                                                              |==============================================================        |  89%  |                                                                              |================================================================      |  92%  |                                                                              |==================================================================    |  94%  |                                                                              |====================================================================  |  97%  |                                                                              |======================================================================| 100%
+`use_raster` is automatically set to TRUE for a matrix with more than
+2000 rows. You can control `use_raster` argument by explicitly setting
+TRUE/FALSE to it.
+
+Set `ht_opt$message = FALSE` to turn off this message.
+`use_raster` is automatically set to TRUE for a matrix with more than
+2000 rows. You can control `use_raster` argument by explicitly setting
+TRUE/FALSE to it.
+
+Set `ht_opt$message = FALSE` to turn off this message.
+  |                                                                              |...............................................                       |  67%
+   inline R code fragments
+
+  |                                                                              |.................................................                     |  69%
+label: Cluster_overview (with options) 
+List of 4
+ $ echo   : logi TRUE
+ $ eval   : logi TRUE
+ $ warning: logi FALSE
+ $ results: chr "asis"
+
+  |                                                                              |..................................................                    |  71%
+  ordinary text without R code
+
+  |                                                                              |...................................................                   |  73%
+label: process_heatmap_data_rel (with options) 
+List of 5
+ $ echo   : logi TRUE
+ $ eval   : logi TRUE
+ $ warning: logi FALSE
+ $ results: logi FALSE
+ $ error  : logi FALSE
+
+`use_raster` is automatically set to TRUE for a matrix with more than
+2000 rows. You can control `use_raster` argument by explicitly setting
+TRUE/FALSE to it.
+
+Set `ht_opt$message = FALSE` to turn off this message.
+`use_raster` is automatically set to TRUE for a matrix with more than
+2000 rows. You can control `use_raster` argument by explicitly setting
+TRUE/FALSE to it.
+
+Set `ht_opt$message = FALSE` to turn off this message.
+  |                                                                              |.....................................................                 |  76%
+   inline R code fragments
+
+  |                                                                              |......................................................                |  78%
+label: plot-heatmaps-rel (with options) 
+List of 4
+ $ echo   : logi TRUE
+ $ eval   : logi TRUE
+ $ warning: logi FALSE
+ $ results: chr "asis"
+
+  |                                                                              |........................................................              |  80%
+  ordinary text without R code
+
+  |                                                                              |.........................................................             |  82%
+label: documentation_saving_1 (with options) 
+List of 5
+ $ echo   : logi FALSE
+ $ eval   : logi TRUE
+ $ warning: logi FALSE
+ $ results: logi FALSE
+ $ error  : logi FALSE
+
+  |                                                                              |...........................................................           |  84%
+  ordinary text without R code
+
+  |                                                                              |............................................................          |  86%
+label: unnamed-chunk-7 (with options) 
+List of 2
+ $ child: chr "DGE.M1.cat.enrichment.fGSEA.Rmd"
+ $ eval : logi FALSE
+
+  |                                                                              |.............................................................         |  88%
+  ordinary text without R code
+
+  |                                                                              |...............................................................       |  90%
+label: unnamed-chunk-8 (with options) 
+List of 5
+ $ echo   : logi FALSE
+ $ eval   : logi TRUE
+ $ warning: logi FALSE
+ $ results: logi FALSE
+ $ error  : logi TRUE
+
+  |                                                                              |................................................................      |  92%
+  ordinary text without R code
+
+  |                                                                              |..................................................................    |  94%
+label: create_report_params (with options) 
+List of 2
+ $ eval   : logi TRUE
+ $ results: chr "asis"
+
+Project Database could not be reached or has no entry in Obio@parameterList$lims.id for this analysis.
+  |                                                                              |...................................................................   |  96%
+  ordinary text without R code
+
+  |                                                                              |..................................................................... |  98%
+label: documentation (with options) 
+List of 3
+ $ eval   : logi TRUE
+ $ echo   : logi TRUE
+ $ results: logi TRUE
+
+  |                                                                              |......................................................................| 100%
+   inline R code fragments
+
+
+output file: DGE_Marker_Analysis.knit.md
+
+/camp/apps/eb/software/pandoc/2.2.3.2-foss-2016b/bin/pandoc +RTS -K512m -RTS DGE_Marker_Analysis.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output /nemo/stp/babs/working/boeings/Projects/boeings/stefan.boeing/dev_scRNAseq_PBMCstim/html_local/DGE_Marker_Analysis.html --lua-filter /nemo/stp/babs/working/boeings/Projects/home_extra/R/x86_64-pc-linux-gnu-library/4.0/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /nemo/stp/babs/working/boeings/Projects/home_extra/R/x86_64-pc-linux-gnu-library/4.0/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --standalone --section-divs --table-of-contents --toc-depth 3 --variable toc_float=1 --variable toc_selectors=h1,h2,h3 --variable toc_collapsed=1 --variable toc_smooth_scroll=1 --variable toc_print=1 --template /nemo/stp/babs/working/boeings/Projects/home_extra/R/x86_64-pc-linux-gnu-library/4.0/rmarkdown/rmd/h/default.html --no-highlight --variable highlightjs=1 --variable theme=paper --css src/style/style.css --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /tmp/slurm_57394823/RtmpCcl3fV/rmarkdown-str338c6cde6590.html --variable code_folding=hide --variable code_menu=1 
+
+Output created: /nemo/stp/babs/working/boeings/Projects/boeings/stefan.boeing/dev_scRNAseq_PBMCstim/html_local/DGE_Marker_Analysis.html
+Warning messages:
+1: In png(..., res = dpi, units = "in") :
+  unable to open connection to X11 display ''
+2: replacing previous import 'RMySQL::isIdCurrent' by 'RSQLite::isIdCurrent' when loading 'biologicSeqTools2' 
+3: In eng_r(options) :
+  Failed to tidy R code in chunk 'unnamed-chunk-5'. Reason:
+Error in base::parse(text = code, keep.source = FALSE) : 
+  <text>:186:1: unexpected symbol
+185: 
+186: sort_by
+     ^
+
+4: In eng_r(options) :
+  Failed to tidy R code in chunk 'create-pca-enrichment-data'. Reason:
+Error in base::parse(text = code, keep.source = FALSE) : 
+  <text>:108:10: unexpected SPECIAL
+107: dbcat2gmt (
+108: dfTemp , %%
+              ^
+
+5: In eng_r(options) :
+  Failed to tidy R code in chunk 'process_heatmap_data'. Reason:
+Error in base::parse(text = code, keep.source = FALSE) : 
+  <text>:143:1: unexpected symbol
+142: OsC_HM @ meta.data [[ segmentationColorCol ] ]
+143: invisible
+     ^
+
+6: In eng_r(options) :
+  Failed to tidy R code in chunk 'process_heatmap_data_rel'. Reason:
+Error in base::parse(text = code, keep.source = FALSE) : 
+  <text>:40:1: unexpected symbol
+39: columnSplitCol = "clusterName"
+40: invisible
+    ^
+
+7: In eng_r(options) :
+  Failed to tidy R code in chunk 'create_report_params'. Reason:
+Error in base::parse(text = code, keep.source = FALSE) : 
+  <text>:3:1: unexpected string constant
+2: invisible(".BeGiN_TiDy_IdEnTiFiEr_HaHaHa.HaHaHa_EnD_TiDy_IdEnTiFiEr")
+3: "title"
+   ^
+
