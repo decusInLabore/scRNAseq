@@ -1,0 +1,45 @@
+## Singularity
+
+ml Singularity/3.11.3
+
+## Retrieve R-singularity from docker store
+singularity pull docker://rocker/r-ver
+
+## Run singularity container and bind to the local file system
+singularity shell --bind  /nemo:/nemo,/camp:/camp r-base_latest.sif
+singularity shell --bind  /nemo:/nemo,/camp:/camp /nemo/stp/babs/working/boeings/singularity_images/r431.ubuntu.16.04.sif
+
+## Install additional software
+wget https://github.com/curl/curl/releases/download/curl-7_55_0/curl-7.55.0.tar.gz
+
+FROM r-base:latest
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+    r-cran-curl \
+    && rm -rf /var/lib/apt/lists/*
+
+
+apt-get update && apt-get install -y \
+ libcurl4-openssl-dev
+ 
+R CMD INSTALL --configure-vars='LIB_DIR=/usr/lib/x86_64-linux-gnu/pkgconfig' <curl-file.gz>
+ 
+ # Fix R package libpaths (helps RStudio Server find the right directories)
+     mkdir -p /usr/lib64/R/etc
+     echo "R_LIBS_USER='/usr/lib64/R/library'" >> /usr/lib64/R/etc/Renviron
+     echo "R_LIBS_SITE='${R_PACKAGE_DIR}'" >> /usr/lib64/R/etc/Renviron
+
+## exist singularity environment
+exit
+
+
+
+
+## Build singularity container from def file
+singularity build lolcow.sif lolcow.def
+
+
+## Extending a docker image and making it into a singularity container
+https://divingintogeneticsandgenomics.com/post/build-your-own-singularity-image/
+
+cd 
