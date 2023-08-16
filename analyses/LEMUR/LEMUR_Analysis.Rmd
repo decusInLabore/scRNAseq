@@ -136,14 +136,6 @@ if (!requireNamespace("DESeq2")){
   renv::install("bioc::DESeq2")
 }
 
-if (!requireNamespace("glmGamPoi")){
-  renv::install("bioc::glmGamPoi")
-}
-
-if (!requireNamespace("LEMUR")){
-  renv::install("bioc::LEMUR")
-}
-
 if (!requireNamespace("biologicSeqTools2")){
   renv::install("decusInLabore/biologicSeqTools2")
 }
@@ -151,6 +143,20 @@ if (!requireNamespace("biologicSeqTools2")){
 if (!requireNamespace("dplyr")){
   renv::install("dplyr")
 }
+
+if (!requireNamespace("glmGamPoi")){
+  renv::install("bioc::glmGamPoi")
+}
+
+if (!requireNamespace("limma")){
+  renv::install("bioc::limma")
+}
+
+if (!requireNamespace("lemur")){
+  renv::install("const-ae/lemur")
+}
+
+
 
 library(Seurat)
 library(biologicSeqTools2)
@@ -278,6 +284,32 @@ tableString <- paste0(
 ##  Set variables                                                            ##
 ###############################################################################
 
+###############################################################################
+## Transform Seurat into SCE                                                 ##
+
+## An old version of the matrix package is required
+# install.packages("https://cran.r-project.org/src/contrib/Archive/Matrix/Matrix_1.3-3.tar.gz")
+
+sce <- Seurat::as.SingleCellExperiment(OsC)
+
+## Done                                                                      ##
+###############################################################################
+
+
+###############################################################################
+## Running LEMUR                                                             ##
+
+#library("lemur")
+#library("SingleCellExperiment")
+
+fit <- lemur::lemur(sce, design = ~ meta_Replicate, n_embedding = 15)
+fit <- lemur::align_harmony(fit)   # This step is optional
+fit <- lemur::test_de(fit, contrast = cond(meta_Replicate =  "Unstimulated") - cond(meta_Replicate = "Stimulated"))
+nei <- lemur::find_de_neighborhoods(fit, group_by = vars(patient_id, condition))
+
+
+## Done                                                                      ##
+###############################################################################
 
 
 ###############################################################################
