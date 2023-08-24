@@ -14,7 +14,7 @@ YEAR 2023
     # Set system locale
     PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
     LANG=C.UTF-8 LC_ALL=C.UTF-8
-    
+    export PATH=$PATH
 
 %post
     # Change to tmp directory to download temporary files
@@ -49,6 +49,7 @@ YEAR 2023
     
     apt-get -y update
     apt-get install -y --no-install-recommends \
+        apt-transport-https \
         autoconf \
         automake \
         build-essential \

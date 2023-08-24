@@ -36,6 +36,7 @@ output:
 ```    
 
 ```{r setup, include=FALSE}
+
 knitr::opts_chunk$set(
     tidy = TRUE,
     tidy.opts = list(width.cutoff = 120),
@@ -302,19 +303,122 @@ sce <- Seurat::as.SingleCellExperiment(OsC)
 #library("lemur")
 #library("SingleCellExperiment")
 
-fit <- c(sce, design = ~ meta_Replicate, n_embedding = 15)
+## It seems that there can't be co-linearity between the variables. Some 
+## differences are required. 
+
+fit <- lemur::lemur(sce, design = ~ meta_Gender + meta_Tumor_Normal, n_embedding = 15)
 fit <- lemur::align_harmony(fit)   # This step is optional
-fit <- lemur::test_de(fit, contrast = cond(meta_Replicate =  "Unstimulated") - cond(meta_Replicate = "Stimulated"))
-nei <- lemur::find_de_neighborhoods(fit, group_by = vars(meta_Replicate), include_complement =F)
+fit <- lemur::test_de(fit, contrast = cond(meta_Tumor_Normal =  "Tumor") - cond(meta_Tumor_Normal = "Normal"))
+nei <- lemur::find_de_neighborhoods(fit, group_by = vars(meta_Gender, meta_Tumor_Normal), include_complement =F)
 # This doesn't work
 #nei <- lemur::find_de_neighborhoods(fit)
-
 
 ## Done                                                                      ##
 ###############################################################################
 
+sceRef <- lemur::glioblastoma_example_data
 ###############################################################################
 ## Plot                                                                      ##
+set.seed(42)
+
+orig_umap <- uwot::umap(as.matrix(t(SingleCellExperiment::logcounts(sce))))
+
+library(ggplot2)
+
+as_tibble(SingleCellExperiment::colData(sce)) %>%
+  mutate(umap = orig_umap) %>%
+  ggplot(aes(x = umap[,1], y = umap[,2])) +
+    geom_point(aes(color = meta_Gender, shape = meta_Tumor_Normal), size = 0.5) +
+    labs(title = "UMAP of logcounts")
+
+as_tibble(SingleCellExperiment::colData(sce)) %>%
+  mutate(umap = orig_umap) %>%
+  ggplot(aes(x = umap[,1], y = umap[,2])) +
+    geom_point(aes(color = meta_Tumor_Normal, shape = meta_Gender), size = 0.5) +
+    labs(title = "UMAP of logcounts")
+
+
+umap <- uwot::umap(t(fit$embedding))
+
+as_tibble(fit$colData) %>%
+  mutate(umap = umap) %>%
+  ggplot(aes(x = umap[,1], y = umap[,2])) +
+    geom_point(aes(color = meta_Tumor_Normal, shape = meta_Gender), size = 0.5) +
+    labs(title = "UMAP of latent space from LEMUR")
+
+sel_gene <- "INHBA"
+
+tibble(umap = umap) %>%
+  mutate(expr = assay(fit, "DE")[sel_gene,]) %>%
+  ggplot(aes(x = umap[,1], y = umap[,2])) +
+    geom_point(aes(color = expr)) +
+    scale_color_gradient2() +
+    labs(title = "Differential expression on UMAP plot")
+
+
+df <- data.frame(
+  as_tibble(nei) %>%
+    arrange(pval) %>%
+    dplyr::select(name, n_cells, pval, adj_pval, lfc)
+)
+
+
+sel_gene <- "INHBA"
+
+tibble(umap = umap) %>%
+  mutate(expr = assay(fit, "DE")[sel_gene,]) %>%
+  ggplot(aes(x = umap[,1], y = umap[,2])) +
+    geom_point(aes(color = expr)) +
+    scale_color_gradient2() +
+    labs(title = "Differential expression on UMAP plot")
+
+library(tidyr)
+library(purrr)
+neighborhood_coordinates <- nei %>%
+  dplyr::filter(selection & name == sel_gene) %>%
+  mutate(cell_id = map(indices, \(idx) colnames(fit)[idx])) %>%
+  unnest(c(indices, cell_id)) %>%
+  left_join(tibble(cell_id = rownames(umap), umap), by = "cell_id") %>%
+  dplyr::select(name, cell_id, umap)
+
+tibble(umap = umap) %>%
+  mutate(expr = assay(fit, "DE")[sel_gene,]) %>%
+  ggplot(aes(x = umap[,1], y = umap[,2])) +
+    geom_point(aes(color = expr)) +
+    scale_color_gradient2() +
+    geom_density2d(data = neighborhood_coordinates, breaks = 0.1, 
+                   contour_var = "ndensity", color = "black") +
+    labs(title = "Differential expression with neighborhood boundary")
+
+nei %>%
+  ggplot(aes(x = lfc, y = -log10(pval))) +
+    geom_point(aes(color  = adj_pval < 0.1)) +
+    labs(title = "Volcano plot of the neighborhoods")
+
+nei %>%
+  ggplot(aes(x = n_cells, y = -log10(pval))) +
+    geom_point(aes(color  = adj_pval < 0.1)) +
+    labs(title = "Neighborhood size vs neighborhood significance") +
+  geom_text()
+
+nei[["label"]] <- ""
+nei[nei$adj_pval < 0.1, "label"] <- nei[nei$adj_pval < 0.1, "name"]
+
+nei %>%
+  ggplot(aes(x = n_cells, y = -log10(pval)), label=label) +
+    geom_point(aes(color  = adj_pval < 0.1, label=label)) +
+    labs(title = "Neighborhood size vs neighborhood significance") +
+  geom_text(aes(label=label))
+
+nei[["label"]] <- ""
+nei[nei$name == "INHBA", "label"] <- nei[nei$name == "INHBA", "name"]
+
+nei %>%
+  ggplot(aes(x = n_cells, y = -log10(pval)), label=label) +
+    geom_point(aes(color  = adj_pval < 0.1, label=label)) +
+    labs(title = "Neighborhood size vs neighborhood significance") +
+  geom_text(aes(label=label))
+
 
 ## Done                                                                      ##
 ###############################################################################
