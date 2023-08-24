@@ -1,0 +1,294 @@
+---
+output: 
+    html_document:
+        code_folding: hide
+        df_print: tibble
+        highlight: default
+        theme: paper
+        toc: true
+        toc_depth: 5
+        toc_float: true
+        css: src/style/style.css
+        always_allow_html: yes
+---
+
+
+```{r setup, include=FALSE}
+# R to use
+# module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;R
+
+knitr::opts_chunk$set(
+    tidy = F,
+    tidy.opts = list(width.cutoff = 120),
+    message = FALSE,
+    warning = FALSE
+)
+
+
+if (!requireNamespace("remotes")){
+  install.packages("remotes")
+}
+
+
+if (!requireNamespace("renv")){
+  remotes::install_github("rstudio/renv")
+}
+
+if (!file.exists("renv.lock")){
+    renv::init()
+} else {
+    renv::restore(prompt = FALSE)
+}
+
+
+library(tidyverse)
+library(dplyr)
+library(Seurat)
+library(ggplot2)
+library(tidyr)
+library(knitr)
+
+
+## ggrasterize option
+rasterDpi <- 300
+
+
+## Option to resmume analysis after time-consuming integration. 
+resume <- TRUE
+
+SeuratFolder <- "../../../../workdir"
+pos <- grep("Seurat.Robj", list.files(SeuratFolder))
+if (length(pos) == 0){
+  resume <- FALSE
+}
+
+if (resume){
+    createNew <- FALSE
+} else {
+    createNew <- TRUE
+}
+
+
+
+cwd <- paste0(here::here(),"/")
+tempWorkDir <- paste0(cwd, "../")
+
+## Load custom packages specific for this analysis ##
+#source("assets/R/scTools.r")
+#source("assets/R/SBwebtools.pckg.r")
+
+#renv::install("decusInLabore/biologicSeqTools")
+#renv::install("decusInLabore/biologicToolsSC")
+library(Seurat)
+library(biologicSeqTools2)
+library(biologicToolsSC)
+
+## Make sure the correct future version (> 1.2) is installed
+#renv::install("https://cran.r-project.org/src/contrib/Archive/future/future_1.19.1.tar.gz")
+## Doublet Finder
+#renv::install("chris-mcginnis-ucsf/DoubletFinder")
+#renv::install("bioc::clusterProfiler")
+#renv::install("bioc::AUCell")
+#renv::install("YuLab-SMU/ggtree")
+
+upload.results.to.database <- TRUE
+save.chunk.intermediates <- TRUE
+
+
+###############################################################################
+##                                                                           ##
+projectDir <- gsub("scripts/scRNAseq/analyses/Main_Analysis", "", getwd())
+workdir <- paste0(projectDir, "workdir/")
+
+
+figureCount <- 1
+
+##                                                                           ##
+###############################################################################
+
+
+```
+
+
+<!-- Running Individual Modules in R -->
+<!-- For example rmarkdown::render("src/modules/settings/partB.set.parameters.Rmd", output_dir = "..") -->
+
+
+<!-- Essential 1: Set Analysis Parameters Chapter/Module (output required later) -->
+```{r child = '01-set.parameters.Rmd', eval=TRUE}
+
+```
+
+<!-- Optional 2: Retrieve Reference Genes from Database or Gmt file -->
+```{r child = '02-retrieve.reference.gene.sets.Rmd', eval=TRUE}
+```
+
+<!-- Essential 3: (output required later): Create Integrated Seurat Object Chapter/Module -->
+```{r child = '03-create.integrated.seurat.object.Rmd', eval=createNew}
+```
+
+```{r, eval=createNew, echo=createNew}
+
+## The above step is the most time consuming. Saving the Obio and OsC object here allows 
+source("save.biologic.robj.R")
+
+print("Obio Object saved.")
+
+save(OsC,
+    file = paste0(
+         Obio@parameterList$localWorkDir,
+         Obio@parameterList$project_id,
+        ".Seurat.Robj"
+     )
+)
+
+print("OsC Object saved.")
+
+```
+
+
+```{r, eval=resume, echo=resume}
+
+## This will load the objects saved in B6. 
+source("load.biologic.robj.R")
+
+load(paste0(
+         Obio@parameterList$localWorkDir,
+         Obio@parameterList$project_id,
+        ".Seurat.Robj"
+     )
+)
+
+
+## Make sure that variable features have been calculated
+if ( length(OsC@assays$RNA@meta.features) == 0 ){
+        OsC <- Seurat::FindVariableFeatures(
+        object = OsC,
+        selection.method = 'vst', 
+        nfeatures = Obio@parameterList$NtopGenes
+    )
+}
+
+
+dotsize  = 1
+
+if (nrow(OsC@meta.data) > 50000){
+  dotsize  = 0.05
+} else if (nrow(OsC@meta.data) > 20000){
+  dotsize = 0.1
+} else if (nrow(OsC@meta.data) > 10000){
+  dotsize = 0.5
+} else if (nrow(OsC@meta.data) > 1000){
+  dotsize = 0.75
+}
+
+Obio@parameterList$dotsize <- dotsize
+
+legendDotSize <- 5
+Obio@parameterList$legendDotSize <- legendDotSize
+dendrofactor <- 5
+Obio@parameterList$dendrofactor <- dendrofactor
+
+documentationParams <- list()
+documentationParams$title <-   paste0("Custom Gene Category Heatmaps, Dotplots and Violinplots for Project ", Obio@parameterList$project_id)
+
+documentationParams$subtitle <- "Simon McCluney - Hill Lab"
+
+documentationParams$abstract <- paste0("This report contains custom heatmaps, dotplots and violinplots for project ",Obio@parameterList$project_id,".")
+
+```
+
+<!-- Essential 6: (output required later): 
+DGE Marker gene upload Chapter/Module -->
+```{r child = '041-custom.sample.and.cluster.colors.Rmd', eval=TRUE}
+```
+
+<!-- Essential 15: (output required later):Category Linear Regression Marker Gene Data Prep Chapter/Module -->
+```{r child = 'customplots.14A-heatmaps.Rmd', eval=TRUE}
+```
+
+<!-- Essential 15: (output required later):Category Linear Regression Marker Gene Data Prep Chapter/Module -->
+```{r child = '14B-dotplots.Rmd', eval=TRUE}
+```
+
+
+<!-- Essential 15: (output required later):Category Linear Regression Marker Gene Data Prep Chapter/Module -->
+```{r child = '14C-violinplots.Rmd', eval=TRUE}
+```
+
+<!-- Essential 18: (output required later):Category Make cluster table Data Prep Chapter/Module -->
+```{r child = '16-gene.set.heatmaps.Rmd', eval=FALSE}
+```
+
+
+
+
+```{r create_report_params, eval=T, results="asis"}
+
+## Try to retrieve project data from db ##
+projectParams <- documentationParams
+
+
+###############################################################################
+## Helper
+firstup <- function(x) {
+    substr(x, 1, 1) <- toupper(substr(x, 1, 1))
+    x
+}
+##
+###############################################################################
+
+
+## Escape all special characters
+projectParams <- lapply(
+  projectParams, function(x) 
+  #gsub("([.|()\\^{}+$*?]|\\[|\\])", "\\\\\1", x)
+  gsub("([.|()/\\^{}+$*?]|\\[|\\])", " ", x)
+) 
+
+projectParams <- lapply(
+  projectParams, function(x) 
+  #gsub("([.|()\\^{}+$*?]|\\[|\\])", "\\\\\1", x)
+  gsub("\\\n", " ", x)
+) 
+
+
+```
+
+
+
+## Documentation
+```{r documentation, eval=TRUE, echo=T, results=T}
+print(paste0("Analysisdirectory: ", getwd()))
+
+biologic_active_object_dir <- paste0(
+    Obio@parameterList$folder,
+    "data/biologic_active_object/"
+)
+
+bFN <- paste0(
+    biologic_active_object_dir,
+    Obio@parameterList$project_id,
+    ".bioLOGIC.Robj"
+)
+print(paste0("bioLOGIC data object: ", bFN))
+
+print(paste0("Clusterresolution: ", Obio@parameterList$singleCellClusterParameter))
+
+print(paste0("Cell cycle regression mode: ", paste0(Obio@parameterList$vars.to.regress, collapse = ", ")))
+
+sessionInfo()
+```
+
+---
+title: "`r projectParams$title`"
+subtitle:  "`r projectParams$subtitle`"
+author:
+    - Bioinformatics: Stefan Boeing^[The Francis Crick Institute, stefan.boeing@crick.ac.uk]
+date: 'Compiled: `r format(Sys.Date(), "%B %d, %Y")`'
+
+abstract: |
+    "`r projectParams$abstract`"
+
+
+---
