@@ -1,0 +1,178 @@
+<!-- Set PArameters Module -->
+<!-- Set the chnkPrefix to make all chunks unique in the overall folder -->
+```{r partB_create_dot_init, echo=TRUE, eval=TRUE, warning=FALSE}
+chnkPrefix <- "Dot."
+VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.Date()), ".pdf")
+
+# Load specific version of R
+#module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a
+```
+
+```{r dotplot_prep, echo=TRUE, eval=TRUE, warning=FALSE, results=F}
+
+## For Violinplots we want single gene lists
+library(tidyr) 
+
+geneList <- lapply(HMgeneSelections, function(x) unique(unlist(x)))
+geneList <- lapply(geneList, function(x) x[x %in% row.names(OsC)])
+selVec <- unlist(lapply(geneList, function(x) length(x) != 0))
+geneList <- geneList[selVec]
+
+## Create colvec ##
+group1ColorCol = "clusterColor"
+group1NameCol = "clusterName"
+#group2ColorCol = segmentationColorCol, 
+#group2NameCol = segmentationCol,
+dfCol <- unique(dfMeta[,c(group1ColorCol, group1NameCol)])
+colVec <- dfCol[,group1ColorCol]
+names(colVec) <- dfCol[,group1NameCol]
+
+# dfCol2 <- unique(dfMeta[,c(group2ColorCol, group2NameCol)])
+# colVec2 <- dfCol2[,group2ColorCol]
+# names(colVec2) <- dfCol2[,group2NameCol]
+# # 
+
+
+plotList <- list()
+
+chnkVec <- as.vector(NULL, mode = "character")
+
+ textSize <- 1
+
+for (i in 1:length(geneList)){
+  
+tag <- paste0("Dot_", names(geneList)[i])  
+geneList[[i]] <- geneList[[i]][rowSums(OsC@assays$RNA[geneList[[i]],]) != 0]
+  
+  if (length(geneList[[i]]) > 0 & length(geneList[[i]]) <=  50){
+   
+    # if (length(geneList[[i]]) > 50){
+    #   dotScale <- 0.01
+    # } else if (length(geneList[[i]]) > 30){
+    #    dotScale <- 0.02
+    # } else if (length(geneList[[i]]) > 20){
+    #    dotScale <- 0.04
+    # } else if (length(geneList[[i]]) > 10){
+    #    dotScale <- 0.1
+    # } else {
+    #   dotscale <- 0.4
+    # }
+    #  
+    ##
+    dpGenes <- unique(geneList[[i]])
+        legendNote <- paste0("The following genes were found in this category and the single-cell dataset: ", paste0(dpGenes, collapse=", "))
+        
+        OsC_DP <- OsC
+        OsC_DP@meta.data$clusterName <- factor(OsC_DP@meta.data$clusterName, levels = Obio@parameterList[["clusterNameOrder"]])
+        
+        
+        
+        dfCol <- unique(OsC@meta.data[,c("clusterName", "clusterColor")])
+if(!is.null(Obio@parameterList$clusterNameOrder)){
+    row.names(dfCol) <- dfCol$clusterName
+    dfCol <- dfCol[Obio@parameterList$clusterNameOrder,]
+}
+        colVec <- as.vector(dfCol$clusterColor)
+        names(colVec) <- dfCol$clusterName
+      
+        textSize <- 2
+        if (length(colVec) > 5){
+            textSize <-1
+        } else if (length(colVec) > 20){
+            textSize <- 0.75
+        } else if (length(colVec) > 40){
+            textSize <- 0.5
+        }
+
+        Idents(OsC_DP) <- "clusterName"
+        
+        plotList[[tag]] <- biologicSeqTools2::DotPlotSB(
+            object = OsC_DP,
+            features = dpGenes,
+            #cols = cols,
+            group.by = NULL,
+            split.by = NULL,
+            dot.scale = 4,
+            col.min = 0,
+            col.max = 5,
+            assay = "RNA"
+        ) + ggtitle(gsub("_", " ", tag)
+        ) + coord_fixed(
+        #) + coord_flip(
+        ) + theme_bw() + theme(
+                axis.title.y  = element_blank(),
+                axis.title.x  = element_blank()
+        )  + theme(axis.text.x = element_text(size=rel(textSize), angle = 45, hjust=1, color = colVec))
+        
+    
+  
+  
+  FNbase <- paste0(tag, VersionPdfExt)
+
+  FN <- paste0(Obio@parameterList$reportFigDir, FNbase)
+  FNrel <- paste0("report_figures/", FNbase)
+            
+  pdf(FN)
+    print(plotList[[tag]])
+  dev.off()
+
+  figLegend <- paste0(
+    '**Figure ', 
+    figureCount, 
+    ':** ',
+    'Dotplot split by cluster for gene set ',gsub("_", " ", tag),'. Download a pdf of this figure <a href="',FNrel,'" target="_blank">here</a>.'
+  )
+            
+  figureCount <- figureCount + 1
+
+  NewChnk <- paste0(
+    "#### ", tag,
+    "\n```{r dot_",
+    tag,", results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",
+    figLegend,"'}\n",
+    "\n",
+    "\n print(plotList[['",tag,"']])",
+    "\n cat(  '\n')",
+    "\n\n\n```\n"   
+)
+
+  chnkVec <- c(
+    chnkVec,
+    NewChnk
+  )
+  }
+} # end for loop
+
+# plotList <- addHeatmap2List(
+#     OsC = OsC,
+#     geneGroupList = geneGroupList,
+#     relativeExpression = TRUE,
+#     plotList = plotList,
+#     cmdVec = NULL,
+#     tag = "Channels_Rel",
+#     showAllLegends = TRUE
+#     )
+
+
+#pdf("../../../../html_local/report_figures/custom.dotplots.plots.asl545.V2.pdf")
+#plotList
+#dev.off()
+
+if (length(plotList) > 3){
+    tabVar <- ".tabset .tabset-fade .tabset-dropdown"
+} else {
+    tabVar <- ".tabset .tabset-fade .tabset-pills"
+}    
+    
+```
+
+
+### Dotplots {`r tabVar`}
+
+In this section heatmaps and dotplots for various gene categories are provided. 
+
+```{r Cluster_dotplot_overview, echo=TRUE, eval=TRUE, warning=FALSE, results="asis"}
+
+cat(paste(knit(text = chnkVec, quiet = T), collapse = '\n'))
+
+```
