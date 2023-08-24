@@ -302,11 +302,19 @@ sce <- Seurat::as.SingleCellExperiment(OsC)
 #library("lemur")
 #library("SingleCellExperiment")
 
-fit <- lemur::lemur(sce, design = ~ meta_Replicate, n_embedding = 15)
+fit <- c(sce, design = ~ meta_Replicate, n_embedding = 15)
 fit <- lemur::align_harmony(fit)   # This step is optional
 fit <- lemur::test_de(fit, contrast = cond(meta_Replicate =  "Unstimulated") - cond(meta_Replicate = "Stimulated"))
-nei <- lemur::find_de_neighborhoods(fit, group_by = vars(patient_id, condition))
+nei <- lemur::find_de_neighborhoods(fit, group_by = vars(meta_Replicate), include_complement =F)
+# This doesn't work
+#nei <- lemur::find_de_neighborhoods(fit)
 
+
+## Done                                                                      ##
+###############################################################################
+
+###############################################################################
+## Plot                                                                      ##
 
 ## Done                                                                      ##
 ###############################################################################

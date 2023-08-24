@@ -18,6 +18,20 @@ geneList <- lapply(geneList, function(x) x[x %in% row.names(OsC)])
 selVec <- unlist(lapply(geneList, function(x) length(x) != 0))
 geneList <- geneList[selVec]
 
+## Create colvec ##
+group1ColorCol = "clusterColor"
+group1NameCol = "clusterName"
+#group2ColorCol = segmentationColorCol, 
+#group2NameCol = segmentationCol,
+dfCol <- unique(dfMeta[,c(group1ColorCol, group1NameCol)])
+colVec <- dfCol[,group1ColorCol]
+names(colVec) <- dfCol[,group1NameCol]
+
+# dfCol2 <- unique(dfMeta[,c(group2ColorCol, group2NameCol)])
+# colVec2 <- dfCol2[,group2ColorCol]
+# names(colVec2) <- dfCol2[,group2NameCol]
+# # 
+
 
 plotList <- list()
 
@@ -30,37 +44,67 @@ for (i in 1:length(geneList)){
 tag <- paste0("Dot_", names(geneList)[i])  
 geneList[[i]] <- geneList[[i]][rowSums(OsC@assays$RNA[geneList[[i]],]) != 0]
   
-  if (length(geneList[[i]]) > 1 & length(geneList[[i]]) <=  50){
+  if (length(geneList[[i]]) > 0 & length(geneList[[i]]) <=  50){
    
-    if (length(geneList[[i]]) > 50){
-      dotScale <- 0.01
-    } else if (length(geneList[[i]]) > 30){
-       dotScale <- 0.02
-    } else if (length(geneList[[i]]) > 20){
-       dotScale <- 0.04
-    } else if (length(geneList[[i]]) > 10){
-       dotScale <- 0.1
-    } else {
-      dotscale <- 0.4
-    }
-     
-    plotList[[tag]] <- biologicSeqTools2::DotPlotSB(
-            object = OsC,
-            features = geneList[[i]],
-            assay = "RNA",
+    # if (length(geneList[[i]]) > 50){
+    #   dotScale <- 0.01
+    # } else if (length(geneList[[i]]) > 30){
+    #    dotScale <- 0.02
+    # } else if (length(geneList[[i]]) > 20){
+    #    dotScale <- 0.04
+    # } else if (length(geneList[[i]]) > 10){
+    #    dotScale <- 0.1
+    # } else {
+    #   dotscale <- 0.4
+    # }
+    #  
+    ##
+    dpGenes <- unique(geneList[[i]])
+        legendNote <- paste0("The following genes were found in this category and the single-cell dataset: ", paste0(dpGenes, collapse=", "))
+        
+        OsC_DP <- OsC
+        OsC_DP@meta.data$clusterName <- factor(OsC_DP@meta.data$clusterName, levels = Obio@parameterList[["clusterNameOrder"]])
+        
+        
+        
+        dfCol <- unique(OsC@meta.data[,c("clusterName", "clusterColor")])
+if(!is.null(Obio@parameterList$clusterNameOrder)){
+    row.names(dfCol) <- dfCol$clusterName
+    dfCol <- dfCol[Obio@parameterList$clusterNameOrder,]
+}
+        colVec <- as.vector(dfCol$clusterColor)
+        names(colVec) <- dfCol$clusterName
+      
+        textSize <- 2
+        if (length(colVec) > 5){
+            textSize <-1
+        } else if (length(colVec) > 20){
+            textSize <- 0.75
+        } else if (length(colVec) > 40){
+            textSize <- 0.5
+        }
+
+        Idents(OsC_DP) <- "clusterName"
+        
+        plotList[[tag]] <- biologicSeqTools2::DotPlotSB(
+            object = OsC_DP,
+            features = dpGenes,
             #cols = cols,
             group.by = NULL,
             split.by = NULL,
-            dot.scale = dotScale,
+            dot.scale = 4,
             col.min = 0,
-            col.max = 5
+            col.max = 5,
+            assay = "RNA"
         ) + ggtitle(gsub("_", " ", tag)
-        ) + xlab(""
         ) + coord_fixed(
-        # ) + coord_flip(
-        ) + theme_bw() +
-      theme(axis.text.x = element_text(size=rel(textSize), angle = 45, hjust=1, color = colVec))
-  
+        #) + coord_flip(
+        ) + theme_bw() + theme(
+                axis.title.y  = element_blank(),
+                axis.title.x  = element_blank()
+        )  + theme(axis.text.x = element_text(size=rel(textSize), angle = 45, hjust=1, color = colVec))
+        
+    
   
   
   FNbase <- paste0(tag, VersionPdfExt)
