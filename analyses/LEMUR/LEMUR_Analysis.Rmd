@@ -27,7 +27,7 @@ output:
 
 # Run singularity-R
 # ml Singularity/3.11.3
-# singularity shell --bind  /nemo:/nemo,/camp:/camp /nemo/stp/babs/working/boeings/singularity_images/r431.ubuntu.16.04.sif
+# singularity shell --bind  /nemo:/nemo,/camp:/camp /nemo/stp/babs/working/boeings/singularity_images/r431.ubuntu.16.04.sif;mkdir -p ~/.R;echo 'CXX17 = g++-7 -std=gnu++17 -fPIC' > ~/.R/Makevars;
 
 # Fixing rccpToml installation issue
 # mkdir -p ~/.R
@@ -36,7 +36,6 @@ output:
 ```    
 
 ```{r setup, include=FALSE}
-
 knitr::opts_chunk$set(
     tidy = TRUE,
     tidy.opts = list(width.cutoff = 120),
@@ -159,8 +158,8 @@ if (!requireNamespace("lemur")){
 
 
 
-library(Seurat)
-library(biologicSeqTools2)
+#library(Seurat)
+#library(biologicSeqTools2)
 library(dplyr)
 
 VersionPdfExt <- paste0(".V", gsub("-", "", Sys.Date()), ".pdf")
@@ -172,7 +171,7 @@ calculateLRTfromScratch <- TRUE
 source("load.biologic.robj.R")
 
 ## Make sure paths are set correctly in the Obio object
-Obio <- Obio %>% 
+Obio <- Obgetwd()io %>% 
     biologicSeqTools2::setMountingPoint()  %>% 
     biologicSeqTools2::setAnalysisPaths() %>% 
     biologicSeqTools2::setCrickGenomeAndGeneNameTable() %>% 
@@ -194,6 +193,21 @@ load(SeuratFN)
 
 ##                                                                           ##
 ###############################################################################
+
+###############################################################################
+## Subset data for testing
+subset4test <- TRUE
+if (!exists("subset4test")){
+  subset4test <- FALSE
+}
+
+if (subset4test){
+  set.seed(42)
+  n.cells <- round(0.2 * nrow(OsC))
+  cells.use <- sample(x= OsC@meta.data$cellID, size=n.cells)
+  OsC <- OsC[, colnames(OsC) %in% cells.use]
+}
+
 
 ###############################################################################
 ## Retrieve database password                                                ##
@@ -291,34 +305,162 @@ tableString <- paste0(
 ## An old version of the matrix package is required
 # install.packages("https://cran.r-project.org/src/contrib/Archive/Matrix/Matrix_1.3-3.tar.gz")
 
-sce <- Seurat::as.SingleCellExperiment(OsC)
+# sce <- Seurat::as.SingleCellExperiment(OsC, assay = "RNA")
+
+cells.use <- OsC@meta.data[OsC@meta.data$meta_Treatment %in% c("Control", "MatB52"), "cellID"]
+OsC <- OsC[, colnames(OsC) %in% cells.use]
+
+rs <- rowSums( data.matrix(OsC@assays[["RNA"]]@counts))
+OsC <- OsC[rowSums( data.matrix(OsC@assays[["RNA"]]@counts)) > 0, ]
+
+# create single-cell experiment manually
+count_matrix <- data.matrix(OsC@assays[["RNA"]]@counts)
+count_matrix <- count_matrix[rowSums(count_matrix) > 0,]
+
+cell_metadata <- data.frame(OsC@meta.data)
+cell_metadata <- cell_metadata[colnames(count_matrix),]
+
+sce <- SingleCellExperiment::SingleCellExperiment(
+  assays=list(counts = count_matrix),
+  colData = cell_metadata
+)
+
+sce <- scater::logNormCounts(sce)
+
 
 ## Done                                                                      ##
 ###############################################################################
 
-
-###############################################################################
-## Running LEMUR                                                             ##
-
-#library("lemur")
-#library("SingleCellExperiment")
-
-## It seems that there can't be co-linearity between the variables. Some 
-## differences are required. 
-
-fit <- lemur::lemur(sce, design = ~ meta_Gender + meta_Tumor_Normal, n_embedding = 15)
+## Test
+fit <- lemur::lemur(sce, design = ~  meta_Replicate + meta_Treatment , n_embedding = 15)
 fit <- lemur::align_harmony(fit)   # This step is optional
-fit <- lemur::test_de(fit, contrast = cond(meta_Tumor_Normal =  "Tumor") - cond(meta_Tumor_Normal = "Normal"))
-nei <- lemur::find_de_neighborhoods(fit, group_by = vars(meta_Gender, meta_Tumor_Normal), include_complement =F)
-# This doesn't work
-#nei <- lemur::find_de_neighborhoods(fit)
+fit <- lemur::test_de(fit, contrast = cond(meta_Treatment =  "MatB52") - cond(meta_Treatment =  "Regeneron"))
+fit <- lemur::test_de(fit, contrast = cond(meta_Treatment =  "MatB52") - cond(meta_Treatment =  "Control"))
 
-## Done                                                                      ##
 ###############################################################################
+## First comparison                                                          ##
 
-sceRef <- lemur::glioblastoma_example_data
+
+
+
+fit <- lemur::test_de(fit, contrast = cond(meta_Treatment =  "Regeneron") - cond(meta_Treatment =  "Control"))
+
+umap <- uwot::umap(t(fit$embedding))
+
+p1 <- as_tibble(fit$colData) %>%
+  mutate(umap = umap) %>%
+  ggplot(aes(x = umap[,1], y = umap[,2])) +
+    geom_point(aes(color = meta_Treatment, shape = meta_Replicate), size = 0.5) +
+    labs(title = "UMAP of latent space from LEMUR")
+
+
+ 
+as_tibble(fit$colData) %>%
+  mutate(umap = umap) %>%
+  ggplot(aes(x = umap[,1], y = umap[,2])) +
+    geom_point(aes(color = clusterName, shape = meta_Replicate), size = 0.5) +
+    labs(title = "UMAP of latent space from LEMUR")
+
+
+nei <- lemur::find_de_neighborhoods(fit, group_by = vars(meta_Replicate, meta_Treatment))
+
+dfRC <- data.frame(
+  as_tibble(nei) %>%
+    arrange(pval) %>%
+    dplyr::select(name, n_cells, pval, adj_pval, lfc)
+)
+
+sel_gene <- "Mafb"
+
+pg1 <- tibble(umap = umap) %>%
+  mutate(expr = assay(fit, "DE")[sel_gene,]) %>%
+  ggplot(aes(x = umap[,1], y = umap[,2])) +
+    geom_point(aes(color = expr)) +
+    scale_color_gradient2() +
+    labs(title = "Differential expression on UMAP plot")
+
+## Done                                                                       ##
+################################################################################
+
 ###############################################################################
-## Plot                                                                      ##
+## Second comparison                                                          ##
+
+fit <- lemur::test_de(fit, contrast = cond(meta_Treatment =  "MatB52") - cond(meta_Treatment =  "Control"))
+
+umap <- uwot::umap(t(fit$embedding))
+
+p2 <- as_tibble(fit$colData) %>%
+  mutate(umap = umap) %>%
+  ggplot(aes(x = umap[,1], y = umap[,2])) +
+    geom_point(aes(color = meta_Treatment, shape = meta_Replicate), size = 0.5) +
+    labs(title = "UMAP of latent space from LEMUR")
+
+pg2 <- tibble(umap = umap) %>%
+  mutate(expr = assay(fit, "DE")[sel_gene,]) %>%
+  ggplot(aes(x = umap[,1], y = umap[,2])) +
+    geom_point(aes(color = expr)) +
+    scale_color_gradient2() +
+    labs(title = "Differential expression on UMAP plot")
+
+
+as_tibble(fit$colData) %>%
+  mutate(umap = umap) %>%
+  ggplot(aes(x = umap[,1], y = umap[,2])) +
+    geom_point(aes(color = clusterName, shape = meta_Replicate), size = 0.5) +
+    labs(title = "UMAP of latent space from LEMUR")
+
+
+nei <- lemur::find_de_neighborhoods(fit, group_by = vars(meta_Replicate, meta_Treatment))
+
+dfMC <- data.frame(
+  as_tibble(nei) %>%
+    arrange(pval) %>%
+    dplyr::select(name, n_cells, pval, adj_pval, lfc)
+)
+
+## Done                                                                       ##
+################################################################################
+
+###############################################################################
+## Third comparison                                                          ##
+
+fit <- lemur::test_de(fit, contrast = cond(meta_Treatment =  "MatB52") - cond(meta_Treatment =  "Regeneron"))
+
+umap <- uwot::umap(t(fit$embedding))
+
+p3 <- as_tibble(fit$colData) %>%
+  mutate(umap = umap) %>%
+  ggplot(aes(x = umap[,1], y = umap[,2])) +
+    geom_point(aes(color = meta_Treatment, shape = meta_Replicate), size = 0.5) +
+    labs(title = "UMAP of latent space from LEMUR")
+
+pg3 <- tibble(umap = umap) %>%
+  mutate(expr = assay(fit, "DE")[sel_gene,]) %>%
+  ggplot(aes(x = umap[,1], y = umap[,2])) +
+    geom_point(aes(color = expr)) +
+    scale_color_gradient2() +
+    labs(title = "Differential expression on UMAP plot")
+
+
+as_tibble(fit$colData) %>%
+  mutate(umap = umap) %>%
+  ggplot(aes(x = umap[,1], y = umap[,2])) +
+    geom_point(aes(color = clusterName, shape = meta_Replicate), size = 0.5) +
+    labs(title = "UMAP of latent space from LEMUR")
+
+
+nei <- lemur::find_de_neighborhoods(fit, group_by = vars(meta_Replicate, meta_Treatment))
+
+dfMR <- data.frame(
+  as_tibble(nei) %>%
+    arrange(pval) %>%
+    dplyr::select(name, n_cells, pval, adj_pval, lfc)
+)
+
+## Done                                                                       ##
+################################################################################
+
+
 set.seed(42)
 
 orig_umap <- uwot::umap(as.matrix(t(SingleCellExperiment::logcounts(sce))))
@@ -328,13 +470,13 @@ library(ggplot2)
 as_tibble(SingleCellExperiment::colData(sce)) %>%
   mutate(umap = orig_umap) %>%
   ggplot(aes(x = umap[,1], y = umap[,2])) +
-    geom_point(aes(color = meta_Gender, shape = meta_Tumor_Normal), size = 0.5) +
+    geom_point(aes(color = meta_Treatment, shape = meta_Replicate), size = 0.5) +
     labs(title = "UMAP of logcounts")
 
 as_tibble(SingleCellExperiment::colData(sce)) %>%
   mutate(umap = orig_umap) %>%
   ggplot(aes(x = umap[,1], y = umap[,2])) +
-    geom_point(aes(color = meta_Tumor_Normal, shape = meta_Gender), size = 0.5) +
+    geom_point(aes(color = clusterName, shape = meta_Replicate), size = 0.5) +
     labs(title = "UMAP of logcounts")
 
 
@@ -343,10 +485,10 @@ umap <- uwot::umap(t(fit$embedding))
 as_tibble(fit$colData) %>%
   mutate(umap = umap) %>%
   ggplot(aes(x = umap[,1], y = umap[,2])) +
-    geom_point(aes(color = meta_Tumor_Normal, shape = meta_Gender), size = 0.5) +
+    geom_point(aes(color = meta_Treatment, shape = meta_Replicate), size = 0.5) +
     labs(title = "UMAP of latent space from LEMUR")
 
-sel_gene <- "INHBA"
+sel_gene <- "Inhba"
 
 tibble(umap = umap) %>%
   mutate(expr = assay(fit, "DE")[sel_gene,]) %>%
@@ -363,7 +505,10 @@ df <- data.frame(
 )
 
 
-sel_gene <- "INHBA"
+sel_gene <- "Ccl5"
+sel_gene <- "Ccl8"
+sel_gene <- "Cxcl10"
+sel_gene <- "Cxcl3"
 
 tibble(umap = umap) %>%
   mutate(expr = assay(fit, "DE")[sel_gene,]) %>%
@@ -411,7 +556,7 @@ nei %>%
   geom_text(aes(label=label))
 
 nei[["label"]] <- ""
-nei[nei$name == "INHBA", "label"] <- nei[nei$name == "INHBA", "name"]
+nei[nei$name == "Inhba", "label"] <- nei[nei$name == "Inhba", "name"]
 
 nei %>%
   ggplot(aes(x = n_cells, y = -log10(pval)), label=label) +
@@ -419,6 +564,106 @@ nei %>%
     labs(title = "Neighborhood size vs neighborhood significance") +
   geom_text(aes(label=label))
 
+
+## Done                                                                      ##
+###############################################################################
+
+
+###############################################################################
+## Running LEMUR                                                             ##
+
+#library("lemur")
+#library("SingleCellExperiment")
+
+## Works with Phase, but not meta_Treatment
+
+fit <- lemur::lemur(sce, design = ~  sampleName +Phase , n_embedding = 15)
+fit <- lemur::align_harmony(fit)   # This step is optional
+fit <- lemur::test_de(fit, contrast = cond(Phase =  "G1") - cond(Phase = "G2M"))
+nei <- lemur::find_de_neighborhoods(fit, group_by = vars(sampleName, Phase))
+
+## Create latent space UMAP
+umap <- uwot::umap(t(fit$embedding))
+
+as_tibble(fit$colData) %>%
+  mutate(umap = umap) %>%
+  ggplot(aes(x = umap[,1], y = umap[,2])) +
+    geom_point(aes(color = sampleID, shape = Phase), size = 0.5) +
+    labs(title = "UMAP of latent space from LEMUR")
+
+
+# We can pick any gene and show the differential expression pattern on the UMAP plot:
+
+as_tibble(nei) %>%
+  arrange(pval)  %>%
+  dplyr::select(name,  n_cells, pval, adj_pval, lfc)
+
+
+# EEF1A1
+sel_gene <- "Cdk1"
+
+tibble(umap = umap) %>%
+  mutate(expr = assay(fit, "DE")[sel_gene,]) %>%
+  ggplot(aes(x = umap[,1], y = umap[,2])) +
+    geom_point(aes(color = expr)) +
+    scale_color_gradient2() +
+    labs(title = "Differential expression on UMAP plot")
+
+
+neighborhood_coordinates <- nei %>%
+  dplyr::filter(selection & name == sel_gene) %>%
+  mutate(cell_id = map(indices, \(idx) colnames(fit)[idx])) %>%
+  unnest(c(indices, cell_id)) %>%
+  left_join(tibble(cell_id = rownames(umap), umap), by = "cell_id") %>%
+  dplyr::select(name, cell_id, umap)
+
+## define region
+tibble(umap = umap) %>%
+  mutate(expr = assay(fit, "DE")[sel_gene,]) %>%
+  ggplot(aes(x = umap[,1], y = umap[,2])) +
+    geom_point(aes(color = expr)) +
+    scale_color_gradient2() +
+    geom_density2d(data = neighborhood_coordinates, breaks = 0.1, 
+                   contour_var = "ndensity", color = "black") +
+    labs(title = "Differential expression with neighborhood boundary")
+
+
+nei %>%
+  ggplot(aes(x = lfc, y = -log10(pval))) +
+    geom_point(aes(color  = adj_pval < 0.1)) +
+    labs(title = "Volcano plot of the neighborhoods")
+
+nei %>%
+  ggplot(aes(x = n_cells, y = -log10(pval))) +
+    geom_point(aes(color  = adj_pval < 0.1)) +
+    labs(title = "Neighborhood size vs neighborhood significance")
+## Done                                                                      ##
+###############################################################################
+
+
+###############################################################################
+##
+fit <- lemur::lemur(sce, design = ~ Phase , n_embedding = 15)
+fit <- lemur::align_harmony(fit)   # This step is optional
+fit <- lemur::test_de(fit, contrast = cond(Phase =  "G1") - cond(Phase = "G2M"))
+nei <- lemur::find_de_neighborhoods(fit, group_by = vars(Phase))
+
+## Create latent space UMAP
+umap <- uwot::umap(t(fit$embedding))
+
+as_tibble(fit$colData) %>%
+  mutate(umap = umap) %>%
+  ggplot(aes(x = umap[,1], y = umap[,2])) +
+    geom_point(aes(color = sampleID, shape = Phase), size = 0.5) +
+    labs(title = "UMAP of latent space from LEMUR")
+
+## Done                                                                      ##
+
+##
+###############################################################################
+
+###############################################################################
+## Plot                                                                      ##
 
 ## Done                                                                      ##
 ###############################################################################
