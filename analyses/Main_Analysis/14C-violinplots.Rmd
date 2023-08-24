@@ -13,8 +13,31 @@ VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.D
 ```{r data_prep_violin, echo=TRUE, eval=TRUE, warning=FALSE, results=F}
 
 ## For Violinplots we want single gene lists
+## Add each cat to ref list 
+## Load gene sets from cat reference file
+catFN <-  Obio@parameterList$catRefFile
+
+if (!is.null(catFN) && file.exists(catFN)){
+  dfCat <- read.delim(
+    catFN, 
+    sep = "\t",
+    stringsAsFactors = F
+  )
 
 
+  for (i in 1:ncol(dfCat)){
+    catName <- colnames(dfCat)[i]
+    geneVec <- unique(
+      as.vector(
+        dfCat[3:nrow(dfCat), i]
+      )
+    )
+    geneVec <- geneVec[geneVec %in% row.names(OsC)]
+    catList <- list()
+    catList[[catName]] <- geneVec
+    HMgeneSelections[[catName]] <- catList
+  }
+}
 geneList <- lapply(HMgeneSelections, function(x) unique(unlist(x)))
 geneList <- lapply(geneList, function(x) x[x %in% row.names(OsC)])
 selVec <- unlist(lapply(geneList, function(x) length(x) != 0))
@@ -31,7 +54,7 @@ tag <- paste0("Vln_", names(geneList)[i])
     
   if (length(geneList[[i]]) > 1 & length(geneList[[i]]) <=  50){
     
-      
+    Idents(OsC) <- "clusterName"  
     plotList[[tag]] <- Seurat::VlnPlot(
         object = OsC,
         features = geneList[[i]],
@@ -40,7 +63,10 @@ tag <- paste0("Vln_", names(geneList)[i])
         flip = T
     ) + ggplot2::theme(legend.position = "none"
     ) + ggplot2::ggtitle(gsub("_", " ", tag)
-    )
+    ) + theme(
+                axis.title.y  = element_blank(),
+                axis.title.x  = element_blank()
+        )  + theme(axis.text.x = element_text(size=rel(textSize), angle = 45, hjust=1))
   
 
   FNbase <- paste0(tag, VersionPdfExt)
