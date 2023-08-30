@@ -126,7 +126,7 @@ if(!is.null(Obio@parameterList$clusterNameOrder)){
   figureCount <- figureCount + 1
 
   NewChnk <- paste0(
-    "#### ", tag,
+    "# ", tag,
     "\n```{r dot_",
     tag,", results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",
     figLegend,"'}\n",
@@ -167,12 +167,14 @@ if (length(plotList) > 3){
 ```
 
 
-### Dotplots {`r tabVar`}
+### Dotplots
 
 In this section heatmaps and dotplots for various gene categories are provided. 
 
+:::: {.panel-tabset .nav-pills}
 ```{r Cluster_dotplot_overview, echo=TRUE, eval=TRUE, warning=FALSE, results="asis"}
 
 cat(paste(knit(text = chnkVec, quiet = T), collapse = '\n'))
 
 ```
+::::

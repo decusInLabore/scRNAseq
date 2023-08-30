@@ -1,0 +1,20 @@
+name: "Custom Plots"
+navbar:
+  title: "Custom Plots"
+  left:
+    - text: "Custom Plots"
+      href: Custom_Gene_Category_Plots.html
+    
+      
+output: 
+    html_document:
+        code_folding: hide
+        df_print: tibble
+        highlight: default
+        theme: paper
+        toc: true
+        toc_depth: 5
+        toc_float: true
+        css: src/style/style.css
+        always_allow_html: yes
+        self_contained: no
