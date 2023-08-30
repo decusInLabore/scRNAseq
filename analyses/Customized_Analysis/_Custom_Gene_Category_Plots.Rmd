@@ -10,6 +10,7 @@ output:
         toc_float: true
         css: src/style/style.css
         always_allow_html: yes
+        self_contained: no
 ---
 
 
@@ -54,7 +55,7 @@ rasterDpi <- 300
 
 
 ## Option to resmume analysis after time-consuming integration. 
-resume <- FALSE
+resume <- TRUE
 
 SeuratFolder <- "../../../../workdir"
 pos <- grep("Seurat.Robj", list.files(SeuratFolder))
@@ -97,7 +98,7 @@ save.chunk.intermediates <- TRUE
 
 ###############################################################################
 ##                                                                           ##
-projectDir <- gsub("scripts/scRNAseq/analyses/Main_Analysis", "", getwd())
+projectDir <- unlist(strsplit(getwd(), "scripts\\/"))[1]
 workdir <- paste0(projectDir, "workdir/")
 
 
@@ -115,16 +116,16 @@ figureCount <- 1
 
 
 <!-- Essential 1: Set Analysis Parameters Chapter/Module (output required later) -->
-```{r child = '01-set.parameters.Rmd', eval=TRUE}
+```{r child = '_01-set.parameters.Rmd', eval=TRUE}
 
 ```
 
 <!-- Optional 2: Retrieve Reference Genes from Database or Gmt file -->
-```{r child = '02-retrieve.reference.gene.sets.Rmd', eval=TRUE}
+```{r child = '_02-retrieve.reference.gene.sets.Rmd', eval=TRUE}
 ```
 
 <!-- Essential 3: (output required later): Create Integrated Seurat Object Chapter/Module -->
-```{r child = '03-create.integrated.seurat.object.Rmd', eval=createNew}
+```{r child = '_03-create.integrated.seurat.object.Rmd', eval=createNew}
 ```
 
 ```{r, eval=createNew, echo=createNew}
@@ -144,10 +145,6 @@ save(OsC,
 
 print("OsC Object saved.")
 
-```
-
-<!-- Optional 4: (creates output only): Create variation plots Chapter/Module -->
-```{r child = '04-create.variation.plots.Rmd', eval=FALSE}
 ```
 
 
@@ -193,148 +190,45 @@ Obio@parameterList$legendDotSize <- legendDotSize
 dendrofactor <- 5
 Obio@parameterList$dendrofactor <- dendrofactor
 
+documentationParams <- list()
+documentationParams$title <-   paste0("Custom Gene Category Heatmaps, Dotplots and Violinplots for Project ", Obio@parameterList$project_id)
 
-## Edit header section
-if (is.null(Obio@documentationParams$title) | Obio@documentationParams$title == ""){
-  ## This project:
-  # Set project parameters manually
-  Obio@documentationParams$title <-   "TBD"
-  
-  Obio@documentationParams$subtitle <- "TBD"
-  
-  Obio@documentationParams$abstract <- "TBD"
-}
+documentationParams$subtitle <- "Simon McCluney - Hill Lab"
+
+documentationParams$abstract <- paste0("This report contains custom heatmaps, dotplots and violinplots for project ",Obio@parameterList$project_id,".")
 
 ```
 
 <!-- Essential 6: (output required later): 
 DGE Marker gene upload Chapter/Module -->
-```{r child = '041-custom.sample.and.cluster.colors.Rmd', eval=TRUE}
-```
-
-<!-- Essential 6: (output required later): 
-DGE Marker gene upload Chapter/Module -->
-```{r child = '05-create.pca.plots.Rmd', eval=TRUE}
-```
-
-<!-- Essential 7: (output required later): Create variation plots Chapter/Module -->
-```{r child = '06-calculate.average.expression.Rmd', eval=TRUE}
-```
-
-<!-- Optional 8: (Output only): Create pca plots Chapter/Module -->
-```{r child = '07-plot.pca.and.tsne.results.Rmd', eval=TRUE}
-```
-
-<!-- Optional 9: (Output only): Create pca plots Chapter/Module -->
-```{r child = '08-euclidian.distances.figure.Rmd', eval=TRUE}
-```
-
-
-<!-- Optional 10: (Output only): Doublet Estimate Chapter/Module -->
-```{r child = '09-doublet.estimation.plots.Rmd', eval=TRUE}
-```
-
-<!-- Optional 11: (Output only): Doublet Estimate Chapter/Module -->
-```{r child = '10-cell.cycle.phase.plots.Rmd', eval=TRUE}
-```
-
-<!-- Optional 12: (Output only): Cell Distribution Barchart Chapter/Module -->
-```{r child = '11-Ncell.barchart.plots.Rmd', eval=TRUE}
-```
-
-<!-- Optional 12b: (Output only): Area Chart Chapter/Module -->
-```{r child = 'B133.timeseries.area.plot.Rmd', eval=FALSE}
-```
-
-<!-- Optional 13: (Output only):Category Enrichments Chapter/Module -->
-```{r child = '12-AUC.cat.enrichments.Rmd', eval=TRUE}
-```
-
-<!-- Essential 14: (output required later):Category Linear Regression Marker Gene Data Prep Chapter/Module -->
-```{r child = '13-linear.regression.data.prep.Rmd', eval=TRUE}
+```{r child = '_041-custom.sample.and.cluster.colors.Rmd', eval=TRUE}
 ```
 
 <!-- Essential 15: (output required later):Category Linear Regression Marker Gene Data Prep Chapter/Module -->
-```{r child = '14A-heatmaps.Rmd', eval=TRUE}
+```{r child = '_customplots.14A-heatmaps.Rmd', eval=TRUE}
 ```
 
 <!-- Essential 15: (output required later):Category Linear Regression Marker Gene Data Prep Chapter/Module -->
-```{r child = '14B-dotplots.Rmd', eval=TRUE}
+```{r child = '_14B-dotplots.Rmd', eval=TRUE}
 ```
 
 
 <!-- Essential 15: (output required later):Category Linear Regression Marker Gene Data Prep Chapter/Module -->
-```{r child = '14C-violinplots.Rmd', eval=TRUE}
-```
-
-<!-- Essential 16: (output required later):Category Make cluster table Data Prep Chapter/Module -->
-```{r child = '15-make.cluster.table.Rmd', eval=FALSE}
+```{r child = '_14C-violinplots.Rmd', eval=TRUE}
 ```
 
 <!-- Essential 18: (output required later):Category Make cluster table Data Prep Chapter/Module -->
-```{r child = '16-gene.set.heatmaps.Rmd', eval=TRUE}
+```{r child = '_16-gene.set.heatmaps.Rmd', eval=FALSE}
 ```
 
-
-<!-- Essential 19: (output required later):Category Make cluster table Data Prep Chapter/Module -->
-```{r child = '17-example.feature.plots.Rmd', eval=TRUE}
-```
-
-<!-- Essential 20: (output required later):Category Make cluster table Data Prep Chapter/Module -->
-```{r child = '18-pca.cell.and.loading.plots.Rmd', eval=FALSE}
-```
-
-
-<!-- Optional 22: (output required later): Add extra tables Chapter/Module -->
-```{r child = '19-add.extra.tables.Rmd', eval=FALSE}
-```
-
-
-
-```{r saveobject, eval=TRUE, echo=T, results=F}
-### Will save Obio object here, so it can be re-used with different parameters
-source("save.biologic.robj.R")
-
-print("Obio Object saved.")
-
-save(OsC,
-    file = paste0(
-         Obio@parameterList$localWorkDir,
-         Obio@parameterList$project_id,
-        ".Seurat.Robj"
-     )
-)
-
-# renv::snapshot(prompt = FALSE)
-
-```
 
 
 
 ```{r create_report_params, eval=T, results="asis"}
 
 ## Try to retrieve project data from db ##
-db.pwd2 <- "zU3ufd9L"
-db.user2 <- "reader"
-host2 <- "clvd1-db-u-p-17.thecrick.org"
-projectParams <- Obio@documentationParams
+projectParams <- documentationParams
 
-tryCatch({
-    dbDB = DBI::dbConnect(
-        drv = RMySQL::MySQL(), 
-        user = db.user2, 
-        password = db.pwd2, 
-        host = host2, 
-        dbname = "clarity_shadow"
-    )
-    dfProposal <-  DBI::dbGetQuery(
-        dbDB, 
-        paste0("SELECT * FROM clarify_asf_proposals WHERE project_name ='",Obio@projectDetailList$lims.id,"'")
-    )
-    dbDisconnect(dbDB)
-}, error = function(x) {
-    message("Project Database could not be reached or has no entry in Obio@parameterList$lims.id for this analysis.")
-})
 
 ###############################################################################
 ## Helper
@@ -345,37 +239,7 @@ firstup <- function(x) {
 ##
 ###############################################################################
 
-## Use automatic entries if no information is available. 
-if (exists("dfProposal")){
-    if (!is.na(dfProposal[1,"ProjectAlias"]) & dfProposal[1,"ProjectAlias"] != ""){
-      if (is.null(projectParams[["title"]]) | projectParams[["title"]] == ""){
-        projectParams[["title"]] = paste0(dfProposal[1,"ProjectAlias"], " - ", dfProposal[1,"project_name"])
-      }
-    }
-    
-    if (!is.na(dfProposal[1,"project_user"]) & dfProposal[1,"project_user"] != ""){
-      if (is.null(projectParams[["subtitle"]]) | projectParams[["subtitle"]] == ""){
-        labString <- firstup(dfProposal[1,"user_lab"])
-        labString <- substr(labString, 1, (nchar(labString) - 1))
-      
-        projectParams[["subtitle"]] = paste0(labString, " Lab - ", dfProposal[1,"project_user"])
-        projectParams[["subtitle"]] <- gsub("^ Lab - ", "", projectParams[["subtitle"]])
-      }
-    }
-    
-    if (!is.na(dfProposal[1,"proposal_text"]) & dfProposal[1,"proposal_text"] != ""){
-      if (!is.null(projectParams[["abstract"]]) | projectParams[["abstract"]] == ""){
-        projectParams[["abstract"]] <- paste0(
-          projectParams[["abstract"]],
-          "\n",
-          dfProposal[1,"proposal_text"]
-        )
-      } else {
-        projectParams[["abstract"]] = dfProposal[1,"proposal_text"]
-      }
-    }
-}
-   
+
 ## Escape all special characters
 projectParams <- lapply(
   projectParams, function(x) 
@@ -420,8 +284,7 @@ sessionInfo()
 ---
 title: "`r projectParams$title`"
 subtitle:  "`r projectParams$subtitle`"
-author:
-    - Bioinformatics: Stefan Boeing^[The Francis Crick Institute, stefan.boeing@crick.ac.uk]
+author: Bioinformatics: Stefan Boeing^[The Francis Crick Institute, stefan.boeing@crick.ac.uk]
 date: 'Compiled: `r format(Sys.Date(), "%B %d, %Y")`'
 
 abstract: |

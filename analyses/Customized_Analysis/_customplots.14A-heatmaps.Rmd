@@ -636,7 +636,7 @@ plotList[[tag]] <- ComplexHeatmap::Heatmap(
   figureCount <- figureCount + 1
 
   NewChnk <- paste0(
-    "#### ", tag,
+    "# ", tag,
     "\n```{r hm_",
     tag,", results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",
     figLegend,"'}\n",
@@ -784,7 +784,9 @@ if (length(plotList) > 3){
 ```
 
 
-### Heatmaps {`r tabVar`}
+
+### Heatmaps Test Tabset
+:::: {.panel-tabset .nav-pills}
 
 In this section heatmaps and dotplots for various gene categories are provided. 
 
@@ -793,3 +795,4 @@ In this section heatmaps and dotplots for various gene categories are provided.
 cat(paste(knit(text = chnkVec, quiet = T), collapse = '\n'))
 
 ```
+::::

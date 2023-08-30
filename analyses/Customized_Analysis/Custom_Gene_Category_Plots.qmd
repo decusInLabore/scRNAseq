@@ -1,21 +1,33 @@
 ---
-output: 
-    html_document:
-        code_folding: hide
-        df_print: tibble
-        highlight: default
-        theme: paper
-        toc: true
-        toc_depth: 5
-        toc_float: true
-        css: src/style/style.css
-        always_allow_html: yes
+format: 
+  html:
+    code-fold: true
+    highlight-style: github
+    code-line-numbers: true
+    code-copy: true
+    df-print: paged
+    highlight: default
+    theme: minty
+    toc: true
+    toc-depth: 5
+    toc-title: Contents
+    toc-location: left
+    css: src/style/style.css
+    embed-resources: false
 ---
 
 
 ```{r setup, include=FALSE}
 # R to use
 # module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;R
+
+
+# Fixing rccpToml installation issue
+# mkdir -p ~/.R
+# echo 'CXX17 = g++-7 -std=gnu++17 -fPIC' > ~/.R/Makevars
+# ml Singularity/3.11.3
+# singularity shell --bind  /nemo:/nemo,/camp:/camp /nemo/stp/babs/working/boeings/singularity_images/r431.ubuntu.16.04.sif;
+
 
 knitr::opts_chunk$set(
     tidy = F,
@@ -97,7 +109,7 @@ save.chunk.intermediates <- TRUE
 
 ###############################################################################
 ##                                                                           ##
-projectDir <- gsub("scripts/scRNAseq/analyses/Main_Analysis", "", getwd())
+projectDir <- unlist(strsplit(getwd(), "scripts\\/"))[1]
 workdir <- paste0(projectDir, "workdir/")
 
 
@@ -115,16 +127,16 @@ figureCount <- 1
 
 
 <!-- Essential 1: Set Analysis Parameters Chapter/Module (output required later) -->
-```{r child = '01-set.parameters.Rmd', eval=TRUE}
+```{r child = '_01-set.parameters.Rmd', eval=TRUE}
 
 ```
 
 <!-- Optional 2: Retrieve Reference Genes from Database or Gmt file -->
-```{r child = '02-retrieve.reference.gene.sets.Rmd', eval=TRUE}
+```{r child = '_02-retrieve.reference.gene.sets.Rmd', eval=TRUE}
 ```
 
 <!-- Essential 3: (output required later): Create Integrated Seurat Object Chapter/Module -->
-```{r child = '03-create.integrated.seurat.object.Rmd', eval=createNew}
+```{r child = '_03-create.integrated.seurat.object.Rmd', eval=createNew}
 ```
 
 ```{r, eval=createNew, echo=createNew}
@@ -200,24 +212,24 @@ documentationParams$abstract <- paste0("This report contains custom heatmaps, do
 
 <!-- Essential 6: (output required later): 
 DGE Marker gene upload Chapter/Module -->
-```{r child = '041-custom.sample.and.cluster.colors.Rmd', eval=TRUE}
+```{r child = '_041-custom.sample.and.cluster.colors.Rmd', eval=TRUE}
 ```
 
 <!-- Essential 15: (output required later):Category Linear Regression Marker Gene Data Prep Chapter/Module -->
-```{r child = 'customplots.14A-heatmaps.Rmd', eval=TRUE}
+```{r child = '_customplots.14A-heatmaps.Rmd', eval=TRUE}
 ```
 
 <!-- Essential 15: (output required later):Category Linear Regression Marker Gene Data Prep Chapter/Module -->
-```{r child = '14B-dotplots.Rmd', eval=TRUE}
+```{r child = '_14B-dotplots.Rmd', eval=TRUE}
 ```
 
 
 <!-- Essential 15: (output required later):Category Linear Regression Marker Gene Data Prep Chapter/Module -->
-```{r child = '14C-violinplots.Rmd', eval=TRUE}
+```{r child = '_14C-violinplots.Rmd', eval=TRUE}
 ```
 
 <!-- Essential 18: (output required later):Category Make cluster table Data Prep Chapter/Module -->
-```{r child = '16-gene.set.heatmaps.Rmd', eval=FALSE}
+```{r child = '_16-gene.set.heatmaps.Rmd', eval=FALSE}
 ```
 
 
@@ -283,8 +295,7 @@ sessionInfo()
 ---
 title: "`r projectParams$title`"
 subtitle:  "`r projectParams$subtitle`"
-author:
-    - Bioinformatics: Stefan Boeing^[The Francis Crick Institute, stefan.boeing@crick.ac.uk]
+author: Stefan Boeing^[The Francis Crick Institute, stefan.boeing@crick.ac.uk]
 date: 'Compiled: `r format(Sys.Date(), "%B %d, %Y")`'
 
 abstract: |
