@@ -16,8 +16,8 @@ if (dir.exists("/Volumes/babs/working/boeings/")){
     hpc.mount <- "/Volumes/babs/working/boeings/"
 } else if (dir.exists("Y:/working/boeings/")){
     hpc.mount <- "Y:/working/boeings/"
-} else if (dir.exists("/camp/stp/babs/working/boeings/")){
-    hpc.mount <- "/camp/stp/babs/working/boeings/"
+} else if (dir.exists("/nemo/stp/babs/working/boeings/")){
+    hpc.mount <- "/nemo/stp/babs/working/boeings/"
 } else {
     hpc.mount <- ""
 }
@@ -64,9 +64,9 @@ Obio <- setDataBaseParameters(Obio)
 Obio <- addGeneAnnotation(Obio)
 
 ## Create Sample List ##
-if (Obio@parameterList$hpcMount != "/camp/stp/babs/working/boeings/"){
+if (Obio@parameterList$hpcMount != "/nemo/stp/babs/working/boeings/"){
     for (i in 1:length(Obio@sampleDetailList)){
-        Obio@sampleDetailList[[i]]$path <- gsub("/camp/stp/babs/working/boeings/",Obio@parameterList$hpcMount, Obio@sampleDetailList[[i]]$path)
+        Obio@sampleDetailList[[i]]$path <- gsub("/nemo/stp/babs/working/boeings/",Obio@parameterList$hpcMount, Obio@sampleDetailList[[i]]$path)
         
     }
 }

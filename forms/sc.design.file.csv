@@ -22,7 +22,7 @@ sampleName,mliGlia,mliNeuron
 limsID,SCP1038,SCP1038
 type,TenX,TenX
 gene.column,1,1
-path,/camp/stp/babs/working/boeings/Projects/pachnisv/yuuki.obata/409_sc_RNA_seq_enteric_glia_neuron_Regev_SC1038/FASTQ_files/mliNeuron/outs/filtered_feature_bc_matrix,
+path,/nemo/stp/babs/working/boeings/Projects/pachnisv/yuuki.obata/409_sc_RNA_seq_enteric_glia_neuron_Regev_SC1038/FASTQ_files/mliNeuron/outs/filtered_feature_bc_matrix,
 singleCellSeuratMtCutoff,10,10
 SeuratNrnaMaxFeatures,10000,10000
 SeuratNrnaMinFeatures,1000,1000

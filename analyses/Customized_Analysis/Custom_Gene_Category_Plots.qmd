@@ -13,7 +13,7 @@ format:
     toc-title: Contents
     toc-location: left
     css: src/style/style.css
-    embed-resources: false
+    embed-resources: true
 ---
 
 

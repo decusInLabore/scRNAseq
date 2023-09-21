@@ -34,7 +34,7 @@ sampleName,CTRL,STIM,,
 limsID,CTRL,STIM,,
 type,matrixFiles,matrixFiles,,"# type must be in c(""TenX"", ""matrixFiles"", ""loomFiles"", ""hdf5Files"")"
 gene.column,2,2,,
-path,/camp/stp/babs/working/boeings/Projects/boeings/stefan.boeing/dev_scRNAseq_PBMCstim/data/immune_control_expression_matrix.txt,/camp/stp/babs/working/boeings/Projects/boeings/stefan.boeing/dev_scRNAseq_PBMCstim/data/immune_stimulated_expression_matrix.txt,,# default 2
+path,/nemo/stp/babs/working/boeings/Projects/boeings/stefan.boeing/dev_scRNAseq_PBMCstim/data/immune_control_expression_matrix.txt,/nemo/stp/babs/working/boeings/Projects/boeings/stefan.boeing/dev_scRNAseq_PBMCstim/data/immune_stimulated_expression_matrix.txt,,# default 2
 singleCellSeuratMtCutoff,30,30,,
 SeuratNrnaMaxFeatures,10000,10000,,
 SeuratNrnaMinFeatures,500,500,,

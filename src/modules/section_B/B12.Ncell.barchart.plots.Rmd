@@ -2,7 +2,7 @@
 <!-- Set the chnkPrefix to make all chunks unique in the overall folder -->
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE}
 ## Recommended (Crick) R configuration for this script:
-# module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;R;
+# module purge;source /nemo/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a;R;
 
 ## Set chapter variables ##
 chnkPrefix <- "partB.N.cell.barchart."
@@ -26,7 +26,7 @@ if (renderChapter){
       ## Load biologic object
       ObioFN <- paste0("../", list.files("..")[grep(".bioLOGIC.Robj", list.files(".."))])
       
-      ObioFN <- "/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/470_scRNAseq_Inhba_SC21185/workdir/SC21185.bioLOGIC.Robj"
+      ObioFN <- "/nemo/stp/babs/working/boeings/Projects/hillc/danielle.park/470_scRNAseq_Inhba_SC21185/workdir/SC21185.bioLOGIC.Robj"
       
       load(ObioFN)
       
@@ -35,7 +35,7 @@ if (renderChapter){
       ## Load Seurat object
       SeuratFN <- paste0(Obio@parameterList$localWorkDir,list.files(Obio@parameterList$localWorkDir)[grep(".Seurat.Robj", list.files(Obio@parameterList$localWorkDir))])
       
-      SeuratFN <- "/camp/stp/babs/working/boeings/Projects/hillc/danielle.park/470_scRNAseq_Inhba_SC21185/workdir/SC21185.Seurat.Robj"
+      SeuratFN <- "/nemo/stp/babs/working/boeings/Projects/hillc/danielle.park/470_scRNAseq_Inhba_SC21185/workdir/SC21185.Seurat.Robj"
       
       load(SeuratFN)
 }

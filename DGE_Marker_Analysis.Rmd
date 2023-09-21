@@ -27,7 +27,7 @@ knitr::opts_chunk$set(
 
 
 ## Recommended (Crick) R-setup: 
-# module purge;source /camp/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a
+# module purge;source /nemo/stp/babs/working/software/modulepath_new_software_tree_2018-08-13;module load pandoc/2.2.3.2-foss-2016b;ml R/4.0.3-foss-2020a
 
 ```
 
@@ -131,8 +131,8 @@ if (dir.exists("/Volumes/babs/working/boeings/")){
     hpc.mount <- "/Volumes/babs/working/boeings/"
 } else if (dir.exists("Y:/working/boeings/")){
     hpc.mount <- "Y:/working/boeings/"
-} else if (dir.exists("/camp/stp/babs/working/boeings/")){
-    hpc.mount <- "/camp/stp/babs/working/boeings/"
+} else if (dir.exists("/nemo/stp/babs/working/boeings/")){
+    hpc.mount <- "/nemo/stp/babs/working/boeings/"
 } else {
     hpc.mount <- ""
 }
@@ -1971,7 +1971,7 @@ if (dir.exists("/Volumes/babs/working/boeings/")){
     hpc.mount <- "/Volumes/babs/working/boeings/"
 } else if (dir.exists("Y:/working/boeings/")){
     hpc.mount <- "Y:/working/boeings/"
-} else if (dir.exists("/camp/stp/babs/working/boeings/")){
+} else if (dir.exists("/nemo/stp/babs/working/boeings/")){
     hpc.mount <- "/nemo/stp/babs/working/boeings/"
 } else {
     hpc.mount <- ""

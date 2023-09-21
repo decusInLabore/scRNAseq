@@ -1,0 +1,27 @@
+---
+title: About
+
+format: 
+  html:
+    code-fold: true
+    highlight-style: github
+    code-line-numbers: true
+    code-copy: true
+    df-print: paged
+    highlight: default
+    theme: minty
+    toc: true
+    toc-depth: 5
+    toc-title: Contents
+    toc-location: left
+    css: src/style/style.css
+    embed-resources: true
+---
+
+## About this blog
+
+This is the contents of the about page for my blog.
+
+```{r}
+plot(1:10)
+```

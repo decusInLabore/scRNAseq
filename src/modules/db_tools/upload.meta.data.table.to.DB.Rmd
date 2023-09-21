@@ -10,8 +10,8 @@ if (dir.exists("/Volumes/babs/working/boeings/")){
     hpc.mount <- "/Volumes/babs/working/boeings/"
 } else if (dir.exists("Y:/working/boeings/")){
     hpc.mount <- "Y:/working/boeings/"
-} else if (dir.exists("/camp/stp/babs/working/boeings/")){
-    hpc.mount <- "/camp/stp/babs/working/boeings/"
+} else if (dir.exists("/nemo/stp/babs/working/boeings/")){
+    hpc.mount <- "/nemo/stp/babs/working/boeings/"
 } else {
     hpc.mount <- ""
 }

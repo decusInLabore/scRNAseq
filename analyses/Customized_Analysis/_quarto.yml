@@ -1,2 +1,35 @@
-project: 
-   output-dir: ../../../../html_local/
+project:
+  type: website
+  output-dir: ../../../../html_local/
+  render: 
+    - Custom_Gene_Category_Plots.qmd
+    - about.qmd
+    
+format: 
+    html:
+      theme: minty
+      
+website:
+  title: "Custom Gene Category Plots"
+  
+  
+      
+  navbar:
+    background: primary
+    left:
+      - file: Custom_Gene_Category_Plots.qmd
+        text: "Plots"
+      - file: about.qmd
+        text: "About"
+        
+  sidebar: 
+    style: "docked"
+    search: true
+    contents: 
+      - Custom_Gene_Category_Plots.qmd
+      - about.qmd
+      
+
+
+
+  
