@@ -7,9 +7,209 @@ VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.D
 ```
 
 ```{r percent_mt, echo=TRUE, eval=TRUE, warning=FALSE, results=F}
+
+###############################################################################
+## Do mt and feature selection plots                                         ##
+#' @title A method
+#'
+#' @description Method description
+#' @param agree TBD
+#' @keywords TBD
+#' @export
+setGeneric(
+  name="doPercMT_plotSL",
+  def=function(
+    SampleList,
+    obj,
+    figureCount = 1,
+    VersionPdfExt = ".pdf",
+    tocSubLevel = 4
+  ) {
+    if (obj@parameterList$species == "mus_musculus"){
+      mtSel <- "^mt-"
+    } else if (obj@parameterList$species == "homo_sapiens") {
+      mtSel <- "^MT-"
+    } else if (obj@parameterList$species == "danio_rerio") {
+      mtSel <- "^mt-"
+    } else if (obj@parameterList$species == "drosophila_melanogaster") {
+      mtSel <- "^mt:"
+    } else {
+      mtSel <- "^MitoGene-"
+    }
+
+    plotListRF <- list()
+    chnkVec <- as.vector(NULL, mode = "character")
+
+    sampleNames <- as.vector(names(obj@sampleDetailList))
+
+    for (i in 1:length(sampleNames)){
+      tag <- paste0("Hist_MT_", sampleNames[i])
+
+      SampleList[[sampleNames[i]]]@meta.data[["included"]] <- "+"
+
+      SampleList[[sampleNames[i]]]@meta.data[((SampleList[[sampleNames[i]]]@meta.data$nFeature_RNA < obj@sampleDetailList[[sampleNames[i]]]$SeuratNrnaMinFeatures) | (SampleList[[sampleNames[i]]]@meta.data$nFeature_RNA > obj@sampleDetailList[[sampleNames[i]]]$SeuratNrnaMaxFeatures)), "included"] <- "ex_N_Feat_RNA"
+
+      SampleList[[sampleNames[i]]]@meta.data[(SampleList[[sampleNames[i]]]@meta.data$percent_mt > obj@sampleDetailList[[sampleNames[i]]]$singleCellSeuratMtCutoff ), "included"] <- "ex_MT_Perc"
+
+
+      dfHist <-  SampleList[[sampleNames[i]]]@meta.data
+
+      ## Fit GMM
+      library(mixtools)
+      x <- as.vector( dfHist$percent_mt)
+      dfHist[["x"]] <- x
+      fitPossible <- tryCatch({fit <- normalmixEM(x, k = 2); fitPossible = T},
+                              error=function(cond) {
+                                message(paste("No fit possible"))
+
+                                # Choose a return value in case of error
+                                fitPossible <- FALSE
+                                return(fitPossible)
+                              })
+
+      #try to fit two Gaussians
+
+      if (fitPossible){
+        dfHist[["temp1"]] <- fit$lambda[1]*dnorm(x,fit$mu[1],fit$sigma[1])
+        dfHist[["temp2"]] <- fit$lambda[2]*dnorm(x,fit$mu[2],fit$sigma[2])
+
+        # https://labrtorian.com/tag/mixture-model/
+
+        ## Calculate Mean for distribution 1
+
+        x1meanLine <- fit$mu[1]
+        x2meanLine <- fit$mu[2]
+      }
+
+      ## Find histogram max count ##
+      pTest <- ggplot2::ggplot(data=dfHist,  ggplot2::aes(x=percent_mt, fill = included)
+      ) + ggplot2::geom_histogram(binwidth=0.3
+      )
+      dfT <- ggplot2::ggplot_build(pTest)$data[[1]]
+      yMax <- max(dfT$count)
+
+      if (fitPossible){
+        dMax1 <- max( fit$lambda[1]*dnorm(x,fit$mu[1],fit$sigma[1]))
+        dMax2 <- max( fit$lambda[2]*dnorm(x,fit$mu[2],fit$sigma[2]))
+
+        if (dMax1 > dMax2){
+          dMax <- dMax1
+          sF <- yMax/dMax
+          dfHist[["fitVec1"]] <- sF *fit$lambda[1]*dnorm(x,fit$mu[1],fit$sigma[1])
+          dfHist[["fitVec2"]] <- sF*fit$lambda[2]*dnorm(x,fit$mu[2],fit$sigma[2])
+          dfHist[["x"]] <- fit$x
+        } else {
+          dMax <- dMax2
+          sF <- yMax/dMax
+          dfHist[["fitVec2"]] <- sF *fit$lambda[1]*dnorm(x,fit$mu[1],fit$sigma[1])
+          dfHist[["fitVec1"]] <- sF*fit$lambda[2]*dnorm(x,fit$mu[2],fit$sigma[2])
+          dfHist[["x"]] <- fit$x
+        }
+
+        dfHist <- dfHist[order(dfHist$x, decreasing = F),]
+      }
+
+
+
+      colVec <- unique(sort(SampleList[[sampleNames[i]]]@meta.data$included))
+      library(RColorBrewer)
+      reds <- c("#FF0000", "#ffa500", "#A30000")
+      colVec <- c("#000000", reds[1:(length(colVec)-1)])
+
+
+
+      plotListRF[[tag]] <- ggplot2::ggplot(data=dfHist,  ggplot2::aes(x=percent_mt, fill = included)
+
+      ) + ggplot2::geom_histogram(binwidth=0.3
+      ) + ggplot2::geom_vline( xintercept = obj@sampleDetailList[[sampleNames[i]]]$singleCellSeuratMtCutoff, col="red", linetype = "dashed"
+      )
+
+      if (fitPossible){
+        plotListRF[[tag]] <- plotListRF[[tag]] + ggplot2::geom_point( ggplot2::aes(x=x, y=fitVec2), color = "#FF0000", size = 0.1
+        ) + ggplot2::geom_vline( xintercept = c(x1meanLine, x2meanLine), col="grey", linetype = "dashed"
+        )
+      }
+
+      plotListRF[[tag]] <- plotListRF[[tag]] +  ggplot2::theme(
+        axis.text.y   =  ggplot2::element_text(size=8),
+        axis.text.x   =  ggplot2::element_text(size=8),
+        axis.title.y  =  ggplot2::element_text(size=8),
+        axis.title.x  =  ggplot2::element_text(size=8),
+        axis.line =  ggplot2::element_line(colour = "black"),
+        panel.border =  ggplot2::element_rect(colour = "black", fill=NA, size=1),
+        plot.title =  ggplot2::element_text(hjust = 0.5, size = 12)
+      ) + ggplot2::geom_vline(xintercept = obj@sampleDetailList[[i]]$singleCellSeuratMtCutoff, col="red"
+      ) + ggplot2::geom_hline(yintercept = 0, col="black"
+
+      ) + ggplot2::labs(title = paste0("Histogram Percent Mitochondrial Genes per Cell ", names(SampleList)[i], " \n (SD1: ", round(sd(x),2),")") ,y = "Count", x = "Percent Mitochondrial Genes"
+      ) + ggplot2::xlim(0, max(dfHist$x)
+      ) + ggplot2::theme_bw()
+
+      ###########################################################################
+      ## Save plot to file                                                     ##
+      FNbase <- paste0("Historgram.MT",names(SampleList)[i], VersionPdfExt)
+      FN <- paste0(obj@parameterList$reportFigDir, FNbase)
+      FNrel <- paste0("report_figures/", FNbase)
+
+      pdf(FN)
+      print(plotListRF[[tag]])
+      dev.off()
+      ##                                                                       ##
+      ###########################################################################
+
+
+
+
+      figCap <- paste0(
+        "**Figure ",
+        figureCount,
+        "C:** Histogram depicting percent mitochondrial genes for each sample ",
+        names(SampleList)[i],
+        ". ",
+        "Download a pdf of this figure [here](", FNrel, "). "
+      )
+
+      NewChnk <- paste0(
+        paste(rep("#", tocSubLevel), collapse=""), " ", tag,
+        "\n```{r Gene_plot_chunk_Histogram-",tag,", results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",figCap,"'}\n",
+        "\n",
+        "\n print(plotListRF[['",tag,"']])",
+        "\n cat(  '\n')",
+        "\n\n\n```\n"
+      )
+
+      ## Histogram Part C done                                                 ##
+      ###########################################################################
+
+
+      chnkVec <- c(
+        chnkVec,
+        NewChnk
+      )
+
+      figureCount <- figureCount + 1
+
+
+    }
+
+
+
+    returnList <- list(
+      "plotListRF" = plotListRF,
+      "chnkVec" = chnkVec,
+      "figureCount" = figureCount
+    )
+
+
+
+  })
+
+## Done mt and feature selection plots                                       ##
+###############################################################################
+
 ###############################################################################
 ## Do percent mt plots                                                       ##
-resList <- biologicToolsSC::doPercMT_plotSL(
+resList <- doPercMT_plotSL(
         SampleList = SampleList,
         obj = Obio,
         figureCount = figureCount,
@@ -42,9 +242,173 @@ cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = '\n'))
 ```
 
 ```{r nFeature_data, echo=TRUE, eval=TRUE, warning=FALSE, results=F}
+
+###############################################################################
+## Do size exclustion                                                        ##
+#' @title A method
+#'
+#' @description Method description
+#' @param agree TBD
+#' @keywords TBD
+#' @export
+setGeneric(
+        name="doRNAfeat_plotSL",
+        def=function(
+                SampleList,
+                obj = "Obio",
+                figureCount = 1,
+                VersionPdfExt = ".pdf",
+                tocSubLevel = 4
+        ) {
+          ###############################################################################
+          ## Make plots                                                                ##
+
+          plotListRF <- list()
+          chnkVec <- as.vector(NULL, mode = "character")
+
+          sampleNames <- as.vector(names(obj@sampleDetailList))
+
+          for (i in 1:length(sampleNames)){
+            tag <- sampleNames[i]
+
+            SampleList[[sampleNames[i]]]@meta.data[["included"]] <- "+"
+
+            SampleList[[sampleNames[i]]]@meta.data[((SampleList[[sampleNames[i]]]@meta.data$nFeature_RNA < obj@sampleDetailList[[sampleNames[i]]]$SeuratNrnaMinFeatures) | (SampleList[[sampleNames[i]]]@meta.data$nFeature_RNA > obj@sampleDetailList[[sampleNames[i]]]$SeuratNrnaMaxFeatures)), "included"] <- "ex_N_Feat_RNA"
+
+            SampleList[[sampleNames[i]]]@meta.data[(SampleList[[sampleNames[i]]]@meta.data$percent_mt > obj@sampleDetailList[[sampleNames[i]]]$singleCellSeuratMtCutoff ), "included"] <- "ex_MT_Perc"
+
+
+            dfHist <-  SampleList[[sampleNames[i]]]@meta.data
+
+            ## Fit GMM
+            library(mixtools)
+            x <- as.vector( dfHist$nFeature_RNA)
+            dfHist[["x"]] <- x
+            fit <- normalmixEM(x, k = 2) #try to fit two Gaussians
+
+            dfHist[["temp1"]] <- fit$lambda[1]*dnorm(x,fit$mu[1],fit$sigma[1])
+            dfHist[["temp2"]] <- fit$lambda[2]*dnorm(x,fit$mu[2],fit$sigma[2])
+
+            # https://labrtorian.com/tag/mixture-model/
+
+            ## Calculate Mean for distribution 1
+
+            x1meanLine <- fit$mu[1]
+            x2meanLine <- fit$mu[2]
+
+            ## Find histogram max count ##
+            pTest <- ggplot2::ggplot(data=dfHist,  ggplot2::aes(x=nFeature_RNA, fill = included)
+            ) + ggplot2::geom_histogram(binwidth=50
+            )
+            dfT <- ggplot2::ggplot_build(pTest)$data[[1]]
+            yMax <- max(dfT$count)
+            dMax1 <- max( fit$lambda[1]*dnorm(x,fit$mu[1],fit$sigma[1]))
+            dMax2 <- max( fit$lambda[2]*dnorm(x,fit$mu[2],fit$sigma[2]))
+            if (dMax1 > dMax2){
+              dMax <- dMax1
+              sF <- yMax/dMax
+              dfHist[["fitVec1"]] <- sF *fit$lambda[1]*dnorm(x,fit$mu[1],fit$sigma[1])
+              dfHist[["fitVec2"]] <- sF*fit$lambda[2]*dnorm(x,fit$mu[2],fit$sigma[2])
+              dfHist[["x"]] <- fit$x
+            } else {
+              dMax <- dMax2
+              sF <- yMax/dMax
+              dfHist[["fitVec2"]] <- sF *fit$lambda[1]*dnorm(x,fit$mu[1],fit$sigma[1])
+              dfHist[["fitVec1"]] <- sF*fit$lambda[2]*dnorm(x,fit$mu[2],fit$sigma[2])
+              dfHist[["x"]] <- fit$x
+            }
+
+            dfHist <- dfHist[order(dfHist$x, decreasing = F),]
+
+            colVec <- unique(sort(SampleList[[sampleNames[i]]]@meta.data$included))
+            library(RColorBrewer)
+            reds <- c("#FF0000", "#ffa500", "#A30000")
+            colVec <- c("#000000", reds[1:(length(colVec)-1)])
+
+
+
+            plotListRF[[paste0("Hist_GL_", tag)]] <- ggplot2::ggplot(data=dfHist,  ggplot2::aes(x=nFeature_RNA, fill = included)
+            ) + ggplot2::geom_vline( xintercept = c(x1meanLine, x2meanLine), col="grey", linetype = "dashed"
+            ) + ggplot2::geom_histogram(binwidth=50,
+            ) + ggplot2::scale_fill_manual(values=colVec) + ggplot2::geom_point( ggplot2::aes(x=x, y=fitVec1), color = "#009900", size = 0.1
+            ) + ggplot2::geom_point( ggplot2::aes(x=x, y=fitVec2), color = "#FF0000", size = 0.1
+            ) + ggplot2::theme_bw(
+            ) +  ggplot2::theme(
+                    axis.text.y   =  ggplot2::element_text(size=8),
+                    axis.text.x   =  ggplot2::element_text(size=8),
+                    axis.title.y  =  ggplot2::element_text(size=8),
+                    axis.title.x  =  ggplot2::element_text(size=8),
+                    axis.line =  ggplot2::element_line(colour = "black"),
+                    panel.border =  ggplot2::element_rect(colour = "black", fill=NA, size=1),
+                    plot.title =  ggplot2::element_text(hjust = 0.5, size = 12)
+            ) + ggplot2::geom_vline(xintercept = obj@sampleDetailList[[i]]$SeuratNrnaMinFeatures, col="red"
+            ) + ggplot2::geom_hline(yintercept = 0, col="black"
+
+            ) + ggplot2::labs(title = paste0("Histogram nFeatures RNA per cell ", names(SampleList)[i], " (SD1: ", round(sd(x),2),")") ,y = "Count", x = "nFeatures RNA"
+            ) + ggplot2::xlim(0, max(dfHist$x))
+
+            ###########################################################################
+            ## Save plot to file                                                     ##
+            FNbase <- paste0("Historgram.GL",names(SampleList)[i], VersionPdfExt)
+            FN <- paste0(obj@parameterList$reportFigDir, FNbase)
+            FNrel <- paste0("report_figures/", FNbase)
+
+            pdf(FN)
+            print(plotListRF[[paste0("Hist_GL_", tag)]])
+            dev.off()
+            ##                                                                       ##
+            ###########################################################################
+
+
+
+
+            figCap <- paste0(
+                    "**Figure ",
+                    figureCount,
+                    "C:** Histogram depicting genes found per cell/nuclei for sample ",
+                    names(SampleList)[i],
+                    ". ",
+                    "Download a pdf of this figure [here](", FNrel, "). "
+            )
+
+            NewChnk <- paste0(
+                    paste(rep("#", tocSubLevel), collapse=""), " ", tag,
+                    "\n```{r Gene_plot_chunk_Histogram-",tag,", results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",figCap,"'}\n",
+                    "\n",
+                    "\n print(plotListRF[['",paste0("Hist_GL_", tag),"']])",
+                    "\n cat(  '\n')",
+                    "\n\n\n```\n"
+            )
+
+            ## Histogram Part C done                                                 ##
+            ###########################################################################
+
+
+            chnkVec <- c(
+                    chnkVec,
+                    NewChnk
+            )
+
+            figureCount <- figureCount + 1
+
+
+          }
+
+
+
+          returnList <- list(
+                  "plotListRF" = plotListRF,
+                  "chnkVec" = chnkVec,
+                  "figureCount" = figureCount
+          )
+
+        })
+
+## Done sizing plots                                                         ##
+###############################################################################
 ###############################################################################
 ## Do percent mt plots                                                       ##
-resList <- biologicToolsSC::doRNAfeat_plotSL(
+resList <- doRNAfeat_plotSL(
         SampleList,
         obj = Obio,
         figureCount = figureCount,

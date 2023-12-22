@@ -1,4 +1,4 @@
-<!-- Set PArameters Module -->
+"<!-- Set PArameters Module -->
 <!-- Set the chnkPrefix to make all chunks unique in the overall folder -->
 ```{r set_QC_parameters_init, echo=TRUE, eval=TRUE, warning=FALSE}
 chnkPrefix <- "create.10X.QC.table."
@@ -6,7 +6,9 @@ VersionPdfExt <- VersionPdfExt <- paste0(".",chnkPrefix,"V", gsub("-", "", Sys.D
 
 ```
 
+## CellRanger QC
 
+```{r load_libraries, echo=TRUE, eval=TRUE, warning=FALSE}
 ```{r create_10X_QC_table, echo=TRUE, eval=TRUE, warning=FALSE, results="asis"}
 ###############################################################################
 ## Create 10X QC table                                                       ##
@@ -162,15 +164,294 @@ if (exists("dfRes")){
 
 ```{r QC_raw_data, echo=TRUE, eval=TRUE, warning=FALSE, results=F}
 
+
+###############################################################################
+## DoCRplots                                                                 ##
+#' @title A method
+#'
+#' @description Method description
+#' @param agree TBD
+#' @keywords TBD
+#' @import Matrix
+#' @export
+#'
+setGeneric(
+  name="doCRplots",
+  def=function(
+    obj,
+    figureCount = 1,
+    VersionPdfExt = ".pdf",
+    tocSubLevel = 4,
+    dotsize = 0.5
+  ) {
+
+    library(Matrix)
+
+    figureCreated <- FALSE
+    sampleNames <- names(obj@sampleDetailList)
+
+    rawSampleList <- list()
+    filtSampleList <- list()
+
+    for (i in 1:length(sampleNames)){
+      if (obj@sampleDetailList[[sampleNames[i]]]$type == "TenX"){
+
+        pos <- grep("gene.column", names(obj@sampleDetailList[[sampleNames[i]]]))
+        if (length(pos) == 0){
+          gene.column = 2
+        } else {
+          gene.column <-  obj@sampleDetailList[[i]]$gene.column
+        }
+
+        baseFN <- obj@sampleDetailList[[sampleNames[i]]]$path
+        rawFN <- gsub("filtered_feature_bc_matrix", "raw_feature_bc_matrix", baseFN)
+
+        if (file.exists(rawFN)){
+          rawSampleList[[sampleNames[i]]] <- Seurat::Read10X(data.dir = rawFN, gene.column = gene.column)
+          filtSampleList[[sampleNames[i]]] <- Seurat::Read10X(data.dir = baseFN, gene.column = gene.column)
+
+          cellID <- colnames(rawSampleList[[sampleNames[i]]])
+
+          CellRanger <- rep("Excl", length(cellID))
+          CellRanger[cellID %in% colnames(filtSampleList[[sampleNames[i]]])] <- "Incl"
+
+
+          UMI_count <- colSums(rawSampleList[[sampleNames[i]]])
+
+          sampleID <- rep(sampleNames[i], length(cellID))
+
+
+          ###################################################################
+          ## Calculate nFeatures                                           ##
+          UMI_filt <- UMI_count[UMI_count > 0]
+          rawM <- rawSampleList[[sampleNames[i]]]
+          rawM <- rawM[,names(UMI_filt)]
+          #rawM[rawM > 0] <- 1
+
+          ## Done calculate nFeatures                                      ##
+          ###################################################################
+
+          dfTemp <- data.frame(sampleID, cellID, CellRanger,UMI_count)
+          dfTemp <- dfTemp[dfTemp$cellID %in% names(UMI_filt), ]
+
+
+          ###################################################################
+          ## Count features                                                ##
+          # increment <- 10000
+          # iter <- floor(nrow(dfTemp)/increment)
+          # resVec <- as.vector(NULL, mode="character")
+          #
+          # for (k in 0:(iter)){
+          #     uL <- ((k+1)*increment )
+          #     if (uL > ncol(rawM)){
+          #         uL = ncol(rawM)
+          #     }
+          #
+          #     h <- rawM[,(k*increment + 1):uL]
+          #     h2 <- apply(h, 2, function(x) length(x[x>0]))
+          #     names(h2) <- colnames(h)
+          #     resVec <- c(
+          #         resVec,
+          #         h2
+          #     )
+          #     print(k)
+          # }
+
+          ## Done count features                                           ##
+          ###################################################################
+
+          dfTemp <- dfTemp[order(dfTemp$UMI_count, decreasing = T),]
+          dfTemp[["sampleOrder"]] <- 1:nrow(dfTemp)
+          dfTemp[dfTemp$sampleOrder < 10, "sampleOrder"] <- 10
+
+          dfTemp$sampleOrder <- log10(dfTemp$sampleOrder)
+
+          dfTemp[["lg10_UMI_count"]] <- dfTemp$UMI_count
+          #dfTemp$lg10_UMI_count[dfTemp$lg10_UMI_count < 10] <- 1
+          dfTemp$lg10_UMI_count <- log10(dfTemp$lg10_UMI_count)
+
+          ###################################################################
+          ## Plot Selection                                                ##
+          selVecF <- as.vector(dfTemp[dfTemp$CellRanger == "Incl", "cellID"])
+          selVecR <- as.vector(dfTemp[dfTemp$CellRanger != "Incl", "cellID"])
+          if (length(selVecR) > length(selVecF)){
+            selVecR <- selVecR[sample(1:length(selVecR), size = length(selVecF), replace = F)]
+          }
+
+
+          selVec <- c(
+            selVecF,
+            selVecR
+          )
+
+          dfTemp[["plot_selection"]] <- "Excl_CR"
+          dfTemp[dfTemp$cellID %in% selVec, "plot_selection"] <- "Incl_CR"
+
+          ## Done Plot Selection                                           ##
+          ###################################################################
+
+          if (!figureCreated){
+            figureCreated = TRUE
+            dfRes <- dfTemp
+          } else {
+            dfRes <- rbind(
+              dfRes,
+              dfTemp
+            )
+          }
+        }
+      }
+    }
+
+    ## Done load raw data                                                        ##
+    ###############################################################################
+
+    ###############################################################################
+    ## Make plots                                                                ##
+
+    plotListQC1 <- list()
+    chnkVec <- as.vector(NULL, mode = "character")
+
+
+    dfPlot <- dfRes[dfRes$plot_selection == "Incl_CR", ]
+    sampleNames <- as.vector(unique(dfPlot$sampleID))
+
+    for (i in 1:length(sampleNames)){
+      tag <- sampleNames[i]
+      greenLine <- min(dfPlot[dfPlot$CellRanger == "Incl" & dfPlot$sampleID == sampleNames[i], "lg10_UMI_count"])
+      blackLine <- max(dfPlot[dfPlot$CellRanger != "Incl" & dfPlot$sampleID == sampleNames[i], "lg10_UMI_count"])
+
+      plotListQC1[[tag]] <- ggplot2::ggplot(dfPlot[dfPlot$sampleID == sampleNames[i],],  ggplot2::aes(sampleOrder, lg10_UMI_count, color=CellRanger)
+      ) + ggplot2::geom_hline(yintercept = blackLine, color = "black", size=0.5
+      ) + ggplot2::geom_hline(yintercept = greenLine, color = "#009900", size=0.5
+      ) + ggplot2::geom_point(
+        shape = 16,
+        size = as.numeric(dotsize)
+      ) +  ggplot2::xlab("log10(N Droplets)") +  ggplot2::ylab("lg10(UMI Count Per Cell)"
+      ) + ggplot2::theme_bw(
+      )  +  ggplot2::theme(
+        axis.text.y   =  ggplot2::element_text(size=8),
+        axis.text.x   =  ggplot2::element_text(size=8),
+        axis.title.y  =  ggplot2::element_text(size=8),
+        axis.title.x  =  ggplot2::element_text(size=8),
+        axis.line =  ggplot2::element_line(colour = "black"),
+        panel.border =  ggplot2::element_rect(colour = "black", fill=NA, size=1),
+        plot.title =  ggplot2::element_text(hjust = 0.5, size = 12)
+      ) +  ggplot2::ggtitle(paste0("QC Sample ", tag)
+      ) +  ggplot2::scale_color_manual(values= c("#000000","#009900")
+      ) +  ggplot2::coord_fixed(ratio=1
+      )
+
+      FNbase <- paste0("cellranger.result.", tag, VersionPdfExt)
+      FN <- paste0(obj@parameterList$reportFigDir, FNbase)
+      FNrel <- paste0("report_figures/", FNbase)
+
+      pdf(FN)
+      plotListQC1[[tag]]
+      dev.off()
+
+      figLegend <- paste0(
+        "**Figure ",
+        figureCount,
+        ":** ",
+        " CellRanger quality assessment. Green cells are considered for further analysis. Download a pdf of this figure [here](", FNrel,")."
+      )
+
+      figureCount <- figureCount + 1
+
+      NewChnk <- paste0(
+        paste(rep("#", tocSubLevel), collapse=""), " ", tag,
+        "\n```{r CellRangerResult_",
+        tag,", results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",
+        figLegend,"'}\n",
+        "\n",
+        "\n print(plotListQC1[['",tag,"']])",
+        "\n cat(  '\n')",
+        "\n\n\n```\n"
+      )
+
+      chnkVec <- c(
+        chnkVec,
+        NewChnk
+      )
+
+
+    }
+
+    tag <- "All"
+    plotListQC1[[tag]] <- ggplot2::ggplot(dfPlot,  ggplot2::aes(sampleOrder, lg10_UMI_count, color=CellRanger)
+    )+ ggplot2::geom_point(
+      shape = 16,
+      size = as.numeric(dotsize)
+    ) +  ggplot2::xlab("log10(N Droplets)") +  ggplot2::ylab("lg10(UMI Count Per Cell)")  +  ggplot2::theme(
+      axis.text.y   =  ggplot2::element_text(size=8),
+      axis.text.x   =  ggplot2::element_text(size=8),
+      axis.title.y  =  ggplot2::element_text(size=8),
+      axis.title.x  =  ggplot2::element_text(size=8),
+      axis.line =  ggplot2::element_line(colour = "black"),
+      panel.border =  ggplot2::element_rect(colour = "black", fill=NA, size=1),
+      plot.title =  ggplot2::element_text(hjust = 0.5, size = 12),
+      panel.background =  ggplot2::element_rect(fill = "lightgrey")
+    ) +  ggplot2::ggtitle(paste0("QC Sample ", tag)
+    ) +  ggplot2::scale_color_manual(values= c("#000000","#009900")
+    ) + ggplot2::theme_bw()
+
+
+    ## Save to file ##
+    FNbase <- paste0("cellranger.result.", tag, VersionPdfExt)
+    FN <- paste0(obj@parameterList$reportFigDir, FNbase)
+    FNrel <- paste0("report_figures/", FNbase)
+
+    pdf(FN)
+    plotListQC1[[tag]]
+    dev.off()
+
+    figLegend <- paste0(
+      "**Figure ",
+      figureCount,
+      ":** ",
+      " CellRanger quality assessment. Green cells are considered for further analysis. Download a pdf of this figure [here](", FNrel,")."
+    )
+
+    figureCount <- figureCount + 1
+
+    NewChnk <- paste0(
+      paste(rep("#", tocSubLevel), collapse = ""), " ", tag,
+      "\n```{r CellRangerResult_",
+      tag,", results='asis', echo=F, eval=TRUE, warning=FALSE, fig.cap='",
+      figLegend,"'}\n",
+      "\n",
+      "\n print(plotListQC1[['",tag,"']])",
+      "\n cat(  '\n')",
+      "\n\n\n```\n"
+    )
+
+    chnkVec <- c(
+      chnkVec,
+      NewChnk
+    )
+
+    returnList <- list(
+      "plotListQC1" = plotListQC1,
+      "chnkVec" = chnkVec,
+      "dfPlot" = dfPlot,
+      "figureCount" = figureCount
+    )
+
+  })
+
+## Done doing CR plots                                                       ##
+###############################################################################
+
 ###############################################################################
 ## Create Cell Ranger QC Plots                                               ##
 if (exists("dfRes")){
 ## Add if clause to check 10X
-resList <- biologicToolsSC::doCRplots(
+resList <-doCRplots(
     obj = Obio,
     figureCount = figureCount,
     VersionPdfExt = VersionPdfExt,
-    tocSubLevel = 4,
+    tocSubLevel = 3,
     dotsize = 0.5
 ) 
 
@@ -208,3 +489,4 @@ cat(paste(knitr::knit(text = chnkVec, quiet = T), collapse = '\n'))
 
 ```
 
+"
